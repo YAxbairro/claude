@@ -1,119 +1,101 @@
 """
-Análise de vídeos imobiliários usando Claude API
+Análise de vídeos imobiliários.
+A análise inteligente é feita pelo Claude Code no chat.
+Este módulo trata apenas da parte técnica (extração de frames, metadata).
 """
 
-import anthropic
-from config import ANTHROPIC_API_KEY
-import base64
+import cv2
+import json
 import requests
 from pathlib import Path
+from config import TEMP_DIR
 
 
 class VideoAnalyzer:
     def __init__(self):
-        self.client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-        self.model = "claude-opus-4-6"
+        self.temp_dir = Path(TEMP_DIR)
+        self.temp_dir.mkdir(exist_ok=True)
 
-    def analyze_reference_video(self, video_url: str) -> dict:
+    def get_video_metadata(self, video_path: str) -> dict:
         """
-        Analisa um vídeo de referência e extrai estilo, efeitos e instruções
+        Extrai metadata técnica do vídeo (duração, resolução, FPS, etc.)
+        Não precisa de API Key - usa OpenCV localmente.
         """
-        print(f"🎬 Analisando vídeo de referência: {video_url}")
+        cap = cv2.VideoCapture(video_path)
 
-        # Prompts para análise detalhada
-        analysis_prompt = f"""
-Você é um expert em produção de vídeos imobiliários. Analise este vídeo de referência e forneça:
+        if not cap.isOpened():
+            return {"error": "Não foi possível abrir o vídeo"}
 
-1. **ESTILO**: Identifique o estilo visual (luxury, modern, minimalist, cinematic, etc.)
-2. **EFEITOS UTILIZADOS**:
-   - Transições (fade, dissolve, zoom, corte rápido, etc.)
-   - Efeitos visuais (neon, glow, blur, color grade, etc.)
-   - Movimentos (pan, zoom, timelapse, slow-motion, etc.)
-3. **ESTRUTURA**:
-   - Duração de cada shot
-   - Ordem das cenas
-   - Ritmo e pacing
-4. **CORES**: Paleta de cores dominante
-5. **ÁUDIO**: Tipo de música/som (se detectável)
-6. **INSTRUÇÕES PARA REPLICAR**: Passos específicos para criar um vídeo similar
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        duration = frame_count / fps if fps > 0 else 0
 
-Por favor, seja muito específico e detalhado nas instruções.
-Formato de resposta: JSON estruturado.
-"""
+        cap.release()
 
-        message = self.client.messages.create(
-            model=self.model,
-            max_tokens=2000,
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": analysis_prompt,
-                        },
-                        {
-                            "type": "text",
-                            "text": f"Vídeo URL: {video_url}",
-                        },
-                    ],
-                }
-            ],
-        )
-
-        analysis = message.content[0].text
-        print("✅ Análise concluída")
-        return {"analysis": analysis, "video_url": video_url}
-
-    def generate_video_instructions(
-        self, reference_analysis: dict, briefing: str
-    ) -> dict:
-        """
-        Gera instruções detalhadas para criar novo vídeo baseado na análise
-        """
-        print("📝 Gerando instruções personalizadas...")
-
-        prompt = f"""
-Baseado na análise do vídeo de referência abaixo, crie instruções detalhadas
-para gerar um novo vídeo imobiliário com o seguinte briefing:
-
-BRIEFING: {briefing}
-
-ANÁLISE DO VÍDEO DE REFERÊNCIA:
-{reference_analysis["analysis"]}
-
-Por favor forneça:
-1. **DESCRIÇÃO VISUAL**: O que o novo vídeo deve mostrar
-2. **SEQUÊNCIA DE SHOTS**: Lista detalhada de cada cena
-3. **EFEITOS A APLICAR**: Efeitos específicos para cada shot
-4. **TIMING**: Duração de cada segmento
-5. **PALETA DE CORES**: Cores específicas (hex) a usar
-6. **TRANSIÇÕES**: Tipo e duração de cada transição
-7. **ANIMAÇÕES**: Movimentos de câmera (pan, zoom, etc.)
-8. **PRIORIDADES**: O que é mais importante manter do estilo original
-
-Formato: Estruturado e pronto para implementação técnica.
-"""
-
-        message = self.client.messages.create(
-            model=self.model,
-            max_tokens=2500,
-            messages=[{"role": "user", "content": prompt}],
-        )
-
-        instructions = message.content[0].text
-        print("✅ Instruções geradas")
         return {
-            "instructions": instructions,
-            "briefing": briefing,
-            "reference_url": reference_analysis["video_url"],
+            "fps": round(fps, 2),
+            "frame_count": frame_count,
+            "width": width,
+            "height": height,
+            "duration_seconds": round(duration, 2),
+            "resolution": f"{width}x{height}",
+            "aspect_ratio": round(width / height, 2) if height > 0 else 0,
         }
+
+    def extract_key_frames(self, video_path: str, num_frames: int = 5) -> list:
+        """
+        Extrai frames-chave do vídeo para análise visual no chat.
+        """
+        cap = cv2.VideoCapture(video_path)
+        if not cap.isOpened():
+            return []
+
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        frame_indices = [
+            int(total_frames * i / num_frames) for i in range(num_frames)
+        ]
+
+        frames_saved = []
+        for idx in frame_indices:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
+            ret, frame = cap.read()
+            if ret:
+                frame_path = str(self.temp_dir / f"frame_{idx}.jpg")
+                cv2.imwrite(frame_path, frame)
+                frames_saved.append(frame_path)
+
+        cap.release()
+        return frames_saved
 
     def validate_video_url(self, url: str) -> bool:
         """Verifica se a URL do vídeo é acessível"""
         try:
-            response = requests.head(url, timeout=5, allow_redirects=True)
+            response = requests.head(url, timeout=10, allow_redirects=True)
             return response.status_code < 400
         except Exception as e:
-            print(f"❌ URL inválida: {e}")
+            print(f"❌ URL inválida ou inacessível: {e}")
             return False
+
+    def analyze_for_chat(self, video_path: str) -> str:
+        """
+        Prepara um relatório técnico do vídeo para ser apresentado no chat,
+        onde o Claude Code fará a análise inteligente.
+        """
+        metadata = self.get_video_metadata(video_path)
+        frames = self.extract_key_frames(video_path, num_frames=3)
+
+        report = f"""
+📊 RELATÓRIO TÉCNICO DO VÍDEO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📐 Resolução: {metadata.get('resolution', 'N/A')}
+⏱️  Duração: {metadata.get('duration_seconds', 0)}s
+🎞️  FPS: {metadata.get('fps', 0)}
+🖼️  Total de frames: {metadata.get('frame_count', 0)}
+📏 Aspect ratio: {metadata.get('aspect_ratio', 0)}
+
+🖼️  Frames extraídos: {len(frames)} frames
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+"""
+        return report

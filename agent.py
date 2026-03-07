@@ -1,56 +1,46 @@
 """
-Agente Principal de Vídeos Imobiliários
-Processa vídeos via links e cria novos vídeos com efeitos
+Agente de Vídeos Imobiliários
+Processa vídeos via links e cria novos vídeos com efeitos.
+NÃO precisa de API Key - a inteligência é fornecida por Claude Code.
 """
 
-from video_analyzer import VideoAnalyzer
 from video_processor import VideoProcessor
-from config import ANTHROPIC_API_KEY
-import json
 
 
 class RealEstateVideoAgent:
     def __init__(self):
-        if not ANTHROPIC_API_KEY:
-            raise ValueError(
-                "❌ ANTHROPIC_API_KEY não configurada. Cria um ficheiro .env com: ANTHROPIC_API_KEY=your_key"
-            )
-
-        self.analyzer = VideoAnalyzer()
         self.processor = VideoProcessor()
 
-    def process_video(self, reference_url: str, briefing: str) -> dict:
+    def process_video(
+        self,
+        reference_url: str,
+        instructions: str,
+        style: str = "modern",
+        effects: list = None,
+    ) -> dict:
         """
-        Pipeline completo do agente:
-        1. Analisa vídeo de referência
-        2. Gera instruções personalizadas
-        3. Processa e cria novo vídeo
+        Processa vídeo de referência e aplica efeitos.
+
+        Parâmetros:
+            reference_url: URL pública do vídeo de referência
+            instructions: Instruções geradas pelo Claude Code no chat
+            style: Estilo do vídeo (luxury, modern, minimalist)
+            effects: Lista de efeitos a aplicar (neon, zoom, timelapse, etc.)
         """
 
         print("\n" + "🎥" * 25)
         print("AGENTE DE VÍDEOS IMOBILIÁRIOS - INICIADO")
         print("🎥" * 25 + "\n")
 
-        # Valida URL
-        if not self.analyzer.validate_video_url(reference_url):
-            return {"error": "URL do vídeo inválida ou inacessível"}
+        if effects is None:
+            effects = ["color_grade", "neon", "zoom"]
 
         try:
-            # 1. ANÁLISE
-            print("\n[1/3] 🎬 ANÁLISE DO VÍDEO DE REFERÊNCIA\n")
-            reference_analysis = self.analyzer.analyze_reference_video(reference_url)
-
-            # 2. GERAÇÃO DE INSTRUÇÕES
-            print("\n[2/3] 📝 GERAÇÃO DE INSTRUÇÕES\n")
-            video_instructions = self.analyzer.generate_video_instructions(
-                reference_analysis, briefing
-            )
-
-            # 3. PROCESSAMENTO
-            print("\n[3/3] 🎞️ PROCESSAMENTO E CRIAÇÃO DO VÍDEO\n")
             output_video = self.processor.process_from_reference(
-                reference_url,
-                video_instructions["instructions"],
+                reference_url=reference_url,
+                instructions=instructions,
+                style=style,
+                effects=effects,
                 output_name="video_imobiliario",
             )
 
@@ -59,43 +49,37 @@ class RealEstateVideoAgent:
 
             return {
                 "status": "✅ SUCESSO",
-                "reference_analysis": reference_analysis["analysis"],
-                "instructions": video_instructions["instructions"],
                 "output_video": output_video,
-                "briefing": briefing,
+                "style": style,
+                "effects_applied": effects,
             }
 
         except Exception as e:
-            print(f"❌ Erro geral: {e}")
+            print(f"❌ Erro: {e}")
             return {"error": str(e)}
 
-    def process_with_style(
-        self, reference_url: str, briefing: str, style: str = "modern"
-    ) -> dict:
-        """
-        Processa vídeo com um estilo específico
-        Estilos disponíveis: luxury, modern, minimalist
-        """
-        print(f"\n📌 Estilo selecionado: {style.upper()}")
 
-        # Adiciona informação de estilo ao briefing
-        style_briefing = f"{briefing}\nEstilo desejado: {style}"
-
-        return self.process_video(reference_url, style_briefing)
-
-
-# Função para usar no chat
-def criar_video_imobiliario(video_url: str, descricao: str, estilo: str = "modern"):
+def processar_video(
+    url: str,
+    style: str = "modern",
+    effects: list = None,
+    instructions: str = "",
+) -> dict:
     """
-    Interface principal para usar no chat
+    Função principal - usada depois de Claude Code analisar o vídeo no chat.
 
-    Exemplo:
-        criar_video_imobiliario(
-            "https://example.com/video.mp4",
-            "Apartamento de luxo com piscina e vista para o mar",
-            estilo="luxury"
+    Exemplo de uso:
+        processar_video(
+            url="https://meu-video.mp4",
+            style="luxury",
+            effects=["neon", "zoom", "timelapse"],
+            instructions="Transição lenta, neon dourado, zoom de saída"
         )
     """
     agent = RealEstateVideoAgent()
-    resultado = agent.process_with_style(video_url, descricao, estilo)
-    return resultado
+    return agent.process_video(
+        reference_url=url,
+        instructions=instructions,
+        style=style,
+        effects=effects or ["color_grade", "neon", "zoom"],
+    )
