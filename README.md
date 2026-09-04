@@ -209,12 +209,21 @@ central com seis subagentes especializados (aquisição, vendas, copy, SEO, desi
 e publicação) que encontra anúncios, conversa com os proprietários no WhatsApp,
 cria as publicações no site, gera os flyers e publica no Facebook e Instagram.
 
+**Não és da área?** Duplo clique em `ARRANCAR.bat` (Windows) ou
+`ARRANCAR.command` (Mac/Linux) e o painel abre-se no browser.
+📖 **[Guia passo a passo: GUIA.md](GUIA.md)**
+
+![Painel](docs/imagens/painel.png)
+
+Para quem prefere a linha de comandos:
+
 ```bash
-python -m imoauto.cli diagnostico   # o que falta configurar
+python -m imoauto.cli painel        # painel web
 python -m imoauto.cli bot           # consola no Telegram
-python test_imoauto.py              # 13 testes, sem chaves
+python -m imoauto.cli diagnostico   # o que falta configurar
+python test_imoauto.py              # 15 testes, sem chaves
 ```
 
 Arranca em modo simulação: faz tudo, mas nada sai para o mundo até tu mandares.
 
-📖 **[Documentação completa: docs/IMOAUTO.md](docs/IMOAUTO.md)**
+📖 **[Documentação técnica: docs/IMOAUTO.md](docs/IMOAUTO.md)**

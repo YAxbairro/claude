@@ -31,9 +31,10 @@ passam por lá. Os testes provam-no.
 | `orquestrador.py` | O robô central. Recebe eventos, escolhe o subagente, executa. |
 | `compliance.py` | O guarda. Decide se um envio é permitido. |
 | `store.py` | SQLite: leads, conversas, listagens, publicações, registo. |
+| `painel.py` | Painel web — a interface principal, sem terminal. |
 | `bot.py` | Consola no Telegram (long polling, sem servidor). |
 | `webhook.py` | Recebe mensagens do WhatsApp e eventos do site. |
-| `cli.py` | `bot`, `webhook`, `diagnostico`, `lead`. |
+| `cli.py` | `painel`, `bot`, `webhook`, `diagnostico`, `lead`. |
 
 ### Subagentes (`imoauto/agents/`)
 
@@ -57,6 +58,18 @@ descoberto → enviado → contactado → respondeu → a_negociar → publicado
          (Telegram)   (TU, na app WhatsApp)
 ```
 
+## Interface
+
+Duas, sobre o mesmo robô e a mesma base de dados:
+
+- **Painel web** (`arrancar.py` ou `python -m imoauto.cli painel`) — leads,
+  conversas, posts a aprovar e um formulário de configuração que escreve o
+  `.env` sozinho. Só ouve em `127.0.0.1`. Para quem não quer terminal, o
+  [GUIA.md](../GUIA.md) explica tudo passo a passo.
+- **Telegram** — os mesmos leads e os mesmos botões, no telemóvel.
+
+O Telegram é opcional: sem ele configurado o painel funciona na mesma.
+
 ## Instalação
 
 ```bash
@@ -71,7 +84,9 @@ arrancar: `ANTHROPIC_API_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`.
 ### Arrancar
 
 ```bash
-python -m imoauto.cli bot          # consola do Telegram
+python arrancar.py                 # painel + bot, e abre o browser
+python -m imoauto.cli painel       # só o painel
+python -m imoauto.cli bot          # só a consola do Telegram
 python -m imoauto.cli webhook      # servidor de webhooks (porta 8080)
 ```
 
@@ -111,9 +126,9 @@ mensagem sugerida), **Já contactei**, **Descartar**.
 python test_imoauto.py
 ```
 
-13 testes, sem chaves e sem rede. Cobrem a conformidade (contacto frio bloqueado,
-janela de 24h, template fora da janela), o armazenamento, e o fluxo completo do
-anúncio ao post pronto.
+15 testes, sem chaves e sem rede. Cobrem a conformidade (contacto frio bloqueado,
+janela de 24h, template fora da janela), o armazenamento, o fluxo completo do
+anúncio ao post pronto, e o painel a funcionar sem Telegram configurado.
 
 ## WhatsApp: qual dos teus números
 

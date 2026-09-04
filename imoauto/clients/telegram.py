@@ -14,9 +14,11 @@ from imoauto import config, store
 BASE = "https://api.telegram.org/bot{token}/{metodo}"
 
 
+def configurado():
+    return bool(config.TELEGRAM_TOKEN and config.TELEGRAM_CHAT_ID)
+
+
 def _chamar(metodo, **dados):
-    if not config.TELEGRAM_TOKEN:
-        raise RuntimeError("TELEGRAM_BOT_TOKEN não configurado")
     url = BASE.format(token=config.TELEGRAM_TOKEN, metodo=metodo)
     resposta = requests.post(url, json=dados, timeout=30)
     corpo = resposta.json()
@@ -28,6 +30,10 @@ def _chamar(metodo, **dados):
 def enviar(texto, botoes=None, chat_id=None):
     """Envia texto (Markdown) com botões inline opcionais."""
     chat = chat_id or config.TELEGRAM_CHAT_ID
+    if not configurado():
+        # Sem Telegram o robô continua a trabalhar — vê-se tudo no painel.
+        store.registar("telegram", "sem_configuracao", "envio ignorado")
+        return {"sem_telegram": True}
     if config.DRY_RUN:
         store.registar("telegram", "dry_run_enviar", texto[:500])
         print(f"[DRY_RUN telegram] {texto}")
@@ -41,6 +47,10 @@ def enviar(texto, botoes=None, chat_id=None):
 
 def enviar_foto(url_imagem, legenda="", botoes=None, chat_id=None):
     chat = chat_id or config.TELEGRAM_CHAT_ID
+    if not configurado():
+        # Sem Telegram o robô continua a trabalhar — vê-se tudo no painel.
+        store.registar("telegram", "sem_configuracao", "envio ignorado")
+        return {"sem_telegram": True}
     if config.DRY_RUN:
         store.registar("telegram", "dry_run_foto", f"{url_imagem} | {legenda[:300]}")
         print(f"[DRY_RUN telegram foto] {url_imagem}\n{legenda}")
@@ -53,7 +63,7 @@ def enviar_foto(url_imagem, legenda="", botoes=None, chat_id=None):
 
 
 def responder_callback(callback_id, texto=""):
-    if config.DRY_RUN:
+    if config.DRY_RUN or not configurado():
         return {"dry_run": True}
     return _chamar("answerCallbackQuery", callback_query_id=callback_id, text=texto)
 

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block titulo %}Painel{% endblock %}
+{% block conteudo %}
+<h1>{{ saudacao }}</h1>
+<p class="sub">O que o robô tem em mãos neste momento.</p>
+
+<div class="grelha">
+  <div class="metrica"><div class="n">{{ contagens.enviado }}</div>
+    <div class="r">à espera que contactes</div></div>
+  <div class="metrica"><div class="n">{{ contagens.a_negociar }}</div>
+    <div class="r">conversas a decorrer</div></div>
+  <div class="metrica"><div class="n">{{ contagens.publicado }}</div>
+    <div class="r">publicados no site</div></div>
+  <div class="metrica"><div class="n">{{ posts_pendentes }}</div>
+    <div class="r">posts à tua espera</div></div>
+</div>
+
+{% if em_falta %}
+<div class="carta">
+  <h3 style="margin-top:0">Falta configurar</h3>
+  <p class="sub" style="margin-bottom:12px">O robô ainda não arranca sem isto:
+    <strong>{{ em_falta|join(', ') }}</strong></p>
+  <a class="botao" href="/configuracao">Configurar agora</a>
+</div>
+{% endif %}
+
+<div class="carta">
+  <h3 style="margin-top:0">Encontraste um anúncio?</h3>
+  <p class="sub" style="margin-bottom:0">Copia o texto do anúncio e cola aqui.
+    O robô extrai os dados, dá-lhe uma nota e escreve-te a mensagem para
+    enviares ao anunciante.</p>
+  <form method="post" action="/novo-lead">
+    <label>Texto do anúncio
+      <span class="dica">Cola tudo: descrição, preço, contacto. Ele desenrasca.</span>
+      <textarea name="texto" required placeholder="Vendo T2 em Almada, 85m2..."></textarea>
+    </label>
+    <label>Link do anúncio (se tiveres)
+      <input type="text" name="url" placeholder="https://..."></label>
+    <div class="botoes"><button class="botao" type="submit">Analisar anúncio</button></div>
+  </form>
+</div>
+
+<div class="carta">
+  <h3 style="margin-top:0">À espera que contactes</h3>
+  {% if leads %}
+    {% for lead in leads %}
+    <div class="lead">
+      <div class="nota">{{ lead.nota }}</div>
+      <div style="flex:1">
+        <h3><a href="/lead/{{ lead.id }}">{{ lead.titulo or 'Sem título' }}</a></h3>
+        <div class="meta">{{ lead.preco or '—' }} · {{ lead.localidade or '—' }}
+          · {{ lead.rede }}</div>
+      </div>
+    </div>
+    {% endfor %}
+    <div class="botoes"><a class="botao claro" href="/leads">Ver todos</a></div>
+  {% else %}
+    <div class="vazio">Nada por contactar de momento.</div>
+  {% endif %}
+</div>
+{% endblock %}

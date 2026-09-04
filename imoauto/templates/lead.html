@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block titulo %}{{ lead.titulo }}{% endblock %}
+{% block conteudo %}
+<h1>{{ lead.titulo or 'Sem título' }}</h1>
+<p class="sub">{{ lead.preco or '—' }} · {{ lead.localidade or '—' }} ·
+  encontrado em {{ lead.rede }} ·
+  <span class="selo info">{{ etiquetas.get(lead.estado, lead.estado) }}</span></p>
+
+<div class="carta">
+  <h3 style="margin-top:0">Porquê este</h3>
+  <p style="margin:0">{{ lead.motivo or '—' }} <strong>Nota {{ lead.nota }}/100.</strong></p>
+  {% if lead.url and not lead.url.startswith('manual://') %}
+  <div class="botoes"><a class="botao claro" href="{{ lead.url }}" target="_blank">
+    Ver o anúncio original</a></div>{% endif %}
+</div>
+
+{% if lead.estado == 'enviado' %}
+<div class="carta">
+  <h3 style="margin-top:0">O passo que é teu</h3>
+  <p class="sub">Esta primeira mensagem tens de ser tu a enviá-la, do teu
+    WhatsApp. É isso que abre a conversa e deixa o robô assumir a partir daí —
+    e é o que impede a conta de ser bloqueada.</p>
+  <div class="carta" style="background:var(--fundo);margin-bottom:0">
+    {{ abordagem or 'Sem sugestão.' }}</div>
+  <div class="botoes">
+    {% if telefone %}
+    <a class="botao verde" target="_blank"
+       href="https://wa.me/{{ telefone }}?text={{ abordagem_url }}">
+       Abrir WhatsApp com a mensagem</a>{% endif %}
+    <form method="post" action="/lead/{{ lead.id }}/contactado" style="display:inline">
+      <button class="botao claro" type="submit">Já contactei</button></form>
+    <form method="post" action="/lead/{{ lead.id }}/descartar" style="display:inline">
+      <button class="botao perigo" type="submit">Descartar</button></form>
+  </div>
+</div>
+{% endif %}
+
+{% if lead.estado == 'contactado' %}
+<div class="carta">
+  <p style="margin:0">Contacto feito. Assim que a pessoa responder, o
+  subagente de vendas assume a conversa sozinho.</p>
+</div>
+{% endif %}
+
+{% if dados %}
+<div class="carta">
+  <h3 style="margin-top:0">Dados recolhidos na conversa</h3>
+  {% for chave, valor in dados.items() %}
+    <div style="padding:7px 0;border-bottom:1px solid var(--linha)">
+      <span class="meta" style="color:var(--suave)">{{ chave }}</span><br>{{ valor }}
+    </div>{% endfor %}
+</div>{% endif %}
+
+{% if conversa %}
+<div class="carta">
+  <h3 style="margin-top:0">Conversa</h3>
+  {% for m in conversa %}
+    <div class="msg {{ m.direcao }}">{{ m.texto }}</div>{% endfor %}
+</div>{% endif %}
+{% endblock %}

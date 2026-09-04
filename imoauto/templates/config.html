@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block titulo %}Configuração{% endblock %}
+{% block conteudo %}
+<h1>Configuração</h1>
+<p class="sub">Cola aqui as chaves. Ficam guardadas no teu computador, num
+  ficheiro chamado <code>.env</code> — nunca saem daqui.</p>
+
+<form method="post">
+  <div class="carta">
+    <h3 style="margin-top:0">Segurança</h3>
+    <label style="display:flex;gap:10px;align-items:flex-start;font-weight:600">
+      <input type="checkbox" name="IMOAUTO_DRY_RUN" value="1"
+        {{ 'checked' if dry_run }} style="width:auto;margin-top:4px">
+      <span>Modo de simulação
+        <span class="dica">O robô faz tudo mas não envia nada para fora.
+        Deixa ligado até veres o que ele escreve.</span></span></label>
+    <label style="display:flex;gap:10px;align-items:flex-start;font-weight:600">
+      <input type="checkbox" name="IMOAUTO_APROVAR_POSTS" value="1"
+        {{ 'checked' if aprovar }} style="width:auto;margin-top:4px">
+      <span>Aprovar posts à mão
+        <span class="dica">Nenhuma publicação sai sem tu carregares em Publicar.
+        Recomendo manter sempre ligado.</span></span></label>
+  </div>
+
+  {% for grupo, titulo, ajuda in grupos %}
+  <div class="carta">
+    <h3 style="margin-top:0">{{ titulo }}</h3>
+    <p class="sub" style="margin-bottom:0">{{ ajuda }}</p>
+    {% for chave, nome, nivel, dica in campos if nivel == grupo %}
+    <label>{{ nome }}
+      {% if dica %}<span class="dica">{{ dica }}</span>{% endif %}
+      <input type="text" name="{{ chave }}" value="{{ valores[chave] }}"
+        placeholder="{{ 'já preenchido' if valores[chave] else 'ainda vazio' }}"
+        autocomplete="off"></label>
+    {% endfor %}
+  </div>
+  {% endfor %}
+
+  <button class="botao" type="submit">Guardar</button>
+</form>
+{% endblock %}

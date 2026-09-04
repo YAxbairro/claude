@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block titulo %}Leads{% endblock %}
+{% block conteudo %}
+<h1>Leads</h1>
+<p class="sub">Anúncios que os subagentes encontraram, ordenados pela nota.</p>
+<div class="carta">
+  {% if leads %}
+    {% for lead in leads %}
+    <div class="lead">
+      <div class="nota">{{ lead.nota }}</div>
+      <div style="flex:1">
+        <h3><a href="/lead/{{ lead.id }}">{{ lead.titulo or 'Sem título' }}</a></h3>
+        <div class="meta">{{ lead.preco or '—' }} · {{ lead.localidade or '—' }}</div>
+        <div style="margin-top:6px">
+          <span class="selo {{ 'ok' if lead.estado in ('publicado','a_negociar')
+            else 'aviso' if lead.estado=='enviado' else 'info' }}">
+            {{ etiquetas.get(lead.estado, lead.estado) }}</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="vazio">Ainda não há leads. Cola um anúncio no painel.</div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titulo %}Posts{% endblock %}
+{% block conteudo %}
+<h1>Posts</h1>
+<p class="sub">Rascunhos que o robô preparou. Nada sai sem tu carregares.</p>
+{% if posts %}
+  {% for post in posts %}
+  <div class="carta">
+    <span class="selo info">{{ post.plataforma }}</span>
+    <span class="selo {{ 'ok' if post.estado=='publicado' else 'aviso' }}"
+      >{{ post.estado }}</span>
+    {% if post.imagem %}<div style="margin:14px 0">
+      <img class="flyer" src="{{ post.imagem }}" alt="flyer"></div>{% endif %}
+    <p style="white-space:pre-wrap;margin:14px 0 0">{{ post.legenda }}</p>
+    {% if post.estado == 'rascunho' %}
+    <div class="botoes">
+      <form method="post" action="/post/{{ post.id }}/publicar" style="display:inline">
+        <button class="botao verde" type="submit">Publicar</button></form>
+      <form method="post" action="/post/{{ post.id }}/rejeitar" style="display:inline">
+        <button class="botao perigo" type="submit">Rejeitar</button></form>
+    </div>{% endif %}
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="carta"><div class="vazio">Ainda não há posts preparados.</div></div>
+{% endif %}
+{% endblock %}

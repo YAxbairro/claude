@@ -188,6 +188,30 @@ class TestFluxoCompleto(unittest.TestCase):
         )
 
 
+class TestPainelSemTelegram(unittest.TestCase):
+    """O painel tem de funcionar antes de o Telegram estar configurado."""
+
+    def setUp(self):
+        store.iniciar()
+        self.robo = Orquestrador()
+        self.robo.aquisicao.pensar = responder_fixo({
+            "titulo": "T2 Almada", "preco": "165.000€", "localidade": "Almada",
+            "telefone": "+351912345678", "nota": 84, "motivo": "particular",
+            "abordagem_sugerida": "Boa tarde, vi o seu anúncio.",
+        })
+
+    def test_lead_criado_sem_telegram_configurado(self):
+        lead = self.robo.novo_anuncio(ANUNCIO, "colado", "manual://sem-telegram")
+        self.assertEqual(store.obter_lead(lead["id"])["estado"], store.ENVIADO)
+
+    def test_paginas_do_painel_abrem(self):
+        from imoauto import painel
+        lead = self.robo.novo_anuncio(ANUNCIO, "colado", "manual://painel")
+        cliente = painel.app.test_client()
+        for rota in ("/", "/leads", f"/lead/{lead['id']}", "/posts", "/configuracao"):
+            self.assertEqual(cliente.get(rota).status_code, 200, rota)
+
+
 class TestUtilitarios(unittest.TestCase):
 
     def test_json_com_ruido_a_volta(self):

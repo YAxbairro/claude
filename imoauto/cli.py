@@ -1,6 +1,7 @@
 """
 Entrada por linha de comandos.
 
+  python -m imoauto.cli painel     # painel web no browser
   python -m imoauto.cli bot        # consola do Telegram (long polling)
   python -m imoauto.cli webhook    # servidor de webhooks
   python -m imoauto.cli diagnostico
@@ -34,6 +35,9 @@ def main(argv=None):
     parser = argparse.ArgumentParser(prog="imoauto")
     sub = parser.add_subparsers(dest="comando", required=True)
 
+    p_painel = sub.add_parser("painel", help="painel web no browser")
+    p_painel.add_argument("--porta", type=int, default=5000)
+
     sub.add_parser("bot", help="consola do Telegram")
 
     p_webhook = sub.add_parser("webhook", help="servidor de webhooks")
@@ -50,6 +54,11 @@ def main(argv=None):
 
     if args.comando == "diagnostico":
         return diagnostico()
+
+    if args.comando == "painel":
+        from imoauto import painel
+        painel.correr(args.porta)
+        return 0
 
     if args.comando == "bot":
         from imoauto import bot

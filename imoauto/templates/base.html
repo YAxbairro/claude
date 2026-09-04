@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block titulo %}Painel{% endblock %} · {{ marca }}</title>
+<style>
+  :root{
+    --fundo:#f4f6f8; --carta:#ffffff; --texto:#141b22; --suave:#5d6b7a;
+    --linha:#e3e8ee; --azul:#0d4a8f; --azul-claro:#e8f0fb;
+    --verde:#0f7b4f; --verde-claro:#e6f4ed; --ambar:#8a5a00; --ambar-claro:#fdf2dd;
+    --vermelho:#b3261e; --raio:14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --fundo:#12171d; --carta:#1a2129; --texto:#e9eef4; --suave:#9aa8b6;
+      --linha:#2a3440; --azul:#5b9bf0; --azul-claro:#17273c;
+      --verde:#4cc38a; --verde-claro:#14291f; --ambar:#e0a83a; --ambar-claro:#2a2213; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fundo);color:var(--texto);
+    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  a{color:var(--azul)}
+  header{background:var(--carta);border-bottom:1px solid var(--linha);
+    position:sticky;top:0;z-index:10}
+  .barra{max-width:960px;margin:0 auto;padding:14px 18px;display:flex;
+    align-items:center;gap:18px;flex-wrap:wrap}
+  .marca{font-weight:700;font-size:19px;letter-spacing:-.3px}
+  nav{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+  nav a{padding:8px 14px;border-radius:999px;text-decoration:none;
+    color:var(--suave);font-size:15px;font-weight:500}
+  nav a.ativo{background:var(--azul-claro);color:var(--azul)}
+  main{max-width:960px;margin:0 auto;padding:22px 18px 60px}
+  h1{font-size:24px;margin:0 0 4px;letter-spacing:-.4px}
+  .sub{color:var(--suave);margin:0 0 22px;font-size:15px}
+  .carta{background:var(--carta);border:1px solid var(--linha);
+    border-radius:var(--raio);padding:18px;margin-bottom:14px}
+  .grelha{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    margin-bottom:24px}
+  .metrica{background:var(--carta);border:1px solid var(--linha);
+    border-radius:var(--raio);padding:16px}
+  .metrica .n{font-size:30px;font-weight:700;letter-spacing:-1px;line-height:1.1}
+  .metrica .r{color:var(--suave);font-size:13px;margin-top:2px}
+  .selo{display:inline-block;padding:3px 10px;border-radius:999px;
+    font-size:12px;font-weight:600}
+  .selo.ok{background:var(--verde-claro);color:var(--verde)}
+  .selo.aviso{background:var(--ambar-claro);color:var(--ambar)}
+  .selo.info{background:var(--azul-claro);color:var(--azul)}
+  .botao{display:inline-block;padding:11px 18px;border-radius:10px;border:0;
+    background:var(--azul);color:#fff;font-size:15px;font-weight:600;
+    text-decoration:none;cursor:pointer;font-family:inherit}
+  .botao.claro{background:transparent;border:1px solid var(--linha);color:var(--texto)}
+  .botao.verde{background:var(--verde)}
+  .botao.perigo{background:transparent;border:1px solid var(--linha);color:var(--vermelho)}
+  .botoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .lead{display:flex;gap:14px;align-items:flex-start;padding:15px 0;
+    border-bottom:1px solid var(--linha)}
+  .lead:last-child{border-bottom:0}
+  .nota{flex:0 0 46px;height:46px;border-radius:12px;background:var(--azul-claro);
+    color:var(--azul);display:grid;place-items:center;font-weight:700;font-size:17px}
+  .lead h3{margin:0 0 2px;font-size:16px}
+  .lead .meta{color:var(--suave);font-size:14px}
+  label{display:block;font-weight:600;font-size:14px;margin:16px 0 5px}
+  label .dica{display:block;font-weight:400;color:var(--suave);font-size:13px;
+    margin-top:2px}
+  input[type=text],input[type=password],textarea{width:100%;padding:11px 13px;
+    border:1px solid var(--linha);border-radius:10px;background:var(--fundo);
+    color:var(--texto);font:15px inherit;font-family:inherit}
+  textarea{min-height:130px;resize:vertical}
+  .msg{padding:11px 14px;border-radius:10px;margin-bottom:8px;max-width:80%;
+    font-size:15px}
+  .msg.entrada{background:var(--fundo);border:1px solid var(--linha)}
+  .msg.saida{background:var(--azul-claro);margin-left:auto}
+  .vazio{text-align:center;color:var(--suave);padding:34px 12px}
+  .aviso{background:var(--ambar-claro);color:var(--ambar);padding:14px 16px;
+    border-radius:var(--raio);margin-bottom:18px;font-size:15px}
+  .flash{background:var(--verde-claro);color:var(--verde);padding:14px 16px;
+    border-radius:var(--raio);margin-bottom:18px;font-weight:600}
+  img.flyer{width:100%;max-width:280px;border-radius:10px;border:1px solid var(--linha)}
+</style>
+</head>
+<body>
+<header><div class="barra">
+  <span class="marca">{{ marca }}</span>
+  <nav>
+    <a href="/" class="{{ 'ativo' if pagina=='painel' }}">Painel</a>
+    <a href="/leads" class="{{ 'ativo' if pagina=='leads' }}">Leads</a>
+    <a href="/posts" class="{{ 'ativo' if pagina=='posts' }}">Posts</a>
+    <a href="/configuracao" class="{{ 'ativo' if pagina=='config' }}">Configuração</a>
+  </nav>
+</div></header>
+<main>
+  {% if modo_simulacao %}
+  <div class="aviso"><strong>Modo de simulação.</strong> O robô trabalha
+  normalmente, mas nada sai para o mundo — nenhuma mensagem, nenhum post.
+  Podes experimentar à vontade. Desligas na Configuração quando confiares.</div>
+  {% endif %}
+  {% with mensagens = get_flashed_messages() %}
+    {% for m in mensagens %}<div class="flash">{{ m }}</div>{% endfor %}
+  {% endwith %}
+  {% block conteudo %}{% endblock %}
+</main>
+</body>
+</html>
