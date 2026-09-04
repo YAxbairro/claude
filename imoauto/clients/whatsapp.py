@@ -58,7 +58,8 @@ def enviar_template(telefone, nome_template, variaveis=None, idioma="pt_PT"):
     Notificação de serviço fora da janela de 24h (ex.: avisar o proprietário
     de que alguém mostrou interesse). Exige template aprovado pela Meta.
     """
-    compliance.exigir_permissao(telefone, e_notificacao_servico=True)
+    compliance.exigir_permissao(telefone, e_notificacao_servico=True,
+                                e_template=True)
     componentes = []
     if variaveis:
         componentes = [{

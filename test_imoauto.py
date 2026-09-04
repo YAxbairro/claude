@@ -28,11 +28,20 @@ def responder_fixo(resultado):
     return lambda *args, **kwargs: resultado
 
 
-class TestConformidade(unittest.TestCase):
-    """A regra que protege a conta: nada de contacto frio."""
+class BaseTeste(unittest.TestCase):
+    """
+    Cada teste com a sua base de dados. Sem isto, o que um teste grava
+    aparece no seguinte — e os testes começam a mentir.
+    """
 
     def setUp(self):
+        from imoauto import config
+        config.BASE_DADOS = os.path.join(tempfile.mkdtemp(), "teste.db")
         store.iniciar()
+
+
+class TestConformidade(BaseTeste):
+    """A regra que protege a conta: nada de contacto frio."""
 
     def test_bloqueia_numero_sem_conversa(self):
         permitido, motivo = compliance.pode_enviar_whatsapp("+351911111111")
@@ -68,10 +77,7 @@ class TestConformidade(unittest.TestCase):
         self.assertFalse(regras["pode_usar_fotos"])
 
 
-class TestArmazenamento(unittest.TestCase):
-
-    def setUp(self):
-        store.iniciar()
+class TestArmazenamento(BaseTeste):
 
     def test_nao_duplica_o_mesmo_anuncio(self):
         url = "https://facebook.com/marketplace/item/999"
@@ -87,11 +93,11 @@ class TestArmazenamento(unittest.TestCase):
         self.assertEqual(encontrado["titulo"], "T1 Lisboa")
 
 
-class TestFluxoCompleto(unittest.TestCase):
+class TestFluxoCompleto(BaseTeste):
     """Do anúncio encontrado até ao post pronto a aprovar."""
 
     def setUp(self):
-        store.iniciar()
+        super().setUp()
         self.robo = Orquestrador()
 
         self.robo.aquisicao.pensar = responder_fixo({
@@ -188,11 +194,11 @@ class TestFluxoCompleto(unittest.TestCase):
         )
 
 
-class TestPainelSemTelegram(unittest.TestCase):
+class TestPainelSemTelegram(BaseTeste):
     """O painel tem de funcionar antes de o Telegram estar configurado."""
 
     def setUp(self):
-        store.iniciar()
+        super().setUp()
         self.robo = Orquestrador()
         self.robo.aquisicao.pensar = responder_fixo({
             "titulo": "T2 Almada", "preco": "165.000€", "localidade": "Almada",
@@ -210,6 +216,129 @@ class TestPainelSemTelegram(unittest.TestCase):
         cliente = painel.app.test_client()
         for rota in ("/", "/leads", f"/lead/{lead['id']}", "/posts", "/configuracao"):
             self.assertEqual(cliente.get(rota).status_code, 200, rota)
+
+
+class TestVigia(BaseTeste):
+    """A ronda diária: só traz o que é novo, e só uma vez."""
+
+    def setUp(self):
+        super().setUp()
+        self.robo = Orquestrador()
+        self.anuncios = [
+            {"titulo": "Vende se T2 Almada", "preco": "280.000 €",
+             "localidade": "Almada", "data": "hoje", "fonte": "OLX",
+             "url": "https://olx.pt/d/anuncio/t2-almada-1.html"},
+            {"titulo": "T2 para alugar Almada", "preco": "1.200 €",
+             "localidade": "Almada", "data": "hoje", "fonte": "OLX",
+             "url": "https://olx.pt/d/anuncio/t2-alugar-2.html"},
+        ]
+        self.robo.vigia.recolher = lambda: (list(self.anuncios), [])
+        # A triagem corta o arrendamento; só o primeiro é analisado.
+        self.robo.vigia.pensar = responder_fixo({"aprovados": [0], "motivo": "venda"})
+        self.robo.aquisicao.pensar = responder_fixo({
+            "titulo": "T2 renovado em Almada", "preco": "280.000 €",
+            "localidade": "Almada", "telefone": "", "particular": True,
+            "nota": 88, "motivo": "particular, descrição fraca",
+            "abordagem_sugerida": "Boa tarde, vi o seu T2.",
+        })
+
+    def test_ronda_traz_so_o_que_passa_a_triagem(self):
+        resultado = self.robo.ronda_diaria()
+        self.assertEqual(resultado["vistos"], 2)
+        self.assertEqual(resultado["analisados"], 1)
+        self.assertEqual(len(resultado["leads"]), 1)
+        self.assertEqual(resultado["leads"][0]["estado"], store.DESCOBERTO)
+        self.assertEqual(
+            store.obter_lead(resultado["leads"][0]["id"])["estado"], store.ENVIADO
+        )
+
+    def test_segunda_ronda_nao_repete_nada(self):
+        """Inclui o que a triagem rejeitou — senão reanalisava-o todos os dias."""
+        self.robo.ronda_diaria()
+        segunda = self.robo.ronda_diaria()
+        self.assertEqual(segunda["vistos"], 2)
+        self.assertEqual(segunda["novos"], 0)
+        self.assertEqual(segunda["analisados"], 0)
+
+    def test_lead_com_nota_baixa_nao_te_incomoda(self):
+        self.robo.aquisicao.pensar = responder_fixo({
+            "titulo": "T3 de agência", "preco": "480.000 €", "localidade": "Almada",
+            "telefone": "", "particular": False, "nota": 31,
+            "motivo": "linguagem de promotor", "abordagem_sugerida": "",
+        })
+        resultado = self.robo.ronda_diaria()
+        self.assertEqual(len(resultado["leads"]), 0)
+        with store.ligar() as c:
+            estado = c.execute("SELECT estado FROM leads LIMIT 1").fetchone()
+        self.assertEqual(estado["estado"], store.DESCARTADO)
+
+    def test_fonte_que_falha_nao_derruba_a_ronda(self):
+        def recolher():
+            return list(self.anuncios), ["OLX · Porto: ligação recusada"]
+        self.robo.vigia.recolher = recolher
+        resultado = self.robo.ronda_diaria()
+        self.assertEqual(len(resultado["leads"]), 1)
+        self.assertEqual(len(resultado["problemas"]), 1)
+
+
+class TestPassarAoRobo(BaseTeste):
+    """Falaste com a pessoa; agora passas o número e o robô continua."""
+
+    def setUp(self):
+        super().setUp()
+        self.robo = Orquestrador()
+        self.lead = store.guardar_lead(
+            "olx", "https://olx.pt/d/anuncio/passar.html", "T2 Almada"
+        )
+
+    def test_sem_consentimento_fica_a_espera(self):
+        resultado = self.robo.assumir_lead(self.lead["id"], "+351911000001")
+        self.assertFalse(resultado["abriu_conversa"])
+        atualizado = store.obter_lead(self.lead["id"])
+        self.assertEqual(atualizado["estado"], store.CONTACTADO)
+        self.assertEqual(atualizado["telefone"], "+351911000001")
+
+    def test_com_consentimento_o_robo_abre_a_conversa(self):
+        resultado = self.robo.assumir_lead(
+            self.lead["id"], "+351911000002", com_consentimento=True,
+            nota="disse que sim ao telefone",
+        )
+        self.assertTrue(resultado["abriu_conversa"])
+        self.assertTrue(store.tem_consentimento("+351911000002"))
+
+    def test_consentimento_nao_abre_a_porta_a_texto_livre(self):
+        """Só template. Texto livre continua a exigir que ela escreva."""
+        from imoauto.clients import whatsapp
+        store.registar_consentimento("+351911000003", origem="teste")
+        with self.assertRaises(compliance.BloqueioConformidade):
+            whatsapp.enviar_texto("+351911000003", "olá")
+
+    def test_numero_sem_consentimento_continua_bloqueado(self):
+        from imoauto.clients import whatsapp
+        with self.assertRaises(compliance.BloqueioConformidade):
+            whatsapp.enviar_template("+351911000004", "primeiro_contacto")
+
+
+class TestAgenda(BaseTeste):
+
+    def setUp(self):
+        super().setUp()
+        store.guardar_definicao("rondas_feitas", [])
+        store.guardar_horas_da_ronda([9, 18])
+
+    def test_ronda_da_manha_fica_em_falta_ate_ser_feita(self):
+        from imoauto import agenda
+        import datetime
+        manha = datetime.datetime(2026, 9, 4, 10, 0)
+        self.assertEqual(agenda.horas_em_falta(manha), [9])
+        agenda.marcar_feita(9, manha)
+        self.assertEqual(agenda.horas_em_falta(manha), [])
+
+    def test_nao_corre_antes_da_hora(self):
+        from imoauto import agenda
+        import datetime
+        madrugada = datetime.datetime(2026, 9, 4, 7, 0)
+        self.assertEqual(agenda.horas_em_falta(madrugada), [])
 
 
 class TestUtilitarios(unittest.TestCase):

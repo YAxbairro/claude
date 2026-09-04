@@ -96,6 +96,8 @@ CAMPOS_EDITAVEIS = [
      "Fala com o @BotFather no Telegram e cria um bot. Ele dá-te isto."),
     ("TELEGRAM_CHAT_ID", "O teu ID de Telegram", "essencial",
      "Fala com o @userinfobot no Telegram. Ele diz-te o número."),
+    ("FIRECRAWL_API_KEY", "Chave de pesquisa (Firecrawl)", "pesquisa",
+     "É o que permite ao Vigia varrer os anúncios. Obtém em firecrawl.dev"),
     ("WHATSAPP_TOKEN", "Token do WhatsApp", "opcional",
      "Da app da Meta, em developers.facebook.com"),
     ("WHATSAPP_PHONE_NUMBER_ID", "ID do número de WhatsApp", "opcional",

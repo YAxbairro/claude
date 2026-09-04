@@ -17,9 +17,16 @@
 {% if lead.estado == 'enviado' %}
 <div class="carta">
   <h3 style="margin-top:0">O passo que é teu</h3>
+  {% if telefone %}
   <p class="sub">Esta primeira mensagem tens de ser tu a enviá-la, do teu
     WhatsApp. É isso que abre a conversa e deixa o robô assumir a partir daí —
     e é o que impede a conta de ser bloqueada.</p>
+  {% else %}
+  <p class="sub">O telefone não está visível no anúncio — nestes portais fica
+    sempre escondido. Abre o anúncio, fala com a pessoa pelo chat de lá (ou
+    carrega em "Mostrar contacto"), e depois volta aqui para passar o número
+    ao robô.</p>
+  {% endif %}
   <div class="carta" style="background:var(--fundo);margin-bottom:0">
     {{ abordagem or 'Sem sugestão.' }}</div>
   <div class="botoes">
@@ -32,6 +39,30 @@
     <form method="post" action="/lead/{{ lead.id }}/descartar" style="display:inline">
       <button class="botao perigo" type="submit">Descartar</button></form>
   </div>
+</div>
+{% endif %}
+
+{% if lead.estado in ('enviado', 'contactado') %}
+<div class="carta">
+  <h3 style="margin-top:0">Passar ao robô</h3>
+  <p class="sub">Já falaste com a pessoa? Põe aqui o número de WhatsApp dela
+    e o robô continua a conversa daí em diante — negoceia, pede as fotos e
+    cria a publicação.</p>
+  <form method="post" action="/lead/{{ lead.id }}/assumir">
+    <label>Número de WhatsApp
+      <input type="text" name="telefone" value="{{ lead.telefone }}"
+        placeholder="+351 9XX XXX XXX" required></label>
+    <label style="display:flex;gap:10px;align-items:flex-start;font-weight:600">
+      <input type="checkbox" name="consentimento" value="1"
+        style="width:auto;margin-top:4px">
+      <span>Ela aceitou que continuemos por WhatsApp
+        <span class="dica">Marca só se for verdade. Com isto, o robô abre a
+        conversa ele próprio com uma mensagem aprovada. Sem isto, fica à
+        espera que ela escreva primeiro.</span></span></label>
+    <div class="botoes">
+      <button class="botao verde" type="submit">O robô assume daqui</button>
+    </div>
+  </form>
 </div>
 {% endif %}
 

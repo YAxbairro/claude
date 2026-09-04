@@ -75,6 +75,37 @@ CREATE TABLE IF NOT EXISTS registo (
     criado_em REAL NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS anuncios_vistos (
+    url TEXT PRIMARY KEY,
+    titulo TEXT,
+    fonte TEXT,
+    criado_em REAL NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS consentimentos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    telefone TEXT NOT NULL,
+    lead_id INTEGER,
+    origem TEXT NOT NULL,
+    nota TEXT,
+    criado_em REAL NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS definicoes (
+    chave TEXT PRIMARY KEY,
+    valor TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS rondas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    vistos INTEGER DEFAULT 0,
+    novos INTEGER DEFAULT 0,
+    qualificados INTEGER DEFAULT 0,
+    erro TEXT,
+    detalhe TEXT DEFAULT '{}',
+    criado_em REAL NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_leads_estado ON leads(estado);
 CREATE INDEX IF NOT EXISTS idx_msg_telefone ON mensagens(telefone, criado_em);
 """
@@ -256,3 +287,117 @@ def registar(ator, acao, detalhe=""):
 
 def so_digitos(texto):
     return "".join(ch for ch in (texto or "") if ch.isdigit())
+
+
+# --- Definições e fontes -------------------------------------------------
+
+def guardar_definicao(chave, valor):
+    with ligar() as c:
+        c.execute(
+            "INSERT INTO definicoes (chave, valor) VALUES (?,?) "
+            "ON CONFLICT(chave) DO UPDATE SET valor = excluded.valor",
+            (chave, json.dumps(valor, ensure_ascii=False)),
+        )
+
+
+def ler_definicao(chave, omissao=None):
+    with ligar() as c:
+        linha = c.execute("SELECT valor FROM definicoes WHERE chave = ?",
+                          (chave,)).fetchone()
+    return json.loads(linha["valor"]) if linha else omissao
+
+
+def ler_fontes():
+    """As fontes onde o Vigia procura. Na primeira vez, semeia as de origem."""
+    from imoauto.fontes import FONTES_INICIAIS
+    fontes = ler_definicao("fontes")
+    if fontes is None:
+        guardar_definicao("fontes", FONTES_INICIAIS)
+        return list(FONTES_INICIAIS)
+    return fontes
+
+
+def guardar_fontes(fontes):
+    guardar_definicao("fontes", fontes)
+
+
+def horas_da_ronda():
+    """A que horas o robô faz a ronda. Lista de horas (0-23)."""
+    return ler_definicao("horas_ronda", [9])
+
+
+def guardar_horas_da_ronda(horas):
+    guardar_definicao("horas_ronda", sorted(set(int(h) for h in horas)))
+
+
+# --- Rondas --------------------------------------------------------------
+
+def registar_ronda(vistos, novos, qualificados, erro="", detalhe=None):
+    with ligar() as c:
+        cur = c.execute(
+            """INSERT INTO rondas (vistos, novos, qualificados, erro, detalhe, criado_em)
+               VALUES (?,?,?,?,?,?)""",
+            (vistos, novos, qualificados, erro,
+             json.dumps(detalhe or {}, ensure_ascii=False), time.time()),
+        )
+        return cur.lastrowid
+
+
+def ultimas_rondas(limite=10):
+    with ligar() as c:
+        return [dict(l) for l in c.execute(
+            "SELECT * FROM rondas ORDER BY criado_em DESC LIMIT ?", (limite,)
+        )]
+
+
+def url_ja_visto(url):
+    """
+    Já passou por aqui? Conta tanto o que virou lead como o que a triagem
+    deitou fora — senão o robô reanalisava os mesmos rejeitados todos os
+    dias, e cada análise custa dinheiro.
+    """
+    with ligar() as c:
+        if c.execute("SELECT 1 FROM leads WHERE url = ? LIMIT 1",
+                     (url,)).fetchone():
+            return True
+        return c.execute("SELECT 1 FROM anuncios_vistos WHERE url = ? LIMIT 1",
+                         (url,)).fetchone() is not None
+
+
+def marcar_vistos(anuncios):
+    """Regista que estes anúncios já foram considerados nesta ronda."""
+    agora = time.time()
+    with ligar() as c:
+        c.executemany(
+            "INSERT OR IGNORE INTO anuncios_vistos (url, titulo, fonte, criado_em) "
+            "VALUES (?,?,?,?)",
+            [(a.get("url", ""), a.get("titulo", ""), a.get("fonte", ""), agora)
+             for a in anuncios if a.get("url")],
+        )
+
+
+# --- Consentimento -------------------------------------------------------
+
+def registar_consentimento(telefone, origem, nota="", lead_id=None):
+    """
+    Guarda que esta pessoa aceitou ser contactada por WhatsApp — porque TU
+    falaste com ela e ela disse que sim. É o que autoriza o robô a abrir a
+    conversa com um template aprovado.
+    """
+    with ligar() as c:
+        c.execute(
+            """INSERT INTO consentimentos (telefone, lead_id, origem, nota, criado_em)
+               VALUES (?,?,?,?,?)""",
+            (telefone, lead_id, origem, nota, time.time()),
+        )
+
+
+def tem_consentimento(telefone):
+    digitos = so_digitos(telefone)
+    if not digitos:
+        return False
+    with ligar() as c:
+        for linha in c.execute("SELECT telefone FROM consentimentos"):
+            if so_digitos(linha["telefone"])[-9:] == digitos[-9:]:
+                return True
+    return False

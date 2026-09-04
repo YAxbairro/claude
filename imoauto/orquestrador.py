@@ -10,7 +10,8 @@ import json
 import os
 
 from imoauto import compliance, config, store
-from imoauto.agents import Aquisicao, Copywriter, Designer, Publicador, SEO, Vendas
+from imoauto.agents import (Aquisicao, Copywriter, Designer, Publicador,
+                            SEO, Vendas, Vigia)
 from imoauto.clients import site, telegram, whatsapp
 
 
@@ -23,6 +24,7 @@ class Orquestrador:
         self.design = Designer()
         self.publicador = Publicador()
         self.vendas = Vendas()
+        self.vigia = Vigia(self.aquisicao)
         store.iniciar()
 
     # --- 1. Lead novo ---------------------------------------------------
@@ -61,6 +63,83 @@ class Orquestrador:
                 "Abrir WhatsApp", f"https://wa.me/{digitos}"
             )])
         return telegram.enviar(texto, botoes)
+
+    # --- 1b. A ronda diária ----------------------------------------------
+
+    def ronda_diaria(self):
+        """
+        O que corre à hora marcada: varre as fontes, qualifica o que é novo
+        e avisa-te de cada lead que valha a pena. Continua sem contactar
+        ninguém — a decisão e a primeira mensagem são tuas.
+        """
+        resultado = self.vigia.ronda(ao_encontrar=self._avisar_lead_novo)
+        self._resumo_da_ronda(resultado)
+        return resultado
+
+    def _avisar_lead_novo(self, lead):
+        store.atualizar_lead(lead["id"], estado=store.ENVIADO)
+        try:
+            self.enviar_lead_para_telegram(lead)
+        except Exception as erro:
+            store.registar("orquestrador", "aviso_falhou", str(erro))
+
+    def _resumo_da_ronda(self, resultado):
+        if not resultado["leads"] and not resultado["problemas"]:
+            return  # ronda silenciosa: nada novo, não vale a pena incomodar
+        linhas = [
+            f"*Ronda terminada* · {len(resultado['leads'])} "
+            f"lead{'s' if len(resultado['leads']) != 1 else ''} "
+            f"para veres",
+            f"Vistos {resultado['vistos']} · novos {resultado['novos']} "
+            f"· analisados {resultado['analisados']}",
+        ]
+        if resultado["problemas"]:
+            linhas.append("\n_Fontes com problemas:_\n" +
+                          "\n".join(f"· {p}" for p in resultado["problemas"][:4]))
+        try:
+            telegram.enviar("\n".join(linhas))
+        except Exception as erro:
+            store.registar("orquestrador", "resumo_falhou", str(erro))
+
+    # --- 1c. Passar o número ao robô --------------------------------------
+
+    def assumir_lead(self, lead_id, telefone, com_consentimento=False, nota=""):
+        """
+        Falaste com a pessoa. Agora passas o número ao robô e ele continua.
+
+        Com `com_consentimento`, estás a declarar que ela aceitou ser
+        contactada por WhatsApp — e aí o robô pode abrir a conversa com um
+        template aprovado. Sem isso, fica à espera que ela escreva.
+        """
+        lead = store.obter_lead(lead_id)
+        if not lead:
+            raise ValueError(f"Lead {lead_id} não existe")
+
+        telefone = telefone.strip()
+        store.atualizar_lead(lead_id, telefone=telefone, estado=store.CONTACTADO)
+
+        if not com_consentimento:
+            return {"assumido": True, "abriu_conversa": False,
+                    "motivo": "À espera que a pessoa escreva. Quando escrever, "
+                              "o robô assume sozinho."}
+
+        store.registar_consentimento(
+            telefone, origem="contacto_do_yanick", nota=nota, lead_id=lead_id
+        )
+        try:
+            whatsapp.enviar_template(
+                telefone, "primeiro_contacto",
+                [lead["titulo"] or "o seu anúncio"],
+            )
+        except compliance.BloqueioConformidade as erro:
+            return {"assumido": True, "abriu_conversa": False, "motivo": str(erro)}
+        except Exception as erro:
+            store.registar("orquestrador", "template_falhou", str(erro))
+            return {"assumido": True, "abriu_conversa": False,
+                    "motivo": f"Número guardado, mas o template falhou: {erro}"}
+
+        return {"assumido": True, "abriu_conversa": True,
+                "motivo": "Conversa aberta. O robô continua a partir daqui."}
 
     # --- 2. Conversa no WhatsApp ----------------------------------------
 
@@ -242,6 +321,12 @@ class Orquestrador:
         if acao == "contactado":
             store.atualizar_lead(identificador, estado=store.CONTACTADO)
             return "Marcado como contactado. O robô assume quando ele responder."
+
+        if acao == "ronda":
+            resultado = self.ronda_diaria()
+            return (f"Ronda feita: {resultado['vistos']} vistos, "
+                    f"{resultado['novos']} novos, "
+                    f"{len(resultado['leads'])} para veres.")
 
         if acao == "descartar":
             store.atualizar_lead(identificador, estado=store.DESCARTADO)

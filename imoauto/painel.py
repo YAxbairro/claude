@@ -14,7 +14,7 @@ import urllib.parse
 
 from flask import Flask, flash, redirect, render_template, request, url_for
 
-from imoauto import config, store
+from imoauto import agenda, config, fontes, store
 from imoauto.orquestrador import Orquestrador
 
 app = Flask(__name__)
@@ -31,6 +31,8 @@ ETIQUETAS = {
 }
 
 GRUPOS = [
+    ("pesquisa", "Para o Vigia procurar sozinho",
+     "É esta chave que lhe dá olhos para varrer os anúncios todos os dias."),
     ("essencial", "Para o robô arrancar",
      "Sem estas três, nada funciona. São gratuitas de obter."),
     ("opcional", "Para o robô publicar sozinho",
@@ -132,6 +134,73 @@ def novo_lead():
         return redirect(url_for("painel"))
     flash(f"Analisado: nota {ficha['nota']}/100.")
     return redirect(url_for("lead", lead_id=ficha["id"]))
+
+
+@app.get("/vigia")
+def vigia():
+    proxima = agenda.proxima_ronda()
+    rondas = []
+    for r in store.ultimas_rondas(8):
+        rondas.append({**r, "quando": datetime.datetime.fromtimestamp(
+            r["criado_em"]).strftime("%d/%m às %H:%M")})
+    return render_template(
+        "vigia.html", **_comum("vigia"),
+        horas=store.horas_da_ronda(), fontes=store.ler_fontes(),
+        proxima=proxima.strftime("%d/%m às %Hh") if proxima else None,
+        rondas=rondas, firecrawl=fontes.configurado(),
+        a_correr=True,
+    )
+
+
+@app.post("/vigia/horas")
+def vigia_horas():
+    store.guardar_horas_da_ronda(request.form.getlist("hora"))
+    flash("Horário guardado.")
+    return redirect(url_for("vigia"))
+
+
+@app.post("/vigia/fontes")
+def vigia_fontes():
+    atuais = store.ler_fontes()
+    for i, fonte in enumerate(atuais):
+        fonte["ativa"] = bool(request.form.get(f"ativa_{i}"))
+    nome = request.form.get("novo_nome", "").strip()
+    alvo = request.form.get("novo_alvo", "").strip()
+    if nome and alvo:
+        atuais.append({"tipo": "listagem", "nome": nome,
+                       "alvo": alvo, "ativa": True})
+    store.guardar_fontes(atuais)
+    flash("Sítios guardados.")
+    return redirect(url_for("vigia"))
+
+
+@app.post("/vigia/correr")
+def vigia_correr():
+    if not fontes.configurado():
+        flash("Falta a FIRECRAWL_API_KEY — sem ela o Vigia não vê nada.")
+        return redirect(url_for("vigia"))
+    try:
+        resultado = robo().ronda_diaria()
+        flash(f"Ronda feita: {resultado['vistos']} vistos, "
+              f"{resultado['novos']} novos, "
+              f"{len(resultado['leads'])} para veres.")
+    except Exception as erro:
+        flash(f"A ronda falhou: {erro}")
+    return redirect(url_for("leads"))
+
+
+@app.post("/lead/<int:lead_id>/assumir")
+def assumir(lead_id):
+    telefone = request.form.get("telefone", "").strip()
+    if not telefone:
+        flash("Falta o número.")
+        return redirect(url_for("lead", lead_id=lead_id))
+    resultado = robo().assumir_lead(
+        lead_id, telefone,
+        com_consentimento=bool(request.form.get("consentimento")),
+    )
+    flash(resultado["motivo"])
+    return redirect(url_for("lead", lead_id=lead_id))
 
 
 @app.get("/posts")

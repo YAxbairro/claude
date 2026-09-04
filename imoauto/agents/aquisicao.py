@@ -21,16 +21,25 @@ O teu trabalho: extrair os dados e avaliar se vale a pena o ImoAuto abordar
 este anunciante para publicar o imóvel/viatura no portal.
 
 Pontua de 0 a 100 tendo em conta:
-- é particular (bom) ou agência/stand já profissionalizado (mau)?
+- é particular (bom) ou agência/stand já profissionalizado (mau)? Sinais de
+  agência: o anúncio diz "profissional", tem logótipo e nome de imobiliária
+  (Remax, Century21, ERA...), referência interna, ou linguagem de folheto
+  ("excelente oportunidade de investimento", "marque já a sua visita")
+- é venda ou arrendamento? Só interessa VENDA — um preço de 800 a 1.500 €
+  é renda mensal, não preço de venda. Arrendamento leva nota 0
 - o anúncio está pobre (poucas fotos, descrição fraca)? isso é oportunidade
-- há sinais de urgência de venda?
+- há sinais de urgência de venda ("negociável", "vendo por motivo de")?
 - o preço e a localização fazem sentido para o mercado português?
+
+O telefone quase nunca está visível nestes portais — fica escondido atrás de
+um botão. Se não o vires, deixa vazio: quem o vai buscar é o humano.
 
 Devolve JSON:
 {"tipo": "imovel|viatura|outro", "titulo": "", "preco": "", "localidade": "",
  "telefone": "", "particular": true, "nota": 0-100, "motivo": "uma frase",
  "abordagem_sugerida": "rascunho curto e humano da 1ª mensagem, tratamento
- formal, sem parecer spam, máximo 3 frases"}
+ formal, sem parecer spam, máximo 3 frases",
+ "onde_contactar": "chat do portal | telefone visível | nenhum"}
 
 A abordagem sugerida é para o humano ler, ajustar e enviar ele próprio.
 Nunca escrevas como se fosses tu a enviá-la."""

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block titulo %}Vigia{% endblock %}
+{% block conteudo %}
+<h1>O Vigia</h1>
+<p class="sub">A ronda automática pelos anúncios. Corre sozinha às horas que
+  marcares e avisa-te do que encontrar.</p>
+
+{% if not firecrawl %}
+<div class="aviso"><strong>Falta a chave de pesquisa.</strong> Sem ela o Vigia
+  não consegue ir à internet. Põe a <code>FIRECRAWL_API_KEY</code> na
+  Configuração — é o que lhe dá olhos.</div>
+{% endif %}
+
+<div class="carta">
+  <h3 style="margin-top:0">Horário</h3>
+  <p class="sub">A que horas queres que ele faça a ronda. Podes marcar mais
+    do que uma.</p>
+  <form method="post" action="/vigia/horas">
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin:12px 0">
+      {% for h in range(24) %}
+      <label style="margin:0;font-weight:500">
+        <input type="checkbox" name="hora" value="{{ h }}"
+          {{ 'checked' if h in horas }} style="width:auto">
+        {{ '%02d'|format(h) }}h</label>
+      {% endfor %}
+    </div>
+    <button class="botao" type="submit">Guardar horário</button>
+  </form>
+  {% if proxima %}
+  <p class="sub" style="margin:14px 0 0">Próxima ronda: <strong>{{ proxima }}</strong>
+    {% if not a_correr %}(só enquanto o programa estiver aberto){% endif %}</p>
+  {% endif %}
+</div>
+
+<div class="carta">
+  <h3 style="margin-top:0">Correr agora</h3>
+  <p class="sub">Não esperes pela hora — faz a ronda já, para veres o que ele
+    encontra.</p>
+  <form method="post" action="/vigia/correr">
+    <button class="botao verde" type="submit">Fazer a ronda agora</button>
+  </form>
+</div>
+
+<div class="carta">
+  <h3 style="margin-top:0">Onde ele procura</h3>
+  <p class="sub">Uma linha por sítio. Podes colar o endereço de qualquer
+    página de resultados do OLX, Imovirtual ou CustoJusto — por exemplo, uma
+    pesquisa já filtrada pela tua zona.</p>
+  <form method="post" action="/vigia/fontes">
+    {% for fonte in fontes %}
+    <div style="padding:12px 0;border-bottom:1px solid var(--linha)">
+      <label style="display:flex;gap:10px;align-items:flex-start;font-weight:600;margin:0">
+        <input type="checkbox" name="ativa_{{ loop.index0 }}" value="1"
+          {{ 'checked' if fonte.ativa }} style="width:auto;margin-top:4px">
+        <span style="flex:1">{{ fonte.nome }}
+          <span class="dica" style="word-break:break-all">{{ fonte.alvo }}</span></span>
+      </label>
+    </div>
+    {% endfor %}
+    <label>Acrescentar um sítio novo — nome
+      <input type="text" name="novo_nome" placeholder="OLX · Setúbal viaturas"></label>
+    <label>Endereço da página de resultados
+      <input type="text" name="novo_alvo" placeholder="https://www.olx.pt/..."></label>
+    <div class="botoes"><button class="botao" type="submit">Guardar</button></div>
+  </form>
+</div>
+
+<div class="carta">
+  <h3 style="margin-top:0">Últimas rondas</h3>
+  {% if rondas %}
+    {% for ronda in rondas %}
+    <div style="padding:11px 0;border-bottom:1px solid var(--linha)">
+      <strong>{{ ronda.quando }}</strong> —
+      {{ ronda.vistos }} vistos, {{ ronda.novos }} novos,
+      <strong>{{ ronda.qualificados }}</strong> para veres
+      {% if ronda.erro %}<br><span style="color:var(--ambar)">{{ ronda.erro }}</span>{% endif %}
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="vazio">Ainda não fez nenhuma ronda.</div>
+  {% endif %}
+</div>
+{% endblock %}

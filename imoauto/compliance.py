@@ -20,21 +20,27 @@ class BloqueioConformidade(Exception):
     """Levantada quando uma ação violaria as políticas da Meta."""
 
 
-def pode_enviar_whatsapp(telefone, e_notificacao_servico=False):
+def pode_enviar_whatsapp(telefone, e_notificacao_servico=False, e_template=False):
     """
     Decide se o robô pode enviar uma mensagem a este número.
 
-    Devolve (permitido, motivo). Três casos:
-      1. Nunca houve conversa      -> NÃO. Tens de escrever tu primeiro.
-      2. Conversa aberta há < 24h  -> SIM, texto livre.
-      3. Conversa antiga (> 24h)   -> só com template aprovado
-                                      (notificação de serviço a quem já é
-                                      utilizador do ImoAuto).
+    Devolve (permitido, motivo). Os casos:
+      1. Nunca houve conversa nem consentimento -> NÃO. Falas tu primeiro.
+      2. Sem conversa mas COM consentimento     -> só template aprovado. É o
+         caso de tu teres falado com a pessoa (no anúncio, ao telefone) e ela
+         ter aceitado que o robô continue por WhatsApp.
+      3. Conversa aberta há < 24h               -> SIM, texto livre.
+      4. Conversa antiga (> 24h)                -> só template aprovado.
     """
     if not store.houve_contacto_humano(telefone):
+        if e_template and store.tem_consentimento(telefone):
+            return True, (
+                "Sem conversa ainda, mas com consentimento registado por ti: "
+                "primeiro contacto permitido como template aprovado."
+            )
         return False, (
-            "Sem conversa aberta com este número. A primeira mensagem tem de "
-            "ser enviada por ti a partir da app — contacto frio automatizado "
+            "Sem conversa aberta nem consentimento registado. A primeira "
+            "mensagem tem de ser enviada por ti — contacto frio automatizado "
             "viola as políticas da Meta."
         )
 
@@ -54,8 +60,9 @@ def pode_enviar_whatsapp(telefone, e_notificacao_servico=False):
     )
 
 
-def exigir_permissao(telefone, e_notificacao_servico=False):
-    permitido, motivo = pode_enviar_whatsapp(telefone, e_notificacao_servico)
+def exigir_permissao(telefone, e_notificacao_servico=False, e_template=False):
+    permitido, motivo = pode_enviar_whatsapp(
+        telefone, e_notificacao_servico, e_template)
     if not permitido:
         store.registar("conformidade", "bloqueio", f"{telefone}: {motivo}")
         raise BloqueioConformidade(motivo)

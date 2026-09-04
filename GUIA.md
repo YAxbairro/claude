@@ -95,7 +95,23 @@ sempre ligada — nenhuma publicação sai sem tu carregares no botão.
 
 ## 4. O dia-a-dia
 
-### Encontraste um anúncio no Facebook ou Instagram?
+### O robô procura sozinho, todos os dias
+
+Vai a **Vigia** no menu. Marca a que horas queres a ronda (por exemplo 9h e
+19h) e carrega em Guardar. A partir daí, todos os dias a essas horas ele
+percorre os anúncios, descarta o que já viu, e traz-te só o que vale a pena —
+já com nota e com a mensagem escrita.
+
+Podes também carregar em **Fazer a ronda agora** para não esperares.
+
+Os sítios onde ele procura estão nessa mesma página, e podes acrescentar os
+teus: faz uma pesquisa no OLX com os filtros que quiseres (zona, preço,
+particulares), copia o endereço da barra do browser, e cola lá.
+
+Para isto funcionar precisas da chave de pesquisa (FIRECRAWL_API_KEY), que se
+põe na Configuração.
+
+### Encontraste tu um anúncio no Facebook ou Instagram?
 Copia o texto todo (descrição, preço, contacto) e cola no painel, na caixa
 **Encontraste um anúncio?**. Carrega em **Analisar anúncio**.
 
@@ -114,8 +130,16 @@ com o texto já lá dentro. Lês, mudas o que quiseres, envias.
 impede a conta do ImoAuto de ser bloqueada. O robô nunca escreve primeiro a
 um desconhecido.
 
+### Passar o número ao robô
+Depois de falares com a pessoa — pelo chat do OLX, por telefone, como for —
+volta à ficha do lead e escreve o número de WhatsApp dela em **Passar ao
+robô**. A partir daí é ele que trata de tudo.
+
+Se ela disse que sim a falar por WhatsApp, marca a caixinha: o robô abre a
+conversa ele próprio. Se não marcares, ele fica à espera que ela escreva.
+
 ### A partir daí, é com ele
-Quando a pessoa responder, o robô assume sozinho: explica o ImoAuto, faz as
+Quando a conversa arranca, o robô assume sozinho: explica o ImoAuto, faz as
 perguntas, pede as fotos, descarrega-as, cria a publicação no site, gera o
 flyer e prepara os posts.
 

@@ -13,9 +13,11 @@ Business do ImoAuto — o ativo de marketing mais caro que existe aqui.
 A solução não é abdicar do objetivo, é mudar o ponto de entrada:
 
 ```
-Subagentes vasculham   →   Telegram (a tua consola)   →   TU envias a 1ª mensagem
-                                                                    ↓
-publica nas redes  ←  cria listagem no site  ←  robô assume a conversa (WhatsApp)
+Vigia varre todos os dias   →   Telegram + painel   →   TU falas com a pessoa
+     (à hora marcada)                                          ↓
+                                                    passas-lhe o número
+                                                               ↓
+publica nas redes ← cria listagem no site ← robô assume a conversa (WhatsApp)
 ```
 
 Tu escreves uma frase. O robô faz o resto — e a partir daí é tudo automático e
@@ -29,6 +31,8 @@ passam por lá. Os testes provam-no.
 | Módulo | O que faz |
 |---|---|
 | `orquestrador.py` | O robô central. Recebe eventos, escolhe o subagente, executa. |
+| `fontes.py` | Onde procurar: páginas de listagens e pesquisa web. |
+| `agenda.py` | A ronda à hora marcada, em segundo plano. |
 | `compliance.py` | O guarda. Decide se um envio é permitido. |
 | `store.py` | SQLite: leads, conversas, listagens, publicações, registo. |
 | `painel.py` | Painel web — a interface principal, sem terminal. |
@@ -40,6 +44,7 @@ passam por lá. Os testes provam-no.
 
 | Subagente | Trabalho |
 |---|---|
+| **Vigia** | Faz a ronda diária pelas fontes, descarta o que já viu, tria o que vale análise e traz-te só o que interessa. |
 | **Aquisição** | Lê um anúncio, extrai dados, pontua 0-100 e rascunha a abordagem — para tu enviares. Nunca contacta. |
 | **Vendas** | Assume a conversa no WhatsApp depois da resposta: explica, recolhe dados, pede fotos, escala para ti quando não sabe. |
 | **Copy** | Títulos, descrições, legendas e hashtags em português de Portugal. |
@@ -137,12 +142,30 @@ API ao mesmo número que usas na app — histórico sincronizado, sem segundo n�
 Exige que esse número esteja na app **WhatsApp Business**, não na app pessoal.
 É o número que quase não usas que deve ir para aqui.
 
-## O que ainda é manual, e porquê
+## A ronda diária
 
-A varredura ampla e contínua de Marketplace, grupos e Instagram não tem API
-oficial. `POST /webhook/lead` e `/lead <texto>` aceitam anúncios de qualquer
-origem — colas o texto, o subagente qualifica. Scraping em escala é frágil e
-bloqueado ativamente; não vale o risco de queimar a conta.
+O Vigia corre às horas que marcares no painel (por omissão 9h). Em cada ronda:
+
+1. lê as fontes ativas — páginas de listagens de portais, e pesquisa web
+2. deita fora tudo o que já viu antes, incluindo o que rejeitou (senão
+   reanalisava os mesmos rejeitados todos os dias, e cada análise custa)
+3. tria o resto: só o que parece venda de particular vai a análise a fundo,
+   no máximo 12 por ronda
+4. qualifica cada um e descarta abaixo de 55/100
+5. o que sobra chega-te ao Telegram e ao painel, com a mensagem já escrita
+
+O que o teste com dados reais ensinou, e está no código:
+
+- no OLX, o que separa particulares de agências é `?search[private_business]=private`
+  no endereço. Sem isso vêm sobretudo imobiliárias
+- a mesma página mistura venda e arrendamento: uma renda de 1.200 € parece um
+  preço. A triagem corta-os
+- **o telefone nunca está visível** nestes portais — fica atrás de um botão.
+  É por isso que és tu a falar primeiro, e só depois passas o número ao robô
+
+Facebook Marketplace e grupos ficam de fora de propósito: a Meta bloqueia
+varredura ativamente, e a conta que se queima é a do ImoAuto. Esses continuam
+a entrar pelo painel, colados à mão.
 
 ## Estado
 

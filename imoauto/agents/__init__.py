@@ -11,6 +11,7 @@ from imoauto.agents.design import Designer
 from imoauto.agents.publicacao import Publicador
 from imoauto.agents.seo import SEO
 from imoauto.agents.vendas import Vendas
+from imoauto.agents.vigia import Vigia
 
 EQUIPA = {
     "aquisicao": Aquisicao,
@@ -19,7 +20,8 @@ EQUIPA = {
     "design": Designer,
     "publicacao": Publicador,
     "vendas": Vendas,
+    "vigia": Vigia,
 }
 
 __all__ = ["EQUIPA", "Aquisicao", "Copywriter", "SEO", "Designer",
-           "Publicador", "Vendas"]
+           "Publicador", "Vendas", "Vigia"]
