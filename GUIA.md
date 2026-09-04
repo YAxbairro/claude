@@ -5,15 +5,45 @@ seguir isto uma vez.
 
 ---
 
+## 0. Trazer os ficheiros para o teu computador
+
+Os ficheiros estão no GitHub. Para os teres na tua máquina:
+
+**[⬇️ Carrega aqui para descarregar](https://github.com/YAxbairro/claude/archive/refs/heads/claude/imoauto-robot-subagents-41gdvr.zip)**
+
+Descarrega um ficheiro `.zip`. Depois:
+
+1. Vai à pasta **Transferências** (ou Downloads)
+2. Clica com o botão direito no ficheiro → **Extrair tudo** (Windows) ou
+   duplo clique (Mac)
+3. Aparece uma pasta chamada `claude-claude-imoauto-robot-subagents-41gdvr`
+4. Arrasta-a para o **Ambiente de trabalho** e muda-lhe o nome para `ImoAuto`
+   (fica mais fácil de encontrar)
+
+Dentro dessa pasta é que estão o `ARRANCAR.bat` e o `ARRANCAR.command`.
+
+> **Nota:** se preferires, no site do GitHub também dá — botão verde **Code** →
+> **Download ZIP**. Mas confirma que estás no branch
+> `claude/imoauto-robot-subagents-41gdvr`, senão descarregas a versão sem o robô.
+
+---
+
 ## 1. Arrancar
 
-**No Windows:** duplo clique em `ARRANCAR.bat`
-**No Mac ou Linux:** duplo clique em `ARRANCAR.command`
+Abre a pasta `ImoAuto` e faz duplo clique em:
+
+- **Windows:** `ARRANCAR.bat`
+- **Mac ou Linux:** `ARRANCAR.command`
 
 Abre-se uma janela preta (é normal, ignora-a — não a feches) e a seguir abre-se
 o painel no teu browser.
 
 Se for a primeira vez, ele instala sozinho o que falta. Pode demorar um minuto.
+
+**Se disser que falta o Python:** é o motor que faz correr o programa. A janela
+dá-te o link — instalas em dois minutos, é gratuito. No Windows, atenção a uma
+caixa no instalador que diz *"Add python.exe to PATH"* — marca-a antes de
+carregar em Install, senão não funciona.
 
 ![O painel](docs/imagens/painel.png)
 
@@ -126,6 +156,10 @@ Não. Só cria publicações novas.
 
 **Enganei-me a configurar.**
 Volta a Configuração, corrige e guarda outra vez. Não parte nada.
+
+**Onde está a pasta outra vez?**
+Onde a puseste no passo 0 — se seguiste o guia, no Ambiente de trabalho, com o
+nome `ImoAuto`.
 
 **A janela preta fechou-se e o painel deixou de funcionar.**
 Normal — a janela preta é o programa. Abre outra vez pelo `ARRANCAR`.

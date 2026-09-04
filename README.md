@@ -209,8 +209,10 @@ central com seis subagentes especializados (aquisição, vendas, copy, SEO, desi
 e publicação) que encontra anúncios, conversa com os proprietários no WhatsApp,
 cria as publicações no site, gera os flyers e publica no Facebook e Instagram.
 
-**Não és da área?** Duplo clique em `ARRANCAR.bat` (Windows) ou
-`ARRANCAR.command` (Mac/Linux) e o painel abre-se no browser.
+**Não és da área?**
+[Descarrega o ZIP](https://github.com/YAxbairro/claude/archive/refs/heads/claude/imoauto-robot-subagents-41gdvr.zip),
+extrai a pasta, e duplo clique em `ARRANCAR.bat` (Windows) ou
+`ARRANCAR.command` (Mac/Linux). O painel abre-se no browser.
 📖 **[Guia passo a passo: GUIA.md](GUIA.md)**
 
 ![Painel](docs/imagens/painel.png)
