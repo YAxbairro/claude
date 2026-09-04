@@ -199,3 +199,22 @@ MIT License - sinta-se livre para usar e modificar
 
 **Versão**: 1.0.0
 **Última atualização**: 2026-03-07
+
+---
+
+## 🤖 Robô ImoAuto
+
+Este repositório inclui também o **robô de operações do ImoAuto** — um agente
+central com seis subagentes especializados (aquisição, vendas, copy, SEO, design
+e publicação) que encontra anúncios, conversa com os proprietários no WhatsApp,
+cria as publicações no site, gera os flyers e publica no Facebook e Instagram.
+
+```bash
+python -m imoauto.cli diagnostico   # o que falta configurar
+python -m imoauto.cli bot           # consola no Telegram
+python test_imoauto.py              # 13 testes, sem chaves
+```
+
+Arranca em modo simulação: faz tudo, mas nada sai para o mundo até tu mandares.
+
+📖 **[Documentação completa: docs/IMOAUTO.md](docs/IMOAUTO.md)**

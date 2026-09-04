@@ -46,3 +46,8 @@ temp/
 # OS
 .DS_Store
 Thumbs.db
+
+# Robô ImoAuto
+media/
+*.db
+.env
