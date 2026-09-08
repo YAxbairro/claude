@@ -127,6 +127,26 @@ imóveis e o **Stand.cv** para viaturas, por ilha, e uma pesquisa web. Podes acr
 os teus: faz uma pesquisa num portal com os filtros que quiseres, copia o
 endereço da barra do browser, e cola lá.
 
+### Não tens tempo para andar nos grupos?
+
+Três saídas, e a primeira não te dá trabalho nenhum:
+
+**Avisos por email.** Ligas as notificações do grupo em "Todas as
+publicações" com email. O Facebook manda-te cada post novo, e o robô lê a
+tua caixa de correio sozinho. Ele lê o *teu email*, não o Facebook — sem
+risco nenhum. Põe o teu email e uma palavra-passe de aplicação na
+Configuração. **Faz o teste com um grupo só primeiro:** liga, espera um dia,
+e vê se o aviso traz o texto do anúncio ou só "o Djim publicou".
+
+**Alguém recolhe por ti.** Uma pessoa algumas horas por semana a percorrer
+os grupos e a mandar capturas ao bot. Pões o ID de Telegram dela na
+Configuração e ela passa a poder enviar — mas não vê os teus leads, nem os
+contactos, nem aprova nada.
+
+**Ou vira o jogo:** publica tu nos grupos a dizer que o ImoAuto publica de
+graça. Quem responder inicia a conversa, e aí o robô trata de tudo sozinho,
+sem limitação nenhuma. É o único que cresce sem trabalho por anúncio.
+
 ### Páginas do Facebook
 
 Também podes pôr páginas do Facebook nessa lista — colas o endereço e ele

@@ -113,7 +113,7 @@ def tratar_callback(robo, callback):
     telegram.enviar(resposta, chat_id=callback["message"]["chat"]["id"])
 
 
-def tratar_foto(robo, mensagem, chat_id):
+def tratar_foto(robo, mensagem, chat_id, agradecer=False):
     """
     Uma captura de ecrã de um anúncio. É o caminho mais rápido para os
     grupos de Facebook: dois toques no telemóvel e está analisado.
@@ -130,6 +130,11 @@ def tratar_foto(robo, mensagem, chat_id):
     legenda = (mensagem.get("caption") or "").strip()
     rede = "facebook" if "facebook" in legenda.lower() else "captura"
     lead = robo.nova_captura(destino, rede)
+    if agradecer:
+        # Quem ajuda a recolher recebe só a confirmação. A ficha completa,
+        # com o contacto da pessoa, vai para o dono.
+        return "Recebido, obrigado." if lead["nota"] >= 40 else \
+            "Recebido — esse não me parece dar para nada, mas obrigado."
     if lead["nota"] < 40:
         return (f"Li a imagem, mas dou-lhe só {lead['nota']}/100: "
                 f"_{lead['motivo']}_")
@@ -157,13 +162,16 @@ def correr():
                 chat_id = mensagem.get("chat", {}).get("id")
                 if not chat_id:
                     continue
-                if str(chat_id) != str(config.TELEGRAM_CHAT_ID):
+                dono = str(chat_id) == str(config.TELEGRAM_CHAT_ID)
+                ajudante = str(chat_id) in config.TELEGRAM_AJUDANTES
+                if not (dono or ajudante):
                     store.registar("bot", "chat_nao_autorizado", str(chat_id))
                     continue
 
                 if mensagem.get("photo"):
                     try:
-                        resposta = tratar_foto(robo, mensagem, chat_id)
+                        resposta = tratar_foto(robo, mensagem, chat_id,
+                                               agradecer=not dono)
                     except Exception as erro:
                         store.registar("bot", "erro_foto", str(erro))
                         resposta = f"Não consegui ler a imagem: {erro}"
@@ -175,6 +183,11 @@ def correr():
                     continue
 
                 if texto.startswith("/"):
+                    if not dono:
+                        telegram.enviar(
+                            "Aqui só recebo anúncios: manda o texto ou uma "
+                            "captura de ecrã.", chat_id=chat_id)
+                        continue
                     telegram.enviar(tratar_comando(robo, texto, chat_id),
                                     chat_id=chat_id)
                     continue
@@ -187,6 +200,8 @@ def correr():
 
                 try:
                     resposta = analisar_colado(robo, texto)
+                    if not dono:
+                        resposta = "Recebido, obrigado."
                 except Exception as erro:
                     resposta = f"Não consegui analisar: {erro}"
                 if resposta:

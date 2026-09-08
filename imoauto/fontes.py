@@ -6,6 +6,7 @@ Duas maneiras de procurar, ambas sobre conteúdo público:
   PaginaListagem  extrai os anúncios de uma página de resultados
                   (NhaKaza para imóveis, Stand.cv para viaturas)
   PaginaFacebook  lê os posts de uma página do Facebook, pela API oficial
+  CaixaDeEmail    lê os avisos de grupos que o Facebook te manda por email
   BuscaWeb        pesquisa (tipo Google) por uma frase, em todo o lado
 
 Ambas assentam no Firecrawl, que é um serviço de pesquisa e leitura de páginas
@@ -222,6 +223,107 @@ class PaginaFacebook(Fonte):
         return anuncios
 
 
+class CaixaDeEmail(Fonte):
+    """
+    Lê os avisos que o Facebook te manda por email.
+
+    Quando ligas as notificações de um grupo ("Todas as publicações" +
+    email), o Facebook envia-te uma mensagem por cada post novo. Essas
+    mensagens chegam à TUA caixa de correio, e ler o teu próprio email não
+    depende de autorização nenhuma da Meta nem toca no Facebook.
+
+    É o único caminho conhecido em que o robô vê os grupos sozinho. Tem uma
+    condição prática: o Facebook tem vindo a encurtar o conteúdo destes
+    avisos ao longo dos anos, e o que vem em cada um varia. Vale a pena
+    ligar num grupo, esperar um dia e ver o que chega antes de contar com
+    isto para os cinco.
+
+    Precisa de EMAIL_SERVIDOR, EMAIL_UTILIZADOR e EMAIL_SENHA. No Gmail a
+    senha é uma "palavra-passe de aplicação", não a tua senha normal.
+    """
+
+    tipo = "email"
+    REMETENTES = ["facebookmail.com", "facebook.com"]
+
+    def procurar(self):
+        import email
+        import imaplib
+        from email.header import decode_header, make_header
+        from imoauto import config
+
+        if not (config.EMAIL_SERVIDOR and config.EMAIL_UTILIZADOR
+                and config.EMAIL_SENHA):
+            raise RuntimeError(
+                "Falta a configuração de email (servidor, utilizador e "
+                "palavra-passe de aplicação).")
+
+        caixa = imaplib.IMAP4_SSL(config.EMAIL_SERVIDOR)
+        try:
+            caixa.login(config.EMAIL_UTILIZADOR, config.EMAIL_SENHA)
+            caixa.select(self.alvo or config.EMAIL_PASTA)
+            _, resultado = caixa.search(None, 'UNSEEN FROM "facebookmail.com"')
+            identificadores = resultado[0].split()[-40:]
+
+            anuncios = []
+            for identificador in identificadores:
+                _, dados = caixa.fetch(identificador, "(RFC822)")
+                mensagem = email.message_from_bytes(dados[0][1])
+                assunto = str(make_header(decode_header(
+                    mensagem.get("Subject", ""))))
+                corpo = _texto_do_email(mensagem)
+                if len(corpo.strip()) < 40:
+                    continue
+                anuncios.append({
+                    "titulo": assunto[:120],
+                    "preco": "", "localidade": "",
+                    "data": mensagem.get("Date", ""),
+                    "url": f"email://{identificador.decode()}",
+                    "resumo": corpo[:4000],
+                    "fonte": self.nome,
+                })
+            return anuncios
+        finally:
+            try:
+                caixa.logout()
+            except Exception:
+                pass
+
+
+def _texto_do_email(mensagem):
+    """Tira o texto de um email, preferindo a parte simples à HTML."""
+    if not mensagem.is_multipart():
+        texto = _descodificar(mensagem)
+        # Os avisos do Facebook vêm muitas vezes só em HTML, sem parte
+        # simples. Sem isto, o subagente recebia as etiquetas todas.
+        if mensagem.get_content_type() == "text/html":
+            return _limpar_html(texto)
+        return texto
+
+    simples, html = "", ""
+    for parte in mensagem.walk():
+        tipo = parte.get_content_type()
+        if tipo == "text/plain" and not simples:
+            simples = _descodificar(parte)
+        elif tipo == "text/html" and not html:
+            html = _descodificar(parte)
+    return simples or _limpar_html(html)
+
+
+def _limpar_html(html):
+    import re as _re
+    sem_cabecalho = _re.sub(r"(?is)<(script|style)[^>]*>.*?</\1>", " ", html)
+    sem_etiquetas = _re.sub(r"<[^>]+>", " ", sem_cabecalho)
+    return _re.sub(r"\s{2,}", " ", sem_etiquetas).strip()
+
+
+def _descodificar(parte):
+    try:
+        carga = parte.get_payload(decode=True) or b""
+        return carga.decode(parte.get_content_charset() or "utf-8", "replace")
+    except Exception:
+        return ""
+
+
 def ler_anuncio(url):
     """Abre um anúncio concreto e devolve o texto, para o qualificar bem."""
     dados = _pedir("scrape", {
@@ -273,6 +375,10 @@ FONTES_INICIAIS = [
     {"tipo": "listagem", "nome": "CVX · carros e motas", "ativa": False,
      "alvo": "https://cvx.cv/carros-e-motas/"},
 
+    # --- Grupos, pela caixa de correio ---------------------------------
+    {"tipo": "email", "nome": "Avisos de grupos por email", "ativa": False,
+     "alvo": "INBOX"},
+
     # --- Páginas do Facebook -------------------------------------------
     # Vazio de propósito: acrescentas as tuas no painel. Cada uma precisa de
     # acesso — ou és administrador dela, ou tens a Page Public Content
@@ -299,7 +405,7 @@ PORTAIS_DE_AGENCIAS = [
 
 def construir(definicao):
     tipos = {"listagem": PaginaListagem, "facebook": PaginaFacebook,
-             "busca": BuscaWeb}
+             "email": CaixaDeEmail, "busca": BuscaWeb}
     classe = tipos.get(definicao.get("tipo"), BuscaWeb)
     extra = {}
     if classe is BuscaWeb:

@@ -35,7 +35,7 @@ passam por lá. Os testes provam-no.
 | Módulo | O que faz |
 |---|---|
 | `orquestrador.py` | O robô central. Recebe eventos, escolhe o subagente, executa. |
-| `fontes.py` | Onde procurar: portais, páginas do Facebook e pesquisa web. |
+| `fontes.py` | Onde procurar: portais, páginas do Facebook, caixa de correio e pesquisa web. |
 | `agenda.py` | A ronda à hora marcada, em segundo plano. |
 | `compliance.py` | O guarda. Decide se um envio é permitido. |
 | `store.py` | SQLite: leads, conversas, listagens, publicações, registo. |

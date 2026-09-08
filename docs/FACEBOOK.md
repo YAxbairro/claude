@@ -27,6 +27,19 @@ Como fazer:
 4. Colas o token no ImoAuto (Configuração → META_PAGE_TOKEN)
 5. Acrescentas o endereço da página no Vigia
 
+### Grupos: a porta está fechada, e é definitivo
+
+Antes de perderes tempo a procurar: **a API de Grupos do Facebook acabou.**
+A Meta anunciou o fim em janeiro de 2024 e removeu-a de todas as versões a
+22 de abril de 2024. E foi mais longe — deixou de ser possível a um
+administrador de grupo instalar aplicações no grupo, mesmo sendo ele o dono.
+
+Ou seja, ao contrário das páginas, nos grupos **não há caminho nenhum**, nem
+sendo administrador. Nenhuma ferramenta lê grupos legitimamente hoje. Quem
+diz que o faz, está a automatizar contas — com o risco que isso traz.
+
+O que sobra para os grupos são os três caminhos em cima.
+
 ### Caminho 2 — páginas públicas de terceiros (exige aprovação)
 
 Para ler páginas que não administras é preciso a funcionalidade **Page
@@ -68,6 +81,59 @@ para poupar dois segundos por anúncio.
 
 Não é prudência exagerada: é que o custo do pior caso é desproporcionado
 face ao que se ganha.
+
+## "Não tenho tempo para andar nos grupos"
+
+Justo — e é a objeção certa. Aqui estão os caminhos em que o trabalho não é
+teu, por ordem de custo.
+
+### 1. Avisos por email (o bot vê os grupos sozinho)
+
+Ligas as notificações do grupo em "Todas as publicações" **com email**. O
+Facebook passa a mandar-te uma mensagem por cada post novo. O robô lê a tua
+caixa de correio e trata cada aviso como um anúncio.
+
+Repara no que isto é: o robô lê o **teu email**, não o Facebook. Não há
+termos a violar, não há conta em risco, não há sessão a iniciar. E funciona
+sem tu abrires nada.
+
+Está construído (`fontes.CaixaDeEmail`). Precisa do teu email e de uma
+palavra-passe de aplicação (no Gmail: Conta Google → Segurança →
+Palavras-passe de aplicações — não é a tua senha normal).
+
+**O que ainda não sabemos, e convém saber antes de contar com isto:** o
+Facebook tem vindo a encurtar o conteúdo destes avisos ao longo dos anos, e
+o que vem em cada um varia. Fomos ver a tua caixa de correio e não havia lá
+nenhum aviso de grupo — só um do Meta Pay —, o que quer dizer que as
+notificações estão desligadas. Liga num grupo só, espera um dia, e vê o que
+chega. Se vier o texto do post, resolveu-se. Se vier só "o Djim publicou no
+grupo", serve para te avisar mas não para analisar.
+
+É um teste de dez minutos e vale a pena fazê-lo antes de tudo o resto.
+
+### 2. Alguém recolhe por ti
+
+Uma pessoa em part-time, algumas horas por semana, a percorrer os grupos e a
+reencaminhar capturas ao bot. Custa pouco em Cabo Verde e funciona hoje.
+
+O robô faz o resto todo: analisa, pontua, escreve a mensagem, negoceia
+depois, cria a publicação, faz o flyer, publica. A parte humana são vinte
+minutos de dedo no ecrã — precisamente a parte que nenhuma API permite.
+
+Está construído: pões o ID de Telegram dela em `TELEGRAM_AJUDANTES` e ela
+passa a poder mandar anúncios. **Não vê mais nada** — nem leads, nem
+contactos, nem aprovações. Recebe só "Recebido, obrigado."
+
+### 3. Virar o problema ao contrário
+
+Em vez de ires atrás dos anúncios, faz com que venham ter contigo: publica
+tu nos grupos ("publica o teu imóvel ou carro no ImoAuto, de graça"). Quem
+responder está a iniciar a conversa — e a partir daí o robô trata de tudo
+sozinho, sem restrição nenhuma, porque responder a quem te contactou é
+exatamente aquilo para que ele foi feito.
+
+É o único caminho que escala sem trabalho humano por anúncio. Os outros dois
+dão-te volume já; este constrói-te um canal.
 
 ## O que resolve o mesmo problema
 

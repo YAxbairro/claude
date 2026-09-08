@@ -28,6 +28,10 @@ MODELO_RAPIDO = _env("IMOAUTO_MODELO_RAPIDO", "claude-haiku-4-5-20251001")
 # --- Telegram (relay interno contigo) -----------------------------------
 TELEGRAM_TOKEN = _env("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = _env("TELEGRAM_CHAT_ID")  # o teu chat pessoal
+# Quem mais pode mandar anúncios ao robô (um ajudante a percorrer grupos).
+# Só podem enviar anúncios: comandos e aprovações continuam a ser só teus.
+TELEGRAM_AJUDANTES = [c.strip() for c in
+                      _env("TELEGRAM_AJUDANTES").split(",") if c.strip()]
 
 # --- WhatsApp Cloud API (Coexistence no número Business) ----------------
 WHATSAPP_TOKEN = _env("WHATSAPP_TOKEN")
@@ -47,6 +51,12 @@ SITE_API_TOKEN = _env("IMOAUTO_API_TOKEN")
 # --- Geração de imagem (flyers) -----------------------------------------
 OPENAI_API_KEY = _env("OPENAI_API_KEY")
 MODELO_IMAGEM = _env("IMOAUTO_MODELO_IMAGEM", "gpt-image-1")
+
+# --- Caixa de correio (avisos de grupos do Facebook) ---------------------
+EMAIL_SERVIDOR = _env("EMAIL_SERVIDOR", "imap.gmail.com")
+EMAIL_UTILIZADOR = _env("EMAIL_UTILIZADOR")
+EMAIL_SENHA = _env("EMAIL_SENHA")          # palavra-passe de aplicação
+EMAIL_PASTA = _env("EMAIL_PASTA", "INBOX")
 
 # --- Operação ------------------------------------------------------------
 BASE_DADOS = _env("IMOAUTO_DB", "./imoauto.db")
@@ -104,6 +114,14 @@ CAMPOS_EDITAVEIS = [
      "Fala com o @BotFather no Telegram e cria um bot. Ele dá-te isto."),
     ("TELEGRAM_CHAT_ID", "O teu ID de Telegram", "essencial",
      "Fala com o @userinfobot no Telegram. Ele diz-te o número."),
+    ("TELEGRAM_AJUDANTES", "IDs de quem te ajuda a recolher", "opcional",
+     "Separados por vírgulas. Estas pessoas podem mandar anúncios ao robô, "
+     "mas não veem nem aprovam nada."),
+    ("EMAIL_UTILIZADOR", "O teu email", "pesquisa",
+     "Para o robô ler os avisos de grupos que o Facebook te manda."),
+    ("EMAIL_SENHA", "Palavra-passe de aplicação do email", "pesquisa",
+     "No Gmail: Conta Google > Segurança > Palavras-passe de aplicações. "
+     "Não é a tua senha normal."),
     ("FIRECRAWL_API_KEY", "Chave de pesquisa (Firecrawl)", "pesquisa",
      "É o que permite ao Vigia varrer os anúncios. Obtém em firecrawl.dev"),
     ("WHATSAPP_TOKEN", "Token do WhatsApp", "opcional",
@@ -158,11 +176,12 @@ def escrever_env(novos_valores):
 def recarregar():
     """Volta a ler o .env e atualiza os valores em memória."""
     global ANTHROPIC_API_KEY, MODELO_PRINCIPAL, MODELO_RAPIDO
-    global TELEGRAM_TOKEN, TELEGRAM_CHAT_ID
+    global TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, TELEGRAM_AJUDANTES
     global WHATSAPP_TOKEN, WHATSAPP_PHONE_ID, WHATSAPP_VERIFY_TOKEN
     global META_TOKEN, FACEBOOK_PAGE_ID, INSTAGRAM_USER_ID, GRAPH_VERSION
     global SITE_BASE_URL, SITE_API_TOKEN
     global OPENAI_API_KEY, MODELO_IMAGEM
+    global EMAIL_SERVIDOR, EMAIL_UTILIZADOR, EMAIL_SENHA, EMAIL_PASTA
     global BASE_DADOS, PASTA_MEDIA, MARCA, IDIOMA
     global DRY_RUN, APROVACAO_MANUAL_POSTS
 
@@ -173,6 +192,8 @@ def recarregar():
     MODELO_RAPIDO = _env("IMOAUTO_MODELO_RAPIDO", "claude-haiku-4-5-20251001")
     TELEGRAM_TOKEN = _env("TELEGRAM_BOT_TOKEN")
     TELEGRAM_CHAT_ID = _env("TELEGRAM_CHAT_ID")
+    TELEGRAM_AJUDANTES = [c.strip() for c in
+                          _env("TELEGRAM_AJUDANTES").split(",") if c.strip()]
     WHATSAPP_TOKEN = _env("WHATSAPP_TOKEN")
     WHATSAPP_PHONE_ID = _env("WHATSAPP_PHONE_NUMBER_ID")
     WHATSAPP_VERIFY_TOKEN = _env("WHATSAPP_VERIFY_TOKEN", "imoauto")
@@ -189,6 +210,10 @@ def recarregar():
     INDICATIVO = _env("IMOAUTO_INDICATIVO", "238")
     DIGITOS_LOCAIS = int(_env("IMOAUTO_DIGITOS_LOCAIS", "7"))
     MOEDA = _env("IMOAUTO_MOEDA", "CVE")
+    EMAIL_SERVIDOR = _env("EMAIL_SERVIDOR", "imap.gmail.com")
+    EMAIL_UTILIZADOR = _env("EMAIL_UTILIZADOR")
+    EMAIL_SENHA = _env("EMAIL_SENHA")
+    EMAIL_PASTA = _env("EMAIL_PASTA", "INBOX")
     BASE_DADOS = _env("IMOAUTO_DB", "./imoauto.db")
     PASTA_MEDIA = _env("IMOAUTO_MEDIA", "./media")
     MARCA = _env("IMOAUTO_MARCA", "ImoAuto")

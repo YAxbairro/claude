@@ -545,6 +545,98 @@ class TestCapturaDeEcra(BaseTeste):
         self.assertTrue(bloco["source"]["data"])
 
 
+class TestCaixaDeEmail(BaseTeste):
+    """
+    Ler os avisos de grupos que o Facebook manda por email.
+
+    É o único caminho em que o robô vê os grupos sozinho: lê a caixa de
+    correio do dono, não o Facebook.
+    """
+
+    def test_sem_configuracao_diz_o_que_falta(self):
+        from imoauto import config, fontes
+        config.EMAIL_UTILIZADOR = ""
+        config.EMAIL_SENHA = ""
+        fonte = fontes.construir({"tipo": "email", "nome": "Avisos",
+                                  "alvo": "INBOX"})
+        with self.assertRaises(RuntimeError) as erro:
+            fonte.procurar()
+        self.assertIn("email", str(erro.exception).lower())
+
+    def test_texto_simples_do_email(self):
+        import email as modulo_email
+        from imoauto import fontes
+        mensagem = modulo_email.message_from_string(
+            "Subject: Djim publicou no grupo\n"
+            "Content-Type: text/plain; charset=utf-8\n\n"
+            "Ta vende Corolla 2014, 1.750.000$. Contacto 991 47 23"
+        )
+        texto = fontes._texto_do_email(mensagem)
+        self.assertIn("Corolla", texto)
+        self.assertIn("991 47 23", texto)
+
+    def test_email_em_html_perde_as_etiquetas(self):
+        import email as modulo_email
+        from imoauto import fontes
+        mensagem = modulo_email.message_from_string(
+            "Subject: aviso\n"
+            "Content-Type: text/html; charset=utf-8\n\n"
+            "<div><p>Ta vende <b>Corolla 2014</b></p><p>1.750.000$</p></div>"
+        )
+        texto = fontes._texto_do_email(mensagem)
+        self.assertIn("Corolla 2014", texto)
+        self.assertNotIn("<b>", texto)
+
+
+class TestAjudantes(BaseTeste):
+    """
+    Alguém pode recolher por ti sem ver o teu negócio.
+
+    Manda anúncios; não vê leads, não vê contactos, não aprova publicações.
+    """
+
+    def test_ajudante_recebe_so_confirmacao(self):
+        from imoauto import config
+        config.TELEGRAM_AJUDANTES = ["555"]
+        robo = Orquestrador()
+        robo.aquisicao.pensar = responder_fixo({
+            "tipo": "viatura", "titulo": "Corolla 2014", "preco": "1.750.000$",
+            "localidade": "Praia", "telefone": "+238 991 47 23",
+            "particular": True, "nota": 86, "motivo": "particular",
+            "abordagem_sugerida": "Bon dia.",
+        })
+        captura = os.path.join(tempfile.mkdtemp(), "p.png")
+        with open(captura, "wb") as f:
+            f.write(b"\x89PNG\r\n\x1a\n")
+
+        from imoauto import bot
+        from imoauto.clients import telegram
+        telegram.descarregar_ficheiro = lambda file_id, destino: destino
+        resposta = bot.tratar_foto(
+            robo, {"photo": [{"file_id": "abc", "file_size": 9}]},
+            chat_id="555", agradecer=True,
+        )
+        self.assertIn("obrigado", resposta.lower())
+        self.assertNotIn("991", resposta)
+        self.assertNotIn("86", resposta)
+
+    def test_lead_do_ajudante_chega_na_mesma_ao_dono(self):
+        from imoauto import config
+        config.TELEGRAM_AJUDANTES = ["555"]
+        robo = Orquestrador()
+        robo.aquisicao.pensar = responder_fixo({
+            "tipo": "viatura", "titulo": "Corolla 2014", "preco": "1.750.000$",
+            "localidade": "Praia", "telefone": "+238 991 47 23",
+            "particular": True, "nota": 86, "motivo": "particular",
+            "abordagem_sugerida": "Bon dia.",
+        })
+        captura = os.path.join(tempfile.mkdtemp(), "q.png")
+        with open(captura, "wb") as f:
+            f.write(b"\x89PNG\r\n\x1a\n")
+        robo.nova_captura(captura, rede="facebook")
+        self.assertEqual(len(store.listar_leads(store.ENVIADO)), 1)
+
+
 class TestUtilitarios(unittest.TestCase):
 
     def test_json_com_ruido_a_volta(self):
