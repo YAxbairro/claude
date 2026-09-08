@@ -171,6 +171,16 @@ O Vigia corre às horas que marcares no painel (por omissão 9h). Em cada ronda:
 4. qualifica cada um e descarta abaixo de 55/100
 5. o que sobra chega-te ao Telegram e ao painel, com a mensagem já escrita
 
+### Porque não há fontes por omissão
+
+O NhaKaza (imóveis) e o Stand.cv (viaturas) foram testados e funcionam. Mas
+são precisamente o que o ImoAuto quer substituir. Ir buscar leads ao quintal
+deles não diferencia nada — segue-lhes o rasto.
+
+Ficam documentados em `fontes.py` e acrescentam-se no painel em dois cliques,
+se um dia fizer sentido. Por omissão, o robô não procura em lado nenhum: os
+anúncios entram por onde o dono quiser.
+
 O que os testes com dados reais ensinaram, e está no código:
 
 - **NhaKaza** é o portal onde os particulares de Cabo Verde publicam de graça,

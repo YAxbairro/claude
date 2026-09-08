@@ -340,64 +340,30 @@ def ler_anuncio(url):
 # que interessa. As locations_id são as ilhas.
 NHAKAZA = "https://nhakaza.cv/?view_page={pagina}"
 
-# NhaKaza (imóveis) e Stand.cv (viaturas) são a mesma plataforma, feita cá:
-# particulares publicam de graça e os anúncios vêm marcados "Particular" ou
-# com o nome da agência/stand. É o sinal que interessa. As locations_id são
-# as ilhas, iguais nos dois sites.
-ILHAS = {"São Vicente": 251, "São Nicolau": 252, "Sal": 253, "Boa Vista": 254,
-         "Maio": 256, "Santiago": 257, "Fogo": 258, "Brava": 259}
+# Nenhuma fonte por omissão, e é deliberado.
+#
+# O NhaKaza e o Stand.cv foram testados e funcionam tecnicamente, mas são
+# precisamente o que o ImoAuto quer substituir. Ir buscar leads ao quintal
+# deles não é diferenciação — é seguir-lhes o rasto. Quem decide se vale a
+# pena é o dono do negócio, não o código, por isso ficam aqui apenas
+# documentados e desligados.
+#
+#   NhaKaza (imóveis):
+#     https://nhakaza.cv/Comprar-Casa-Apartamento-Lojas-Escritorio/?view_page=buy&tp_to=2
+#   Stand.cv (viaturas):
+#     https://stand.cv/Comprar-Carro-Pecas-Comerciais-Pesados/?view_page=buy&tp_to=2
+#
+# Acrescentam-se no painel em dois cliques, se um dia fizer sentido.
 
-FONTES_INICIAIS = [
-    # --- Imóveis -------------------------------------------------------
-    {"tipo": "listagem", "nome": "NhaKaza · imóveis à venda", "ativa": True,
-     "alvo": "https://nhakaza.cv/Comprar-Casa-Apartamento-Lojas-Escritorio/"
-             "?view_page=buy&tp_to=2"},
-    {"tipo": "listagem", "nome": "NhaKaza · Santiago", "ativa": True,
-     "alvo": "https://nhakaza.cv/Arrendar-Alugar-Comprar-Vender-Apartamentos-"
-             "Moradias-Santiago/?view_page=rent&locations_id=257"},
-    {"tipo": "listagem", "nome": "NhaKaza · São Vicente", "ativa": True,
-     "alvo": "https://nhakaza.cv/Arrendar-Alugar-Comprar-Vender-Apartamentos-"
-             "Moradias-Sao-Vicente/?view_page=rent&locations_id=251"},
-    {"tipo": "listagem", "nome": "NhaKaza · Sal", "ativa": False,
-     "alvo": "https://nhakaza.cv/Arrendar-Alugar-Comprar-Vender-Apartamentos-"
-             "Moradias-Sal/?view_page=rent&locations_id=253"},
+FONTES_INICIAIS = []
 
-    # --- Viaturas ------------------------------------------------------
-    {"tipo": "listagem", "nome": "Stand.cv · viaturas à venda", "ativa": True,
-     "alvo": "https://stand.cv/Comprar-Carro-Pecas-Comerciais-Pesados/"
-             "?view_page=buy&tp_to=2"},
-    {"tipo": "listagem", "nome": "Stand.cv · Santiago", "ativa": True,
-     "alvo": "https://stand.cv/Alugar-Comprar-Vender-Carros-Viaturas-Santiago/"
-             "?view_page=rent&locations_id=257"},
-    {"tipo": "listagem", "nome": "Stand.cv · São Vicente", "ativa": True,
-     "alvo": "https://stand.cv/Alugar-Comprar-Vender-Carros-Viaturas-Sao-"
-             "Vicente/?view_page=rent&locations_id=251"},
-    {"tipo": "listagem", "nome": "CVX · carros e motas", "ativa": False,
-     "alvo": "https://cvx.cv/carros-e-motas/"},
-
-    # --- Grupos, pela caixa de correio ---------------------------------
-    {"tipo": "email", "nome": "Avisos de grupos por email", "ativa": False,
-     "alvo": "INBOX"},
-
-    # --- Páginas do Facebook -------------------------------------------
-    # Vazio de propósito: acrescentas as tuas no painel. Cada uma precisa de
-    # acesso — ou és administrador dela, ou tens a Page Public Content
-    # Access aprovada pela Meta. Ver docs/FACEBOOK.md.
-
-    # --- Web ------------------------------------------------------------
-    {"tipo": "busca", "nome": "Web · vende-se particular Cabo Verde", "ativa": True,
-     "alvo": "vende-se casa OR apartamento OR terreno OR carro particular "
-             "Cabo Verde contacto WhatsApp -imobiliaria -stand -remax",
-     "local": "Cabo Verde"},
-]
-
-# Sites que são de agências e stands: os imóveis e carros deles já estão
-# com alguém. Ficam documentados para não voltarem a ser tentados.
+# Sites de agências, stands e portais concorrentes. Não se procura aqui.
 PORTAIS_DE_AGENCIAS = [
-    # imóveis
+    # portais concorrentes
+    "nhakaza.cv", "stand.cv", "cvx.cv", "caboverdecarros.com",
+    # imobiliárias
     "imor.cv", "sigma.cv", "ayodele.cv", "remax.cv", "kaps-habitat.com",
-    "properstar.pt",
-    # viaturas
+    # stands
     "caetano.cv", "freexauto.cv", "duarteauto.cv", "multimarcasauto.com",
     "beforward.jp",
 ]
