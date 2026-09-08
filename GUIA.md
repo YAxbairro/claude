@@ -115,14 +115,29 @@ já com nota e com a mensagem escrita.
 
 Podes também carregar em **Fazer a ronda agora** para não esperares.
 
-Os sítios onde ele procura estão nessa mesma página — o NhaKaza por ilha
-(Santiago, São Vicente, Sal, Boa Vista) e uma pesquisa web. Podes acrescentar
+Os sítios onde ele procura estão nessa mesma página — o **NhaKaza** para
+imóveis e o **Stand.cv** para viaturas, por ilha, e uma pesquisa web. Podes acrescentar
 os teus: faz uma pesquisa num portal com os filtros que quiseres, copia o
 endereço da barra do browser, e cola lá.
 
+### Páginas do Facebook
+
+Também podes pôr páginas do Facebook nessa lista — colas o endereço e ele
+reconhece-a sozinho. Mas há uma condição que não depende de nós: o Facebook
+só deixa ler os posts de uma página se **fores administrador dela**, ou se a
+Meta aprovar uma autorização especial (que demora semanas e não é garantida).
+
+O caminho prático é o primeiro: falas com quem gere a página, ele dá-te
+acesso de administrador, e a partir daí ela entra na ronda como qualquer
+outro sítio. E tem uma vantagem — quem te deu acesso já te conhece.
+
+Está tudo explicado em [docs/FACEBOOK.md](docs/FACEBOOK.md), incluindo o que
+não fazemos (automatizar a tua conta pessoal) e porquê: é a conta do ImoAuto
+que se arrisca a perder.
+
 Aviso honesto: os portais cabo-verdianos têm pouca coisa. No dia em que
 testámos, a página de vendas do NhaKaza tinha **um** anúncio. A ronda apanha
-o que houver, mas não esperes muito dela — o volume vem do copiar-colar.
+o que houver, mas o volume vem mesmo do copiar-colar.
 
 Para isto funcionar precisas da chave de pesquisa (FIRECRAWL_API_KEY), que se
 põe na Configuração.

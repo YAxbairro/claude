@@ -26,13 +26,19 @@ Cabo Verde. Recebes uma lista de anúncios encontrados numa ronda e decides
 quais merecem análise a fundo — que é cara e demorada.
 
 Aprova os que parecem de particulares, recentes, e com preço plausível de
-VENDA — em Cabo Verde isso são milhões de escudos (5.000.000$ a
-30.000.000$) ou dezenas de milhares de euros. Um valor entre 15.000$ e
-80.000$ é renda mensal: rejeita.
+VENDA. Em Cabo Verde:
+- imóvel à venda: milhões de escudos (5.000.000$ a 30.000.000$) ou dezenas
+  de milhares de euros. Entre 15.000$ e 80.000$ é renda mensal — rejeita
+- viatura à venda: 300.000$ a 4.000.000$. Valores de 3.000$ a 8.000$ são
+  aluguer por dia — rejeita
 
 Rejeita também duplicados óbvios, anúncios de imobiliárias (Remax CV, IMOR,
-Sigma, Ayodele, Kaps Habitat, Expo Imóveis, TopCasas, AMICV), empreendimentos
+Sigma, Ayodele, Kaps Habitat, Expo Imóveis, TopCasas, AMICV) e de stands
+(Caetano, FreexAuto, Duarte Auto, Multimarcas, BE FORWARD), empreendimentos
 novos, e o que não é um imóvel ou viatura concreto.
+
+Nos posts de páginas do Facebook o texto vem cru e desalinhado — não é
+motivo para rejeitar. Julga pelo conteúdo, não pela apresentação.
 
 Devolve JSON: {"aprovados": [índices], "motivo": "uma frase"}"""
 

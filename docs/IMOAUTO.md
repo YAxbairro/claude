@@ -4,9 +4,9 @@ Robô de operações com subagentes especializados: encontra anúncios, conduz a
 conversa com o proprietário, cria a publicação no site, gera o flyer e publica
 nas redes — com um humano no ponto exato onde a lei o exige.
 
-Feito para **Cabo Verde**: números de +238 com 7 dígitos, preços em escudos e
-em euros (a diáspora anuncia em euros), zonas da Praia, Mindelo, Sal e Boa
-Vista, e os portais que existem cá.
+Feito para **Cabo Verde**, para **imóveis e viaturas**: números de +238 com
+7 dígitos, preços em escudos e em euros (a diáspora anuncia em euros), zonas
+da Praia, Mindelo, Sal e Boa Vista, e os portais que existem cá.
 
 ## O princípio de desenho
 
@@ -35,7 +35,7 @@ passam por lá. Os testes provam-no.
 | Módulo | O que faz |
 |---|---|
 | `orquestrador.py` | O robô central. Recebe eventos, escolhe o subagente, executa. |
-| `fontes.py` | Onde procurar: páginas de listagens e pesquisa web. |
+| `fontes.py` | Onde procurar: portais, páginas do Facebook e pesquisa web. |
 | `agenda.py` | A ronda à hora marcada, em segundo plano. |
 | `compliance.py` | O guarda. Decide se um envio é permitido. |
 | `store.py` | SQLite: leads, conversas, listagens, publicações, registo. |
@@ -187,6 +187,20 @@ O que os testes com dados reais ensinaram, e está no código:
   sem comando nenhum)
 - nos portais o telefone está escondido; nos grupos e no Instagram as pessoas
   publicam-no à vista, muitas vezes com "(também WhatsApp)"
+- **Stand.cv** é o NhaKaza das viaturas — mesma plataforma, mesma estrutura
+  de endereços, mesmas ilhas. Quem souber usar um sabe usar o outro
+- stands e imobiliárias (Caetano, FreexAuto, Duarte Auto, BE FORWARD, e os
+  do lado dos imóveis) ficam em `PORTAIS_DE_AGENCIAS`: não se procura lá
+
+## Páginas do Facebook
+
+`fontes.PaginaFacebook` lê os posts de uma página pela Graph API oficial. O
+código funciona; o que decide se dá é o acesso, e há dois caminhos com custos
+muito diferentes — ser administrador da página (funciona hoje) ou obter a
+Page Public Content Access da Meta (revisão de semanas, sem garantia).
+
+Está explicado a sério, com o que não fazemos e porquê, em
+**[docs/FACEBOOK.md](FACEBOOK.md)**.
 
 Facebook Marketplace e grupos ficam de fora de propósito: a Meta bloqueia
 varredura ativamente, e a conta que se queima é a do ImoAuto. Esses continuam

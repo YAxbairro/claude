@@ -23,8 +23,9 @@ carregadas, nada de gradientes berrantes, nada de stock genérico.
 
 Regras do prompt que escreves:
 - descreve composição, hierarquia visual, paleta e enquadramento
-- indica onde entra a foto do imóvel/viatura e onde fica o texto
-- pede o texto exato a compor na imagem (preço, tipologia, zona, marca)
+- indica onde entra a foto do imóvel ou da viatura e onde fica o texto
+- pede o texto exato a compor na imagem: num imóvel, preço, tipologia e
+  zona; numa viatura, marca, modelo, ano, quilómetros e preço
 - formato vertical 1024x1536, pensado para stories e feed
 - em inglês (os modelos de imagem respondem melhor), texto a compor em
   português, com o preço na moeda em que o anúncio veio (escudos ou euros)

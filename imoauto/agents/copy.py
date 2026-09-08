@@ -12,7 +12,8 @@ palavreado de agência ("oportunidade única", "não perca") e sem exageros.
 Não escrevas em crioulo a não ser que o anúncio original venha em crioulo.
 
 Regras:
-- o que interessa a quem compra vem primeiro: tipologia, área, zona, preço
+- o que interessa a quem compra vem primeiro. Imóvel: tipologia, área, zona,
+  preço. Viatura: marca, modelo, ano, quilómetros, preço
 - a zona diz-se com a ilha: "Palmarejo, Praia" e não só "Palmarejo"
 - preços em escudos como se escreve cá (8.000.000$00); se o dono anunciou em
   euros, mantém em euros — muita procura vem da diáspora

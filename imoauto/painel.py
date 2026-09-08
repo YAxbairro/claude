@@ -148,7 +148,7 @@ def vigia():
         horas=store.horas_da_ronda(), fontes=store.ler_fontes(),
         proxima=proxima.strftime("%d/%m às %Hh") if proxima else None,
         rondas=rondas, firecrawl=fontes.configurado(),
-        a_correr=True,
+        tem_facebook=bool(config.META_TOKEN), a_correr=True,
     )
 
 
@@ -167,7 +167,8 @@ def vigia_fontes():
     nome = request.form.get("novo_nome", "").strip()
     alvo = request.form.get("novo_alvo", "").strip()
     if nome and alvo:
-        atuais.append({"tipo": "listagem", "nome": nome,
+        tipo = "facebook" if "facebook.com" in alvo.lower() else "listagem"
+        atuais.append({"tipo": tipo, "nome": nome,
                        "alvo": alvo, "ativa": True})
     store.guardar_fontes(atuais)
     flash("Sítios guardados.")

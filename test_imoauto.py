@@ -385,6 +385,104 @@ class TestNumerosCaboVerde(BaseTeste):
         self.assertEqual(len(store.historico("00238 9912345")), 2)
 
 
+class TestPaginaFacebook(BaseTeste):
+    """
+    A fonte do Facebook. O que se testa aqui é o comportamento quando não há
+    acesso — que é o caso mais provável, e tem de ser dito com clareza em
+    vez de falhar em silêncio.
+    """
+
+    def test_sem_token_diz_o_que_falta(self):
+        from imoauto import config, fontes
+        config.META_TOKEN = ""
+        pagina = fontes.construir({"tipo": "facebook", "nome": "Página",
+                                   "alvo": "https://facebook.com/exemplo"})
+        with self.assertRaises(RuntimeError) as erro:
+            pagina.procurar()
+        self.assertIn("META_PAGE_TOKEN", str(erro.exception))
+
+    def test_endereco_do_facebook_e_reconhecido_sozinho(self):
+        from imoauto import fontes
+        self.assertIsInstance(
+            fontes.construir({"tipo": "facebook", "nome": "P",
+                              "alvo": "https://facebook.com/standcv"}),
+            fontes.PaginaFacebook,
+        )
+
+    def test_posts_viram_anuncios(self):
+        from imoauto import config, fontes
+        config.META_TOKEN = "token-de-teste"
+        pagina = fontes.construir({"tipo": "facebook", "nome": "Compra e Venda CV",
+                                   "alvo": "https://facebook.com/exemplo"})
+
+        class RespostaFalsa:
+            @staticmethod
+            def json():
+                return {"data": [
+                    {"id": "1", "message": "Vende-se Toyota Corolla 2015, "
+                     "120.000 km, 1.850.000$. Contacto 991 23 45",
+                     "created_time": "2026-09-08T09:00:00+0000",
+                     "permalink_url": "https://facebook.com/post/1"},
+                    {"id": "2", "message": "Bom dia",  # curto: não é anúncio
+                     "created_time": "2026-09-08T09:01:00+0000",
+                     "permalink_url": "https://facebook.com/post/2"},
+                ]}
+
+        import imoauto.fontes as modulo
+        original = modulo.requests.get
+        modulo.requests.get = lambda *a, **k: RespostaFalsa()
+        try:
+            anuncios = pagina.procurar()
+        finally:
+            modulo.requests.get = original
+
+        self.assertEqual(len(anuncios), 1)
+        self.assertIn("Toyota Corolla", anuncios[0]["titulo"])
+        self.assertEqual(anuncios[0]["url"], "https://facebook.com/post/1")
+
+    def test_falta_de_autorizacao_explica_se(self):
+        from imoauto import config, fontes
+        config.META_TOKEN = "token-de-teste"
+        pagina = fontes.construir({"tipo": "facebook", "nome": "P",
+                                   "alvo": "https://facebook.com/outra"})
+
+        class RespostaFalsa:
+            @staticmethod
+            def json():
+                return {"error": {"code": 200, "message":
+                        "Requires Page Public Content Access"}}
+
+        import imoauto.fontes as modulo
+        original = modulo.requests.get
+        modulo.requests.get = lambda *a, **k: RespostaFalsa()
+        try:
+            with self.assertRaises(RuntimeError) as erro:
+                pagina.procurar()
+        finally:
+            modulo.requests.get = original
+        self.assertIn("administrador", str(erro.exception))
+
+    def test_pagina_sem_acesso_nao_derruba_a_ronda(self):
+        """Uma página bloqueada é um aviso, não o fim da ronda."""
+        robo = Orquestrador()
+        robo.vigia.recolher = lambda: (
+            [{"titulo": "Vende-se Toyota Corolla 2015, 1.850.000$",
+              "preco": "1.850.000$", "localidade": "Praia", "data": "hoje",
+              "fonte": "Stand.cv", "url": "https://stand.cv/a1"}],
+            ["Página X: é preciso ser administrador dela"],
+        )
+        robo.vigia.pensar = responder_fixo({"aprovados": [0], "motivo": "venda"})
+        robo.aquisicao.pensar = responder_fixo({
+            "tipo": "viatura", "titulo": "Toyota Corolla 2015",
+            "preco": "1.850.000$", "localidade": "Praia", "telefone": "9912345",
+            "particular": True, "nota": 76, "motivo": "particular",
+            "abordagem_sugerida": "Bom dia, vi o seu Corolla.",
+        })
+        resultado = robo.ronda_diaria()
+        self.assertEqual(len(resultado["leads"]), 1)
+        self.assertEqual(len(resultado["problemas"]), 1)
+
+
 class TestUtilitarios(unittest.TestCase):
 
     def test_json_com_ruido_a_volta(self):
