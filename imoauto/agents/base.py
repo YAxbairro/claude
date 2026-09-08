@@ -5,7 +5,9 @@ Um subagente = instruções + uma chamada ao modelo + resposta estruturada.
 Sem estado partilhado: o que precisa de persistir vai para o store.
 """
 
+import base64
 import json
+import mimetypes
 import re
 
 from imoauto import config, store
@@ -38,8 +40,13 @@ class Subagente:
     modelo = None
     max_tokens = 2000
 
-    def pensar(self, pedido, contexto=None, json_esperado=False):
-        """Faz uma pergunta ao modelo e devolve texto (ou dict, se JSON)."""
+    def pensar(self, pedido, contexto=None, json_esperado=False, imagem=None):
+        """
+        Faz uma pergunta ao modelo e devolve texto (ou dict, se JSON).
+
+        `imagem` é o caminho de um ficheiro. Serve para o caso mais comum em
+        Cabo Verde: uma captura de ecrã de um anúncio num grupo de Facebook.
+        """
         mensagem = pedido
         if contexto:
             mensagem = (
@@ -52,11 +59,15 @@ class Subagente:
                 "e sem blocos de código."
             )
 
+        conteudo = [{"type": "text", "text": mensagem}]
+        if imagem:
+            conteudo.insert(0, bloco_de_imagem(imagem))
+
         resposta = cliente().messages.create(
             model=self.modelo or config.MODELO_PRINCIPAL,
             max_tokens=self.max_tokens,
             system=self.instrucoes,
-            messages=[{"role": "user", "content": mensagem}],
+            messages=[{"role": "user", "content": conteudo}],
         )
         texto = "".join(
             bloco.text for bloco in resposta.content if bloco.type == "text"
@@ -66,6 +77,17 @@ class Subagente:
         if json_esperado:
             return extrair_json(texto)
         return texto
+
+
+def bloco_de_imagem(caminho):
+    """Prepara um ficheiro de imagem para ir na pergunta ao modelo."""
+    tipo = mimetypes.guess_type(caminho)[0] or "image/jpeg"
+    if tipo not in ("image/jpeg", "image/png", "image/gif", "image/webp"):
+        tipo = "image/jpeg"
+    with open(caminho, "rb") as ficheiro:
+        dados = base64.standard_b64encode(ficheiro.read()).decode()
+    return {"type": "image",
+            "source": {"type": "base64", "media_type": tipo, "data": dados}}
 
 
 def extrair_json(texto):

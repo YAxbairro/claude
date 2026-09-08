@@ -49,7 +49,7 @@ passam por lá. Os testes provam-no.
 | Subagente | Trabalho |
 |---|---|
 | **Vigia** | Faz a ronda diária pelas fontes, descarta o que já viu, tria o que vale análise e traz-te só o que interessa. |
-| **Aquisição** | Lê um anúncio, extrai dados, pontua 0-100 e rascunha a abordagem — para tu enviares. Nunca contacta. |
+| **Aquisição** | Lê um anúncio — texto colado ou captura de ecrã —, extrai dados, pontua 0-100 e rascunha a abordagem, para tu enviares. Nunca contacta. |
 | **Vendas** | Assume a conversa no WhatsApp depois da resposta: explica, recolhe dados, pede fotos, escala para ti quando não sabe. |
 | **Copy** | Títulos, descrições, legendas e hashtags em português de Portugal. |
 | **SEO** | Title, meta description, slug, palavras-chave e schema.org. |
@@ -199,8 +199,20 @@ código funciona; o que decide se dá é o acesso, e há dois caminhos com custo
 muito diferentes — ser administrador da página (funciona hoje) ou obter a
 Page Public Content Access da Meta (revisão de semanas, sem garantia).
 
-Está explicado a sério, com o que não fazemos e porquê, em
-**[docs/FACEBOOK.md](FACEBOOK.md)**.
+Está explicado a sério em **[docs/FACEBOOK.md](FACEBOOK.md)** — incluindo
+porque não automatizamos um browser com sessão iniciada, e o que se faz em
+vez disso.
+
+## Capturas de ecrã
+
+`Aquisicao.qualificar_captura()` analisa a fotografia de um anúncio. É a
+resposta prática aos grupos de Facebook, que não têm API: dois toques no
+telemóvel em vez de uma varredura que não existe.
+
+E tem uma vantagem sobre qualquer scraper de portal: nos grupos as pessoas
+escrevem o número no post ("991 47 23, tambem WhatsApp"). A captura apanha-o,
+e a normalização de `numero_local()` garante que, quando a pessoa responder,
+o robô sabe de quem é.
 
 Facebook Marketplace e grupos ficam de fora de propósito: a Meta bloqueia
 varredura ativamente, e a conta que se queima é a do ImoAuto. Esses continuam

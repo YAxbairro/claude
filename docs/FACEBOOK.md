@@ -45,18 +45,41 @@ aprovados, continuaram sem conseguir ler páginas de terceiros.
 Ou seja: é um caminho oficial e real, mas é trabalho de semanas e sem
 garantia. Não construas o negócio a contar com ele.
 
-## O que não fazemos, e porquê
+## "E se eu iniciar sessão num browser automatizado?"
 
-Automatizar um browser com a tua conta pessoal para percorrer páginas e
-grupos — tecnicamente possível, e é o que muita gente faz. Não está aqui
-de propósito:
+É a pergunta óbvia, e a resposta tem três partes — a técnica, a prática e
+a do risco.
 
-- viola os termos do Facebook, que proíbem acesso automatizado
-- a conta que arrisca ser bloqueada é a tua, e com ela a Página do ImoAuto
-- parte sempre que o Facebook mexe no HTML, o que é a toda a hora
+**A técnica.** Escrever isso é fácil. O código existe em qualquer lado.
 
-O risco não é abstrato: perder a conta significa perder o canal onde o
-ImoAuto se dá a conhecer. Não compensa.
+**A prática, que é onde cai.** Uma sessão automatizada não vive num sítio
+fixo: cada arranque é uma máquina nova, sem cookies, sem sessão. Ou seja,
+teria de iniciar sessão de novo todos os dias — com a palavra-passe
+guardada algures e o código de dois fatores a chegar ao teu telemóvel de
+madrugada. E esse início de sessão vem de um centro de dados noutro país.
+Para o Facebook isso é o padrão exato de uma conta comprometida: a resposta
+normal é um bloqueio de segurança logo à primeira, com pedido de documento
+de identificação.
+
+**O risco.** Mesmo que passasse, o acesso automatizado viola os termos. A
+conta que fica em causa é a tua pessoal — e é a ela que a Página do ImoAuto
+está agarrada. Perdê-la é perder o canal onde o negócio se dá a conhecer,
+para poupar dois segundos por anúncio.
+
+Não é prudência exagerada: é que o custo do pior caso é desproporcionado
+face ao que se ganha.
+
+## O que resolve o mesmo problema
+
+Manda uma **captura de ecrã**. Vês o anúncio no grupo, fotografas o ecrã,
+envias ao bot do Telegram. O robô lê a imagem — texto, preço, nome de quem
+publicou, e o número de telefone quando lá está — e devolve a ficha com a
+mensagem pronta.
+
+São dois toques no telemóvel, e tem uma vantagem sobre a varredura
+automática: nos grupos as pessoas escrevem o número no próprio post
+("991 47 23, tambem WhatsApp"), coisa que nos portais nunca aparece. A
+captura apanha-o; um scraper de portal não.
 
 ## O que fica, então
 

@@ -8,13 +8,16 @@ Comandos:
   /ronda          faz a ronda pelas fontes agora
   /publicar <id>  força a publicação de um rascunho
 
-E, sobretudo: cola aqui o texto de qualquer anúncio, sem comando nenhum.
+E, sobretudo, duas maneiras sem comando nenhum:
+  · colas o texto de um anúncio
+  · mandas uma captura de ecrã dele
 Em Cabo Verde a maior parte dos negócios está nos grupos de Facebook e no
-WhatsApp, onde não há como varrer automaticamente. Copias o texto do
-telemóvel, colas ao robô, e ele devolve a análise e a mensagem pronta.
+WhatsApp, onde não há como varrer automaticamente. Fotografas o ecrã ou
+copias o texto, mandas ao robô, e ele devolve a análise e a mensagem pronta.
 """
 
 import json
+import os
 import time
 
 from imoauto import config, store
@@ -42,8 +45,10 @@ def tratar_comando(robo, texto, chat_id):
     if comando in ("start", "ajuda", "help"):
         return (
             f"*{config.MARCA}* — robô de operações\n\n"
-            "*Cola aqui o texto de um anúncio* (sem comando nenhum) e eu "
-            "analiso-o e escrevo-te a mensagem para enviares.\n\n"
+            "*Manda-me um anúncio* e eu analiso-o e escrevo-te a mensagem "
+            "para enviares. Pode ser:\n"
+            "· o texto colado\n"
+            "· uma captura de ecrã do grupo\n\n"
             "/leads — leads por contactar\n"
             "/ronda — procurar nos portais agora\n"
             "/estado — estado do sistema\n"
@@ -108,6 +113,29 @@ def tratar_callback(robo, callback):
     telegram.enviar(resposta, chat_id=callback["message"]["chat"]["id"])
 
 
+def tratar_foto(robo, mensagem, chat_id):
+    """
+    Uma captura de ecrã de um anúncio. É o caminho mais rápido para os
+    grupos de Facebook: dois toques no telemóvel e está analisado.
+    """
+    file_id = telegram.maior_foto(mensagem)
+    if not file_id:
+        return "Não consegui apanhar essa imagem."
+
+    pasta = os.path.join(config.PASTA_MEDIA, "capturas")
+    os.makedirs(pasta, exist_ok=True)
+    destino = os.path.join(pasta, f"{file_id[:24]}.jpg")
+    telegram.descarregar_ficheiro(file_id, destino)
+
+    legenda = (mensagem.get("caption") or "").strip()
+    rede = "facebook" if "facebook" in legenda.lower() else "captura"
+    lead = robo.nova_captura(destino, rede)
+    if lead["nota"] < 40:
+        return (f"Li a imagem, mas dou-lhe só {lead['nota']}/100: "
+                f"_{lead['motivo']}_")
+    return None  # o cartão já foi enviado
+
+
 def correr():
     robo = Orquestrador()
     essenciais, _ = config.em_falta()
@@ -127,10 +155,23 @@ def correr():
                 mensagem = update.get("message", {})
                 texto = mensagem.get("text", "")
                 chat_id = mensagem.get("chat", {}).get("id")
-                if not texto or not chat_id:
+                if not chat_id:
                     continue
                 if str(chat_id) != str(config.TELEGRAM_CHAT_ID):
                     store.registar("bot", "chat_nao_autorizado", str(chat_id))
+                    continue
+
+                if mensagem.get("photo"):
+                    try:
+                        resposta = tratar_foto(robo, mensagem, chat_id)
+                    except Exception as erro:
+                        store.registar("bot", "erro_foto", str(erro))
+                        resposta = f"Não consegui ler a imagem: {erro}"
+                    if resposta:
+                        telegram.enviar(resposta, chat_id=chat_id)
+                    continue
+
+                if not texto:
                     continue
 
                 if texto.startswith("/"):

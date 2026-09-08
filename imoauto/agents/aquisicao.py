@@ -63,12 +63,33 @@ Devolve JSON:
 A abordagem sugerida é para o humano ler, ajustar e enviar ele próprio.
 Nunca escrevas como se fosses tu a enviá-la."""
 
+    def qualificar_captura(self, caminho_imagem, rede, url):
+        """
+        Qualifica um anúncio a partir de uma captura de ecrã.
+
+        É o caminho para os grupos de Facebook: não há como os varrer por
+        API, mas fotografar o ecrã e reenviar leva dois segundos — e a
+        captura traz o que o texto copiado perde, como as fotos do imóvel
+        e o nome de quem publicou.
+        """
+        ficha = self.pensar(
+            "Esta é uma captura de ecrã de um anúncio publicado num grupo ou "
+            "página do Facebook. Lê tudo o que lá está — texto, preço, nome "
+            "de quem publicou, número de telefone se aparecer — e analisa.",
+            imagem=caminho_imagem,
+            json_esperado=True,
+        )
+        return self._guardar(ficha, rede, url)
+
     def qualificar(self, texto_anuncio, rede, url):
         """Analisa um anúncio e grava-o como lead pontuado."""
         ficha = self.pensar(
             f"Anúncio encontrado em {rede}:\n\n{texto_anuncio}",
             json_esperado=True,
         )
+        return self._guardar(ficha, rede, url)
+
+    def _guardar(self, ficha, rede, url):
         lead = store.guardar_lead(
             rede=rede,
             url=url,

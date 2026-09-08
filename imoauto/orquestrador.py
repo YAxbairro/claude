@@ -50,9 +50,14 @@ class Orquestrador:
             f"{lead['preco'] or '—'} · {lead['localidade'] or '—'}\n"
             f"Contacto: `{telefone}`\n\n"
             f"_{lead['motivo']}_\n\n"
-            f"*Mensagem sugerida (envia tu):*\n{abordagem}\n\n"
-            f"[Ver anúncio]({lead['url']})"
+            f"*Mensagem sugerida (envia tu):*\n{abordagem}\n"
         )
+        # Uma captura de ecrã não tem link para abrir — dizê-lo é melhor do
+        # que oferecer um endereço que não vai a lado nenhum.
+        if lead["url"].startswith(("captura://", "colado://", "manual://")):
+            texto += "\n_Veio de uma captura ou de texto colado._"
+        else:
+            texto += f"\n[Ver anúncio]({lead['url']})"
         botoes = [[
             telegram.botao("Já contactei", {"a": "contactado", "id": lead["id"]}),
             telegram.botao("Descartar", {"a": "descartar", "id": lead["id"]}),
@@ -63,6 +68,18 @@ class Orquestrador:
                 "Abrir WhatsApp", f"https://wa.me/{digitos}"
             )])
         return telegram.enviar(texto, botoes)
+
+    def nova_captura(self, caminho_imagem, rede="captura"):
+        """
+        Fotografaste um anúncio num grupo de Facebook. O robô lê a imagem,
+        qualifica-a e devolve-te a ficha — igual ao texto colado, mas sem
+        teres de copiar nada.
+        """
+        url = f"captura://{os.path.basename(caminho_imagem)}"
+        lead = self.aquisicao.qualificar_captura(caminho_imagem, rede, url)
+        self.enviar_lead_para_telegram(lead)
+        store.atualizar_lead(lead["id"], estado=store.ENVIADO)
+        return lead
 
     # --- 1b. A ronda diária ----------------------------------------------
 

@@ -81,6 +81,26 @@ def obter_atualizacoes(offset=None, timeout=25):
     return corpo["result"]
 
 
+def descarregar_ficheiro(file_id, destino):
+    """Descarrega uma foto que enviaste ao bot. Duas chamadas, como na Meta."""
+    info = _chamar("getFile", file_id=file_id)
+    caminho = info["file_path"]
+    url = (f"https://api.telegram.org/file/bot{config.TELEGRAM_TOKEN}/{caminho}")
+    resposta = requests.get(url, timeout=60)
+    resposta.raise_for_status()
+    with open(destino, "wb") as ficheiro:
+        ficheiro.write(resposta.content)
+    return destino
+
+
+def maior_foto(mensagem):
+    """O Telegram manda várias resoluções; queremos a maior."""
+    fotos = mensagem.get("photo") or []
+    if not fotos:
+        return None
+    return max(fotos, key=lambda f: f.get("file_size", 0))["file_id"]
+
+
 def botao(texto, dados):
     return {"text": texto, "callback_data": json.dumps(dados, separators=(",", ":"))}
 

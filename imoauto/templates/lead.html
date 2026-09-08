@@ -9,7 +9,7 @@
 <div class="carta">
   <h3 style="margin-top:0">Porquê este</h3>
   <p style="margin:0">{{ lead.motivo or '—' }} <strong>Nota {{ lead.nota }}/100.</strong></p>
-  {% if lead.url and not lead.url.startswith('manual://') %}
+  {% if lead.url and '://' in lead.url and not lead.url.split('://')[0] in ('manual', 'colado', 'captura') %}
   <div class="botoes"><a class="botao claro" href="{{ lead.url }}" target="_blank">
     Ver o anúncio original</a></div>{% endif %}
 </div>

@@ -95,12 +95,19 @@ sempre ligada — nenhuma publicação sai sem tu carregares no botão.
 
 ## 4. O dia-a-dia
 
-### O caminho mais rápido: colar no Telegram
+### O caminho mais rápido: fotografar o ecrã
 
-Estás no telemóvel, vês um anúncio num grupo do Facebook ou no WhatsApp.
-Copias o texto, colas na conversa com o teu bot do Telegram — sem escrever
-comando nenhum — e ele responde com a análise, a nota e a mensagem pronta a
-enviar.
+Estás no telemóvel, vês um anúncio num grupo do Facebook. **Tiras uma
+captura de ecrã e mandas ao teu bot do Telegram.** Sem escrever nada. Ele lê
+a imagem — o texto, o preço, quem publicou, e o número de telefone se lá
+estiver — e responde com a análise, a nota e a mensagem pronta a enviar.
+
+Também podes colar só o texto, se preferires. Funciona igual.
+
+A captura tem uma vantagem: nos grupos as pessoas escrevem o número no
+próprio post. Nos portais isso nunca aparece — fica sempre escondido atrás
+de um botão. Por isso, no Facebook, muitas vezes já ficas com o número
+sem teres de o pedir.
 
 Em Cabo Verde é assim que aparece a maior parte dos negócios: nos grupos e no
 WhatsApp, que nenhum robô consegue varrer sozinho. Por isso este caminho é o

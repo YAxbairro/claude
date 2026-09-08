@@ -483,6 +483,68 @@ class TestPaginaFacebook(BaseTeste):
         self.assertEqual(len(resultado["problemas"]), 1)
 
 
+class TestCapturaDeEcra(BaseTeste):
+    """
+    Fotografar um anúncio num grupo e mandá-lo ao robô.
+
+    É o caminho para o Facebook: os grupos não se varrem por API, mas uma
+    captura leva dois toques — e traz o que o texto copiado perde, como o
+    número que a pessoa escreveu no post.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.robo = Orquestrador()
+        self.robo.aquisicao.pensar = responder_fixo({
+            "tipo": "viatura", "titulo": "Toyota Corolla 2014, 148.000 km",
+            "preco": "1.750.000$", "localidade": "Praia, Achada Santo António",
+            "telefone": "+238 991 47 23", "particular": True, "nota": 86,
+            "motivo": "particular, publicado hoje",
+            "abordagem_sugerida": "Bon dia Djim, vi o seu Corolla.",
+        })
+        self.captura = os.path.join(tempfile.mkdtemp(), "post.png")
+        with open(self.captura, "wb") as f:
+            f.write(b"\x89PNG\r\n\x1a\n")  # basta existir
+
+    def test_captura_vira_lead_a_espera_do_contacto(self):
+        lead = self.robo.nova_captura(self.captura, rede="facebook")
+        self.assertEqual(lead["nota"], 86)
+        self.assertEqual(store.obter_lead(lead["id"])["estado"], store.ENVIADO)
+        self.assertEqual(lead["rede"], "facebook")
+
+    def test_telefone_lido_da_imagem_liga_a_resposta_no_whatsapp(self):
+        """O ponto todo: ele responde de '9914723' e o robô sabe quem é."""
+        self.robo.nova_captura(self.captura, rede="facebook")
+        encontrado = store.lead_por_telefone("9914723")
+        self.assertIsNotNone(encontrado)
+        self.assertIn("Corolla", encontrado["titulo"])
+
+    def test_duas_capturas_iguais_nao_duplicam(self):
+        primeiro = self.robo.nova_captura(self.captura, rede="facebook")
+        segundo = self.robo.nova_captura(self.captura, rede="facebook")
+        self.assertEqual(primeiro["id"], segundo["id"])
+
+    def test_cartao_nao_oferece_link_que_nao_existe(self):
+        from imoauto.clients import telegram
+        enviados = []
+        original = telegram.enviar
+        telegram.enviar = lambda texto, *a, **k: enviados.append(texto)
+        try:
+            self.robo.nova_captura(self.captura, rede="facebook")
+        finally:
+            telegram.enviar = original
+        self.assertTrue(enviados)
+        self.assertNotIn("captura://", enviados[0])
+        self.assertIn("captura", enviados[0].lower())
+
+    def test_imagem_e_preparada_para_o_modelo(self):
+        from imoauto.agents.base import bloco_de_imagem
+        bloco = bloco_de_imagem(self.captura)
+        self.assertEqual(bloco["type"], "image")
+        self.assertEqual(bloco["source"]["media_type"], "image/png")
+        self.assertTrue(bloco["source"]["data"])
+
+
 class TestUtilitarios(unittest.TestCase):
 
     def test_json_com_ruido_a_volta(self):
