@@ -4,6 +4,10 @@ Robô de operações com subagentes especializados: encontra anúncios, conduz a
 conversa com o proprietário, cria a publicação no site, gera o flyer e publica
 nas redes — com um humano no ponto exato onde a lei o exige.
 
+Feito para **Cabo Verde**: números de +238 com 7 dígitos, preços em escudos e
+em euros (a diáspora anuncia em euros), zonas da Praia, Mindelo, Sal e Boa
+Vista, e os portais que existem cá.
+
 ## O princípio de desenho
 
 Há uma coisa que este sistema deliberadamente **não** faz: contactar
@@ -74,6 +78,19 @@ Duas, sobre o mesmo robô e a mesma base de dados:
 - **Telegram** — os mesmos leads e os mesmos botões, no telemóvel.
 
 O Telegram é opcional: sem ele configurado o painel funciona na mesma.
+
+## Números de telefone
+
+Um número cabo-verdiano aparece escrito de muitas maneiras — `+238 991 23 45`,
+`00238 9912345`, `991 2345`. `store.numero_local()` reduz todas à mesma parte
+local de 7 dígitos, e é isso que liga uma mensagem recebida ao lead certo.
+
+Isto não é um pormenor: sem essa normalização o robô recebe a resposta do
+proprietário e não sabe de quem é — o fluxo parte-se ao meio. Seis testes
+cobrem-no.
+
+Para operar noutro país, mudam-se três variáveis (`IMOAUTO_INDICATIVO`,
+`IMOAUTO_DIGITOS_LOCAIS`, `IMOAUTO_MOEDA`) e as fontes.
 
 ## Instalação
 
@@ -154,14 +171,22 @@ O Vigia corre às horas que marcares no painel (por omissão 9h). Em cada ronda:
 4. qualifica cada um e descarta abaixo de 55/100
 5. o que sobra chega-te ao Telegram e ao painel, com a mensagem já escrita
 
-O que o teste com dados reais ensinou, e está no código:
+O que os testes com dados reais ensinaram, e está no código:
 
-- no OLX, o que separa particulares de agências é `?search[private_business]=private`
-  no endereço. Sem isso vêm sobretudo imobiliárias
-- a mesma página mistura venda e arrendamento: uma renda de 1.200 € parece um
-  preço. A triagem corta-os
-- **o telefone nunca está visível** nestes portais — fica atrás de um botão.
-  É por isso que és tu a falar primeiro, e só depois passas o número ao robô
+- **NhaKaza** é o portal onde os particulares de Cabo Verde publicam de graça,
+  e marca cada anúncio como "Particular" ou imobiliária — é o sinal que conta
+- **imor.cv, sigma.cv, ayodele.cv, remax.cv, kaps-habitat.com são agências.**
+  Não se procura lá: esses imóveis já estão com alguém. Ficam listados em
+  `PORTAIS_DE_AGENCIAS` para não voltarem a ser tentados
+- as páginas misturam venda e arrendamento: em Cabo Verde uma renda anda nos
+  15.000$–80.000$/mês e uma venda nos milhões de escudos. A triagem separa-os
+- **os portais cabo-verdianos são magros.** A página de vendas do NhaKaza
+  tinha um anúncio no dia em que testámos. O mercado real está nos grupos de
+  Facebook e no WhatsApp — por isso o copiar-colar não é o plano B, é o
+  caminho principal, e está feito para ser instantâneo (colas no Telegram,
+  sem comando nenhum)
+- nos portais o telefone está escondido; nos grupos e no Instagram as pessoas
+  publicam-no à vista, muitas vezes com "(também WhatsApp)"
 
 Facebook Marketplace e grupos ficam de fora de propósito: a Meta bloqueia
 varredura ativamente, e a conta que se queima é a do ImoAuto. Esses continuam

@@ -95,7 +95,18 @@ sempre ligada — nenhuma publicação sai sem tu carregares no botão.
 
 ## 4. O dia-a-dia
 
-### O robô procura sozinho, todos os dias
+### O caminho mais rápido: colar no Telegram
+
+Estás no telemóvel, vês um anúncio num grupo do Facebook ou no WhatsApp.
+Copias o texto, colas na conversa com o teu bot do Telegram — sem escrever
+comando nenhum — e ele responde com a análise, a nota e a mensagem pronta a
+enviar.
+
+Em Cabo Verde é assim que aparece a maior parte dos negócios: nos grupos e no
+WhatsApp, que nenhum robô consegue varrer sozinho. Por isso este caminho é o
+principal, e está feito para ser instantâneo.
+
+### O robô também procura sozinho, todos os dias
 
 Vai a **Vigia** no menu. Marca a que horas queres a ronda (por exemplo 9h e
 19h) e carrega em Guardar. A partir daí, todos os dias a essas horas ele
@@ -104,9 +115,14 @@ já com nota e com a mensagem escrita.
 
 Podes também carregar em **Fazer a ronda agora** para não esperares.
 
-Os sítios onde ele procura estão nessa mesma página, e podes acrescentar os
-teus: faz uma pesquisa no OLX com os filtros que quiseres (zona, preço,
-particulares), copia o endereço da barra do browser, e cola lá.
+Os sítios onde ele procura estão nessa mesma página — o NhaKaza por ilha
+(Santiago, São Vicente, Sal, Boa Vista) e uma pesquisa web. Podes acrescentar
+os teus: faz uma pesquisa num portal com os filtros que quiseres, copia o
+endereço da barra do browser, e cola lá.
+
+Aviso honesto: os portais cabo-verdianos têm pouca coisa. No dia em que
+testámos, a página de vendas do NhaKaza tinha **um** anúncio. A ronda apanha
+o que houver, mas não esperes muito dela — o volume vem do copiar-colar.
 
 Para isto funcionar precisas da chave de pesquisa (FIRECRAWL_API_KEY), que se
 põe na Configuração.

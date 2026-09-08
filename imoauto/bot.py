@@ -5,8 +5,13 @@ Corre em long polling (sem servidor, sem domínio, sem certificados).
 Comandos:
   /leads          leads por contactar, ordenados por nota
   /estado         estado do sistema e configurações em falta
-  /lead <texto>   cola aqui o texto de um anúncio e ele qualifica-o
+  /ronda          faz a ronda pelas fontes agora
   /publicar <id>  força a publicação de um rascunho
+
+E, sobretudo: cola aqui o texto de qualquer anúncio, sem comando nenhum.
+Em Cabo Verde a maior parte dos negócios está nos grupos de Facebook e no
+WhatsApp, onde não há como varrer automaticamente. Copias o texto do
+telemóvel, colas ao robô, e ele devolve a análise e a mensagem pronta.
 """
 
 import json
@@ -37,8 +42,10 @@ def tratar_comando(robo, texto, chat_id):
     if comando in ("start", "ajuda", "help"):
         return (
             f"*{config.MARCA}* — robô de operações\n\n"
+            "*Cola aqui o texto de um anúncio* (sem comando nenhum) e eu "
+            "analiso-o e escrevo-te a mensagem para enviares.\n\n"
             "/leads — leads por contactar\n"
-            "/lead <texto do anúncio> — qualifica um anúncio\n"
+            "/ronda — procurar nos portais agora\n"
             "/estado — estado do sistema\n"
             "/publicar <id> — publica um rascunho aprovado"
         )
@@ -64,6 +71,12 @@ def tratar_comando(robo, texto, chat_id):
         lead = robo.novo_anuncio(argumento, "manual", f"manual://{time.time()}")
         return f"Lead `#{lead['id']}` qualificado: {lead['nota']}/100."
 
+    if comando == "ronda":
+        resultado = robo.ronda_diaria()
+        return (f"Ronda feita: {resultado['vistos']} vistos, "
+                f"{resultado['novos']} novos, "
+                f"{len(resultado['leads'])} para veres.")
+
     if comando == "publicar":
         try:
             robo.publicador.aprovar(int(argumento.strip()))
@@ -72,6 +85,20 @@ def tratar_comando(robo, texto, chat_id):
             return f"Não deu: {erro}"
 
     return "Comando desconhecido. /ajuda"
+
+
+def analisar_colado(robo, texto):
+    """
+    Qualquer texto colado é tratado como um anúncio.
+
+    É o caminho principal em Cabo Verde: os grupos de Facebook e o WhatsApp
+    não se varrem por API, mas copiar-colar de telemóvel é instantâneo.
+    """
+    lead = robo.novo_anuncio(texto, "colado", f"colado://{abs(hash(texto))}")
+    if lead["nota"] < 40:
+        return (f"Analisei, mas dou-lhe só {lead['nota']}/100: "
+                f"_{lead['motivo']}_\nNão me parece que valha a pena.")
+    return None  # o cartão do lead já foi enviado pelo orquestrador
 
 
 def tratar_callback(robo, callback):
@@ -105,7 +132,24 @@ def correr():
                 if str(chat_id) != str(config.TELEGRAM_CHAT_ID):
                     store.registar("bot", "chat_nao_autorizado", str(chat_id))
                     continue
-                telegram.enviar(tratar_comando(robo, texto, chat_id), chat_id=chat_id)
+
+                if texto.startswith("/"):
+                    telegram.enviar(tratar_comando(robo, texto, chat_id),
+                                    chat_id=chat_id)
+                    continue
+
+                if len(texto.strip()) < 25:
+                    telegram.enviar(
+                        "Cola o texto do anúncio (ou /ajuda para os comandos).",
+                        chat_id=chat_id)
+                    continue
+
+                try:
+                    resposta = analisar_colado(robo, texto)
+                except Exception as erro:
+                    resposta = f"Não consegui analisar: {erro}"
+                if resposta:
+                    telegram.enviar(resposta, chat_id=chat_id)
         except KeyboardInterrupt:
             print("\nParado.")
             return

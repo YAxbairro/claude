@@ -5,14 +5,19 @@ Duas maneiras de procurar, ambas sobre conteúdo público:
 
   BuscaWeb        pesquisa (tipo Google) por uma frase, em todo o lado
   PaginaListagem  extrai os anúncios de uma página de resultados
-                  (OLX, Imovirtual, CustoJusto...)
+                  (NhaKaza e outros portais cabo-verdianos)
 
 Ambas assentam no Firecrawl, que é um serviço de pesquisa e leitura de páginas
 com API própria. Precisa de FIRECRAWL_API_KEY.
 
 Nota deliberada: não há aqui varredura do Facebook Marketplace nem de grupos
 fechados. A Meta bloqueia-o ativamente e a conta que se queima é a do ImoAuto.
-Esses continuam a entrar pelo painel, colados à mão.
+Esses continuam a entrar pelo painel ou pelo Telegram, colados à mão.
+
+Em Cabo Verde isso pesa mais do que noutros sítios: os portais online são
+poucos e magros, e o mercado real vive nos grupos de Facebook e no WhatsApp.
+A ronda automática apanha o que houver nos portais; o grosso vais tu buscar
+com um copiar-colar. Está pensado para isso ser rápido.
 """
 
 import os
@@ -36,6 +41,7 @@ ESQUEMA_ANUNCIOS = {
                     "localidade": {"type": "string"},
                     "data": {"type": "string"},
                     "url": {"type": "string"},
+                    "anunciante": {"type": "string"},
                 },
             },
         }
@@ -44,8 +50,11 @@ ESQUEMA_ANUNCIOS = {
 
 INSTRUCAO = (
     "Extrai os anúncios de imóveis ou viaturas listados nesta página. "
-    "Para cada um: titulo, preco, localidade, data de publicação, e o link "
-    "completo. Ignora banners, publicidade e anúncios patrocinados de agências."
+    "Para cada um: titulo, preco, localidade (ilha e zona), data de "
+    "publicação, o link completo, e se o anunciante é particular ou "
+    "imobiliária, quando a página o indicar. Os preços podem vir em escudos "
+    "cabo-verdianos (8.000.000$00 ou 8 000 000 CVE) ou em euros. Ignora "
+    "banners, publicidade e anúncios patrocinados de agências."
 )
 
 
@@ -90,7 +99,7 @@ class Fonte:
 
 class PaginaListagem(Fonte):
     """
-    Uma página de resultados de um portal (OLX, Imovirtual, CustoJusto).
+    Uma página de resultados de um portal (NhaKaza, e o que mais houver).
     É a fonte mais rica: dá título, preço, localidade, data e link de cada
     anúncio numa só leitura.
     """
@@ -119,7 +128,7 @@ class BuscaWeb(Fonte):
 
     tipo = "busca"
 
-    def __init__(self, nome, alvo, ativa=True, limite=10, local="Portugal"):
+    def __init__(self, nome, alvo, ativa=True, limite=10, local="Cabo Verde"):
         super().__init__(nome, alvo, ativa)
         self.limite = limite
         self.local = local
@@ -158,21 +167,37 @@ def ler_anuncio(url):
 # --- Fontes que vêm de origem ------------------------------------------
 # Editáveis no painel. Estas são as que já provámos funcionar.
 
+# NhaKaza é o portal de anúncios de Cabo Verde onde particulares publicam de
+# graça, e marca cada anúncio como "Particular" ou imobiliária — é o sinal
+# que interessa. As locations_id são as ilhas.
+NHAKAZA = "https://nhakaza.cv/?view_page={pagina}"
+
 FONTES_INICIAIS = [
-    # O que faz a diferença é o ?search[private_business]=private — sem ele
-    # o OLX devolve sobretudo agências. Foi testado.
-    {"tipo": "listagem", "nome": "OLX · Almada (só particulares)", "ativa": True,
-     "alvo": "https://www.olx.pt/imoveis/apartamento-casa-a-venda/almada-almada/"
-             "?search%5Bprivate_business%5D=private"},
-    {"tipo": "listagem", "nome": "OLX · Setúbal (só particulares)", "ativa": True,
-     "alvo": "https://www.olx.pt/imoveis/apartamento-casa-a-venda/setubal/"
-             "?search%5Bprivate_business%5D=private"},
-    {"tipo": "listagem", "nome": "OLX · Lisboa (só particulares)", "ativa": True,
-     "alvo": "https://www.olx.pt/imoveis/apartamento-casa-a-venda/lisboa/"
-             "?search%5Bprivate_business%5D=private"},
-    {"tipo": "busca", "nome": "Web · vende-se sem imobiliária", "ativa": False,
-     "alvo": "vende-se apartamento particular sem imobiliária contacto"},
+    {"tipo": "listagem", "nome": "NhaKaza · vendas (todo o país)", "ativa": True,
+     "alvo": "https://nhakaza.cv/Comprar-Casa-Apartamento-Lojas-Escritorio/"
+             "?view_page=buy&tp_to=2"},
+    {"tipo": "listagem", "nome": "NhaKaza · Santiago", "ativa": True,
+     "alvo": "https://nhakaza.cv/Arrendar-Alugar-Comprar-Vender-Apartamentos-"
+             "Moradias-Santiago/?view_page=rent&locations_id=257"},
+    {"tipo": "listagem", "nome": "NhaKaza · São Vicente", "ativa": True,
+     "alvo": "https://nhakaza.cv/Arrendar-Alugar-Comprar-Vender-Apartamentos-"
+             "Moradias-Sao-Vicente/?view_page=rent&locations_id=251"},
+    {"tipo": "listagem", "nome": "NhaKaza · Sal", "ativa": True,
+     "alvo": "https://nhakaza.cv/Arrendar-Alugar-Comprar-Vender-Apartamentos-"
+             "Moradias-Sal/?view_page=rent&locations_id=253"},
+    {"tipo": "listagem", "nome": "NhaKaza · Boa Vista", "ativa": False,
+     "alvo": "https://nhakaza.cv/Arrendar-Alugar-Comprar-Vender-Apartamentos-"
+             "Moradias-Boavista/?view_page=rent&locations_id=254"},
+    {"tipo": "busca", "nome": "Web · vende-se particular Cabo Verde", "ativa": True,
+     "alvo": "vende-se casa OR apartamento OR terreno particular Cabo Verde "
+             "contacto WhatsApp -imobiliaria -remax", "local": "Cabo Verde"},
 ]
+
+# Portais que são de imobiliárias (imor.cv, sigma.cv, ayodele.cv, remax.cv,
+# kaps-habitat.com). Não servem para procurar leads — os anúncios já estão
+# com uma agência. Ficam aqui documentados para não voltarem a ser tentados.
+PORTAIS_DE_AGENCIAS = ["imor.cv", "sigma.cv", "ayodele.cv", "remax.cv",
+                       "kaps-habitat.com", "properstar.pt"]
 
 
 def construir(definicao):
@@ -180,7 +205,7 @@ def construir(definicao):
     extra = {}
     if classe is BuscaWeb:
         extra = {"limite": definicao.get("limite", 10),
-                 "local": definicao.get("local", "Portugal")}
+                 "local": definicao.get("local", "Cabo Verde")}
     return classe(definicao["nome"], definicao["alvo"],
                   definicao.get("ativa", True), **extra)
 

@@ -52,7 +52,15 @@ MODELO_IMAGEM = _env("IMOAUTO_MODELO_IMAGEM", "gpt-image-1")
 BASE_DADOS = _env("IMOAUTO_DB", "./imoauto.db")
 PASTA_MEDIA = _env("IMOAUTO_MEDIA", "./media")
 MARCA = _env("IMOAUTO_MARCA", "ImoAuto")
-IDIOMA = _env("IMOAUTO_IDIOMA", "pt-PT")
+IDIOMA = _env("IMOAUTO_IDIOMA", "pt")
+
+# --- País de operação ----------------------------------------------------
+# Cabo Verde: indicativo +238, números locais de 7 dígitos, escudo (CVE).
+# Muitos anúncios usam euros também, por causa da diáspora.
+PAIS = _env("IMOAUTO_PAIS", "CV")
+INDICATIVO = _env("IMOAUTO_INDICATIVO", "238")
+DIGITOS_LOCAIS = int(_env("IMOAUTO_DIGITOS_LOCAIS", "7"))
+MOEDA = _env("IMOAUTO_MOEDA", "CVE")
 
 # Interruptor mestre: com DRY_RUN nada sai para o mundo (nem posts, nem
 # mensagens). Só regista o que teria feito. Começa sempre assim.
@@ -176,6 +184,11 @@ def recarregar():
     SITE_API_TOKEN = _env("IMOAUTO_API_TOKEN")
     OPENAI_API_KEY = _env("OPENAI_API_KEY")
     MODELO_IMAGEM = _env("IMOAUTO_MODELO_IMAGEM", "gpt-image-1")
+    global PAIS, INDICATIVO, DIGITOS_LOCAIS, MOEDA
+    PAIS = _env("IMOAUTO_PAIS", "CV")
+    INDICATIVO = _env("IMOAUTO_INDICATIVO", "238")
+    DIGITOS_LOCAIS = int(_env("IMOAUTO_DIGITOS_LOCAIS", "7"))
+    MOEDA = _env("IMOAUTO_MOEDA", "CVE")
     BASE_DADOS = _env("IMOAUTO_DB", "./imoauto.db")
     PASTA_MEDIA = _env("IMOAUTO_MEDIA", "./media")
     MARCA = _env("IMOAUTO_MARCA", "ImoAuto")

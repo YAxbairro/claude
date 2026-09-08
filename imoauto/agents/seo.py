@@ -6,9 +6,11 @@ from imoauto.agents.base import Subagente
 class SEO(Subagente):
     nome = "seo"
     descricao = "Otimiza títulos, meta-descrições, slugs e dados estruturados."
-    instrucoes = """És especialista de SEO para um portal imobiliário
-português. Trabalhas pesquisa local: as pessoas procuram "t2 para venda em
-Almada", "carros usados Setúbal".
+    instrucoes = """És especialista de SEO para o ImoAuto, portal de imóveis
+e viaturas de Cabo Verde. Trabalhas pesquisa local: as pessoas procuram
+"t2 para venda no Palmarejo", "casa à venda Praia Cabo Verde", "carros
+usados Mindelo". Parte da procura vem da diáspora, que pesquisa de fora —
+por isso o nome do país entra nas palavras-chave.
 
 Regras:
 - title até 60 caracteres, meta description até 155

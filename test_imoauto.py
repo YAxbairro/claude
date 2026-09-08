@@ -341,6 +341,50 @@ class TestAgenda(BaseTeste):
         self.assertEqual(agenda.horas_em_falta(madrugada), [])
 
 
+class TestNumerosCaboVerde(BaseTeste):
+    """
+    Números cabo-verdianos: +238 e 7 dígitos.
+
+    A mesma pessoa aparece escrita de cinco maneiras. Se o robô não as
+    reconhecer como uma só, não liga a mensagem que chega ao lead de quem a
+    enviou — e o fluxo todo parte-se ao meio.
+    """
+
+    FORMAS = ["+238 991 23 45", "9912345", "00238 9912345",
+              "238-991-2345", "991 2345"]
+
+    def test_todas_as_formas_sao_o_mesmo_numero(self):
+        locais = {store.numero_local(f) for f in self.FORMAS}
+        self.assertEqual(locais, {"9912345"})
+
+    def test_mensagem_recebida_encontra_o_lead(self):
+        store.guardar_lead("nhakaza", "https://nhakaza.cv/a", "T2 Palmarejo",
+                           telefone="+238 991 23 45")
+        encontrado = store.lead_por_telefone("9912345")
+        self.assertIsNotNone(encontrado)
+        self.assertEqual(encontrado["titulo"], "T2 Palmarejo")
+
+    def test_numeros_diferentes_nao_se_confundem(self):
+        store.guardar_lead("nhakaza", "https://nhakaza.cv/b", "T3 Mindelo",
+                           telefone="+238 991 23 45")
+        self.assertIsNone(store.lead_por_telefone("+238 995 67 89"))
+
+    def test_conversa_aberta_reconhecida_noutro_formato(self):
+        """Escreveste-lhe como '9912345'; ele responde como '+2389912345'."""
+        store.guardar_mensagem("9912345", "entrada", "Bom dia")
+        permitido, _ = compliance.pode_enviar_whatsapp("+238 991 23 45")
+        self.assertTrue(permitido)
+
+    def test_consentimento_vale_em_qualquer_formato(self):
+        store.registar_consentimento("+238 991 23 45", origem="teste")
+        self.assertTrue(store.tem_consentimento("9912345"))
+
+    def test_historico_junta_os_formatos(self):
+        store.guardar_mensagem("9912345", "entrada", "Bom dia")
+        store.guardar_mensagem("+238 991 23 45", "saida", "Bom dia, sr.")
+        self.assertEqual(len(store.historico("00238 9912345")), 2)
+
+
 class TestUtilitarios(unittest.TestCase):
 
     def test_json_com_ruido_a_volta(self):

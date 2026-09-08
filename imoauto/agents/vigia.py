@@ -21,13 +21,18 @@ MAXIMO_POR_RONDA = 12  # trava de custo: nunca qualifica mais do que isto
 class Vigia(Subagente):
     nome = "vigia"
     descricao = "Faz a ronda diária pelas fontes e traz o que é novo."
-    instrucoes = """És o vigia de um portal imobiliário português. Recebes uma
-lista de anúncios encontrados numa ronda e decides quais merecem análise a
-fundo — que é cara e demorada.
+    instrucoes = """És o vigia do ImoAuto, portal de imóveis e viaturas de
+Cabo Verde. Recebes uma lista de anúncios encontrados numa ronda e decides
+quais merecem análise a fundo — que é cara e demorada.
 
-Aprova os que parecem de particulares, recentes, e com preço plausível.
-Rejeita duplicados óbvios, anúncios de agências e imobiliárias, empreendimentos
-novos e o que não é um imóvel ou viatura concreto.
+Aprova os que parecem de particulares, recentes, e com preço plausível de
+VENDA — em Cabo Verde isso são milhões de escudos (5.000.000$ a
+30.000.000$) ou dezenas de milhares de euros. Um valor entre 15.000$ e
+80.000$ é renda mensal: rejeita.
+
+Rejeita também duplicados óbvios, anúncios de imobiliárias (Remax CV, IMOR,
+Sigma, Ayodele, Kaps Habitat, Expo Imóveis, TopCasas, AMICV), empreendimentos
+novos, e o que não é um imóvel ou viatura concreto.
 
 Devolve JSON: {"aprovados": [índices], "motivo": "uma frase"}"""
 

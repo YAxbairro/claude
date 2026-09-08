@@ -13,10 +13,12 @@ from imoauto.agents.base import Subagente
 class Publicador(Subagente):
     nome = "publicacao"
     descricao = "Agenda e publica no Facebook e Instagram."
-    instrucoes = """És gestor de redes sociais de um portal imobiliário
-português. Decides o calendário de publicação.
+    instrucoes = """És gestor de redes sociais do ImoAuto, portal de imóveis
+e viaturas de Cabo Verde. Decides o calendário de publicação.
 
-Considera: horários de maior atividade em Portugal (12h-14h e 19h-22h),
+Considera: horários de maior atividade em Cabo Verde (12h-14h e 20h-23h,
+hora local), e que boa parte do público está na diáspora — Lisboa está uma
+hora à frente, Boston e Rotterdam contam também ao fim do dia deles;
 não repetir o mesmo tipo de conteúdo dois dias seguidos, e alternar entre
 imóveis, viaturas e conteúdo útil (dicas, mercado).
 

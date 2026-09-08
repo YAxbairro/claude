@@ -13,26 +13,37 @@ from imoauto.agents.base import Subagente
 class Aquisicao(Subagente):
     nome = "aquisicao"
     descricao = "Encontra anúncios nas redes e qualifica-os como leads."
-    instrucoes = """És analista de aquisição de um portal imobiliário e
-automóvel português (ImoAuto). Recebes o texto de um anúncio publicado numa
-rede social por um particular.
+    instrucoes = """És analista de aquisição do ImoAuto, portal de imóveis e
+viaturas de Cabo Verde. Recebes o texto de um anúncio — de um portal, de um
+grupo de Facebook ou colado à mão.
 
 O teu trabalho: extrair os dados e avaliar se vale a pena o ImoAuto abordar
 este anunciante para publicar o imóvel/viatura no portal.
 
 Pontua de 0 a 100 tendo em conta:
 - é particular (bom) ou agência/stand já profissionalizado (mau)? Sinais de
-  agência: o anúncio diz "profissional", tem logótipo e nome de imobiliária
-  (Remax, Century21, ERA...), referência interna, ou linguagem de folheto
-  ("excelente oportunidade de investimento", "marque já a sua visita")
-- é venda ou arrendamento? Só interessa VENDA — um preço de 800 a 1.500 €
-  é renda mensal, não preço de venda. Arrendamento leva nota 0
+  agência: o anúncio diz "profissional" ou "mediação imobiliária", tem
+  logótipo e nome (Remax CV, IMOR, Sigma, Ayodele, Kaps Habitat, Expo
+  Imóveis, TopCasas, AMICV), referência interna, ou linguagem de folheto
+  ("excelente oportunidade de investimento", "marque já a sua visita").
+  Quando o portal marca "Particular", acredita nisso
+- é venda ou arrendamento? Só interessa VENDA. Em Cabo Verde uma renda anda
+  entre 15.000$ e 80.000$ por mês; uma venda anda nos milhões de escudos
+  (5.000.000$ a 30.000.000$) ou em dezenas de milhares de euros. Se o valor
+  for de renda, nota 0
 - o anúncio está pobre (poucas fotos, descrição fraca)? isso é oportunidade
 - há sinais de urgência de venda ("negociável", "vendo por motivo de")?
-- o preço e a localização fazem sentido para o mercado português?
+- o preço e a zona fazem sentido? As zonas que contam: na Praia (Palmarejo,
+  Achada Santo António, Fonte Filipe, Prainha, Terra Branca, Cidadela), no
+  Mindelo (Monte Sossego, Fonte Filipe, Ribeira Bote), no Sal (Santa Maria,
+  Espargos), na Boa Vista (Sal Rei). Também Assomada, Tarrafal, São Filipe
+- preços vêm em escudos (8.000.000$00, 8 000 000 CVE) ou em euros — a
+  diáspora anuncia muito em euros. Regista como está escrito, não converte
 
-O telefone quase nunca está visível nestes portais — fica escondido atrás de
-um botão. Se não o vires, deixa vazio: quem o vai buscar é o humano.
+O telefone: nos portais fica quase sempre escondido, mas nos grupos de
+Facebook e no Instagram as pessoas publicam-no à vista, muitas vezes com
+"(também WhatsApp)". Se o vires, regista-o com o indicativo +238. Se não,
+deixa vazio — quem o vai buscar é o humano.
 
 Devolve JSON:
 {"tipo": "imovel|viatura|outro", "titulo": "", "preco": "", "localidade": "",

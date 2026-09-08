@@ -166,12 +166,14 @@ def obter_lead(lead_id):
 
 def lead_por_telefone(telefone):
     """Encontra o lead associado a um número (para saber quem está a falar)."""
-    digitos = so_digitos(telefone)
+    procurado = numero_local(telefone)
+    if not procurado:
+        return None
     with ligar() as c:
         for linha in c.execute(
             "SELECT * FROM leads WHERE telefone != '' ORDER BY atualizado_em DESC"
         ):
-            if so_digitos(linha["telefone"])[-9:] == digitos[-9:]:
+            if numero_local(linha["telefone"]) == procurado:
                 return dict(linha)
     return None
 
@@ -200,13 +202,27 @@ def guardar_mensagem(telefone, direcao, texto, lead_id=None, canal="whatsapp"):
 
 
 def historico(telefone, limite=30):
+    formas = numeros_conhecidos(telefone)
+    marcadores = ",".join("?" * len(formas))
     with ligar() as c:
         linhas = c.execute(
-            """SELECT direcao, texto, criado_em FROM mensagens
-               WHERE telefone = ? ORDER BY criado_em DESC LIMIT ?""",
-            (telefone, limite),
+            f"""SELECT direcao, texto, criado_em FROM mensagens
+                WHERE telefone IN ({marcadores})
+                ORDER BY criado_em DESC LIMIT ?""",
+            (*formas, limite),
         ).fetchall()
     return [dict(l) for l in reversed(linhas)]
+
+
+def numeros_conhecidos(telefone):
+    """Todas as formas do mesmo número que já estão gravadas."""
+    procurado = numero_local(telefone)
+    with ligar() as c:
+        registados = {l["telefone"] for l in
+                      c.execute("SELECT DISTINCT telefone FROM mensagens")}
+    formas = {t for t in registados if numero_local(t) == procurado}
+    formas.add(telefone)
+    return list(formas)
 
 
 def houve_contacto_humano(telefone):
@@ -217,19 +233,24 @@ def houve_contacto_humano(telefone):
     teres iniciado a conversa a partir da app). Sem isto, seria contacto
     frio automatizado — proibido pela Meta.
     """
+    formas = numeros_conhecidos(telefone)
+    marcadores = ",".join("?" * len(formas))
     with ligar() as c:
         return c.execute(
-            "SELECT 1 FROM mensagens WHERE telefone = ? LIMIT 1", (telefone,)
+            f"SELECT 1 FROM mensagens WHERE telefone IN ({marcadores}) LIMIT 1",
+            formas,
         ).fetchone() is not None
 
 
 def ultima_mensagem_recebida(telefone):
+    formas = numeros_conhecidos(telefone)
+    marcadores = ",".join("?" * len(formas))
     with ligar() as c:
         linha = c.execute(
-            """SELECT criado_em FROM mensagens
-               WHERE telefone = ? AND direcao = 'entrada'
-               ORDER BY criado_em DESC LIMIT 1""",
-            (telefone,),
+            f"""SELECT criado_em FROM mensagens
+                WHERE telefone IN ({marcadores}) AND direcao = 'entrada'
+                ORDER BY criado_em DESC LIMIT 1""",
+            formas,
         ).fetchone()
     return linha["criado_em"] if linha else None
 
@@ -287,6 +308,26 @@ def registar(ator, acao, detalhe=""):
 
 def so_digitos(texto):
     return "".join(ch for ch in (texto or "") if ch.isdigit())
+
+
+def numero_local(telefone):
+    """
+    Reduz um número à sua parte local, para poder comparar.
+
+    Em Cabo Verde os números têm 7 dígitos e o indicativo é +238. A mesma
+    pessoa aparece como "+238 991 23 45", "00238 9912345" ou só "991 23 45"
+    — e todas essas formas têm de ser reconhecidas como a mesma. Sem isto,
+    o robô não liga a mensagem que chega ao lead de quem a enviou.
+    """
+    digitos = so_digitos(telefone)
+    if not digitos:
+        return ""
+    digitos = digitos.lstrip("0")
+    indicativo = config.INDICATIVO
+    if (indicativo and digitos.startswith(indicativo)
+            and len(digitos) > config.DIGITOS_LOCAIS):
+        digitos = digitos[len(indicativo):]
+    return digitos[-config.DIGITOS_LOCAIS:]
 
 
 # --- Definições e fontes -------------------------------------------------
@@ -393,11 +434,11 @@ def registar_consentimento(telefone, origem, nota="", lead_id=None):
 
 
 def tem_consentimento(telefone):
-    digitos = so_digitos(telefone)
-    if not digitos:
+    procurado = numero_local(telefone)
+    if not procurado:
         return False
     with ligar() as c:
         for linha in c.execute("SELECT telefone FROM consentimentos"):
-            if so_digitos(linha["telefone"])[-9:] == digitos[-9:]:
+            if numero_local(linha["telefone"]) == procurado:
                 return True
     return False

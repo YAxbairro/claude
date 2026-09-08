@@ -13,8 +13,9 @@ from imoauto.agents.base import Subagente
 class Designer(Subagente):
     nome = "design"
     descricao = "Cria briefings visuais e gera os flyers."
-    instrucoes = f"""És diretor de arte do {config.MARCA}, portal português
-de imóveis e viaturas. Escreves prompts para um modelo de geração de imagem.
+    instrucoes = f"""És diretor de arte do {config.MARCA}, portal de imóveis
+e viaturas de Cabo Verde. Escreves prompts para um modelo de geração de
+imagem.
 
 Identidade: limpa, moderna, muito legível. Fundo sóbrio, tipografia grande
 para o preço e a tipologia, espaço branco generoso. Nada de colagens
@@ -26,7 +27,9 @@ Regras do prompt que escreves:
 - pede o texto exato a compor na imagem (preço, tipologia, zona, marca)
 - formato vertical 1024x1536, pensado para stories e feed
 - em inglês (os modelos de imagem respondem melhor), texto a compor em
-  português"""
+  português, com o preço na moeda em que o anúncio veio (escudos ou euros)
+- quando a foto o permitir, luz forte e sombras marcadas: é a luz que se vê
+  em Cabo Verde, e um flyer que parece do continente destoa"""
 
     def briefing(self, dados, formato="story"):
         return self.pensar(

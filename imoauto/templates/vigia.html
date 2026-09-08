@@ -44,8 +44,8 @@
 <div class="carta">
   <h3 style="margin-top:0">Onde ele procura</h3>
   <p class="sub">Uma linha por sítio. Podes colar o endereço de qualquer
-    página de resultados do OLX, Imovirtual ou CustoJusto — por exemplo, uma
-    pesquisa já filtrada pela tua zona.</p>
+    página de resultados de um portal — por exemplo o NhaKaza já filtrado
+    pela ilha que te interessa.</p>
   <form method="post" action="/vigia/fontes">
     {% for fonte in fontes %}
     <div style="padding:12px 0;border-bottom:1px solid var(--linha)">
@@ -58,9 +58,9 @@
     </div>
     {% endfor %}
     <label>Acrescentar um sítio novo — nome
-      <input type="text" name="novo_nome" placeholder="OLX · Setúbal viaturas"></label>
+      <input type="text" name="novo_nome" placeholder="NhaKaza · Fogo"></label>
     <label>Endereço da página de resultados
-      <input type="text" name="novo_alvo" placeholder="https://www.olx.pt/..."></label>
+      <input type="text" name="novo_alvo" placeholder="https://nhakaza.cv/..."></label>
     <div class="botoes"><button class="botao" type="submit">Guardar</button></div>
   </form>
 </div>
