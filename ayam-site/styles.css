@@ -23,9 +23,9 @@
   --gold-deep:  #7E560A;
 
   /* texto */
-  --ink:        #4A2C22;
-  --stone:      #7D6151;
-  --stone-dim:  #9A8070;
+  --ink:        #4A2C22;   /* 8.9:1  — texto principal */
+  --stone:      #6F5344;   /* 6.2:1  — texto secundário */
+  --stone-dim:  #7F6253;   /* 4.9:1  — etiquetas: distingue-se pela forma, não por ser mais claro */
 
   /* vidro claro */
   --glass:      rgba(255, 252, 246, .60);
@@ -101,7 +101,7 @@ ul,ol{ margin:0; padding:0; list-style:none; }
 .eyebrow{
   font-family:'IBM Plex Mono', ui-monospace, Menlo, monospace;
   font-size:var(--t-xs); letter-spacing:0.22em; text-transform:uppercase;
-  color:var(--gold); display:flex; align-items:center; gap:0.7em;
+  color:var(--burgundy); display:flex; align-items:center; gap:0.7em;
 }
 .eyebrow::before{ content:''; width:26px; height:1px; background:var(--gold); opacity:.75; flex:none; }
 .eyebrow--plain::before{ display:none; }
@@ -412,7 +412,7 @@ ul,ol{ margin:0; padding:0; list-style:none; }
 }
 .float:hover{ border-color:var(--glass-lit); transform:translateX(-4px); }
 .float b{ font-family:'Fraunces',serif; font-weight:500; font-size:1.04rem; color:var(--burgundy); }
-.float span{ font-size:var(--t-sm); color:var(--stone); line-height:1.45; }
+.float span{ font-size:var(--t-sm); color:var(--ink); line-height:1.45; }
 
 .ln{ display:block; overflow:hidden; padding-block:0.04em; }
 .ln__i{ display:block; }
@@ -587,7 +587,7 @@ ul,ol{ margin:0; padding:0; list-style:none; }
   transition:background-color .35s ease, transform .35s var(--ease);
 }
 .deck__dot.is-on{ background:var(--gold-lit); transform:scale(1.5); }
-.deck__hint{ text-align:center; color:var(--stone-dim); margin-top:12px; position:relative; z-index:2; }
+.deck__hint{ text-align:center; color:var(--stone); margin-top:12px; position:relative; z-index:2; }
 
 /* ============================================================
    DOIS CAMINHOS
@@ -608,14 +608,14 @@ ul,ol{ margin:0; padding:0; list-style:none; }
 .track:hover .track__bg img{ transform:scale(1.07); }
 .track__bg::after{
   content:''; position:absolute; inset:0;
-  background:linear-gradient(to top, rgba(245,240,230,.97) 12%, rgba(245,240,230,.82) 46%, rgba(245,240,230,.4) 100%);
+  background:linear-gradient(to top, rgba(245,240,230,.99) 14%, rgba(245,240,230,.9) 48%, rgba(245,240,230,.45) 100%);
 }
 .track h3{ font-size:var(--t-lg); font-weight:300; }
 .track h3 em{ font-style:italic; color:var(--rust); }
 .track__list{ display:flex; flex-direction:column; }
 .track__list li{
   padding-block:9px; border-top:1px solid var(--glass-line);
-  font-size:var(--t-sm); color:var(--stone);
+  font-size:var(--t-sm); color:var(--ink);
   display:grid; grid-template-columns:auto 1fr; gap:11px; align-items:baseline;
 }
 .track__list li::before{ content:'\2014'; color:var(--gold); }
@@ -659,11 +659,11 @@ ul,ol{ margin:0; padding:0; list-style:none; }
 @media (min-width:1020px){ .steps{ grid-template-columns:repeat(4,1fr); } }
 .step-c{ padding:clamp(22px,2.8vw,32px); display:flex; flex-direction:column; gap:10px; }
 .step-c__n{
-  font-family:'Fraunces',serif; font-size:2.2rem; line-height:1; color:var(--cream-3);
+  font-family:'Fraunces',serif; font-size:2.2rem; line-height:1; color:var(--gold);
   font-variation-settings:'SOFT' 8,'opsz' 90; font-variant-numeric:tabular-nums;
-  transition:color .5s ease; -webkit-text-stroke:0;
+  transition:color .5s ease;
 }
-.step-c:hover .step-c__n{ color:var(--gold-lit); }
+.step-c:hover .step-c__n{ color:var(--burgundy); }
 .step-c h3{ font-size:1.1rem; font-variation-settings:'SOFT' 10,'opsz' 40; }
 .step-c p{ font-size:var(--t-sm); color:var(--stone); line-height:1.5; }
 
@@ -684,8 +684,7 @@ ul,ol{ margin:0; padding:0; list-style:none; }
   font-size:clamp(1.55rem,.9rem+3.1vw,3.5rem); font-style:italic; line-height:1.16; max-width:17ch;
   font-variation-settings:'SOFT' 26,'WONK' 1,'opsz' 130;
 }
-.cv__pt{ color:var(--stone); max-width:44ch; font-size:var(--t-sm); }
-.cv__tag{ color:var(--gold); }
+.cv__pt{ color:var(--ink); max-width:44ch; font-size:var(--t-sm); }
 
 /* ============================================================
    NÚMEROS + MISSÃO
@@ -714,7 +713,7 @@ ul,ol{ margin:0; padding:0; list-style:none; }
 .marquee__track{ display:flex; gap:clamp(26px,4vw,58px); width:max-content; will-change:transform; }
 .marquee__item{
   font-family:'Fraunces',serif; font-size:clamp(1.3rem,.9rem+1.5vw,2.2rem);
-  color:rgba(91,26,20,.32); font-weight:300; white-space:nowrap;
+  color:rgba(91,26,20,.42); font-weight:300; white-space:nowrap;
   display:flex; align-items:center; gap:clamp(26px,4vw,58px);
   font-variation-settings:'SOFT' 12,'opsz' 70;
 }
@@ -788,6 +787,11 @@ ul,ol{ margin:0; padding:0; list-style:none; }
 .channel:last-of-type{ border-bottom:1px solid var(--glass-line); }
 .channel:hover{ padding-left:10px; }
 .channel__k{ color:var(--stone-dim); min-width:8ch; }
+/* em ecrã estreito a etiqueta sobe para a sua própria linha: senão o email parte a meio */
+@media (max-width:560px){
+  .channel{ grid-template-columns:1fr auto; gap:4px 12px; }
+  .channel__k{ grid-column:1 / -1; min-width:0; }
+}
 .channel__v{ font-size:var(--t-md); color:var(--burgundy); word-break:break-word; }
 .channel__a{ color:var(--gold); transition:transform .4s ease; flex:none; }
 .channel:hover .channel__a{ transform:translateX(4px); }
@@ -866,7 +870,7 @@ ul,ol{ margin:0; padding:0; list-style:none; }
 @media (min-width:760px){ .foot__grid{ grid-template-columns:1.2fr 1fr 1fr; } }
 .foot__logo img{ width:120px; }
 .foot h4{ font-family:'IBM Plex Mono',monospace; font-size:var(--t-xs); letter-spacing:.2em; text-transform:uppercase; color:var(--gold); font-weight:400; margin-bottom:12px; }
-.foot p, .foot li{ font-size:var(--t-sm); color:var(--stone); line-height:1.65; }
+.foot p, .foot li{ font-size:var(--t-sm); color:var(--ink); line-height:1.65; }
 .foot li + li{ margin-top:5px; }
 .foot a:hover{ color:var(--burgundy); }
 .foot__bar{ border-top:1px solid var(--glass-line); padding-block:16px; display:flex; flex-wrap:wrap; gap:12px 24px; align-items:center; color:var(--stone-dim); }
