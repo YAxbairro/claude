@@ -4,690 +4,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400..700&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
 
-<style>
-/* ============================================================
-   AYAM Viagens & Turismo
-   Paleta extraída do logótipo: bordô #4A0D0A · ouro #D8900C · ferrugem #B15706
-   Tipos: Fraunces (display) · Archivo (texto) · IBM Plex Mono (dados)
-   ============================================================ */
-
-:root{
-  /* fundos — pretos com viés quente vermelho-castanho, derivados do bordô */
-  --night:      #140604;
-  --night-2:    #1B0907;
-  --night-3:    #23100C;
-  --edge:       #3A1A12;
-  --edge-soft:  #2A1310;
-
-  /* marca */
-  --maroon:     #4A0D0A;
-  --rust:       #B15706;
-  --gold:       #D8900C;
-  --gold-lit:   #EFB33A;
-  --gold-deep:  #8A5A07;
-
-  /* texto */
-  --sand:       #F5EDE0;
-  --stone:      #B39C8C;
-  --stone-dim:  #7D6759;
-
-  --maxw: 1320px;
-  --gut: clamp(20px, 5vw, 72px);
-
-  /* escala tipográfica */
-  --t-xs:  0.72rem;
-  --t-sm:  0.82rem;
-  --t-base:1rem;
-  --t-md:  clamp(1.05rem, 0.98rem + 0.35vw, 1.25rem);
-  --t-lg:  clamp(1.5rem, 1.2rem + 1.4vw, 2.3rem);
-  --t-xl:  clamp(2.1rem, 1.5rem + 2.9vw, 4rem);
-  --t-2xl: clamp(2.8rem, 1.6rem + 5.4vw, 6.6rem);
-  --t-3xl: clamp(2.6rem, 1.05rem + 5.6vw, 6.2rem);
-
-  color-scheme: dark;
-}
-
-*,*::before,*::after{ box-sizing:border-box; }
-
-body{
-  margin:0;
-  background:var(--night);
-  color:var(--sand);
-  font-family:'Archivo', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  font-size:var(--t-base);
-  line-height:1.6;
-  -webkit-font-smoothing:antialiased;
-  text-rendering:optimizeLegibility;
-  overflow-x:hidden;
-}
-
-img{ max-width:100%; display:block; }
-a{ color:inherit; text-decoration:none; }
-button{ font:inherit; color:inherit; background:none; border:none; cursor:pointer; }
-
-:focus-visible{
-  outline:2px solid var(--gold-lit);
-  outline-offset:3px;
-  border-radius:2px;
-}
-
-h1,h2,h3,h4{
-  font-family:'Fraunces', ui-serif, Georgia, 'Times New Roman', serif;
-  font-weight:400;
-  line-height:1.02;
-  letter-spacing:-0.022em;
-  text-wrap:balance;
-  margin:0;
-  font-variation-settings:'SOFT' 12, 'WONK' 1, 'opsz' 120;
-}
-
-p{ margin:0; }
-ul{ margin:0; padding:0; list-style:none; }
-
-/* ---------- utilidades ---------- */
-.wrap{ width:100%; max-width:var(--maxw); margin-inline:auto; padding-inline:var(--gut); }
-
-.eyebrow{
-  font-family:'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-  font-size:var(--t-xs);
-  letter-spacing:0.22em;
-  text-transform:uppercase;
-  color:var(--gold);
-  display:flex; align-items:center; gap:0.7em;
-}
-.eyebrow::before{
-  content:''; width:26px; height:1px; background:var(--gold); opacity:.65; flex:none;
-}
-.eyebrow--plain::before{ display:none; }
-
-.mono{
-  font-family:'IBM Plex Mono', ui-monospace, Menlo, monospace;
-  font-size:var(--t-xs);
-  letter-spacing:0.12em;
-  font-variant-numeric:tabular-nums;
-}
-
-.lede{
-  font-size:var(--t-md);
-  color:var(--stone);
-  line-height:1.66;
-  max-width:62ch;
-}
-
-.rule{ height:1px; background:var(--edge-soft); border:0; margin:0; }
-
-.section{ padding-block:clamp(72px, 11vw, 160px); position:relative; }
-
-/* ---------- grão de filme ---------- */
-.grain{
-  position:fixed; inset:0; z-index:60; pointer-events:none; opacity:.055;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  mix-blend-mode:overlay;
-}
-
-/* ============================================================
-   PRÉ-CARREGAMENTO
-   ============================================================ */
-.preload{
-  position:fixed; inset:0; z-index:100;
-  background:var(--night);
-  display:grid; place-items:center;
-  animation:preload-failsafe .5s 3.2s forwards;
-}
-@keyframes preload-failsafe{ to{ opacity:0; visibility:hidden; } }
-.preload__inner{ display:flex; flex-direction:column; align-items:center; gap:22px; }
-.preload__mark{ width:min(190px, 46vw); opacity:.92; }
-.preload__bar{ width:min(210px, 50vw); height:1px; background:var(--edge); position:relative; overflow:hidden; }
-.preload__fill{ position:absolute; inset:0; background:var(--gold); transform:scaleX(0); transform-origin:left; }
-.preload__num{ color:var(--stone-dim); }
-
-/* ============================================================
-   ROTA — a linha de voo que se desenha (assinatura da marca)
-   ============================================================ */
-.route{
-  position:fixed; left:max(16px, 2.1vw); top:0; height:100vh; width:34px;
-  z-index:40; pointer-events:none;
-  display:none;
-}
-.route__svg{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
-.route__base{ stroke:var(--edge); stroke-width:1; fill:none; stroke-dasharray:3 6; }
-.route__live{ stroke:var(--gold); stroke-width:1.4; fill:none; stroke-dasharray:3 6; }
-.route__plane{
-  position:absolute; left:50%; top:0; width:15px; height:15px;
-  margin-left:-7.5px; margin-top:-7.5px;
-  color:var(--gold-lit);
-  filter:drop-shadow(0 0 7px rgba(216,144,12,.55));
-}
-.route__plane svg{ display:block; width:100%; height:100%; }
-@media (min-width:1180px){ .route{ display:block; } }
-
-/* ============================================================
-   NAVEGAÇÃO
-   ============================================================ */
-.nav{
-  position:fixed; inset:0 0 auto 0; z-index:50;
-  display:flex; align-items:center; gap:24px;
-  padding:16px var(--gut);
-  transition:background-color .45s ease, backdrop-filter .45s ease, border-color .45s ease, padding .45s ease;
-  border-bottom:1px solid transparent;
-}
-.nav.is-stuck{
-  background:rgba(20,6,4,.82);
-  backdrop-filter:blur(14px) saturate(1.3);
-  -webkit-backdrop-filter:blur(14px) saturate(1.3);
-  border-bottom-color:var(--edge-soft);
-  padding-block:11px;
-}
-.nav__logo{ flex:none; }
-.nav__logo img{ width:clamp(122px, 12.5vw, 158px); height:auto; }
-.nav__links{ display:none; gap:clamp(18px,2.4vw,34px); margin-inline:auto; }
-.nav__link{
-  font-size:var(--t-sm); letter-spacing:.04em; color:var(--stone);
-  position:relative; padding-block:4px; transition:color .3s ease;
-}
-.nav__link::after{
-  content:''; position:absolute; left:0; bottom:0; width:100%; height:1px;
-  background:var(--gold); transform:scaleX(0); transform-origin:right;
-  transition:transform .42s cubic-bezier(.4,0,.2,1);
-}
-.nav__link:hover{ color:var(--sand); }
-.nav__link:hover::after{ transform:scaleX(1); transform-origin:left; }
-@media (min-width:940px){ .nav__links{ display:flex; } }
-
-.nav__cta{ margin-left:auto; }
-@media (min-width:940px){ .nav__cta{ margin-left:0; } }
-
-/* botão */
-.btn{
-  --btn-fg:var(--night);
-  --btn-bg:var(--gold);
-  display:inline-flex; align-items:center; gap:.6em;
-  padding:.85em 1.5em;
-  background:var(--btn-bg); color:var(--btn-fg);
-  font-size:var(--t-sm); font-weight:600; letter-spacing:.03em;
-  border-radius:100px;
-  position:relative; overflow:hidden; isolation:isolate;
-  transition:color .38s ease;
-  white-space:nowrap;
-}
-.btn::before{
-  content:''; position:absolute; inset:0; z-index:-1;
-  background:var(--sand);
-  transform:translateY(101%);
-  transition:transform .48s cubic-bezier(.66,0,.24,1);
-}
-.btn:hover::before{ transform:translateY(0); }
-.btn svg{ width:1em; height:1em; flex:none; }
-
-.btn--ghost{
-  --btn-bg:transparent; --btn-fg:var(--sand);
-  border:1px solid var(--edge);
-}
-.btn--ghost::before{ background:var(--gold); }
-.btn--ghost:hover{ color:var(--night); }
-
-.btn--sm{ padding:.62em 1.15em; font-size:var(--t-xs); }
-
-/* ============================================================
-   HERÓI
-   ============================================================ */
-.hero{
-  position:relative;
-  height:min(92svh, 900px);
-  min-height:548px;
-  display:flex; flex-direction:column; justify-content:flex-end;
-  overflow:hidden;
-}
-.hero__media{ position:absolute; inset:-6% 0 0 0; z-index:0; will-change:transform; }
-.hero__media img{ width:100%; height:100%; object-fit:cover; }
-.hero__scrim{
-  position:absolute; inset:0; z-index:1;
-  background:
-    linear-gradient(to top, var(--night) 2%, rgba(20,6,4,.72) 30%, rgba(20,6,4,.22) 62%, rgba(20,6,4,.45) 100%),
-    linear-gradient(to right, rgba(74,13,10,.5), transparent 58%);
-}
-.hero__body{ position:relative; z-index:2; padding-bottom:clamp(26px,4.5vw,54px); }
-.hero__inner{ display:flex; flex-direction:column; gap:clamp(16px,2.2vw,26px); max-width:min(100%, 940px); }
-.hero h1{
-  font-size:var(--t-3xl);
-  max-width:none;
-  font-variation-settings:'SOFT' 18, 'WONK' 1, 'opsz' 144;
-  font-weight:300;
-}
-.hero h1 em{
-  font-style:italic; color:var(--gold);
-  font-variation-settings:'SOFT' 30, 'WONK' 1, 'opsz' 144;
-}
-.hero__sub{ max-width:44ch; color:var(--sand); opacity:.86; font-size:var(--t-md); }
-.hero__actions{ display:flex; flex-wrap:wrap; gap:12px; margin-top:6px; }
-
-/* linhas mascaradas */
-.ln{ display:block; overflow:hidden; padding-block:0.04em; }
-.ln__i{ display:block; }
-
-/* faixa de dados tipo painel de embarque */
-.readout{
-  position:relative; z-index:2;
-  border-top:1px solid var(--edge-soft);
-  background:linear-gradient(to top, rgba(20,6,4,.9), rgba(20,6,4,.35));
-}
-.readout__grid{
-  display:flex; flex-wrap:wrap; align-items:center; gap:clamp(14px,3vw,40px);
-  padding-block:13px;
-  color:var(--stone);
-}
-.readout__item{ display:flex; align-items:baseline; gap:.55em; }
-.readout__k{ color:var(--stone-dim); }
-.readout__v{ color:var(--sand); }
-.readout__dot{
-  width:5px; height:5px; border-radius:50%; background:var(--gold);
-  animation:pulse 2.4s ease-in-out infinite; flex:none; align-self:center;
-}
-@keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.25} }
-.readout__cue{ margin-left:auto; display:flex; align-items:center; gap:.6em; color:var(--stone-dim); }
-.readout__cue span{ display:block; width:1px; height:18px; background:var(--edge); position:relative; overflow:hidden; }
-.readout__cue span::after{
-  content:''; position:absolute; inset:0; background:var(--gold);
-  animation:cue 2.1s cubic-bezier(.7,0,.3,1) infinite;
-}
-@keyframes cue{ 0%{transform:translateY(-100%)} 55%,100%{transform:translateY(100%)} }
-
-/* ============================================================
-   SOBRE / MANIFESTO
-   ============================================================ */
-.about__top{
-  display:grid; gap:clamp(26px,4vw,60px);
-  grid-template-columns:1fr;
-  align-items:start;
-}
-@media (min-width:900px){ .about__top{ grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr); } }
-
-.manifesto{
-  font-family:'Fraunces', serif;
-  font-size:var(--t-lg);
-  line-height:1.34;
-  font-weight:300;
-  letter-spacing:-0.014em;
-  font-variation-settings:'SOFT' 14,'WONK' 0,'opsz' 90;
-  max-width:26ch;
-}
-.manifesto .w{ display:inline-block; }
-.manifesto .hl{ color:var(--gold); font-style:italic; }
-
-.about__cols{ display:grid; gap:clamp(20px,3vw,34px); grid-template-columns:1fr; }
-@media (min-width:560px){ .about__cols{ grid-template-columns:1fr 1fr; } }
-
-.fact{ display:flex; flex-direction:column; gap:9px; padding-top:16px; border-top:1px solid var(--edge-soft); }
-.fact__n{
-  font-family:'Fraunces', serif; font-size:clamp(2.1rem,1.4rem+2.6vw,3.3rem);
-  color:var(--gold); line-height:1; font-variation-settings:'SOFT' 8,'opsz' 110;
-  font-variant-numeric:tabular-nums;
-}
-.fact__l{ font-size:var(--t-sm); color:var(--stone); max-width:26ch; }
-
-/* par de fotos Cabo Verde */
-.cvpair{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:clamp(28px,4vw,44px); }
-.cvpair figure{ margin:0; position:relative; overflow:hidden; }
-.cvpair img{ width:100%; aspect-ratio:19/14; object-fit:cover; }
-.cvpair figcaption{
-  position:absolute; left:10px; bottom:8px;
-  font-family:'IBM Plex Mono',monospace; font-size:var(--t-xs);
-  letter-spacing:.14em; text-transform:uppercase; color:var(--sand);
-  text-shadow:0 1px 8px rgba(20,6,4,.9);
-}
-
-/* ============================================================
-   SERVIÇOS
-   ============================================================ */
-.svc-head{ display:flex; flex-direction:column; gap:16px; margin-bottom:clamp(34px,5vw,64px); max-width:54ch; }
-.svc-grid{ display:grid; gap:1px; background:var(--edge-soft); border-block:1px solid var(--edge-soft); grid-template-columns:1fr; }
-@media (min-width:640px){ .svc-grid{ grid-template-columns:1fr 1fr; } }
-@media (min-width:1020px){ .svc-grid{ grid-template-columns:repeat(4,1fr); } }
-
-.svc{
-  background:var(--night); padding:clamp(22px,2.6vw,32px);
-  display:flex; flex-direction:column; gap:11px; min-height:196px;
-  position:relative; isolation:isolate; overflow:hidden;
-  transition:background-color .5s ease;
-}
-.svc::before{
-  content:''; position:absolute; inset:0; z-index:-1;
-  background:linear-gradient(160deg, var(--night-3), var(--night));
-  opacity:0; transition:opacity .5s ease;
-}
-.svc:hover::before{ opacity:1; }
-.svc__i{
-  width:30px; height:30px; color:var(--gold);
-  transition:transform .55s cubic-bezier(.4,0,.2,1);
-}
-.svc:hover .svc__i{ transform:translateY(-3px) rotate(-5deg); }
-.svc__i svg{ width:100%; height:100%; }
-.svc h3{ font-size:1.14rem; letter-spacing:-.01em; font-variation-settings:'SOFT' 10,'opsz' 40; }
-.svc p{ font-size:var(--t-sm); color:var(--stone); line-height:1.55; }
-
-/* ============================================================
-   BILHETES AÉREOS
-   ============================================================ */
-.air{ background:var(--night-2); border-block:1px solid var(--edge-soft); }
-.air__grid{ display:grid; gap:clamp(30px,5vw,70px); grid-template-columns:1fr; align-items:start; }
-@media (min-width:960px){ .air__grid{ grid-template-columns:minmax(0,1fr) minmax(0,1.05fr); } }
-
-.air h2{ font-size:var(--t-xl); font-weight:300; margin-block:14px 18px; }
-.air h2 em{ font-style:italic; color:var(--gold); }
-
-.promises{ display:flex; flex-direction:column; }
-.promise{
-  display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:start;
-  padding-block:17px; border-top:1px solid var(--edge-soft);
-}
-.promise:last-child{ border-bottom:1px solid var(--edge-soft); }
-.promise__n{ color:var(--gold-deep); padding-top:.22em; }
-.promise__t{ font-size:var(--t-base); color:var(--sand); line-height:1.5; }
-
-/* cabines */
-.cabins{ display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-top:26px; }
-.cabin{
-  border:1px solid var(--edge-soft); padding:15px 13px;
-  display:flex; flex-direction:column; gap:5px;
-  transition:border-color .4s ease, background-color .4s ease;
-}
-.cabin:hover{ border-color:var(--gold-deep); background:var(--night-3); }
-.cabin__c{ color:var(--gold); }
-.cabin__n{ font-size:var(--t-sm); color:var(--stone); }
-
-/* ============================================================
-   DOIS CAMINHOS — corporativo / particular
-   ============================================================ */
-.tracks{ display:grid; gap:1px; background:var(--edge-soft); grid-template-columns:1fr; }
-@media (min-width:880px){ .tracks{ grid-template-columns:1fr 1fr; } }
-.track{
-  background:var(--night); padding:clamp(28px,4vw,54px);
-  display:flex; flex-direction:column; gap:18px;
-  position:relative; isolation:isolate; overflow:hidden;
-}
-.track::before{
-  content:''; position:absolute; inset:0; z-index:-1;
-  background:radial-gradient(120% 90% at 0% 0%, rgba(74,13,10,.55), transparent 62%);
-  opacity:0; transition:opacity .6s ease;
-}
-.track:hover::before{ opacity:1; }
-.track h3{ font-size:var(--t-lg); font-weight:300; }
-.track h3 em{ font-style:italic; color:var(--gold); }
-.track__list{ display:flex; flex-direction:column; gap:1px; margin-top:4px; }
-.track__list li{
-  padding-block:11px; border-top:1px solid var(--edge-soft);
-  font-size:var(--t-sm); color:var(--stone);
-  display:grid; grid-template-columns:auto 1fr; gap:12px; align-items:baseline;
-}
-.track__list li::before{ content:'—'; color:var(--gold-deep); }
-.track__foot{ margin-top:auto; padding-top:20px; font-family:'Fraunces',serif; font-size:1.06rem; color:var(--sand); font-style:italic; }
-
-/* ============================================================
-   DESTINOS — carrossel horizontal fixado
-   ============================================================ */
-.rail{ position:relative; background:var(--night); }
-.rail__head{
-  display:flex; flex-wrap:wrap; align-items:flex-end; gap:18px;
-  padding-block:clamp(60px,8vw,110px) clamp(24px,3vw,38px);
-}
-.rail__head h2{ font-size:var(--t-xl); font-weight:300; flex:1 1 260px; }
-.rail__head h2 em{ font-style:italic; color:var(--gold); }
-.rail__note{ color:var(--stone-dim); }
-
-.rail__viewport{ padding-bottom:clamp(60px,8vw,110px); }
-.rail__track{
-  display:flex; gap:clamp(12px,1.5vw,22px);
-  padding-inline:var(--gut);
-  width:max-content;
-}
-
-.card{
-  --cw: clamp(250px, 25vw, 340px);
-  width:var(--cw); flex:none;
-  display:flex; flex-direction:column;
-  position:relative;
-}
-.card__frame{
-  position:relative; overflow:hidden;
-  aspect-ratio:4/5; background:var(--night-3);
-}
-.card__img{
-  position:absolute; top:0; left:-12%; width:124%; height:100%;
-  object-fit:cover;
-  transition:filter .6s ease;
-  filter:saturate(.92) brightness(.92);
-  will-change:transform;
-}
-.card:hover .card__img{ filter:saturate(1.05) brightness(1); }
-.card__veil{
-  position:absolute; inset:0;
-  background:linear-gradient(to top, rgba(20,6,4,.88) 2%, rgba(20,6,4,.15) 48%, transparent 78%);
-}
-.card__code{
-  position:absolute; top:12px; right:13px;
-  font-family:'IBM Plex Mono',monospace; font-size:var(--t-xs);
-  letter-spacing:.16em; color:var(--sand);
-  padding:4px 8px; border:1px solid rgba(245,237,224,.28);
-  backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px);
-  background:rgba(20,6,4,.3);
-}
-.card__over{ position:absolute; left:15px; right:15px; bottom:13px; display:flex; flex-direction:column; gap:3px; }
-.card__country{
-  font-family:'IBM Plex Mono',monospace; font-size:var(--t-xs);
-  letter-spacing:.2em; text-transform:uppercase; color:var(--gold);
-}
-.card__name{
-  font-family:'Fraunces',serif; font-size:1.42rem; line-height:1.1;
-  font-variation-settings:'SOFT' 14,'WONK' 1,'opsz' 60;
-}
-.card__meta{
-  display:flex; flex-direction:column; gap:1px;
-  border-top:1px solid var(--edge-soft); margin-top:13px;
-}
-.card__row{
-  display:flex; justify-content:space-between; gap:10px;
-  padding-block:8px; border-bottom:1px solid var(--edge-soft);
-  font-family:'IBM Plex Mono',monospace; font-size:var(--t-xs);
-  letter-spacing:.06em; font-variant-numeric:tabular-nums;
-}
-.card__rk{ color:var(--stone-dim); }
-.card__rv{ color:var(--stone); }
-.card__rv--gold{ color:var(--gold); }
-
-@media (max-width:859px){
-  .rail__viewport{ overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
-  .rail__viewport::-webkit-scrollbar{ display:none; }
-  .rail__track{ transform:none !important; }
-  .card{ scroll-snap-align:center; --cw:min(76vw, 300px); }
-}
-@media (min-width:860px){ .rail__viewport{ overflow:hidden; } }
-
-/* ============================================================
-   CABO VERDE — momento em kriolu
-   ============================================================ */
-.cv{ position:relative; }
-.cv__sticky{
-  position:relative; height:100svh; min-height:520px;
-  display:grid; place-items:center; overflow:hidden;
-}
-.cv__media{ position:absolute; inset:0; z-index:0; clip-path:inset(9% 7% round 2px); will-change:clip-path; }
-.cv__media img{ width:100%; height:100%; object-fit:cover; }
-.cv__scrim{ position:absolute; inset:0; z-index:1; background:linear-gradient(to top, rgba(20,6,4,.9), rgba(20,6,4,.42) 55%, rgba(20,6,4,.7)); }
-.cv__body{ position:relative; z-index:2; text-align:center; display:flex; flex-direction:column; gap:20px; align-items:center; }
-.cv__kriolu{
-  font-family:'Fraunces',serif; font-weight:300;
-  font-size:clamp(1.55rem, .9rem + 3.1vw, 3.5rem);
-  font-style:italic; line-height:1.16; max-width:17ch;
-  font-variation-settings:'SOFT' 26,'WONK' 1,'opsz' 130;
-  text-shadow:0 2px 30px rgba(20,6,4,.6);
-}
-.cv__pt{ color:var(--stone); max-width:44ch; font-size:var(--t-sm); }
-.cv__tag{ color:var(--gold); }
-
-/* ============================================================
-   DIFERENCIAIS
-   ============================================================ */
-.diff__grid{ display:grid; gap:clamp(26px,4vw,56px); grid-template-columns:1fr; align-items:start; }
-@media (min-width:900px){ .diff__grid{ grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); } }
-.diff__list{ display:flex; flex-direction:column; }
-.diff__item{
-  display:grid; grid-template-columns:auto 1fr; gap:clamp(14px,2.2vw,28px);
-  align-items:baseline; padding-block:clamp(15px,1.9vw,22px);
-  border-top:1px solid var(--edge-soft);
-  transition:padding-left .45s cubic-bezier(.4,0,.2,1), color .45s ease;
-  color:var(--stone);
-}
-.diff__item:last-child{ border-bottom:1px solid var(--edge-soft); }
-.diff__item:hover{ padding-left:12px; color:var(--sand); }
-.diff__k{ color:var(--gold-deep); transition:color .45s ease; }
-.diff__item:hover .diff__k{ color:var(--gold); }
-.diff__t{ font-size:var(--t-md); line-height:1.42; }
-
-/* editorial alto */
-.diff__fig{ margin:0; position:relative; overflow:hidden; }
-.diff__fig img{ width:100%; aspect-ratio:11/14; object-fit:cover; will-change:transform; }
-.diff__cap{
-  margin-top:12px; display:flex; justify-content:space-between; gap:12px;
-  color:var(--stone-dim);
-}
-
-/* ============================================================
-   MISSÃO / VISÃO / VALORES
-   ============================================================ */
-.mv{ background:var(--night-2); border-block:1px solid var(--edge-soft); }
-.mv__two{ display:grid; gap:1px; background:var(--edge-soft); grid-template-columns:1fr; margin-bottom:clamp(40px,6vw,80px); }
-@media (min-width:760px){ .mv__two{ grid-template-columns:1fr 1fr; } }
-.mv__cell{ background:var(--night-2); padding:clamp(26px,3.4vw,46px); display:flex; flex-direction:column; gap:15px; }
-.mv__cell h3{ font-size:var(--t-lg); font-weight:300; font-style:italic; color:var(--gold); }
-.mv__cell p{ color:var(--stone); font-size:var(--t-md); line-height:1.6; max-width:40ch; }
-
-.values{ display:grid; gap:1px; background:var(--edge-soft); grid-template-columns:1fr; border:1px solid var(--edge-soft); }
-@media (min-width:620px){ .values{ grid-template-columns:1fr 1fr; } }
-@media (min-width:1040px){ .values{ grid-template-columns:repeat(4,1fr); } }
-.value{
-  background:var(--night-2); padding:clamp(18px,2.2vw,26px);
-  display:flex; flex-direction:column; gap:7px;
-  transition:background-color .45s ease;
-}
-.value:hover{ background:var(--night-3); }
-.value__n{ font-family:'Fraunces',serif; font-size:1.08rem; color:var(--sand); }
-.value__d{ font-size:var(--t-sm); color:var(--stone); line-height:1.5; }
-
-/* ============================================================
-   NÚMEROS
-   ============================================================ */
-.stats{ display:grid; gap:1px; background:var(--edge-soft); grid-template-columns:1fr 1fr; border-block:1px solid var(--edge-soft); }
-@media (min-width:840px){ .stats{ grid-template-columns:repeat(4,1fr); } }
-.stat{ background:var(--night); padding:clamp(24px,3.2vw,44px) clamp(18px,2.4vw,30px); display:flex; flex-direction:column; gap:8px; }
-.stat__n{
-  font-family:'Fraunces',serif; font-weight:300;
-  font-size:clamp(2.4rem,1.3rem+3.7vw,4.4rem); line-height:.95;
-  color:var(--gold); font-variant-numeric:tabular-nums;
-  font-variation-settings:'SOFT' 10,'opsz' 130;
-  display:flex; align-items:baseline;
-}
-.stat__l{ font-size:var(--t-sm); color:var(--stone); max-width:22ch; }
-
-/* ============================================================
-   MARQUEE
-   ============================================================ */
-.marquee{ overflow:hidden; border-bottom:1px solid var(--edge-soft); padding-block:clamp(18px,2.4vw,30px); }
-.marquee__track{ display:flex; gap:clamp(26px,4vw,58px); width:max-content; will-change:transform; }
-.marquee__item{
-  font-family:'Fraunces',serif; font-size:clamp(1.3rem,.9rem+1.5vw,2.2rem);
-  color:var(--stone-dim); font-weight:300; white-space:nowrap;
-  display:flex; align-items:center; gap:clamp(26px,4vw,58px);
-  font-variation-settings:'SOFT' 12,'opsz' 70;
-}
-.marquee__item::after{ content:'✦'; font-size:.44em; color:var(--gold); font-family:'Archivo',sans-serif; }
-
-/* ============================================================
-   CONTACTO
-   ============================================================ */
-.contact{ position:relative; }
-.contact h2{
-  font-size:var(--t-2xl); font-weight:300; max-width:14ch;
-  font-variation-settings:'SOFT' 18,'WONK' 1,'opsz' 144;
-}
-.contact h2 em{ font-style:italic; color:var(--gold); }
-.contact__grid{ display:grid; gap:clamp(30px,5vw,64px); grid-template-columns:1fr; align-items:end; margin-top:clamp(26px,4vw,48px); }
-@media (min-width:880px){ .contact__grid{ grid-template-columns:minmax(0,1fr) minmax(0,.85fr); } }
-
-.channels{ display:flex; flex-direction:column; }
-.channel{
-  display:grid; grid-template-columns:auto 1fr auto; gap:16px; align-items:center;
-  padding-block:clamp(15px,1.8vw,20px); border-top:1px solid var(--edge-soft);
-  transition:padding-left .45s cubic-bezier(.4,0,.2,1);
-}
-.channel:last-of-type{ border-bottom:1px solid var(--edge-soft); }
-.channel:hover{ padding-left:10px; }
-.channel__k{ color:var(--stone-dim); min-width:9ch; }
-.channel__v{ font-size:var(--t-md); color:var(--sand); word-break:break-word; }
-.channel__a{ color:var(--gold); transition:transform .4s ease; flex:none; }
-.channel:hover .channel__a{ transform:translateX(4px); }
-
-.contact__cta{ display:flex; flex-wrap:wrap; gap:12px; margin-top:clamp(26px,3.5vw,40px); }
-
-/* ============================================================
-   RODAPÉ
-   ============================================================ */
-.foot{ border-top:1px solid var(--edge-soft); background:var(--night-2); }
-.foot__grid{
-  display:grid; gap:clamp(24px,3.5vw,48px); grid-template-columns:1fr;
-  padding-block:clamp(36px,5vw,62px);
-}
-@media (min-width:760px){ .foot__grid{ grid-template-columns:1.2fr 1fr 1fr; } }
-.foot__logo img{ width:120px; }
-.foot h4{ font-family:'IBM Plex Mono',monospace; font-size:var(--t-xs); letter-spacing:.2em; text-transform:uppercase; color:var(--gold); font-weight:400; margin-bottom:12px; }
-.foot p, .foot li{ font-size:var(--t-sm); color:var(--stone); line-height:1.65; }
-.foot li + li{ margin-top:5px; }
-.foot a:hover{ color:var(--gold); }
-.foot__bar{
-  border-top:1px solid var(--edge-soft);
-  padding-block:16px; display:flex; flex-wrap:wrap; gap:12px 24px; align-items:center;
-  color:var(--stone-dim);
-}
-.foot__bar a{ color:var(--stone-dim); text-decoration:underline; text-underline-offset:3px; }
-.foot__bar a:hover{ color:var(--gold); }
-.credits{ max-width:100%; line-height:1.7; }
-
-/* ============================================================
-   CURSOR
-   ============================================================ */
-.cursor{
-  position:fixed; top:0; left:0; z-index:70; pointer-events:none;
-  width:32px; height:32px; margin:-16px 0 0 -16px;
-  border:1px solid var(--gold); border-radius:50%;
-  display:none; place-items:center;
-  transition:width .35s ease, height .35s ease, margin .35s ease, background-color .35s ease, opacity .3s ease;
-  mix-blend-mode:normal;
-}
-.cursor__t{
-  font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.14em;
-  color:var(--night); opacity:0; transition:opacity .3s ease; text-transform:uppercase;
-}
-.cursor.is-big{ width:74px; height:74px; margin:-37px 0 0 -37px; background:var(--gold); }
-.cursor.is-big .cursor__t{ opacity:1; }
-@media (hover:hover) and (pointer:fine) and (min-width:1024px){ .cursor{ display:grid; } }
-
-/* ============================================================
-   MOVIMENTO REDUZIDO
-   ============================================================ */
-@media (prefers-reduced-motion: reduce){
-  *,*::before,*::after{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
-  .preload{ display:none; }
-  .route{ display:none; }
-  .cv__sticky{ height:auto; min-height:0; padding-block:clamp(60px,10vw,120px); }
-  .cv__media{ clip-path:none; }
-  .cursor{ display:none; }
-  .hero__media{ inset:0; }
-}
-</style>
-
+<a class="skip" href="#conteudo">Saltar para o conteúdo</a>
 <div class="grain" aria-hidden="true"></div>
 
-<!-- ============ PRÉ-CARREGAMENTO ============ -->
 <div class="preload" id="preload" aria-hidden="true">
   <div class="preload__inner">
     <img class="preload__mark" src="assets/ayam-logo.png" alt="">
@@ -696,38 +17,59 @@ ul{ margin:0; padding:0; list-style:none; }
   </div>
 </div>
 
-<!-- ============ ROTA (assinatura) ============ -->
+<div class="progress" aria-hidden="true"><div class="progress__bar" id="progressBar"></div></div>
+
 <div class="route" id="route" aria-hidden="true">
   <svg class="route__svg" viewBox="0 0 34 1000" preserveAspectRatio="none">
     <path class="route__base" d="M17 0 L17 1000"></path>
-    <path class="route__live" id="routeLive" d="M17 0 L17 1000"></path>
+    <path class="route__live" id="routeLive" d="M17 0 L17 0"></path>
   </svg>
   <div class="route__plane" id="routePlane">
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M12 2c.7 0 1.2.9 1.2 2v5.2l7.6 4.4c.4.2.6.6.6 1v1.3c0 .4-.4.7-.8.6l-7.4-2.2v4l2 1.6c.2.2.3.4.3.7v.9c0 .3-.3.5-.6.4L12 21l-2.9 1c-.3.1-.6-.1-.6-.4v-.9c0-.3.1-.5.3-.7l2-1.6v-4l-7.4 2.2c-.4.1-.8-.2-.8-.6v-1.3c0-.4.2-.8.6-1l7.6-4.4V4c0-1.1.5-2 1.2-2z"/>
-    </svg>
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c.7 0 1.2.9 1.2 2v5.2l7.6 4.4c.4.2.6.6.6 1v1.3c0 .4-.4.7-.8.6l-7.4-2.2v4l2 1.6c.2.2.3.4.3.7v.9c0 .3-.3.5-.6.4L12 21l-2.9 1c-.3.1-.6-.1-.6-.4v-.9c0-.3.1-.5.3-.7l2-1.6v-4l-7.4 2.2c-.4.1-.8-.2-.8-.6v-1.3c0-.4.2-.8.6-1l7.6-4.4V4c0-1.1.5-2 1.2-2z"/></svg>
   </div>
 </div>
 
 <div class="cursor" id="cursor" aria-hidden="true"><span class="cursor__t" id="cursorT">ver</span></div>
 
 <!-- ============ NAVEGAÇÃO ============ -->
-<nav class="nav" id="nav">
+<nav class="nav" id="nav" aria-label="Navegação principal">
   <a class="nav__logo" href="#topo" aria-label="AYAM Viagens e Turismo — início">
     <img src="assets/ayam-logo.png" alt="AYAM Viagens &amp; Turismo" width="832" height="320">
   </a>
-  <div class="nav__links">
+  <div class="nav__links" id="navLinks">
     <a class="nav__link" href="#sobre">Sobre</a>
     <a class="nav__link" href="#servicos">Serviços</a>
     <a class="nav__link" href="#voos">Bilhetes aéreos</a>
     <a class="nav__link" href="#destinos">Destinos</a>
-    <a class="nav__link" href="#contacto">Contacto</a>
+    <a class="nav__link" href="#pacotes">Pacotes</a>
+    <a class="nav__link" href="#orcamento">Contacto</a>
   </div>
-  <a class="nav__cta btn btn--sm" href="https://wa.me/2389990900" target="_blank" rel="noopener" data-magnetic>
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.87 9.87 0 004.79 1.22h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0012.04 2zm0 18.15h-.01a8.2 8.2 0 01-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 01-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23a8.2 8.2 0 018.24 8.24c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.24-.64.8-.78.97-.15.16-.29.18-.53.06-.25-.13-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.13-.15.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43h-.47c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07s.89 2.4 1.01 2.560c.12.17 1.74 2.66 4.22 3.73.59.25 1.05.4 1.41.52.59.19 1.13.16 1.56.1.47-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.1-.22-.16-.47-.28z"/></svg>
-    WhatsApp
-  </a>
+  <div class="nav__right">
+    <a class="nav__cta btn btn--sm" href="#orcamento" data-magnetic>Pedir proposta</a>
+    <button class="burger" id="burger" aria-expanded="false" aria-controls="menu" aria-label="Abrir menu">
+      <span class="burger__box" aria-hidden="true"><span></span><span></span></span>
+    </button>
+  </div>
 </nav>
+
+<!-- ============ MENU EM ECRÃ INTEIRO ============ -->
+<div class="menu" id="menu" hidden>
+  <div class="menu__bg" aria-hidden="true"></div>
+  <nav class="menu__links" aria-label="Navegação em ecrã inteiro">
+    <a class="menu__link" href="#sobre"><i>01</i> Sobre nós</a>
+    <a class="menu__link" href="#servicos"><i>02</i> Serviços</a>
+    <a class="menu__link" href="#voos"><i>03</i> Bilhetes aéreos</a>
+    <a class="menu__link" href="#destinos"><i>04</i> Destinos</a>
+    <a class="menu__link" href="#pacotes"><i>05</i> Pacotes</a>
+    <a class="menu__link" href="#caboverde"><i>06</i> Cabo Verde</a>
+    <a class="menu__link" href="#orcamento"><i>07</i> Pedir proposta</a>
+  </nav>
+  <div class="menu__foot">
+    <a href="https://wa.me/2389990900" target="_blank" rel="noopener">+238 999 09 00</a>
+    <a href="mailto:ayam.reservas@gmail.com">ayam.reservas@gmail.com</a>
+    <a href="https://instagram.com/ayam.cv" target="_blank" rel="noopener">@ayam.cv</a>
+  </div>
+</div>
 
 <!-- ============ HERÓI ============ -->
 <header class="hero" id="topo">
@@ -746,7 +88,7 @@ ul{ margin:0; padding:0; list-style:none; }
         </h1>
         <p class="hero__sub" data-hero="3">Viagens exclusivas para quem exige mais do que um destino.</p>
         <div class="hero__actions" data-hero="4">
-          <a class="btn" href="https://wa.me/2389990900" target="_blank" rel="noopener" data-magnetic>Planear a minha viagem</a>
+          <a class="btn" href="#orcamento" data-magnetic>Planear a minha viagem</a>
           <a class="btn btn--ghost" href="#destinos" data-magnetic>Ver destinos</a>
         </div>
       </div>
@@ -767,22 +109,22 @@ ul{ margin:0; padding:0; list-style:none; }
   </div>
 </header>
 
-<main>
+<main id="conteudo">
 
 <!-- ============ SOBRE ============ -->
-<section class="section" id="sobre" data-waypoint="Sobre">
+<section class="section" id="sobre" aria-labelledby="sobre-h">
   <div class="wrap">
     <div class="about__top">
       <div>
         <p class="eyebrow" data-reveal>Sobre nós</p>
-        <p class="manifesto" id="manifesto" data-manifesto>
+        <h2 id="sobre-h" class="manifesto" data-manifesto>
           A AYAM é uma agência 100% cabo-verdiana, com <span class="hl">alma local</span> e <span class="hl">visão global</span>. Atuamos com o rigor das melhores companhias do mundo.
-        </p>
+        </h2>
       </div>
       <div>
         <p class="lede" data-reveal>Combinamos serviço personalizado, tecnologia de ponta e parcerias internacionais de excelência, garantindo um atendimento completo, eficiente e humano. Cada viagem é tratada com profissionalismo, atenção ao detalhe e paixão por servir — como as grandes agências, mas com o nosso toque único.</p>
 
-        <div class="about__cols" style="margin-top:clamp(28px,4vw,44px)">
+        <div class="about__cols">
           <div class="fact" data-reveal>
             <span class="fact__n" data-count="10" data-suffix="+">0</span>
             <span class="fact__l">anos de experiência com rigor internacional</span>
@@ -795,11 +137,11 @@ ul{ margin:0; padding:0; list-style:none; }
 
         <div class="cvpair">
           <figure data-reveal>
-            <img src="assets/cv-a.jpg" alt="Baía de Mindelo, ilha de São Vicente" width="760" height="560" loading="lazy">
+            <img class="fade-img" src="assets/cv-a.jpg" alt="Baía de Mindelo, ilha de São Vicente" width="760" height="560" loading="lazy" decoding="async">
             <figcaption>Mindelo · VXE</figcaption>
           </figure>
           <figure data-reveal>
-            <img src="assets/cv-b.jpg" alt="Barcos de pesca em Santa Maria, ilha do Sal" width="760" height="560" loading="lazy">
+            <img class="fade-img" src="assets/cv-b.jpg" alt="Barcos de pesca em Santa Maria, ilha do Sal" width="760" height="560" loading="lazy" decoding="async">
             <figcaption>Santa Maria · SID</figcaption>
           </figure>
         </div>
@@ -809,74 +151,83 @@ ul{ margin:0; padding:0; list-style:none; }
 </section>
 
 <!-- ============ SERVIÇOS ============ -->
-<section class="section" id="servicos" data-waypoint="Serviços" style="padding-top:0">
+<section class="section" id="servicos" style="padding-top:0" aria-labelledby="servicos-h">
   <div class="wrap">
     <div class="svc-head">
       <p class="eyebrow" data-reveal>Serviços integrados</p>
-      <h2 style="font-size:var(--t-xl);font-weight:300" data-reveal>Do início <em style="font-style:italic;color:var(--gold)">ao regresso.</em></h2>
+      <h2 id="servicos-h" style="font-size:var(--t-xl);font-weight:300" data-reveal>Do início <em style="font-style:italic;color:var(--gold)">ao regresso.</em></h2>
       <p class="lede" data-reveal>Uma viagem bem feita é aquela em que o cliente não se preocupa com nada. Só desfruta.</p>
     </div>
-  </div>
 
-  <div class="wrap">
+    <div class="svc-lead" data-reveal>
+      <div class="svc-lead__t">
+        <p class="mono" style="color:var(--gold)">O NOSSO NÚCLEO</p>
+        <h3>Bilhetes aéreos, <em>em todas as classes.</em></h3>
+        <p>Parceria directa com as companhias internacionais mais prestigiadas. Tarifas optimizadas, rotas complexas resolvidas, e assistência antes, durante e depois da emissão.</p>
+        <a class="btn btn--ghost btn--sm" href="#voos" style="align-self:flex-start" data-magnetic>Como funciona</a>
+      </div>
+      <div class="svc-lead__cabins">
+        <div class="cabin"><span class="cabin__c mono">Y</span><span class="cabin__n">Económica</span></div>
+        <div class="cabin"><span class="cabin__c mono">J</span><span class="cabin__n">Executiva</span></div>
+        <div class="cabin"><span class="cabin__c mono">F</span><span class="cabin__n">Primeira</span></div>
+      </div>
+    </div>
+
     <div class="svc-grid">
       <article class="svc" data-reveal-stagger>
-        <span class="svc__i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h20M12 2c2.5 2.7 3.9 6.3 4 10-.1 3.7-1.5 7.3-4 10-2.5-2.7-3.9-6.3-4-10 .1-3.7 1.5-7.3 4-10z"/><circle cx="12" cy="12" r="10"/></svg></span>
-        <h3>Bilhetes aéreos</h3>
-        <p>Nacionais e internacionais, em todas as classes, com tarifas optimizadas e transparentes.</p>
+        <span class="svc__i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M3 21h18M9 21v-6h6v6"/><path d="M8 11h.01M12 11h.01M16 11h.01"/></svg></span>
+        <h4>Hotéis e resorts</h4>
+        <p>Unidades de luxo, boutique e conveniência, seleccionadas uma a uma.</p>
       </article>
       <article class="svc" data-reveal-stagger>
-        <span class="svc__i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M3 21h18M9 21v-6h6v6"/><path d="M8 11h.01M12 11h.01M16 11h.01"/></svg></span>
-        <h3>Hotéis e resorts</h3>
-        <p>Unidades de luxo, boutique e conveniência, selecionadas uma a uma.</p>
-      </article>
-      <article class="svc" data-reveal-stagger>
-        <span class="svc__i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16V9l2-5h12l2 5v7"/><path d="M2 16h20v3H2z"/><circle cx="7" cy="12.5" r="1.2"/><circle cx="17" cy="12.5" r="1.2"/><path d="M6 19v2M18 19v2"/></svg></span>
-        <h3>Transfers privados</h3>
+        <span class="svc__i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16V9l2-5h12l2 5v7"/><path d="M2 16h20v3H2z"/><circle cx="7" cy="12.5" r="1.2"/><circle cx="17" cy="12.5" r="1.2"/><path d="M6 19v2M18 19v2"/></svg></span>
+        <h4>Transfers privados</h4>
         <p>Serviço executivo à chegada e à partida, com motorista dedicado.</p>
       </article>
       <article class="svc" data-reveal-stagger>
-        <span class="svc__i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3v-5l2-5h14l2 5v5h-2"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/><path d="M9.5 17h5"/></svg></span>
-        <h3>Aluguer de viaturas</h3>
+        <span class="svc__i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3v-5l2-5h14l2 5v5h-2"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/><path d="M9.5 17h5"/></svg></span>
+        <h4>Aluguer de viaturas</h4>
         <p>Frota premium e convencional, com entrega no aeroporto ou ao domicílio.</p>
       </article>
       <article class="svc" data-reveal-stagger>
-        <span class="svc__i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v13H3z"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M3 12h18"/><path d="M12 12v2"/></svg></span>
-        <h3>Pacotes sob medida</h3>
+        <span class="svc__i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v13H3z"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M3 12h18"/><path d="M12 12v2"/></svg></span>
+        <h4>Pacotes sob medida</h4>
         <p>Roteiros exclusivos desenhados de raiz, do primeiro desejo ao último detalhe.</p>
       </article>
       <article class="svc" data-reveal-stagger>
-        <span class="svc__i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.4-3.2 8.2-8 9-4.8-.8-8-4.6-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg></span>
-        <h3>Vistos e seguros</h3>
+        <span class="svc__i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.4-3.2 8.2-8 9-4.8-.8-8-4.6-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg></span>
+        <h4>Vistos e seguros</h4>
         <p>Gestão completa de documentação e cobertura de viagem, sem surpresas.</p>
       </article>
       <article class="svc" data-reveal-stagger>
-        <span class="svc__i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0115 0"/></svg></span>
-        <h3>Travel Agent dedicado</h3>
+        <span class="svc__i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0115 0"/></svg></span>
+        <h4>Travel Agent dedicado</h4>
         <p>Uma pessoa responsável pela sua viagem, do planeamento ao regresso.</p>
       </article>
       <article class="svc" data-reveal-stagger>
-        <span class="svc__i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg></span>
-        <h3>Atendimento onde estiver</h3>
+        <span class="svc__i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg></span>
+        <h4>Atendimento onde estiver</h4>
         <p>Presencial, digital ou ao domicílio — com marcação prévia.</p>
+      </article>
+      <article class="svc" data-reveal-stagger>
+        <span class="svc__i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 1.9"/></svg></span>
+        <h4>Apoio 24/7</h4>
+        <p>Um número que atende, esteja onde estiver, à hora que for.</p>
       </article>
     </div>
   </div>
 </section>
 
 <!-- ============ BILHETES AÉREOS ============ -->
-<section class="section air" id="voos" data-waypoint="Voos">
+<section class="section air" id="voos" aria-labelledby="voos-h">
   <div class="wrap">
     <div class="air__grid">
       <div>
         <p class="eyebrow" data-reveal>Bilhetes aéreos</p>
-        <h2 data-reveal>Ao nível das <em>melhores companhias.</em></h2>
+        <h2 id="voos-h" data-reveal>Ao nível das <em>melhores companhias.</em></h2>
         <p class="lede" data-reveal>Trabalhamos em parceria directa com as mais prestigiadas companhias aéreas internacionais. Com a AYAM, cada viagem começa com conforto, eficiência e prestígio.</p>
-
-        <div class="cabins" data-reveal>
-          <div class="cabin"><span class="cabin__c mono">Y</span><span class="cabin__n">Económica</span></div>
-          <div class="cabin"><span class="cabin__c mono">J</span><span class="cabin__n">Executiva</span></div>
-          <div class="cabin"><span class="cabin__c mono">F</span><span class="cabin__n">Primeira</span></div>
+        <div style="margin-top:26px" data-reveal>
+          <a class="btn" href="#orcamento" data-magnetic>Pedir cotação de voo</a>
         </div>
       </div>
 
@@ -907,12 +258,10 @@ ul{ margin:0; padding:0; list-style:none; }
 </section>
 
 <!-- ============ DOIS CAMINHOS ============ -->
-<section class="section" data-waypoint="Perfis" style="padding-bottom:0">
+<section class="section" style="padding-bottom:0" aria-labelledby="perfis-h">
   <div class="wrap">
     <p class="eyebrow" data-reveal>Dois caminhos</p>
-    <h2 style="font-size:var(--t-xl);font-weight:300;margin-block:14px clamp(28px,4vw,48px);max-width:20ch" data-reveal>Para empresas e para <em style="font-style:italic;color:var(--gold)">sonhos pessoais.</em></h2>
-  </div>
-  <div class="wrap">
+    <h2 id="perfis-h" style="font-size:var(--t-xl);font-weight:300;margin-block:14px clamp(28px,4vw,48px);max-width:20ch" data-reveal>Para empresas e para <em style="font-style:italic;color:var(--gold)">sonhos pessoais.</em></h2>
     <div class="tracks">
       <article class="track" data-reveal>
         <p class="mono" style="color:var(--gold)">CORPORATIVO</p>
@@ -947,188 +296,135 @@ ul{ margin:0; padding:0; list-style:none; }
 </section>
 
 <!-- ============ DESTINOS ============ -->
-<section class="rail" id="destinos" data-waypoint="Destinos">
+<section class="rail" id="destinos" aria-labelledby="destinos-h">
   <div class="wrap">
     <div class="rail__head">
-      <h2 data-reveal>Os nossos <em>pacotes.</em></h2>
+      <h2 id="destinos-h" data-reveal>Os nossos <em>destinos.</em></h2>
       <p class="rail__note mono" data-reveal>Tempos de viagem indicativos a partir da Praia (RAI)</p>
+    </div>
+    <div class="rail__bar">
+      <span class="rail__hint mono">Deslize para ver mais →</span>
+      <div class="rail__progress" aria-hidden="true"><i id="railFill"></i></div>
+      <div class="rail__arrows">
+        <button class="rail__arrow" id="railPrev" aria-label="Destinos anteriores" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button class="rail__arrow" id="railNext" aria-label="Próximos destinos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
     </div>
   </div>
 
   <div class="rail__viewport" id="railViewport">
-    <div class="rail__track" id="railTrack">
+    <div class="rail__track" id="railTrack" role="list"></div>
+  </div>
+</section>
 
-      <article class="card" data-cursor="ver">
-        <div class="card__frame">
-          <img class="card__img" src="assets/d-fogo.jpg" alt="Pico do Fogo, ilha do Fogo, Cabo Verde" width="760" height="950" loading="lazy">
-          <div class="card__veil"></div>
-          <span class="card__code">SFL</span>
-          <div class="card__over">
-            <span class="card__country">Cabo Verde</span>
-            <h3 class="card__name">Ilha do Fogo</h3>
-          </div>
+<!-- ============ PACOTES ============ -->
+<section class="section" id="pacotes" aria-labelledby="pacotes-h">
+  <div class="wrap">
+    <p class="eyebrow" data-reveal>Os nossos pacotes</p>
+    <h2 id="pacotes-h" style="font-size:var(--t-xl);font-weight:300;margin-block:14px 16px;max-width:18ch" data-reveal>Três formas de <em style="font-style:italic;color:var(--gold)">partir.</em></h2>
+    <p class="lede" style="margin-bottom:clamp(30px,4vw,50px)" data-reveal>Desenhamos experiências únicas para todos os cantos do mundo. Trabalhamos com os melhores parceiros globais para garantir conforto, segurança e momentos verdadeiramente inesquecíveis.</p>
+
+    <div class="tiers">
+      <article class="tier" data-reveal-stagger>
+        <span class="tier__n">Escapadinha</span>
+        <span class="tier__len mono">3 A 5 NOITES</span>
+        <p class="tier__d">Uma pausa curta e bem resolvida. Ideal para fins-de-semana prolongados, entre ilhas ou a poucas horas de voo.</p>
+        <ul class="tier__list">
+          <li>Voos e estadia reservados</li>
+          <li>Transfer de chegada e partida</li>
+          <li>Seguro de viagem incluído</li>
+          <li>Sugestões locais seleccionadas</li>
+        </ul>
+        <div class="tier__price">
+          <span class="mono" style="color:var(--stone-dim)">A partir de</span>
+          <b>Sob consulta</b>
         </div>
-        <div class="card__meta">
-          <div class="card__row"><span class="card__rk">Coordenadas</span><span class="card__rv">14.895° N · 24.495° W</span></div>
-          <div class="card__row"><span class="card__rk">Melhor época</span><span class="card__rv card__rv--gold">Nov — Jun</span></div>
-          <div class="card__row"><span class="card__rk">Voo</span><span class="card__rv">0h35 · directo</span></div>
-          <div class="card__row"><span class="card__rk">Hora local</span><span class="card__rv" data-tz="Atlantic/Cape_Verde">—</span></div>
-        </div>
+        <button class="btn btn--ghost btn--sm btn--block" data-quote-tier="Escapadinha" style="margin-top:14px">Pedir proposta</button>
       </article>
 
-      <article class="card" data-cursor="ver">
-        <div class="card__frame">
-          <img class="card__img" src="assets/d-maldivas.jpg" alt="Atol das Maldivas visto do ar" width="760" height="950" loading="lazy">
-          <div class="card__veil"></div>
-          <span class="card__code">MLE</span>
-          <div class="card__over">
-            <span class="card__country">Maldivas</span>
-            <h3 class="card__name">Atol de Baa</h3>
-          </div>
+      <article class="tier tier--feature" data-reveal-stagger>
+        <span class="tier__flag">Mais procurado</span>
+        <span class="tier__n">Circuito</span>
+        <span class="tier__len mono">7 A 12 NOITES</span>
+        <p class="tier__d">Vários destinos, um só roteiro. Cultura, natureza e descanso combinados com o ritmo certo.</p>
+        <ul class="tier__list">
+          <li>Voos multi-destino e ligações internas</li>
+          <li>Estadias seleccionadas em cada etapa</li>
+          <li>Transfers e aluguer de viatura</li>
+          <li>Experiências reservadas com antecedência</li>
+          <li>Gestão de vistos e documentação</li>
+          <li>Travel Agent dedicado</li>
+        </ul>
+        <div class="tier__price">
+          <span class="mono" style="color:var(--stone-dim)">A partir de</span>
+          <b>Sob consulta</b>
         </div>
-        <div class="card__meta">
-          <div class="card__row"><span class="card__rk">Coordenadas</span><span class="card__rv">5.210° N · 73.068° E</span></div>
-          <div class="card__row"><span class="card__rk">Melhor época</span><span class="card__rv card__rv--gold">Nov — Abr</span></div>
-          <div class="card__row"><span class="card__rk">Voo</span><span class="card__rv">≈ 20h · via LIS/DXB</span></div>
-          <div class="card__row"><span class="card__rk">Hora local</span><span class="card__rv" data-tz="Indian/Maldives">—</span></div>
-        </div>
+        <button class="btn btn--sm btn--block" data-quote-tier="Circuito" style="margin-top:14px">Pedir proposta</button>
       </article>
 
-      <article class="card" data-cursor="ver">
-        <div class="card__frame">
-          <img class="card__img" src="assets/d-dubai.jpg" alt="Linha do horizonte do Dubai ao anoitecer" width="760" height="950" loading="lazy">
-          <div class="card__veil"></div>
-          <span class="card__code">DXB</span>
-          <div class="card__over">
-            <span class="card__country">Emirados</span>
-            <h3 class="card__name">Dubai</h3>
-          </div>
+      <article class="tier" data-reveal-stagger>
+        <span class="tier__n">Sob <em>medida</em></span>
+        <span class="tier__len mono">SEM LIMITE</span>
+        <p class="tier__d">Desenhado de raiz a partir do que imagina. Lua-de-mel, aniversário marcante, volta ao mundo ou retiro de empresa.</p>
+        <ul class="tier__list">
+          <li>Roteiro construído consigo, do zero</li>
+          <li>Classe executiva e primeira classe</li>
+          <li>Resorts e hotéis boutique de excepção</li>
+          <li>Experiências privadas e guias locais</li>
+          <li>Assistência VIP em aeroporto</li>
+          <li>Apoio 24/7 durante toda a viagem</li>
+        </ul>
+        <div class="tier__price">
+          <span class="mono" style="color:var(--stone-dim)">A partir de</span>
+          <b>Sob consulta</b>
         </div>
-        <div class="card__meta">
-          <div class="card__row"><span class="card__rk">Coordenadas</span><span class="card__rv">25.197° N · 55.274° E</span></div>
-          <div class="card__row"><span class="card__rk">Melhor época</span><span class="card__rv card__rv--gold">Nov — Mar</span></div>
-          <div class="card__row"><span class="card__rk">Voo</span><span class="card__rv">≈ 13h · via LIS</span></div>
-          <div class="card__row"><span class="card__rk">Hora local</span><span class="card__rv" data-tz="Asia/Dubai">—</span></div>
-        </div>
+        <button class="btn btn--ghost btn--sm btn--block" data-quote-tier="Sob medida" style="margin-top:14px">Pedir proposta</button>
       </article>
-
-      <article class="card" data-cursor="ver">
-        <div class="card__frame">
-          <img class="card__img" src="assets/d-lisboa.jpg" alt="Telhados de Alfama, Lisboa" width="760" height="950" loading="lazy">
-          <div class="card__veil"></div>
-          <span class="card__code">LIS</span>
-          <div class="card__over">
-            <span class="card__country">Portugal</span>
-            <h3 class="card__name">Lisboa</h3>
-          </div>
-        </div>
-        <div class="card__meta">
-          <div class="card__row"><span class="card__rk">Coordenadas</span><span class="card__rv">38.714° N · 9.139° W</span></div>
-          <div class="card__row"><span class="card__rk">Melhor época</span><span class="card__rv card__rv--gold">Abr — Out</span></div>
-          <div class="card__row"><span class="card__rk">Voo</span><span class="card__rv">≈ 5h30 · directo</span></div>
-          <div class="card__row"><span class="card__rk">Hora local</span><span class="card__rv" data-tz="Europe/Lisbon">—</span></div>
-        </div>
-      </article>
-
-      <article class="card" data-cursor="ver">
-        <div class="card__frame">
-          <img class="card__img" src="assets/d-rio.jpg" alt="Pão de Açúcar, Rio de Janeiro" width="760" height="950" loading="lazy">
-          <div class="card__veil"></div>
-          <span class="card__code">GIG</span>
-          <div class="card__over">
-            <span class="card__country">Brasil</span>
-            <h3 class="card__name">Rio de Janeiro</h3>
-          </div>
-        </div>
-        <div class="card__meta">
-          <div class="card__row"><span class="card__rk">Coordenadas</span><span class="card__rv">22.952° S · 43.210° W</span></div>
-          <div class="card__row"><span class="card__rk">Melhor época</span><span class="card__rv card__rv--gold">Dez — Mar</span></div>
-          <div class="card__row"><span class="card__rk">Voo</span><span class="card__rv">≈ 11h · via LIS</span></div>
-          <div class="card__row"><span class="card__rk">Hora local</span><span class="card__rv" data-tz="America/Sao_Paulo">—</span></div>
-        </div>
-      </article>
-
-      <article class="card" data-cursor="ver">
-        <div class="card__frame">
-          <img class="card__img" src="assets/d-krabi.jpg" alt="Falésias calcárias de Railay, Krabi" width="760" height="950" loading="lazy">
-          <div class="card__veil"></div>
-          <span class="card__code">KBV</span>
-          <div class="card__over">
-            <span class="card__country">Tailândia</span>
-            <h3 class="card__name">Railay, Krabi</h3>
-          </div>
-        </div>
-        <div class="card__meta">
-          <div class="card__row"><span class="card__rk">Coordenadas</span><span class="card__rv">8.012° N · 98.838° E</span></div>
-          <div class="card__row"><span class="card__rk">Melhor época</span><span class="card__rv card__rv--gold">Nov — Mar</span></div>
-          <div class="card__row"><span class="card__rk">Voo</span><span class="card__rv">≈ 19h · via LIS/BKK</span></div>
-          <div class="card__row"><span class="card__rk">Hora local</span><span class="card__rv" data-tz="Asia/Bangkok">—</span></div>
-        </div>
-      </article>
-
-      <article class="card" data-cursor="ver">
-        <div class="card__frame">
-          <img class="card__img" src="assets/d-quioto.jpg" alt="Bosque de bambu de Arashiyama, Quioto" width="760" height="950" loading="lazy">
-          <div class="card__veil"></div>
-          <span class="card__code">KIX</span>
-          <div class="card__over">
-            <span class="card__country">Japão</span>
-            <h3 class="card__name">Quioto</h3>
-          </div>
-        </div>
-        <div class="card__meta">
-          <div class="card__row"><span class="card__rk">Coordenadas</span><span class="card__rv">35.009° N · 135.667° E</span></div>
-          <div class="card__row"><span class="card__rk">Melhor época</span><span class="card__rv card__rv--gold">Mar — Abr · Out — Nov</span></div>
-          <div class="card__row"><span class="card__rk">Voo</span><span class="card__rv">≈ 20h · via LIS</span></div>
-          <div class="card__row"><span class="card__rk">Hora local</span><span class="card__rv" data-tz="Asia/Tokyo">—</span></div>
-        </div>
-      </article>
-
-      <article class="card" data-cursor="ver">
-        <div class="card__frame">
-          <img class="card__img" src="assets/d-amalfi.jpg" alt="Positano, Costa Amalfitana" width="760" height="950" loading="lazy">
-          <div class="card__veil"></div>
-          <span class="card__code">NAP</span>
-          <div class="card__over">
-            <span class="card__country">Itália</span>
-            <h3 class="card__name">Costa Amalfitana</h3>
-          </div>
-        </div>
-        <div class="card__meta">
-          <div class="card__row"><span class="card__rk">Coordenadas</span><span class="card__rv">40.628° N · 14.485° E</span></div>
-          <div class="card__row"><span class="card__rk">Melhor época</span><span class="card__rv card__rv--gold">Mai — Jun · Set</span></div>
-          <div class="card__row"><span class="card__rk">Voo</span><span class="card__rv">≈ 9h · via LIS</span></div>
-          <div class="card__row"><span class="card__rk">Hora local</span><span class="card__rv" data-tz="Europe/Rome">—</span></div>
-        </div>
-      </article>
-
-      <article class="card" data-cursor="ver">
-        <div class="card__frame">
-          <img class="card__img" src="assets/d-bali.jpg" alt="Socalcos de arroz de Tegallalang, Bali" width="760" height="950" loading="lazy">
-          <div class="card__veil"></div>
-          <span class="card__code">DPS</span>
-          <div class="card__over">
-            <span class="card__country">Indonésia</span>
-            <h3 class="card__name">Bali</h3>
-          </div>
-        </div>
-        <div class="card__meta">
-          <div class="card__row"><span class="card__rk">Coordenadas</span><span class="card__rv">8.431° S · 115.279° E</span></div>
-          <div class="card__row"><span class="card__rk">Melhor época</span><span class="card__rv card__rv--gold">Abr — Out</span></div>
-          <div class="card__row"><span class="card__rk">Voo</span><span class="card__rv">≈ 22h · via LIS/DXB</span></div>
-          <div class="card__row"><span class="card__rk">Hora local</span><span class="card__rv" data-tz="Asia/Makassar">—</span></div>
-        </div>
-      </article>
-
     </div>
   </div>
 </section>
 
+<!-- ============ COMO TRABALHAMOS ============ -->
+<section class="section section--tight" aria-labelledby="processo-h">
+  <div class="wrap" style="margin-bottom:clamp(26px,3.4vw,42px)">
+    <p class="eyebrow" data-reveal>Como trabalhamos</p>
+    <h2 id="processo-h" style="font-size:var(--t-xl);font-weight:300;margin-top:14px;max-width:18ch" data-reveal>Quatro passos, <em style="font-style:italic;color:var(--gold)">sem surpresas.</em></h2>
+  </div>
+  <div class="wrap">
+    <ol class="steps">
+      <li class="step-c" data-reveal-stagger>
+        <span class="step-c__n">01</span>
+        <h4>Conversa</h4>
+        <p>Ouvimos o que imagina: quem viaja, quando, com que orçamento e o que não pode faltar.</p>
+      </li>
+      <li class="step-c" data-reveal-stagger>
+        <span class="step-c__n">02</span>
+        <h4>Proposta</h4>
+        <p>Desenhamos o roteiro com voos, estadias e experiências, com valores claros e alternativas.</p>
+      </li>
+      <li class="step-c" data-reveal-stagger>
+        <span class="step-c__n">03</span>
+        <h4>Reserva</h4>
+        <p>Tratamos das emissões, vistos, seguros e transfers. Recebe tudo organizado num só lugar.</p>
+      </li>
+      <li class="step-c" data-reveal-stagger>
+        <span class="step-c__n">04</span>
+        <h4>Acompanhamento</h4>
+        <p>Estamos disponíveis antes, durante e depois. Se algo mudar em viagem, resolvemos.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
 <!-- ============ CABO VERDE / KRIOLU ============ -->
-<section class="cv" id="caboverde" data-waypoint="Cabo Verde">
+<section class="cv" id="caboverde" aria-label="Cabo Verde">
   <div class="cv__sticky" id="cvSticky">
     <div class="cv__media" id="cvMedia">
-      <img src="assets/fogo.jpg" alt="Pico do Fogo sobre o campo de lava de Chã das Caldeiras" width="1600" height="900" loading="lazy">
+      <img src="assets/fogo.jpg" alt="Pico do Fogo sobre o campo de lava de Chã das Caldeiras" width="1600" height="900" loading="lazy" decoding="async">
     </div>
     <div class="cv__scrim"></div>
     <div class="cv__body wrap">
@@ -1140,11 +436,11 @@ ul{ margin:0; padding:0; list-style:none; }
 </section>
 
 <!-- ============ DIFERENCIAIS ============ -->
-<section class="section" data-waypoint="Diferença">
+<section class="section" aria-labelledby="diff-h">
   <div class="wrap">
     <div class="diff__grid">
       <figure class="diff__fig" data-reveal>
-        <img src="assets/editorial.jpg" alt="Falésia calcária sobre o mar em Railay, Tailândia" width="1100" height="1450" loading="lazy" id="diffImg">
+        <img src="assets/editorial.jpg" alt="Falésia calcária sobre o mar em Railay, Tailândia" width="1100" height="1450" loading="lazy" decoding="async" id="diffImg">
         <figcaption class="diff__cap mono">
           <span>O verdadeiro luxo está no cuidado</span>
           <span>com os detalhes</span>
@@ -1153,8 +449,7 @@ ul{ margin:0; padding:0; list-style:none; }
 
       <div>
         <p class="eyebrow" data-reveal>O que nos diferencia</p>
-        <h2 style="font-size:var(--t-xl);font-weight:300;margin-block:14px clamp(24px,3vw,38px);max-width:16ch" data-reveal>Rigor, empatia e <em style="font-style:italic;color:var(--gold)">eficácia.</em></h2>
-
+        <h2 id="diff-h" style="font-size:var(--t-xl);font-weight:300;margin-block:14px clamp(24px,3vw,38px);max-width:16ch" data-reveal>Rigor, empatia e <em style="font-style:italic;color:var(--gold)">eficácia.</em></h2>
         <div class="diff__list">
           <div class="diff__item" data-reveal-stagger><span class="diff__k mono">01</span><span class="diff__t">Atendimento personalizado com padrão premium</span></div>
           <div class="diff__item" data-reveal-stagger><span class="diff__k mono">02</span><span class="diff__t">Parcerias com as principais companhias aéreas e redes hoteleiras do mundo</span></div>
@@ -1170,7 +465,7 @@ ul{ margin:0; padding:0; list-style:none; }
 </section>
 
 <!-- ============ MISSÃO / VISÃO / VALORES ============ -->
-<section class="section mv" data-waypoint="Valores">
+<section class="section mv" aria-labelledby="valores-h">
   <div class="wrap">
     <div class="mv__two">
       <div class="mv__cell" data-reveal>
@@ -1185,7 +480,7 @@ ul{ margin:0; padding:0; list-style:none; }
       </div>
     </div>
 
-    <p class="eyebrow" style="margin-bottom:18px" data-reveal>Valores</p>
+    <p class="eyebrow" id="valores-h" style="margin-bottom:18px" data-reveal>Valores</p>
     <div class="values">
       <div class="value" data-reveal-stagger><span class="value__n">Globalidade</span><span class="value__d">Ligamos Cabo Verde ao mundo com classe</span></div>
       <div class="value" data-reveal-stagger><span class="value__n">Rigor</span><span class="value__d">Cumprimos com exigência e profissionalismo</span></div>
@@ -1228,39 +523,171 @@ ul{ margin:0; padding:0; list-style:none; }
   </div>
 </div>
 
-<!-- ============ CONTACTO ============ -->
-<section class="section contact" id="contacto" data-waypoint="Contacto">
+<!-- ============ PEDIDO DE PROPOSTA ============ -->
+<section class="section quote" id="orcamento" aria-labelledby="orcamento-h">
   <div class="wrap">
-    <p class="eyebrow" data-reveal>Contactos</p>
-    <h2 data-reveal style="margin-top:16px">Diga-nos para onde. <em>Nós tratamos do resto.</em></h2>
-
-    <div class="contact__grid">
-      <div class="channels">
-        <a class="channel" href="https://wa.me/2389990900" target="_blank" rel="noopener" data-reveal-stagger>
-          <span class="channel__k mono">Telefone</span>
-          <span class="channel__v">+238 999 09 00</span>
-          <span class="channel__a mono">WhatsApp →</span>
-        </a>
-        <a class="channel" href="mailto:ayam.reservas@gmail.com" data-reveal-stagger>
-          <span class="channel__k mono">Email</span>
-          <span class="channel__v">ayam.reservas@gmail.com</span>
-          <span class="channel__a mono">Escrever →</span>
-        </a>
-        <a class="channel" href="https://instagram.com/ayam.cv" target="_blank" rel="noopener" data-reveal-stagger>
-          <span class="channel__k mono">Instagram</span>
-          <span class="channel__v">@ayam.cv</span>
-          <span class="channel__a mono">Seguir →</span>
-        </a>
-      </div>
-
+    <div class="quote__grid">
       <div>
-        <p class="lede" data-reveal>Atendimento presencial, digital e ao domicílio, com marcação prévia. Respondemos a todos os pedidos — de uma escapadinha entre ilhas a um roteiro de volta ao mundo.</p>
-        <div class="contact__cta">
-          <a class="btn" href="https://wa.me/2389990900" target="_blank" rel="noopener" data-magnetic>
-            Falar connosco agora
+        <p class="eyebrow" data-reveal>Pedir proposta</p>
+        <h2 id="orcamento-h" data-reveal>Diga-nos para onde. <em>Nós tratamos do resto.</em></h2>
+        <p class="lede" data-reveal>Responda a quatro perguntas rápidas. No fim, enviamos tudo organizado para o nosso WhatsApp — sem formulários intermináveis e sem esperar por email.</p>
+
+        <div class="channels" style="margin-top:clamp(28px,3.6vw,44px)">
+          <a class="channel" href="https://wa.me/2389990900" target="_blank" rel="noopener" data-reveal-stagger>
+            <span class="channel__k mono">Telefone</span>
+            <span class="channel__v">+238 999 09 00</span>
+            <span class="channel__a mono">WhatsApp →</span>
+          </a>
+          <a class="channel" href="mailto:ayam.reservas@gmail.com" data-reveal-stagger>
+            <span class="channel__k mono">Email</span>
+            <span class="channel__v">ayam.reservas@gmail.com</span>
+            <span class="channel__a mono">Escrever →</span>
+          </a>
+          <a class="channel" href="https://instagram.com/ayam.cv" target="_blank" rel="noopener" data-reveal-stagger>
+            <span class="channel__k mono">Instagram</span>
+            <span class="channel__v">@ayam.cv</span>
+            <span class="channel__a mono">Seguir →</span>
           </a>
         </div>
       </div>
+
+      <form class="form" id="quoteForm" novalidate data-reveal>
+        <div class="form__top">
+          <div class="form__meter" aria-hidden="true">
+            <i id="m1"></i><i id="m2"></i><i id="m3"></i><i id="m4"></i>
+          </div>
+          <div class="form__count mono">
+            <span>Passo <b id="stepNow">1</b> de 4</span>
+            <span id="stepName">Tipo de viagem</span>
+          </div>
+        </div>
+
+        <div class="form__stage" aria-live="polite">
+
+          <!-- 1 -->
+          <fieldset class="step" data-step="1" style="border:0;padding:0;margin:0">
+            <legend class="step__q" style="padding:0">Que tipo de viagem tem em mente?</legend>
+            <div class="chips" id="chipsTipo" role="group" aria-label="Tipo de viagem">
+              <button type="button" class="chip" aria-pressed="false">Lua-de-mel</button>
+              <button type="button" class="chip" aria-pressed="false">Férias em família</button>
+              <button type="button" class="chip" aria-pressed="false">Escapadinha</button>
+              <button type="button" class="chip" aria-pressed="false">Viagem corporativa</button>
+              <button type="button" class="chip" aria-pressed="false">Aventura</button>
+              <button type="button" class="chip" aria-pressed="false">Bem-estar</button>
+              <button type="button" class="chip" aria-pressed="false">Cruzeiro</button>
+              <button type="button" class="chip" aria-pressed="false">Ainda não sei</button>
+            </div>
+            <p class="field__err" id="err1"></p>
+          </fieldset>
+
+          <!-- 2 -->
+          <fieldset class="step" data-step="2" hidden style="border:0;padding:0;margin:0">
+            <legend class="step__q" style="padding:0">Para onde gostaria de ir?</legend>
+            <p class="step__hint">Pode escolher mais do que um.</p>
+            <div class="chips" id="chipsDestino" role="group" aria-label="Destinos"></div>
+            <div class="field">
+              <label for="outroDestino">Outro destino</label>
+              <input type="text" id="outroDestino" name="outroDestino" placeholder="Ex.: Zanzibar, Nova Iorque, Cancún…" autocomplete="off">
+            </div>
+            <p class="field__err" id="err2"></p>
+          </fieldset>
+
+          <!-- 3 -->
+          <fieldset class="step" data-step="3" hidden style="border:0;padding:0;margin:0">
+            <legend class="step__q" style="padding:0">Quando, e quantos vão?</legend>
+            <div class="grid2">
+              <div class="field">
+                <label for="mes">Mês de partida</label>
+                <select id="mes" name="mes"></select>
+              </div>
+              <div class="field">
+                <label for="noites">Duração</label>
+                <select id="noites" name="noites">
+                  <option>3 a 5 noites</option>
+                  <option selected>7 a 10 noites</option>
+                  <option>11 a 14 noites</option>
+                  <option>Mais de 14 noites</option>
+                  <option>Ainda não sei</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid2">
+              <div class="field">
+                <label for="adultos">Adultos</label>
+                <div class="stepper" data-stepper="adultos" data-min="1" data-max="20">
+                  <button type="button" data-dir="-1" aria-label="Menos adultos">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg>
+                  </button>
+                  <output id="adultos" name="adultos">2</output>
+                  <button type="button" data-dir="1" aria-label="Mais adultos">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="field">
+                <label for="criancas">Crianças</label>
+                <div class="stepper" data-stepper="criancas" data-min="0" data-max="20">
+                  <button type="button" data-dir="-1" aria-label="Menos crianças" disabled>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg>
+                  </button>
+                  <output id="criancas" name="criancas">0</output>
+                  <button type="button" data-dir="1" aria-label="Mais crianças">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="field">
+              <label for="orcamentoPax">Orçamento por pessoa (opcional)</label>
+              <select id="orcamentoPax" name="orcamentoPax">
+                <option value="">Prefiro falar convosco</option>
+                <option>Até 150 000 CVE</option>
+                <option>150 000 – 350 000 CVE</option>
+                <option>350 000 – 700 000 CVE</option>
+                <option>Mais de 700 000 CVE</option>
+              </select>
+            </div>
+          </fieldset>
+
+          <!-- 4 -->
+          <fieldset class="step" data-step="4" hidden style="border:0;padding:0;margin:0">
+            <legend class="step__q" style="padding:0">Como falamos consigo?</legend>
+            <div class="field">
+              <label for="nome">Nome</label>
+              <input type="text" id="nome" name="nome" placeholder="O seu nome" autocomplete="name" required>
+              <p class="field__err" id="errNome"></p>
+            </div>
+            <div class="field">
+              <label for="contacto">Telefone ou email</label>
+              <input type="text" id="contacto" name="contacto" placeholder="+238 000 00 00 ou nome@email.com" autocomplete="tel" required>
+              <p class="field__err" id="errContacto"></p>
+            </div>
+            <div class="field">
+              <label for="nota">Alguma coisa que devamos saber? (opcional)</label>
+              <textarea id="nota" name="nota" placeholder="Datas fixas, aniversário, preferências alimentares, mobilidade…"></textarea>
+            </div>
+            <div class="review" id="review"></div>
+          </fieldset>
+
+          <!-- concluído -->
+          <div class="step form__done" data-step="5" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.6 2.6L16 9.5"/></svg>
+            <h3>Pedido pronto a enviar</h3>
+            <p style="color:var(--stone);max-width:36ch">Abrimos o WhatsApp com tudo já escrito. Se não abrir, use um dos botões abaixo.</p>
+            <div style="display:flex;flex-direction:column;gap:9px;width:100%;max-width:300px">
+              <a class="btn btn--block" id="waLink" href="https://wa.me/2389990900" target="_blank" rel="noopener">Abrir no WhatsApp</a>
+              <a class="btn btn--ghost btn--sm btn--block" id="mailLink" href="mailto:ayam.reservas@gmail.com">Enviar por email</a>
+              <button type="button" class="form__back" id="restart" style="align-self:center">Fazer outro pedido</button>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="form__nav" id="formNav">
+          <button type="button" class="form__back" id="btnBack" hidden>← Voltar</button>
+          <button type="button" class="btn" id="btnNext" data-magnetic>Continuar</button>
+        </div>
+      </form>
     </div>
   </div>
 </section>
@@ -1276,7 +703,6 @@ ul{ margin:0; padding:0; list-style:none; }
         <p style="margin-top:16px;max-width:34ch">Agência de viagens e turismo 100% cabo-verdiana. Alma local, visão global.</p>
         <p class="mono" style="margin-top:14px;color:var(--gold)">For Your Time</p>
       </div>
-
       <div>
         <h4>Navegar</h4>
         <ul>
@@ -1284,11 +710,11 @@ ul{ margin:0; padding:0; list-style:none; }
           <li><a href="#servicos">Serviços</a></li>
           <li><a href="#voos">Bilhetes aéreos</a></li>
           <li><a href="#destinos">Destinos</a></li>
+          <li><a href="#pacotes">Pacotes</a></li>
           <li><a href="#caboverde">Cabo Verde</a></li>
-          <li><a href="#contacto">Contacto</a></li>
+          <li><a href="#orcamento">Pedir proposta</a></li>
         </ul>
       </div>
-
       <div>
         <h4>Contactos</h4>
         <ul>
@@ -1318,365 +744,37 @@ ul{ margin:0; padding:0; list-style:none; }
   </div>
 </footer>
 
+<!-- ============ GAVETA DE DESTINO ============ -->
+<div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true">
+  <div class="drawer__scrim" data-drawer-close></div>
+  <div class="drawer__panel" id="drawerPanel">
+    <button class="drawer__close" data-drawer-close aria-label="Fechar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="drawer__hero"><img id="drawerImg" src="" alt="" width="1100" height="733"></div>
+    <div class="drawer__body">
+      <p class="drawer__country" id="drawerCountry"></p>
+      <h2 class="drawer__title" id="drawerTitle"></h2>
+      <p class="drawer__desc" id="drawerDesc"></p>
+      <div class="drawer__tags" id="drawerTags"></div>
+      <div class="drawer__facts" id="drawerFacts"></div>
+      <div class="drawer__inc">
+        <h4>O que tratamos por si</h4>
+        <ul id="drawerInc"></ul>
+      </div>
+      <div class="drawer__cta">
+        <button class="btn btn--block" id="drawerQuote">Pedir proposta para este destino</button>
+        <a class="btn btn--ghost btn--sm btn--block" id="drawerWa" href="https://wa.me/2389990900" target="_blank" rel="noopener">Falar já no WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="totop" id="toTop" aria-label="Voltar ao topo">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
 <script src="vendor/gsap.min.js"></script>
 <script src="vendor/ScrollTrigger.min.js"></script>
 <script src="vendor/lenis.min.js"></script>
-<script>
-(function(){
-  'use strict';
-
-  var REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var hasGSAP = typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined';
-
-  document.getElementById('year').textContent = new Date().getFullYear();
-
-  /* ---------------------------------------------------------
-     Relógios — hora local real em cada destino
-     --------------------------------------------------------- */
-  function tick(){
-    var now = new Date();
-    document.querySelectorAll('[data-tz]').forEach(function(el){
-      try{
-        el.textContent = new Intl.DateTimeFormat('pt-PT',{
-          timeZone: el.dataset.tz, hour:'2-digit', minute:'2-digit', hour12:false
-        }).format(now);
-      }catch(e){ el.textContent = '—'; }
-    });
-    var cv = document.getElementById('clockCV');
-    if(cv){
-      try{
-        cv.textContent = new Intl.DateTimeFormat('pt-PT',{
-          timeZone:'Atlantic/Cape_Verde', hour:'2-digit', minute:'2-digit', hour12:false
-        }).format(now) + ' · UTC−1';
-      }catch(e){ cv.textContent = 'UTC−1'; }
-    }
-  }
-  tick();
-  setInterval(tick, 20000);
-
-  /* ---------------------------------------------------------
-     Sem GSAP ou com movimento reduzido: o site fica estático e legível
-     --------------------------------------------------------- */
-  if(!hasGSAP || REDUCE){
-    var pl = document.getElementById('preload');
-    if(pl) pl.remove();
-    return;
-  }
-
-  gsap.registerPlugin(ScrollTrigger);
-
-  /* ---------------------------------------------------------
-     Scroll suave (Lenis) ligado ao ticker do GSAP
-     --------------------------------------------------------- */
-  var lenis = null;
-  if(typeof window.Lenis !== 'undefined'){
-    lenis = new Lenis({ duration:1.05, smoothWheel:true, touchMultiplier:1.6 });
-    lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add(function(t){ lenis.raf(t * 1000); });
-    gsap.ticker.lagSmoothing(0);
-  }
-
-  /* âncoras internas */
-  document.querySelectorAll('a[href^="#"]').forEach(function(a){
-    a.addEventListener('click', function(e){
-      var id = a.getAttribute('href');
-      if(id.length < 2) return;
-      var target = document.querySelector(id);
-      if(!target) return;
-      e.preventDefault();
-      if(lenis) lenis.scrollTo(target, { offset:-10, duration:1.25 });
-      else target.scrollIntoView({ behavior:'smooth' });
-    });
-  });
-
-  /* ---------------------------------------------------------
-     Pré-carregamento
-     --------------------------------------------------------- */
-  var preload   = document.getElementById('preload');
-  var fill      = document.getElementById('preloadFill');
-  var num       = document.getElementById('preloadNum');
-  var counter   = { v:0 };
-
-  var intro = gsap.timeline();
-  intro
-    .to(fill, { scaleX:1, duration:.95, ease:'power2.inOut' }, 0)
-    .to(counter, {
-      v:100, duration:.95, ease:'power2.inOut',
-      onUpdate:function(){ num.textContent = String(Math.round(counter.v)).padStart(2,'0'); }
-    }, 0)
-    .to('.preload__inner', { y:-14, opacity:0, duration:.45, ease:'power2.in' }, '>-0.05')
-    .to(preload, {
-      yPercent:-100, duration:.9, ease:'expo.inOut',
-      onComplete:function(){ preload.style.display='none'; ScrollTrigger.refresh(); }
-    }, '<0.1');
-
-  /* herói — entrada mascarada */
-  intro
-    .from('[data-hero="1"]', { opacity:0, y:16, duration:.7, ease:'power3.out' }, '-=0.45')
-    .from('.hero h1 .ln__i', { yPercent:112, duration:1.05, stagger:.09, ease:'expo.out' }, '-=0.55')
-    .from('[data-hero="3"]', { opacity:0, y:18, duration:.8, ease:'power3.out' }, '-=0.65')
-    .from('[data-hero="4"]', { opacity:0, y:18, duration:.8, ease:'power3.out' }, '-=0.62')
-    .from('.readout__grid > *', { opacity:0, y:10, duration:.6, stagger:.05, ease:'power2.out' }, '-=0.6');
-
-  /* parallax do herói */
-  gsap.to('#heroMedia', {
-    yPercent:13, ease:'none',
-    scrollTrigger:{ trigger:'.hero', start:'top top', end:'bottom top', scrub:true }
-  });
-  gsap.to('.hero__body, .readout', {
-    opacity:0, ease:'none',
-    scrollTrigger:{ trigger:'.hero', start:'40% top', end:'bottom top', scrub:true }
-  });
-
-  /* ---------------------------------------------------------
-     Navegação fixa
-     --------------------------------------------------------- */
-  var nav = document.getElementById('nav');
-  ScrollTrigger.create({
-    start: 'top -80',
-    onUpdate:function(self){ nav.classList.toggle('is-stuck', self.scroll() > 80); },
-    onRefresh:function(self){ nav.classList.toggle('is-stuck', self.scroll() > 80); }
-  });
-
-  /* ---------------------------------------------------------
-     ROTA — a linha de voo que se desenha (assinatura)
-     --------------------------------------------------------- */
-  var routeLive = document.getElementById('routeLive');
-  var routePlane = document.getElementById('routePlane');
-  if(routeLive && window.matchMedia('(min-width:1180px)').matches){
-    var LEN = 1000;
-    gsap.set(routeLive, { attr:{ 'stroke-dasharray':'3 6' } });
-    var routeH = function(){ return document.getElementById('route').clientHeight; };
-    gsap.set(routePlane, { y:0 });
-
-    ScrollTrigger.create({
-      start:0, end:'max',
-      onUpdate:function(self){
-        var p = self.progress;
-        routeLive.style.strokeDashoffset = '0';
-        routeLive.setAttribute('d', 'M17 0 L17 ' + (LEN * p).toFixed(1));
-        gsap.set(routePlane, { y: routeH() * p });
-      }
-    });
-  }
-
-  /* ---------------------------------------------------------
-     Manifesto — palavras que acendem com o scroll
-     --------------------------------------------------------- */
-  var man = document.querySelector('[data-manifesto]');
-  if(man){
-    /* embrulha cada palavra preservando os <span class="hl"> */
-    (function wrapWords(node){
-      var kids = Array.prototype.slice.call(node.childNodes);
-      kids.forEach(function(n){
-        if(n.nodeType === 3){
-          var frag = document.createDocumentFragment();
-          n.textContent.split(/(\s+)/).forEach(function(part){
-            if(!part) return;
-            if(/^\s+$/.test(part)){ frag.appendChild(document.createTextNode(part)); return; }
-            var s = document.createElement('span');
-            s.className = 'w'; s.textContent = part;
-            frag.appendChild(s);
-          });
-          node.replaceChild(frag, n);
-        } else if(n.nodeType === 1){
-          if(n.classList.contains('hl')){ n.classList.add('w'); }
-          else wrapWords(n);
-        }
-      });
-    })(man);
-
-    gsap.from(man.querySelectorAll('.w'), {
-      opacity:.16, stagger:.55, ease:'none',
-      scrollTrigger:{ trigger:man, start:'top 82%', end:'bottom 62%', scrub:.7 }
-    });
-  }
-
-  /* ---------------------------------------------------------
-     Revelações genéricas
-     --------------------------------------------------------- */
-  gsap.utils.toArray('[data-reveal]').forEach(function(el){
-    gsap.from(el, {
-      opacity:0, y:26, duration:.95, ease:'power3.out',
-      scrollTrigger:{ trigger:el, start:'top 88%', once:true }
-    });
-  });
-
-  /* agrupa os "stagger" por contentor pai */
-  var groups = new Map();
-  gsap.utils.toArray('[data-reveal-stagger]').forEach(function(el){
-    var p = el.parentElement;
-    if(!groups.has(p)) groups.set(p, []);
-    groups.get(p).push(el);
-  });
-  groups.forEach(function(items, parent){
-    gsap.from(items, {
-      opacity:0, y:24, duration:.85, stagger:.07, ease:'power3.out',
-      scrollTrigger:{ trigger:parent, start:'top 85%', once:true }
-    });
-  });
-
-  /* ---------------------------------------------------------
-     Contadores
-     --------------------------------------------------------- */
-  gsap.utils.toArray('[data-count]').forEach(function(el){
-    var end = parseFloat(el.dataset.count);
-    var sfx = el.dataset.suffix || '';
-    var o = { v:0 };
-    gsap.to(o, {
-      v:end, duration:1.7, ease:'power2.out',
-      scrollTrigger:{ trigger:el, start:'top 90%', once:true },
-      onUpdate:function(){ el.textContent = Math.round(o.v) + sfx; }
-    });
-  });
-
-  /* ---------------------------------------------------------
-     DESTINOS — carrossel horizontal fixado
-     --------------------------------------------------------- */
-  var mm = gsap.matchMedia();
-
-  mm.add('(min-width: 860px)', function(){
-    var viewport = document.getElementById('railViewport');
-    var track    = document.getElementById('railTrack');
-    if(!viewport || !track) return;
-
-    var distance = function(){
-      return Math.max(0, track.scrollWidth - window.innerWidth);
-    };
-
-    var scrubTween = gsap.to(track, {
-      x: function(){ return -distance(); },
-      ease:'none',
-      scrollTrigger:{
-        trigger: viewport,
-        start:'top top',
-        end: function(){ return '+=' + (distance() + window.innerHeight * 0.4); },
-        pin: true,
-        scrub: .85,
-        anticipatePin: 1,
-        invalidateOnRefresh: true
-      }
-    });
-
-    /* parallax dentro de cada cartão, sincronizado com o movimento horizontal */
-    gsap.utils.toArray('.card').forEach(function(card){
-      var img = card.querySelector('.card__img');
-      if(!img) return;
-      gsap.fromTo(img, { xPercent:-9 }, {
-        xPercent:9, ease:'none',
-        scrollTrigger:{
-          trigger: card,
-          containerAnimation: scrubTween,
-          start:'left right',
-          end:'right left',
-          scrub:true
-        }
-      });
-    });
-
-    return function(){ gsap.set(track, { clearProps:'x' }); };
-  });
-
-  /* ---------------------------------------------------------
-     CABO VERDE — imagem que abre + frase em kriolu
-     --------------------------------------------------------- */
-  mm.add('(min-width: 760px)', function(){
-    var st = document.getElementById('cvSticky');
-    var media = document.getElementById('cvMedia');
-    if(!st || !media) return;
-
-    gsap.fromTo(media,
-      { clipPath:'inset(11% 9% round 2px)', scale:1.06 },
-      {
-        clipPath:'inset(0% 0% round 0px)', scale:1, ease:'none',
-        scrollTrigger:{ trigger:st, start:'top bottom', end:'top top', scrub:.6 }
-      }
-    );
-    gsap.to(media, {
-      yPercent:8, ease:'none',
-      scrollTrigger:{ trigger:st, start:'top top', end:'bottom top', scrub:true }
-    });
-  });
-
-  /* frase em kriolu — palavra a palavra */
-  var kri = document.getElementById('kriolu');
-  if(kri){
-    var words = kri.textContent.trim().split(/\s+/);
-    kri.innerHTML = words.map(function(w){
-      return '<span class="ln" style="display:inline-block;vertical-align:top"><span class="ln__i">' + w + '</span></span>';
-    }).join(' ');
-    gsap.from(kri.querySelectorAll('.ln__i'), {
-      yPercent:110, duration:1, stagger:.045, ease:'expo.out',
-      scrollTrigger:{ trigger:kri, start:'top 82%', once:true }
-    });
-  }
-
-  /* editorial alto — parallax suave */
-  var diffImg = document.getElementById('diffImg');
-  if(diffImg){
-    gsap.fromTo(diffImg, { yPercent:-6, scale:1.1 }, {
-      yPercent:6, ease:'none',
-      scrollTrigger:{ trigger:diffImg.parentElement, start:'top bottom', end:'bottom top', scrub:true }
-    });
-  }
-
-  /* ---------------------------------------------------------
-     Marquee com reação à velocidade do scroll
-     --------------------------------------------------------- */
-  var mTrack = document.getElementById('marqueeTrack');
-  if(mTrack){
-    mTrack.innerHTML += mTrack.innerHTML;   /* duplica para loop contínuo */
-    var mTween = gsap.to(mTrack, {
-      xPercent:-50, duration:34, ease:'none', repeat:-1
-    });
-    ScrollTrigger.create({
-      start:0, end:'max',
-      onUpdate:function(self){
-        var v = self.getVelocity();
-        var ts = gsap.utils.clamp(-6, 6, 1 + v / 900);
-        gsap.to(mTween, { timeScale: ts === 0 ? 1 : ts, duration:.35, overwrite:true });
-        gsap.to(mTween, { timeScale:1, duration:1.1, delay:.4, overwrite:false });
-      }
-    });
-  }
-
-  /* ---------------------------------------------------------
-     Cursor + botões magnéticos
-     --------------------------------------------------------- */
-  var fine = window.matchMedia('(hover:hover) and (pointer:fine) and (min-width:1024px)').matches;
-  if(fine){
-    var cur = document.getElementById('cursor');
-    var curT = document.getElementById('cursorT');
-    var cx = gsap.quickTo(cur, 'x', { duration:.42, ease:'power3' });
-    var cy = gsap.quickTo(cur, 'y', { duration:.42, ease:'power3' });
-
-    window.addEventListener('mousemove', function(e){ cx(e.clientX); cy(e.clientY); });
-    document.addEventListener('mouseleave', function(){ gsap.to(cur, { opacity:0, duration:.3 }); });
-    document.addEventListener('mouseenter', function(){ gsap.to(cur, { opacity:1, duration:.3 }); });
-
-    document.querySelectorAll('[data-cursor]').forEach(function(el){
-      el.addEventListener('mouseenter', function(){
-        curT.textContent = el.dataset.cursor;
-        cur.classList.add('is-big');
-      });
-      el.addEventListener('mouseleave', function(){ cur.classList.remove('is-big'); });
-    });
-
-    /* magnetismo */
-    document.querySelectorAll('[data-magnetic]').forEach(function(el){
-      var qx = gsap.quickTo(el, 'x', { duration:.5, ease:'power3' });
-      var qy = gsap.quickTo(el, 'y', { duration:.5, ease:'power3' });
-      el.addEventListener('mousemove', function(e){
-        var r = el.getBoundingClientRect();
-        qx((e.clientX - (r.left + r.width/2)) * 0.28);
-        qy((e.clientY - (r.top + r.height/2)) * 0.42);
-      });
-      el.addEventListener('mouseleave', function(){ qx(0); qy(0); });
-    });
-  }
-
-  /* recalcula depois de as imagens carregarem */
-  window.addEventListener('load', function(){ ScrollTrigger.refresh(); });
-
-})();
-</script>
+<script src="app.js"></script>

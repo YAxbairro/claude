@@ -1,9 +1,19 @@
 # -*- coding: utf-8 -*-
-"""Gera o index.html autónomo (para alojar) a partir de _content.html."""
+"""Gera o index.html autónomo (para alojar) a partir de _content.html.
+
+_content.html é a fonte: contém o <title>, os <link> e todo o markup, mas sem
+<head> nem <body> — é também o ficheiro que se publica como Artifact, onde a
+plataforma fornece esse invólucro. Aqui acrescentamos o invólucro completo.
+"""
 import io
 
+MARK = '<link rel="stylesheet" href="styles.css">'
+
 src = io.open('_content.html', encoding='utf-8').read()
-i = src.index('</style>') + len('</style>')
+if MARK not in src:
+    raise SystemExit('erro: não encontrei "%s" em _content.html' % MARK)
+
+i = src.index(MARK) + len(MARK)
 head_part, body_part = src[:i], src[i:]
 
 HEAD_EXTRA = '''<meta charset="utf-8">
