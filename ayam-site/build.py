@@ -26,7 +26,7 @@ HEAD_EXTRA = '''<meta charset="utf-8">
 <meta property="og:site_name" content="AYAM Viagens &amp; Turismo">
 <meta property="og:title" content="AYAM Viagens &amp; Turismo — O mundo à sua medida">
 <meta property="og:description" content="Agência de viagens 100% cabo-verdiana. Bilhetes aéreos, viagens corporativas e particulares, pacotes sob medida.">
-<meta property="og:image" content="assets/hero.jpg">
+<meta property="og:image" content="assets/og.jpg">
 <meta property="og:locale" content="pt_CV">
 <meta name="twitter:card" content="summary_large_image">
 

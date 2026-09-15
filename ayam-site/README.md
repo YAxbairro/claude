@@ -24,11 +24,16 @@ sobre fundo liso — foi essa a principal mudança de direcção.
 
 Nomes de ficheiros de imagem:
 
-| Prefixo | Para quê | Tamanho |
-|---|---|---|
-| `bg-*.jpg` | fundo de secção e de destino | 1600×900 |
-| `d-*.jpg` | cartão vertical do carrossel | 760×950 |
-| `w-*.jpg` | imagem de topo da gaveta | 1100×733 |
+| Prefixo | Para quê | Tamanho | Nota |
+|---|---|---|---|
+| `bg-*.webp` | fundo de secção e de destino | 1440×810 | qualidade baixa e ligeiramente desfocados de propósito — ficam atrás de véus escuros |
+| `d-*.webp` | cartão vertical do carrossel | 680×850 | mostrado a 318 px, chega para ecrãs retina |
+| `w-*.webp` | imagem de topo da gaveta | 1040×693 | |
+| `og.jpg` | pré-visualização ao partilhar o link | 1200×630 | fica em JPEG: o WebP nem sempre é lido pelas pré-visualizações do WhatsApp |
+
+Os caminhos das imagens de destino são construídos em `app.js` por concatenação
+(`'assets/d-' + d.id + '.webp'`). Ao mudar de formato, é preciso alterar aí também —
+uma substituição só no HTML não chega.
 
 Ao acrescentar um destino em `DESTINOS` (`app.js`), são precisas as três imagens
 com o mesmo `id`. O carrossel, a gaveta, a pesquisa e os chips do formulário são
@@ -108,7 +113,7 @@ lado nenhum — existem apenas na conversa de WhatsApp. Para ter um registo
 | O quê | Onde | Porquê |
 |---|---|---|
 | Logótipo | `assets/ayam-logo.png` | Foi extraído da apresentação em PDF, a 416×160 px. Um SVG ou PNG original fica nítido em qualquer tamanho. |
-| Fotografia | `assets/*.jpg` | São imagens Creative Commons de recurso. Fotografias próprias — clientes, equipa, escritório, viagens realizadas — valem muito mais e retiram a necessidade dos créditos no rodapé. |
+| Fotografia | `assets/*.webp` | São imagens Creative Commons de recurso. Fotografias próprias — clientes, equipa, escritório, viagens realizadas — valem muito mais e retiram a necessidade dos créditos no rodapé. |
 | Créditos | rodapé de `_content.html` | As licenças CC BY / CC BY-SA **obrigam** a manter a atribuição enquanto estas imagens forem usadas. Ao trocar por fotografia própria, apagar o bloco `.credits`. |
 | Preços dos pacotes | `_content.html`, secção Pacotes | Estão como "Sob consulta" de propósito — não inventámos valores. |
 | Tempos de voo | `app.js`, array `DESTINOS` | Estão marcados como indicativos. Vale a pena confirmar com os horários praticados. |

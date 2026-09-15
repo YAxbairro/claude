@@ -108,13 +108,13 @@
     if (!stage) return;
     stage.innerHTML = DESTINOS.map(function (d, i) {
       return '<button class="deck__card" data-i="' + i + '" aria-label="' + destLabel(d) + '">' +
-        '<img src="assets/d-' + d.id + '.jpg" alt="' + d.name + ', ' + d.country + '" width="760" height="950" loading="lazy" decoding="async">' +
+        '<img src="assets/d-' + d.id + '.webp" alt="' + d.name + ', ' + d.country + '" width="760" height="950" loading="lazy" decoding="async">' +
         '<span class="deck__num mono">' + (i + 1) + ' / ' + DESTINOS.length + '</span>' +
         '<span class="deck__cap"><span class="deck__cc">' + d.country + '</span><span class="deck__cn">' + d.name + '</span></span>' +
         '</button>';
     }).join('');
     bgs.innerHTML = DESTINOS.map(function (d, i) {
-      return '<img src="assets/bg-' + d.id + '.jpg" alt="" class="' + (i === 0 ? 'is-on' : '') + '" loading="lazy" decoding="async">';
+      return '<img src="assets/bg-' + d.id + '.webp" alt="" class="' + (i === 0 ? 'is-on' : '') + '" loading="lazy" decoding="async">';
     }).join('');
     dots.innerHTML = DESTINOS.map(function (d, i) {
       return '<button class="deck__dot' + (i === 0 ? ' is-on' : '') + '" data-i="' + i + '" aria-label="Ir para ' + d.name + '"></button>';
@@ -263,7 +263,7 @@
       }
       results.innerHTML = list.map(function (d, i) {
         return '<button class="search__item' + (i === 0 ? ' is-cur' : '') + '" data-id="' + d.id + '" role="option">' +
-          '<img src="assets/d-' + d.id + '.jpg" alt="" loading="lazy">' +
+          '<img src="assets/d-' + d.id + '.webp" alt="" loading="lazy">' +
           '<span class="search__t"><span class="search__c">' + d.country + '</span><span class="search__n">' + d.name + '</span></span>' +
           '<span class="search__code">' + d.code + '</span></button>';
       }).join('');
@@ -330,7 +330,7 @@
     if (!d || !drawer) return;
     lastFocus = document.activeElement;
 
-    $('#drawerImg').src = 'assets/w-' + d.id + '.jpg';
+    $('#drawerImg').src = 'assets/w-' + d.id + '.webp';
     $('#drawerImg').alt = d.name + ', ' + d.country;
     $('#drawerCountry').textContent = d.country;
     $('#drawerTitle').textContent = d.name;
