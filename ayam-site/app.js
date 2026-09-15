@@ -632,6 +632,26 @@
     });
   }
 
+  /* Revelação discreta para quem pede movimento reduzido: só transparência,
+     sem deslocamento nem paralaxe. Melhor do que uma página completamente parada. */
+  function softReveals() {
+    var items = $$('[data-reveal], [data-reveal-stagger]');
+    if (!items.length || !window.IntersectionObserver) return;
+    items.forEach(function (el) { el.style.opacity = '0'; });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        io.unobserve(e.target);
+        gsap.to(e.target, { opacity: 1, duration: .45, ease: 'none' });
+      });
+    }, { rootMargin: '0px 0px -8% 0px' });
+    items.forEach(function (el) { io.observe(el); });
+    /* rede de segurança: nada pode ficar invisível se o observador falhar */
+    setTimeout(function () {
+      items.forEach(function (el) { if (+getComputedStyle(el).opacity < .95) gsap.set(el, { opacity: 1 }); });
+    }, 5000);
+  }
+
   /* ============================================================
      ARRANQUE
      ============================================================ */
@@ -681,10 +701,17 @@
   if (!hasGSAP || REDUCE) {
     var pl = $('#preload');
     if (pl) pl.remove();
+    if (hasGSAP && REDUCE) softReveals();
     return;
   }
 
   gsap.registerPlugin(ScrollTrigger);
+
+  /* Nenhum ecrã real tem uma janela com mais de 1600px de altura. Quando isso
+     acontece, a página está dentro de uma moldura alta e quem rola é a de fora:
+     o scrollY interior fica sempre a zero. Aqui as revelações não podem depender
+     do scroll, senão metade do conteúdo fica parada em opacidade zero. */
+  var EMBED = window.innerHeight > 1600;
 
   if (typeof window.Lenis !== 'undefined') {
     var lenis = new Lenis({ duration: 1.05, smoothWheel: true, touchMultiplier: 1.6 });
@@ -707,13 +734,9 @@
       .from('.readout__grid > *', { opacity: 0, y: 10, duration: .6, stagger: .05, ease: 'power2.out' }, at + .46);
   }
 
-  var seenIntro = false;
-  try { seenIntro = sessionStorage.getItem('ayam-intro') === '1'; sessionStorage.setItem('ayam-intro', '1'); }
-  catch (e) { /* modo privado: mostra a introdução à mesma */ }
-
   var plPath = $('#plPath'), plTrail = $('#plTrail'), plPlane = $('#plPlane');
 
-  if (seenIntro || !plPath || !plTrail) {
+  if (!plPath || !plTrail) {
     /* já viu nesta sessão — vai directo ao herói */
     if (preload) preload.style.display = 'none';
     heroIn(0);
@@ -844,7 +867,34 @@
     return $$('.wd', el);
   }
 
+  if (EMBED) {
+    var revAll = $$('[data-reveal], [data-reveal-stagger]');
+    var headsE = $$('main h2, .air h2').filter(function (h) {
+      return !h.classList.contains('manifesto') && !h.classList.contains('eyebrow') && h.textContent.trim();
+    });
+    headsE.forEach(function (h) { h.removeAttribute('data-reveal'); splitWords(h); });
+
+    gsap.set(revAll, { opacity: 0, y: 22 });
+    var seq = gsap.timeline({ delay: .45 });
+    seq.to(revAll, { opacity: 1, y: 0, duration: .75, stagger: .055, ease: 'power3.out' }, 0);
+    headsE.forEach(function (h, i) {
+      var w = $$('.wd', h);
+      if (w.length) seq.from(w, { opacity: 0, yPercent: 50, duration: .7, stagger: .03, ease: 'power3.out' }, .3 + i * .18);
+    });
+    $$('.eyebrow').forEach(function (e, i) {
+      seq.fromTo(e, { '--rule': 0 }, { '--rule': 1, duration: .6, ease: 'power3.out' }, .35 + i * .12);
+    });
+    $$('[data-count]').forEach(function (el, i) {
+      var end = parseFloat(el.dataset.count), sfx = el.dataset.suffix || '', o = { v: 0 };
+      seq.to(o, {
+        v: end, duration: 1.5, ease: 'power2.out',
+        onUpdate: function () { el.textContent = Math.round(o.v) + sfx; }
+      }, .6 + i * .1);
+    });
+  }
+
   $$('main h2, .air h2').forEach(function (h) {
+    if (EMBED) return;
     /* o manifesto tem o seu próprio efeito, e o h2 do bloco de números é um eyebrow */
     if (h.classList.contains('manifesto') || h.classList.contains('eyebrow')) return;
     if (!h.textContent.trim()) return;
@@ -859,7 +909,7 @@
   });
 
   /* o fio do eyebrow desenha-se: o mesmo gesto da rota, repetido em cada secção */
-  $$('.eyebrow').forEach(function (e) {
+  if (!EMBED) $$('.eyebrow').forEach(function (e) {
     gsap.fromTo(e, { '--rule': 0 }, {
       '--rule': 1, duration: .7, ease: 'power3.out',
       scrollTrigger: { trigger: e, start: 'top 92%', once: true }
@@ -867,11 +917,11 @@
   });
 
   /* ---------- revelações e contadores ---------- */
-  $$('[data-reveal]').forEach(function (el) {
+  if (!EMBED) $$('[data-reveal]').forEach(function (el) {
     gsap.from(el, { opacity: 0, y: 30, duration: .95, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%', once: true } });
   });
   var groups = new Map();
-  $$('[data-reveal-stagger]').forEach(function (el) {
+  if (!EMBED) $$('[data-reveal-stagger]').forEach(function (el) {
     var p = el.parentElement;
     if (!groups.has(p)) groups.set(p, []);
     groups.get(p).push(el);
@@ -879,7 +929,7 @@
   groups.forEach(function (items, parent) {
     gsap.from(items, { opacity: 0, y: 28, duration: .85, stagger: .07, ease: 'power3.out', scrollTrigger: { trigger: parent, start: 'top 86%', once: true } });
   });
-  $$('[data-count]').forEach(function (el) {
+  if (!EMBED) $$('[data-count]').forEach(function (el) {
     var end = parseFloat(el.dataset.count), sfx = el.dataset.suffix || '', o = { v: 0 };
     gsap.to(o, {
       v: end, duration: 1.7, ease: 'power2.out',
