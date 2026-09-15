@@ -102,8 +102,12 @@ ul,ol{ margin:0; padding:0; list-style:none; }
   font-family:'IBM Plex Mono', ui-monospace, Menlo, monospace;
   font-size:var(--t-xs); letter-spacing:0.22em; text-transform:uppercase;
   color:var(--burgundy); display:flex; align-items:center; gap:0.7em;
+  --rule:1;
 }
-.eyebrow::before{ content:''; width:26px; height:1px; background:var(--gold); opacity:.75; flex:none; }
+.eyebrow::before{
+  content:''; width:26px; height:1px; background:var(--gold); opacity:.75; flex:none;
+  transform-origin:left center; transform:scaleX(var(--rule));
+}
 .eyebrow--plain::before{ display:none; }
 
 .mono{
@@ -112,6 +116,7 @@ ul,ol{ margin:0; padding:0; list-style:none; }
 }
 
 .lede{ font-size:var(--t-md); color:var(--stone); line-height:1.62; max-width:48ch; }
+.wd{ display:inline-block; will-change:transform, opacity; }
 .section{ padding-block:clamp(78px, 11vw, 168px); position:relative; isolation:isolate; }
 .section--tight{ padding-block:clamp(56px, 7.5vw, 110px); }
 
@@ -179,14 +184,22 @@ ul,ol{ margin:0; padding:0; list-style:none; }
 .preload{
   position:fixed; inset:0; z-index:100; background:var(--cream);
   display:grid; place-items:center;
-  animation:preload-failsafe .5s 3.2s forwards;
+  animation:preload-failsafe .5s 3.6s forwards;
 }
 @keyframes preload-failsafe{ to{ opacity:0; visibility:hidden; } }
-.preload__inner{ display:flex; flex-direction:column; align-items:center; gap:22px; }
-.preload__mark{ width:min(190px, 46vw); }
-.preload__bar{ width:min(210px,50vw); height:1px; background:var(--cream-3); position:relative; overflow:hidden; }
-.preload__fill{ position:absolute; inset:0; background:var(--gold-lit); transform:scaleX(0); transform-origin:left; }
-.preload__num{ color:var(--stone-dim); }
+.preload__stage{ position:relative; width:min(330px, 76vw); display:flex; flex-direction:column; align-items:center; }
+/* a rota tracejada do logótipo, com o avião a descer por ela */
+.preload__air{ position:relative; width:100%; height:clamp(62px, 19vw, 100px); }
+.preload__svg{ position:absolute; inset:0; width:100%; height:100%; color:rgba(91,26,20,.22); overflow:visible; }
+.preload__svg #plTrail{ stroke:var(--gold-lit); }
+.preload__plane{
+  position:absolute; left:0; top:0; width:18px; height:18px; margin:-9px 0 0 -9px;
+  color:var(--gold-lit); opacity:0;
+  filter:drop-shadow(0 1px 5px rgba(91,26,20,.28));
+}
+.preload__plane svg{ width:100%; height:100%; display:block; }
+.preload__mark{ width:100%; }
+.preload__rule{ display:block; width:62%; height:1px; background:var(--gold-lit); transform:scaleX(0); margin-top:15px; }
 
 /* ============================================================
    PROGRESSO · ROTA · VOLTAR AO TOPO
@@ -372,6 +385,8 @@ ul,ol{ margin:0; padding:0; list-style:none; }
 .btn--sm{ padding:.62em 1.15em; font-size:var(--t-xs); }
 .btn--block{ width:100%; }
 .btn[disabled]{ opacity:.4; pointer-events:none; }
+.btn:active{ transform:scale(.975); }
+.icobtn:active, .deck__arrow:active, .totop:active{ transform:scale(.94); }
 
 /* ============================================================
    HERÓI — a fotografia desvanece para creme onde o título assenta
@@ -525,7 +540,8 @@ ul,ol{ margin:0; padding:0; list-style:none; }
   box-shadow:0 26px 54px -20px rgba(91,26,20,.5);
   background:var(--cream-3);
 }
-.deck__card img{ width:100%; height:100%; object-fit:cover; }
+.deck__card img{ width:100%; height:100%; object-fit:cover; transition:transform 1.2s var(--ease-out); }
+.deck__card:not(.is-active):hover img{ transform:scale(1.06); }
 .deck__card::after{
   content:''; position:absolute; inset:0;
   background:linear-gradient(to top, rgba(50,14,10,.86) 3%, rgba(50,14,10,.1) 46%, transparent 72%);

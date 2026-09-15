@@ -84,6 +84,12 @@
 
   var destLabel = function (d) { return d.country + ' · ' + d.name; };
 
+  /* pequeno impulso ao seleccionar — confirma o toque */
+  function pop(el) {
+    if (!hasGSAP || REDUCE || !el) return;
+    gsap.fromTo(el, { scale: .9 }, { scale: 1, duration: .45, ease: 'back.out(3)' });
+  }
+
   /* ============================================================
      RELÓGIOS
      ============================================================ */
@@ -530,6 +536,7 @@
         $$('#chipsTipo .chip').forEach(function (o) { o.setAttribute('aria-pressed', 'false'); });
         c.setAttribute('aria-pressed', 'true');
         state.tipo = c.textContent.trim();
+        pop(c);
         setErr('#err1', '');
       });
     });
@@ -539,6 +546,7 @@
       if (!c) return;
       var on = c.getAttribute('aria-pressed') === 'true';
       c.setAttribute('aria-pressed', on ? 'false' : 'true');
+      pop(c);
       var v = c.dataset.v;
       if (on) state.destinos = state.destinos.filter(function (x) { return x !== v; });
       else state.destinos.push(v);
@@ -686,25 +694,66 @@
     gsap.ticker.lagSmoothing(0);
   }
 
-  /* ---------- pré-carregamento + herói ---------- */
-  var preload = $('#preload'), fill = $('#preloadFill'), num = $('#preloadNum'), counter = { v: 0 };
-  gsap.timeline()
-    .to(fill, { scaleX: 1, duration: .95, ease: 'power2.inOut' }, 0)
-    .to(counter, {
-      v: 100, duration: .95, ease: 'power2.inOut',
-      onUpdate: function () { num.textContent = String(Math.round(counter.v)).padStart(2, '0'); }
-    }, 0)
-    .to('.preload__inner', { y: -14, opacity: 0, duration: .45, ease: 'power2.in' }, '>-0.05')
-    .to(preload, {
-      yPercent: -100, duration: .9, ease: 'expo.inOut',
-      onComplete: function () { preload.style.display = 'none'; ScrollTrigger.refresh(); }
-    }, '<0.1')
-    .from('[data-hero="1"]', { opacity: 0, y: 16, duration: .7, ease: 'power3.out' }, '-=0.45')
-    .from('.hero h1 .ln__i', { yPercent: 112, duration: 1.05, stagger: .09, ease: 'expo.out' }, '-=0.55')
-    .from('[data-hero="3"]', { opacity: 0, y: 18, duration: .8, ease: 'power3.out' }, '-=0.65')
-    .from('[data-hero="4"]', { opacity: 0, y: 18, duration: .8, ease: 'power3.out' }, '-=0.62')
-    .from('.float', { opacity: 0, x: 34, duration: .8, stagger: .1, ease: 'power3.out' }, '-=0.75')
-    .from('.readout__grid > *', { opacity: 0, y: 10, duration: .6, stagger: .05, ease: 'power2.out' }, '-=0.6');
+  /* ---------- pré-carregamento: o avião desce pela rota do logótipo ---------- */
+  var preload = $('#preload');
+  var tl = gsap.timeline();
+
+  function heroIn(at) {
+    tl.from('[data-hero="1"]', { opacity: 0, y: 16, duration: .7, ease: 'power3.out' }, at)
+      .from('.hero h1 .ln__i', { yPercent: 112, duration: 1.05, stagger: .09, ease: 'expo.out' }, at + .08)
+      .from('.float', { opacity: 0, x: 34, duration: .8, stagger: .1, ease: 'power3.out' }, at + .2)
+      .from('[data-hero="3"]', { opacity: 0, y: 18, duration: .8, ease: 'power3.out' }, at + .32)
+      .from('[data-hero="4"]', { opacity: 0, y: 18, duration: .8, ease: 'power3.out' }, at + .4)
+      .from('.readout__grid > *', { opacity: 0, y: 10, duration: .6, stagger: .05, ease: 'power2.out' }, at + .46);
+  }
+
+  var seenIntro = false;
+  try { seenIntro = sessionStorage.getItem('ayam-intro') === '1'; sessionStorage.setItem('ayam-intro', '1'); }
+  catch (e) { /* modo privado: mostra a introdução à mesma */ }
+
+  var plPath = $('#plPath'), plTrail = $('#plTrail'), plPlane = $('#plPlane');
+
+  if (seenIntro || !plPath || !plTrail) {
+    /* já viu nesta sessão — vai directo ao herói */
+    if (preload) preload.style.display = 'none';
+    heroIn(0);
+    ScrollTrigger.refresh();
+  } else {
+    var plSvg = plPath.ownerSVGElement;
+    var plLen = plTrail.getTotalLength();
+    var vb = plSvg.viewBox.baseVal;
+
+    /* o rasto começa por desenhar; preserveAspectRatio="none" dá escalas
+       independentes em x e y, por isso o ângulo tem de usar as duas */
+    gsap.set(plTrail, { strokeDasharray: plLen, strokeDashoffset: plLen });
+    gsap.set(plPath, { opacity: 0 });
+
+    var flight = { t: 0 };
+    function placePlane() {
+      var r = plSvg.getBoundingClientRect();
+      if (!r.width) return;
+      var sx = r.width / vb.width, sy = r.height / vb.height;
+      var a = plTrail.getPointAtLength(plLen * flight.t);
+      var bnext = plTrail.getPointAtLength(Math.min(plLen, plLen * flight.t + 2));
+      var ang = Math.atan2((bnext.y - a.y) * sy, (bnext.x - a.x) * sx) * 180 / Math.PI;
+      gsap.set(plPlane, { x: a.x * sx, y: a.y * sy, rotation: ang + 90 });
+    }
+    placePlane();
+
+    tl.to(plPath, { opacity: 1, duration: .45, ease: 'power2.out' }, 0)
+      .to(plPlane, { opacity: 1, duration: .3, ease: 'power2.out' }, .15)
+      .to(flight, { t: 1, duration: 1.25, ease: 'power1.inOut', onUpdate: placePlane }, .15)
+      .to(plTrail, { strokeDashoffset: 0, duration: 1.25, ease: 'power1.inOut' }, .15)
+      .from('#plMark', { opacity: 0, y: 14, duration: .7, ease: 'power3.out' }, .75)
+      .to('#plRule', { scaleX: 1, duration: .6, ease: 'power3.out' }, 1.05)
+      .to(plPlane, { opacity: 0, duration: .3, ease: 'power2.in' }, 1.4)
+      .to('.preload__stage', { y: -16, opacity: 0, duration: .45, ease: 'power2.in' }, 1.5)
+      .to(preload, {
+        yPercent: -100, duration: .9, ease: 'expo.inOut',
+        onComplete: function () { preload.style.display = 'none'; ScrollTrigger.refresh(); }
+      }, 1.62);
+    heroIn(1.95);
+  }
 
   gsap.to('#heroMedia', { yPercent: 13, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
   gsap.to('.hero__body, .readout, .hero__float', { opacity: 0, ease: 'none', scrollTrigger: { trigger: '.hero', start: '40% top', end: 'bottom top', scrub: true } });
@@ -773,6 +822,50 @@
     });
   }
 
+  /* ---------- títulos: cascata palavra a palavra ---------- */
+  function splitWords(el) {
+    if (el.dataset.wd) return $$('.wd', el);
+    el.dataset.wd = '1';
+    (function walk(node) {
+      Array.prototype.slice.call(node.childNodes).forEach(function (n) {
+        if (n.nodeType === 3) {
+          var frag = document.createDocumentFragment();
+          n.textContent.split(/(\s+)/).forEach(function (part) {
+            if (!part) return;
+            if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+            var sp = document.createElement('span');
+            sp.className = 'wd'; sp.textContent = part;
+            frag.appendChild(sp);
+          });
+          node.replaceChild(frag, n);
+        } else if (n.nodeType === 1 && !n.classList.contains('wd')) walk(n);
+      });
+    })(el);
+    return $$('.wd', el);
+  }
+
+  $$('main h2, .air h2').forEach(function (h) {
+    /* o manifesto tem o seu próprio efeito, e o h2 do bloco de números é um eyebrow */
+    if (h.classList.contains('manifesto') || h.classList.contains('eyebrow')) return;
+    if (!h.textContent.trim()) return;
+    h.removeAttribute('data-reveal');           /* sai do ciclo genérico abaixo */
+    var words = splitWords(h);
+    if (!words.length) return;
+    gsap.from(words, {
+      opacity: 0, yPercent: 55, rotateX: -32, transformPerspective: 700, transformOrigin: '50% 100%',
+      duration: .85, stagger: .035, ease: 'power3.out',
+      scrollTrigger: { trigger: h, start: 'top 87%', once: true }
+    });
+  });
+
+  /* o fio do eyebrow desenha-se: o mesmo gesto da rota, repetido em cada secção */
+  $$('.eyebrow').forEach(function (e) {
+    gsap.fromTo(e, { '--rule': 0 }, {
+      '--rule': 1, duration: .7, ease: 'power3.out',
+      scrollTrigger: { trigger: e, start: 'top 92%', once: true }
+    });
+  });
+
   /* ---------- revelações e contadores ---------- */
   $$('[data-reveal]').forEach(function (el) {
     gsap.from(el, { opacity: 0, y: 30, duration: .95, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%', once: true } });
@@ -794,6 +887,14 @@
       onUpdate: function () { el.textContent = Math.round(o.v) + sfx; }
     });
   });
+
+  /* ---------- a chegada do carrossel ---------- */
+  if (stage) {
+    gsap.from(stage, {
+      scale: .88, opacity: 0, y: 30, duration: 1.1, ease: 'power3.out',
+      scrollTrigger: { trigger: '#destinos', start: 'top 78%', once: true }
+    });
+  }
 
   /* ---------- Cabo Verde ---------- */
   var mm = gsap.matchMedia();
