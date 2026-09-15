@@ -16,6 +16,24 @@ assets/           fotografia tratada + logótipo + favicon
 vendor/           GSAP 3.12.5, ScrollTrigger, Lenis 1.1.13
 ```
 
+### Como está construído
+
+Cada secção tem **fotografia de fundo** (`.bg` + `.bg__img` + `.bg__scrim`) e o
+conteúdo vive em **painéis de vidro** (`.glass`) por cima. Não há blocos de texto
+sobre fundo liso — foi essa a principal mudança de direcção.
+
+Nomes de ficheiros de imagem:
+
+| Prefixo | Para quê | Tamanho |
+|---|---|---|
+| `bg-*.jpg` | fundo de secção e de destino | 1600×900 |
+| `d-*.jpg` | cartão vertical do carrossel | 760×950 |
+| `w-*.jpg` | imagem de topo da gaveta | 1100×733 |
+
+Ao acrescentar um destino em `DESTINOS` (`app.js`), são precisas as três imagens
+com o mesmo `id`. O carrossel, a gaveta, a pesquisa e os chips do formulário são
+todos gerados a partir desse array — não há nada a duplicar à mão.
+
 **Editar `_content.html`, `styles.css` ou `app.js`** e depois correr:
 
 ```bash
@@ -28,7 +46,9 @@ Editar o `index.html` directamente faz com que as alterações se percam na gera
 
 | Quero mudar | Ficheiro | Onde |
 |---|---|---|
-| Destinos (nomes, voos, épocas, descrições) | `app.js` | array `DESTINOS`, no topo |
+| Destinos (nomes, voos, épocas, descrições) | `app.js` | array `DESTINOS`, no topo — alimenta carrossel, gaveta, pesquisa e formulário |
+| Fundos das secções | `_content.html` | `<img class="bg__img" src="assets/bg-…">` em cada secção |
+| Força do escurecimento sobre as fotos | `styles.css` | `.bg__scrim`, `.bg__scrim--even`, `.bg__scrim--deep` |
 | O que está incluído nos pacotes | `app.js` | array `INCLUI` |
 | Cores e tipos de letra | `styles.css` | bloco `:root`, no topo |
 | Textos das secções | `_content.html` | por secção, comentadas |
@@ -102,9 +122,14 @@ lado nenhum — existem apenas na conversa de WhatsApp. Para ter um registo
 - **Acessibilidade**: link para saltar o cabeçalho, foco preso dentro do menu e da
   gaveta, fecho com `Escape`, `aria-pressed` nos chips, `aria-current` na navegação,
   e todos os botões com nome acessível.
-- **Telemóvel**: menu em ecrã inteiro abaixo de 1000 px; o carrossel passa a
-  `scroll-snap` nativo abaixo de 860 px; a gaveta transforma-se em painel inferior
-  abaixo de 640 px.
+- **Carrossel 3D**: `perspective` no contentor e `rotateY`/`translateZ` por cartão,
+  com deslocamento circular — o cartão activo fica sempre ao centro, com cartões
+  dos dois lados, e a navegação dá a volta nos extremos. Funciona com setas,
+  pontos, arrasto, teclado e clique. O fundo da secção troca com o destino activo.
+- **Pesquisa**: abre pelo ícone da barra ou pela tecla `/`; filtra por nome, país,
+  código IATA ou etiqueta; navega com as setas e escolhe com `Enter`.
+- **Telemóvel**: menu em ecrã inteiro abaixo de 1040 px; a gaveta transforma-se em
+  painel inferior abaixo de 640 px.
 - **Relógios**: a hora local de cada destino é calculada no browser com
   `Intl.DateTimeFormat` a partir do fuso horário — não é texto fixo.
 - Fontes carregadas do Google Fonts (Fraunces, Archivo, IBM Plex Mono). Para

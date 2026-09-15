@@ -6,6 +6,7 @@
 
   var REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var hasGSAP = typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined';
+  var FINE = window.matchMedia('(hover:hover) and (pointer:fine) and (min-width:1024px)').matches;
   var WA = '2389990900';
   var MAIL = 'ayam.reservas@gmail.com';
 
@@ -13,71 +14,62 @@
   var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
 
   /* ============================================================
-     DADOS — fonte única para o carrossel e para a gaveta
+     DADOS — fonte única: carrossel, gaveta, pesquisa e formulário
      ============================================================ */
   var DESTINOS = [
     {
       id: 'fogo', country: 'Cabo Verde', name: 'Ilha do Fogo', code: 'SFL',
       coords: '14.895° N · 24.495° W', season: 'Nov — Jun', flight: '0h35 · directo',
-      tz: 'Atlantic/Cape_Verde', tags: ['Natureza', 'Entre ilhas', 'Aventura'],
-      desc: 'Um vulcão activo com uma aldeia dentro da cratera. Chã das Caldeiras produz vinho e café em solo de lava, e a subida ao Pico faz-se de madrugada para chegar ao cume com o nascer do sol. A ilha mais dramática do arquipélago, a trinta e cinco minutos de voo da Praia.',
-      len: '3 a 5 noites'
+      tz: 'Atlantic/Cape_Verde', tags: ['Natureza', 'Entre ilhas', 'Aventura'], len: '3 a 5 noites',
+      desc: 'Um vulcão activo com uma aldeia dentro da cratera. Chã das Caldeiras produz vinho e café em solo de lava, e a subida ao Pico faz-se de madrugada para chegar ao cume com o nascer do sol.'
     },
     {
       id: 'maldivas', country: 'Maldivas', name: 'Atol de Baa', code: 'MLE',
       coords: '5.210° N · 73.068° E', season: 'Nov — Abr', flight: '≈ 20h · via LIS/DXB',
-      tz: 'Indian/Maldives', tags: ['Lua-de-mel', 'Praia', 'Bem-estar'],
-      desc: 'Reserva da Biosfera da UNESCO, o Atol de Baa é onde as mantas se juntam às centenas na baía de Hanifaru entre Maio e Novembro. Villas sobre a água, casa de mergulho privada e o silêncio que só existe a duzentos quilómetros do continente mais próximo.',
-      len: '7 a 10 noites'
+      tz: 'Indian/Maldives', tags: ['Lua-de-mel', 'Praia', 'Bem-estar'], len: '7 a 10 noites',
+      desc: 'Reserva da Biosfera da UNESCO, é aqui que as mantas se juntam às centenas na baía de Hanifaru. Villas sobre a água, casa de mergulho privada e o silêncio de quem está longe de tudo.'
     },
     {
       id: 'dubai', country: 'Emirados', name: 'Dubai', code: 'DXB',
       coords: '25.197° N · 55.274° E', season: 'Nov — Mar', flight: '≈ 13h · via LIS',
-      tz: 'Asia/Dubai', tags: ['Cidade', 'Compras', 'Família'],
-      desc: 'A escala que vale a viagem. Entre o deserto e o Golfo, Dubai combina hotelaria de altíssimo nível com jantar no topo do mundo e madrugadas de balão sobre as dunas. Excelente ponto de ligação para a Ásia, e um destino inteiro por si só.',
-      len: '4 a 7 noites'
+      tz: 'Asia/Dubai', tags: ['Cidade', 'Compras', 'Família'], len: '4 a 7 noites',
+      desc: 'A escala que vale a viagem. Entre o deserto e o Golfo, hotelaria do mais alto nível, jantar no topo do mundo e madrugadas de balão sobre as dunas.'
     },
     {
       id: 'lisboa', country: 'Portugal', name: 'Lisboa', code: 'LIS',
       coords: '38.714° N · 9.139° W', season: 'Abr — Out', flight: '≈ 5h30 · directo',
-      tz: 'Europe/Lisbon', tags: ['Cidade', 'Cultura', 'Família'],
-      desc: 'A ligação mais curta entre Cabo Verde e a Europa. Alfama ao amanhecer, mercados de bairro, e a porta de entrada para toda a rede de voos europeia. Tratamos de estadia, transfers e das ligações seguintes sem que tenha de pensar nisso.',
-      len: '4 a 7 noites'
+      tz: 'Europe/Lisbon', tags: ['Cidade', 'Cultura', 'Família'], len: '4 a 7 noites',
+      desc: 'A ligação mais curta entre Cabo Verde e a Europa. Alfama ao amanhecer, mercados de bairro, e a porta de entrada para toda a rede de voos europeia.'
     },
     {
       id: 'rio', country: 'Brasil', name: 'Rio de Janeiro', code: 'GIG',
       coords: '22.952° S · 43.210° W', season: 'Dez — Mar', flight: '≈ 11h · via LIS',
-      tz: 'America/Sao_Paulo', tags: ['Cidade', 'Praia', 'Cultura'],
-      desc: 'Do Pão de Açúcar ao pôr do sol no Arpoador, o Rio faz-se de miradouros e de música. Do outro lado do mesmo Atlântico, com uma língua partilhada e uma proximidade cultural que se sente à chegada.',
-      len: '7 a 10 noites'
+      tz: 'America/Sao_Paulo', tags: ['Cidade', 'Praia', 'Cultura'], len: '7 a 10 noites',
+      desc: 'Do Pão de Açúcar ao pôr do sol no Arpoador, o Rio faz-se de miradouros e de música. Do outro lado do mesmo Atlântico, com a língua partilhada.'
     },
     {
       id: 'krabi', country: 'Tailândia', name: 'Railay, Krabi', code: 'KBV',
       coords: '8.012° N · 98.838° E', season: 'Nov — Mar', flight: '≈ 19h · via LIS/BKK',
-      tz: 'Asia/Bangkok', tags: ['Praia', 'Aventura', 'Lua-de-mel'],
-      desc: 'Uma península só acessível por barco, fechada por falésias de calcário que caem a pique sobre o mar de Andamão. Escalada, caiaque entre ilhotas e praias que ao fim da tarde ficam vazias. O sossego da Tailândia sem o ruído de Phuket.',
-      len: '10 a 14 noites'
+      tz: 'Asia/Bangkok', tags: ['Praia', 'Aventura', 'Lua-de-mel'], len: '10 a 14 noites',
+      desc: 'Uma península só acessível por barco, fechada por falésias de calcário sobre o mar de Andamão. O sossego da Tailândia sem o ruído de Phuket.'
     },
     {
       id: 'quioto', country: 'Japão', name: 'Quioto', code: 'KIX',
-      coords: '35.009° N · 135.667° E', season: 'Mar — Abr · Out — Nov',
-      flight: '≈ 20h · via LIS', tz: 'Asia/Tokyo', tags: ['Cultura', 'Cidade', 'Bem-estar'],
-      desc: 'Mil e seiscentos templos, ruas de madeira e um bosque de bambu que assobia com o vento. Vá na floração das cerejeiras, em Abril, ou no vermelho dos áceres, em Novembro — as duas janelas esgotam com um ano de antecedência.',
-      len: '10 a 14 noites'
+      coords: '35.009° N · 135.667° E', season: 'Mar — Abr · Out — Nov', flight: '≈ 20h · via LIS',
+      tz: 'Asia/Tokyo', tags: ['Cultura', 'Cidade', 'Bem-estar'], len: '10 a 14 noites',
+      desc: 'Mil e seiscentos templos, ruas de madeira e um bosque de bambu que assobia com o vento. Vá na floração das cerejeiras ou no vermelho dos áceres.'
     },
     {
       id: 'amalfi', country: 'Itália', name: 'Costa Amalfitana', code: 'NAP',
       coords: '40.628° N · 14.485° E', season: 'Mai — Jun · Set', flight: '≈ 9h · via LIS',
-      tz: 'Europe/Rome', tags: ['Lua-de-mel', 'Cultura', 'Praia'],
-      desc: 'Positano desce a encosta até ao mar em socalcos de casas cor de açafrão. Almoço em Ravello, barco privado até Capri e limoncello ao fim da tarde. Evite Agosto: Maio e Setembro dão-lhe a mesma costa sem as multidões.',
-      len: '7 a 10 noites'
+      tz: 'Europe/Rome', tags: ['Lua-de-mel', 'Cultura', 'Praia'], len: '7 a 10 noites',
+      desc: 'Positano desce a encosta até ao mar em socalcos de casas cor de açafrão. Almoço em Ravello e barco privado até Capri, longe das multidões de Agosto.'
     },
     {
       id: 'bali', country: 'Indonésia', name: 'Bali', code: 'DPS',
       coords: '8.431° S · 115.279° E', season: 'Abr — Out', flight: '≈ 22h · via LIS/DXB',
-      tz: 'Asia/Makassar', tags: ['Bem-estar', 'Lua-de-mel', 'Natureza'],
-      desc: 'Os socalcos de arroz de Tegallalang ao amanhecer, retiros de ioga em Ubud e praias de areia negra vulcânica a sul. Uma ilha que se percorre devagar, entre templos e vales, com estadias que vão de cabanas na selva a resorts sobre a falésia.',
-      len: '12 a 16 noites'
+      tz: 'Asia/Makassar', tags: ['Bem-estar', 'Lua-de-mel', 'Natureza'], len: '12 a 16 noites',
+      desc: 'Os socalcos de arroz de Tegallalang ao amanhecer, retiros de ioga em Ubud e praias de areia negra vulcânica a sul. Uma ilha que se percorre devagar.'
     }
   ];
 
@@ -90,14 +82,14 @@
     'Travel Agent dedicado e apoio 24/7'
   ];
 
+  var destLabel = function (d) { return d.country + ' · ' + d.name; };
+
   /* ============================================================
-     RELÓGIOS — hora local real em cada destino
+     RELÓGIOS
      ============================================================ */
   function fmtTime(tz) {
     try {
-      return new Intl.DateTimeFormat('pt-PT', {
-        timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false
-      }).format(new Date());
+      return new Intl.DateTimeFormat('pt-PT', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
     } catch (e) { return '—'; }
   }
   function tick() {
@@ -107,43 +99,231 @@
   }
 
   /* ============================================================
-     CARROSSEL — cartões a partir dos dados
+     CARROSSEL 3D
      ============================================================ */
-  function renderCards() {
-    var track = $('#railTrack');
-    if (!track) return;
-    track.innerHTML = DESTINOS.map(function (d) {
-      return '' +
-        '<article class="card" role="listitem">' +
-          '<div class="card__frame">' +
-            '<img class="card__img" src="assets/d-' + d.id + '.jpg" alt="' + d.name + ', ' + d.country + '" width="760" height="950" loading="lazy" decoding="async">' +
-            '<div class="card__veil"></div>' +
-            '<span class="card__code">' + d.code + '</span>' +
-            '<div class="card__over">' +
-              '<span class="card__country">' + d.country + '</span>' +
-              '<h3 class="card__name">' + d.name + '</h3>' +
-            '</div>' +
-            '<button class="card__hit" data-dest="' + d.id + '" aria-label="Ver detalhes de ' + d.name + ', ' + d.country + '">' +
-              '<span class="card__open" aria-hidden="true">' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>' +
-              '</span>' +
-            '</button>' +
-          '</div>' +
-          '<div class="card__meta">' +
-            '<div class="card__row"><span class="card__rk">Coordenadas</span><span class="card__rv">' + d.coords + '</span></div>' +
-            '<div class="card__row"><span class="card__rk">Melhor época</span><span class="card__rv card__rv--gold">' + d.season + '</span></div>' +
-            '<div class="card__row"><span class="card__rk">Voo</span><span class="card__rv">' + d.flight + '</span></div>' +
-            '<div class="card__row"><span class="card__rk">Hora local</span><span class="card__rv" data-tz="' + d.tz + '">—</span></div>' +
-          '</div>' +
-        '</article>';
+  var deck = $('#deck'), stage = $('#deckStage'), bgs = $('#deckBgs'), dots = $('#deckDots');
+  var cards = [], bgImgs = [], dotEls = [], active = 0;
+
+  function buildDeck() {
+    if (!stage) return;
+    stage.innerHTML = DESTINOS.map(function (d, i) {
+      return '<button class="deck__card" data-i="' + i + '" aria-label="' + destLabel(d) + '">' +
+        '<img src="assets/d-' + d.id + '.jpg" alt="' + d.name + ', ' + d.country + '" width="760" height="950" loading="lazy" decoding="async">' +
+        '<span class="deck__num mono">' + (i + 1) + ' / ' + DESTINOS.length + '</span>' +
+        '<span class="deck__cap"><span class="deck__cc">' + d.country + '</span><span class="deck__cn">' + d.name + '</span></span>' +
+        '</button>';
     }).join('');
+    bgs.innerHTML = DESTINOS.map(function (d, i) {
+      return '<img src="assets/bg-' + d.id + '.jpg" alt="" class="' + (i === 0 ? 'is-on' : '') + '" loading="lazy" decoding="async">';
+    }).join('');
+    dots.innerHTML = DESTINOS.map(function (d, i) {
+      return '<button class="deck__dot' + (i === 0 ? ' is-on' : '') + '" data-i="' + i + '" aria-label="Ir para ' + d.name + '"></button>';
+    }).join('');
+    cards = $$('.deck__card', stage);
+    bgImgs = $$('img', bgs);
+    dotEls = $$('.deck__dot', dots);
+  }
+
+  function layoutDeck(animate) {
+    if (!cards.length) return;
+    var cw = cards[0].getBoundingClientRect().width || 240;
+    var n = cards.length, half = Math.floor(n / 2);
+    cards.forEach(function (c, i) {
+      /* deslocamento circular: o activo fica sempre ao centro, com cartões de ambos os lados */
+      var o = ((((i - active) % n) + n + half) % n) - half;
+      var abs = Math.abs(o), sign = o < 0 ? -1 : (o > 0 ? 1 : 0);
+
+      /* leque comprimido: cada cartão afasta-se menos do que o anterior */
+      var x = 0, k;
+      for (k = 1; k <= abs; k++) x += cw * 0.58 * Math.pow(0.76, k - 1);
+      x *= sign;
+
+      var vars = {
+        xPercent: -50, yPercent: -50,
+        x: x,
+        z: -abs * 190,
+        rotateY: -sign * Math.min(abs, 3) * 25,
+        scale: 1 - Math.min(abs, 4) * 0.055,
+        opacity: abs > 3 ? 0 : 1 - abs * 0.09,
+        duration: animate ? 0.78 : 0,
+        ease: 'power3.out',
+        overwrite: 'auto'
+      };
+      if (hasGSAP) gsap.to(c, vars);
+      c.style.zIndex = String(60 - abs);
+      c.classList.toggle('is-active', i === active);
+      c.setAttribute('aria-hidden', abs > 3 ? 'true' : 'false');
+      c.tabIndex = i === active ? 0 : -1;
+    });
+
+    bgImgs.forEach(function (im, i) { im.classList.toggle('is-on', i === active); });
+    dotEls.forEach(function (d, i) { d.classList.toggle('is-on', i === active); });
+    updateInfo(animate);
+  }
+
+  function updateInfo(animate) {
+    var d = DESTINOS[active];
+    if (!d) return;
+    var set = function () {
+      $('#diCountry').textContent = d.country;
+      $('#diName').textContent = d.name;
+      $('#diDesc').textContent = d.desc;
+      $('#diFacts').innerHTML = [
+        ['Código', d.code], ['Melhor época', d.season],
+        ['Voo desde RAI', d.flight], ['Hora local', fmtTime(d.tz)]
+      ].map(function (f) {
+        return '<span class="deck-info__f"><span class="deck-info__fk">' + f[0] + '</span><span class="deck-info__fv">' + f[1] + '</span></span>';
+      }).join('');
+    };
+    if (hasGSAP && animate && !REDUCE) {
+      var panel = $('#deckInfo');
+      gsap.timeline()
+        .to(panel, { opacity: .25, y: 6, duration: .18, ease: 'power2.in' })
+        .add(set)
+        .to(panel, { opacity: 1, y: 0, duration: .42, ease: 'power3.out' });
+    } else { set(); }
+  }
+
+  function goTo(i, animate) {
+    var n = DESTINOS.length;
+    active = ((i % n) + n) % n;          /* dá a volta nos extremos */
+    layoutDeck(animate !== false);
+  }
+
+  function initDeck() {
+    if (!deck) return;
+    buildDeck();
+    layoutDeck(false);
+
+    $('#deckPrev').addEventListener('click', function () { goTo(active - 1); });
+    $('#deckNext').addEventListener('click', function () { goTo(active + 1); });
+    dots.addEventListener('click', function (e) {
+      var b = e.target.closest('.deck__dot');
+      if (b) goTo(+b.dataset.i);
+    });
+    stage.addEventListener('click', function (e) {
+      var c = e.target.closest('.deck__card');
+      if (!c) return;
+      var i = +c.dataset.i;
+      if (i === active) openDrawer(DESTINOS[i].id);
+      else goTo(i);
+    });
+    deck.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(active - 1); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); goTo(active + 1); }
+      if (e.key === 'Enter' || e.key === ' ') {
+        if (e.target === deck) { e.preventDefault(); openDrawer(DESTINOS[active].id); }
+      }
+    });
+
+    /* arrastar */
+    var dragging = false, startX = 0, moved = 0;
+    deck.addEventListener('pointerdown', function (e) {
+      if (e.target.closest('.deck__arrow')) return;
+      dragging = true; startX = e.clientX; moved = 0;
+      deck.setPointerCapture(e.pointerId);
+    });
+    deck.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      moved = e.clientX - startX;
+      var cw = cards[0] ? cards[0].getBoundingClientRect().width : 240;
+      if (Math.abs(moved) > cw * 0.34) {
+        goTo(active + (moved < 0 ? 1 : -1));
+        startX = e.clientX; moved = 0;
+      }
+    });
+    var stop = function () { dragging = false; };
+    deck.addEventListener('pointerup', stop);
+    deck.addEventListener('pointercancel', stop);
+
+    $('#diOpen').addEventListener('click', function () { openDrawer(DESTINOS[active].id); });
+    $('#diQuote').addEventListener('click', function () { jumpToForm(null, destLabel(DESTINOS[active])); });
+
+    window.addEventListener('resize', function () { layoutDeck(false); });
   }
 
   /* ============================================================
-     GAVETA DE DESTINO
+     PESQUISA
      ============================================================ */
-  var drawer = $('#drawer');
-  var lastFocus = null;
+  function initSearch() {
+    var box = $('#search'), input = $('#searchInput'), results = $('#searchResults');
+    if (!box) return;
+    var cur = 0, list = [];
+
+    function render(q) {
+      q = (q || '').trim().toLowerCase();
+      list = DESTINOS.filter(function (d) {
+        if (!q) return true;
+        return (d.name + ' ' + d.country + ' ' + d.code + ' ' + d.tags.join(' ')).toLowerCase().indexOf(q) > -1;
+      });
+      cur = 0;
+      if (!list.length) {
+        results.innerHTML = '<p class="search__empty">Sem resultados para “' + q + '”. Escreva-nos e tratamos de qualquer destino.</p>';
+        return;
+      }
+      results.innerHTML = list.map(function (d, i) {
+        return '<button class="search__item' + (i === 0 ? ' is-cur' : '') + '" data-id="' + d.id + '" role="option">' +
+          '<img src="assets/d-' + d.id + '.jpg" alt="" loading="lazy">' +
+          '<span class="search__t"><span class="search__c">' + d.country + '</span><span class="search__n">' + d.name + '</span></span>' +
+          '<span class="search__code">' + d.code + '</span></button>';
+      }).join('');
+    }
+
+    function highlight() {
+      $$('.search__item', results).forEach(function (el, i) { el.classList.toggle('is-cur', i === cur); });
+      var el = $$('.search__item', results)[cur];
+      if (el) el.scrollIntoView({ block: 'nearest' });
+    }
+
+    function open() {
+      box.classList.add('is-open');
+      document.body.classList.add('is-locked');
+      if (window.__lenis) window.__lenis.stop();
+      input.value = ''; render('');
+      setTimeout(function () { input.focus(); }, 80);
+    }
+    function close() {
+      box.classList.remove('is-open');
+      document.body.classList.remove('is-locked');
+      if (window.__lenis) window.__lenis.start();
+      $('#searchOpen').focus();
+    }
+    function pick(id) {
+      var i = DESTINOS.map(function (d) { return d.id; }).indexOf(id);
+      close();
+      if (i < 0) return;
+      goTo(i);
+      var t = $('#destinos');
+      setTimeout(function () {
+        if (window.__lenis) window.__lenis.scrollTo(t, { offset: -10, duration: 1.2 });
+        else t.scrollIntoView({ behavior: 'smooth' });
+      }, 120);
+    }
+
+    $('#searchOpen').addEventListener('click', open);
+    $$('[data-search-close]').forEach(function (el) { el.addEventListener('click', close); });
+    input.addEventListener('input', function () { render(input.value); });
+    results.addEventListener('click', function (e) {
+      var b = e.target.closest('.search__item');
+      if (b) pick(b.dataset.id);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === '/' && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName) && !box.classList.contains('is-open')) {
+        e.preventDefault(); open(); return;
+      }
+      if (!box.classList.contains('is-open')) return;
+      if (e.key === 'Escape') { e.preventDefault(); close(); }
+      if (e.key === 'ArrowDown') { e.preventDefault(); cur = Math.min(list.length - 1, cur + 1); highlight(); }
+      if (e.key === 'ArrowUp') { e.preventDefault(); cur = Math.max(0, cur - 1); highlight(); }
+      if (e.key === 'Enter' && list[cur]) { e.preventDefault(); pick(list[cur].id); }
+      trap(e, $('.search__panel'));
+    });
+  }
+
+  /* ============================================================
+     GAVETA
+     ============================================================ */
+  var drawer = $('#drawer'), lastFocus = null;
 
   function openDrawer(id) {
     var d = DESTINOS.filter(function (x) { return x.id === id; })[0];
@@ -164,10 +344,9 @@
       return '<div class="drawer__fact"><span class="drawer__fk">' + f[0] + '</span><span class="drawer__fv">' + f[1] + '</span></div>';
     }).join('');
     $('#drawerInc').innerHTML = INCLUI.map(function (i) { return '<li>' + i + '</li>'; }).join('');
-
     $('#drawerWa').href = 'https://wa.me/' + WA + '?text=' +
       encodeURIComponent('Olá AYAM! Gostava de saber mais sobre uma viagem a ' + d.name + ' (' + d.country + ').');
-    $('#drawerQuote').dataset.dest = d.country + ' \u00b7 ' + d.name;
+    $('#drawerQuote').dataset.dest = destLabel(d);
 
     drawer.classList.add('is-open');
     drawer.setAttribute('aria-hidden', 'false');
@@ -185,9 +364,8 @@
     if (lastFocus) lastFocus.focus();
   }
 
-  /* prende o foco dentro de um contentor aberto */
   function trap(e, container) {
-    if (e.key !== 'Tab') return;
+    if (e.key !== 'Tab' || !container) return;
     var f = $$('a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])', container)
       .filter(function (el) { return el.offsetParent !== null; });
     if (!f.length) return;
@@ -197,22 +375,20 @@
   }
 
   /* ============================================================
-     FORMULÁRIO DE PROPOSTA
+     FORMULÁRIO
      ============================================================ */
-  var state = { tipo: '', destinos: [], outro: '', mes: '', noites: '', adultos: 2, criancas: 0, orc: '', nome: '', contacto: '', nota: '', tier: '' };
+  var state = { tipo: '', destinos: [], outro: '', adultos: 2, criancas: 0, nome: '', contacto: '', nota: '', tier: '' };
   var stepNow = 1;
   var STEP_NAMES = ['Tipo de viagem', 'Destinos', 'Datas e viajantes', 'Os seus dados'];
 
   function buildMonths() {
     var sel = $('#mes');
     if (!sel) return;
-    var now = new Date(), out = [];
-    out.push('<option value="Ainda não sei">Ainda não sei</option>');
+    var now = new Date(), out = ['<option value="Ainda não sei">Ainda não sei</option>'];
     for (var i = 0; i < 18; i++) {
       var d = new Date(now.getFullYear(), now.getMonth() + i, 1);
       var label = new Intl.DateTimeFormat('pt-PT', { month: 'long', year: 'numeric' }).format(d);
-      label = label.charAt(0).toUpperCase() + label.slice(1);
-      out.push('<option>' + label + '</option>');
+      out.push('<option>' + label.charAt(0).toUpperCase() + label.slice(1) + '</option>');
     }
     sel.innerHTML = out.join('');
     sel.selectedIndex = 2;
@@ -222,74 +398,62 @@
     var box = $('#chipsDestino');
     if (!box) return;
     box.innerHTML = DESTINOS.map(function (d) {
-      var label = d.country + ' \u00b7 ' + d.name;
-      return '<button type="button" class="chip" aria-pressed="false" data-v="' + label + '">' + label + '</button>';
+      var l = destLabel(d);
+      return '<button type="button" class="chip" aria-pressed="false" data-v="' + l + '">' + l + '</button>';
     }).join('');
   }
 
   function showStep(n, dir) {
-    var stage = $('.form__stage');
-    if (!stage) return;
-    var from = $('.step:not([hidden])', stage);
-    var to = $('.step[data-step="' + n + '"]', stage);
-    if (!to) return;
-
-    if (from === to) return;
+    var stage2 = $('.form__stage');
+    if (!stage2) return;
+    var from = $('.step:not([hidden])', stage2);
+    var to = $('.step[data-step="' + n + '"]', stage2);
+    if (!to || from === to) return;
     if (from) from.hidden = true;
     to.hidden = false;
-
     if (hasGSAP && !REDUCE) {
-      gsap.fromTo(to, { opacity: 0, x: (dir === -1 ? -18 : 18) },
-        { opacity: 1, x: 0, duration: .45, ease: 'power3.out' });
+      gsap.fromTo(to, { opacity: 0, x: (dir === -1 ? -18 : 18) }, { opacity: 1, x: 0, duration: .45, ease: 'power3.out' });
     }
-
     stepNow = n;
-    var isDone = n === 5;
-    $('#formNav').hidden = isDone;
-    $('#btnBack').hidden = isDone || n === 1;
+    var done = n === 5;
+    $('#formNav').hidden = done;
+    $('#btnBack').hidden = done || n === 1;
     $('#btnNext').textContent = n === 4 ? 'Enviar pedido' : 'Continuar';
-    if (!isDone) {
+    if (!done) {
       $('#stepNow').textContent = String(n);
       $('#stepName').textContent = STEP_NAMES[n - 1];
     }
-    for (var i = 1; i <= 4; i++) {
-      $('#m' + i).classList.toggle('is-done', i <= (isDone ? 4 : n));
-    }
+    for (var i = 1; i <= 4; i++) $('#m' + i).classList.toggle('is-done', i <= (done ? 4 : n));
     if (n === 4) renderReview();
   }
 
   function destinosLabel() {
-    var list = state.destinos.slice();
-    if (state.outro) list.push(state.outro);
-    return list.length ? list.join(', ') : 'A definir';
+    var l = state.destinos.slice();
+    if (state.outro) l.push(state.outro);
+    return l.length ? l.join(', ') : 'A definir';
   }
-
   function paxLabel() {
     var p = state.adultos + (state.adultos === 1 ? ' adulto' : ' adultos');
     if (state.criancas > 0) p += ' · ' + state.criancas + (state.criancas === 1 ? ' criança' : ' crianças');
     return p;
   }
-
   function renderReview() {
     var rows = [
       ['Tipo', state.tipo || 'A definir'],
       ['Destinos', destinosLabel()],
-      ['Partida', $('#mes') ? $('#mes').value : ''],
-      ['Duração', $('#noites') ? $('#noites').value : ''],
+      ['Partida', $('#mes').value],
+      ['Duração', $('#noites').value],
       ['Viajantes', paxLabel()]
     ];
     if (state.tier) rows.unshift(['Pacote', state.tier]);
-    var orc = $('#orcamentoPax') ? $('#orcamentoPax').value : '';
+    var orc = $('#orcamentoPax').value;
     if (orc) rows.push(['Orçamento', orc]);
     $('#review').innerHTML = rows.map(function (r) {
       return '<div class="review__row"><span class="review__k">' + r[0] + '</span><span class="review__v">' + r[1] + '</span></div>';
     }).join('');
   }
-
   function buildMessage() {
-    var L = [];
-    L.push('*Pedido de proposta — AYAM*');
-    L.push('');
+    var L = ['*Pedido de proposta — AYAM*', ''];
     if (state.tier) L.push('Pacote: ' + state.tier);
     L.push('Tipo: ' + (state.tipo || 'A definir'));
     L.push('Destinos: ' + destinosLabel());
@@ -298,19 +462,12 @@
     L.push('Viajantes: ' + paxLabel());
     var orc = $('#orcamentoPax').value;
     if (orc) L.push('Orçamento por pessoa: ' + orc);
-    L.push('');
-    L.push('Nome: ' + state.nome);
-    L.push('Contacto: ' + state.contacto);
-    if (state.nota) { L.push('Nota: ' + state.nota); }
-    L.push('');
-    L.push('Enviado pelo site ayam.cv');
+    L.push('', 'Nome: ' + state.nome, 'Contacto: ' + state.contacto);
+    if (state.nota) L.push('Nota: ' + state.nota);
+    L.push('', 'Enviado pelo site ayam.cv');
     return L.join('\n');
   }
-
-  function setErr(id, msg) {
-    var el = $(id);
-    if (el) el.textContent = msg || '';
-  }
+  function setErr(id, msg) { var el = $(id); if (el) el.textContent = msg || ''; }
 
   function validate(n) {
     if (n === 1) {
@@ -319,9 +476,7 @@
     }
     if (n === 2) {
       state.outro = $('#outroDestino').value.trim();
-      if (!state.destinos.length && !state.outro) {
-        setErr('#err2', 'Escolha um destino ou escreva outro.'); return false;
-      }
+      if (!state.destinos.length && !state.outro) { setErr('#err2', 'Escolha um destino ou escreva outro.'); return false; }
       setErr('#err2', ''); return true;
     }
     if (n === 4) {
@@ -341,13 +496,35 @@
     return true;
   }
 
+  function jumpToForm(tier, dest) {
+    if (tier) {
+      state.tier = tier;
+      var map = { 'Escapadinha': '3 a 5 noites', 'Circuito': '7 a 10 noites', 'Sob medida': 'Mais de 14 noites' };
+      if (map[tier] && $('#noites')) $('#noites').value = map[tier];
+    }
+    if (dest) {
+      var chip = $$('#chipsDestino .chip').filter(function (c) { return c.dataset.v === dest; })[0];
+      if (chip && chip.getAttribute('aria-pressed') !== 'true') {
+        chip.setAttribute('aria-pressed', 'true');
+        state.destinos.push(dest);
+      }
+    }
+    var target = $('#orcamento');
+    if (window.__lenis) window.__lenis.scrollTo(target, { offset: -10, duration: 1.1 });
+    else target.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(function () {
+      var live = $('.step:not([hidden])');
+      var first = live && $('button, input, select', live);
+      if (first) first.focus({ preventScroll: true });
+    }, 420);
+  }
+
   function initForm() {
     var form = $('#quoteForm');
     if (!form) return;
     buildMonths();
     buildDestChips();
 
-    /* chips de tipo — escolha única */
     $$('#chipsTipo .chip').forEach(function (c) {
       c.addEventListener('click', function () {
         $$('#chipsTipo .chip').forEach(function (o) { o.setAttribute('aria-pressed', 'false'); });
@@ -357,7 +534,6 @@
       });
     });
 
-    /* chips de destino — escolha múltipla */
     $('#chipsDestino').addEventListener('click', function (e) {
       var c = e.target.closest('.chip');
       if (!c) return;
@@ -369,11 +545,8 @@
       setErr('#err2', '');
     });
 
-    /* contadores */
     $$('[data-stepper]').forEach(function (st) {
-      var key = st.dataset.stepper;
-      var min = +st.dataset.min, max = +st.dataset.max;
-      var out = $('output', st);
+      var key = st.dataset.stepper, min = +st.dataset.min, max = +st.dataset.max, out = $('output', st);
       st.addEventListener('click', function (e) {
         var b = e.target.closest('button');
         if (!b) return;
@@ -389,7 +562,6 @@
     $('#btnNext').addEventListener('click', function () {
       if (!validate(stepNow)) return;
       if (stepNow < 4) { showStep(stepNow + 1, 1); return; }
-      /* passo 4 → gera links e mostra conclusão */
       var msg = buildMessage();
       $('#waLink').href = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(msg);
       $('#mailLink').href = 'mailto:' + MAIL +
@@ -398,49 +570,16 @@
       showStep(5, 1);
       window.open($('#waLink').href, '_blank', 'noopener');
     });
-
-    $('#btnBack').addEventListener('click', function () {
-      if (stepNow > 1) showStep(stepNow - 1, -1);
-    });
-
+    $('#btnBack').addEventListener('click', function () { if (stepNow > 1) showStep(stepNow - 1, -1); });
     $('#restart').addEventListener('click', function () {
-      state = { tipo: '', destinos: [], outro: '', mes: '', noites: '', adultos: 2, criancas: 0, orc: '', nome: '', contacto: '', nota: '', tier: '' };
+      state = { tipo: '', destinos: [], outro: '', adultos: 2, criancas: 0, nome: '', contacto: '', nota: '', tier: '' };
       $$('.chip').forEach(function (c) { c.setAttribute('aria-pressed', 'false'); });
       form.reset();
-      $$('[data-stepper]').forEach(function (st) {
-        var d = st.dataset.stepper === 'adultos' ? '2' : '0';
-        $('output', st).textContent = d;
-      });
+      $$('[data-stepper]').forEach(function (st) { $('output', st).textContent = st.dataset.stepper === 'adultos' ? '2' : '0'; });
       buildMonths();
       showStep(1, -1);
     });
-
-    /* Enter avança em vez de submeter */
     form.addEventListener('submit', function (e) { e.preventDefault(); $('#btnNext').click(); });
-
-    /* atalhos para o formulário a partir dos pacotes e da gaveta */
-    function jumpToForm(tier, dest) {
-      if (tier) {
-        state.tier = tier;
-        var map = { 'Escapadinha': '3 a 5 noites', 'Circuito': '7 a 10 noites', 'Sob medida': 'Mais de 14 noites' };
-        if (map[tier] && $('#noites')) $('#noites').value = map[tier];
-      }
-      if (dest) {
-        var chip = $$('#chipsDestino .chip').filter(function (c) { return c.dataset.v === dest; })[0];
-        if (chip && chip.getAttribute('aria-pressed') !== 'true') {
-          chip.setAttribute('aria-pressed', 'true');
-          state.destinos.push(dest);
-        }
-      }
-      var target = $('#orcamento');
-      if (window.__lenis) window.__lenis.scrollTo(target, { offset: -10, duration: 1.1 });
-      else target.scrollIntoView({ behavior: 'smooth' });
-      setTimeout(function () {
-        var live = $('.step:not([hidden])');
-        var first = live && $('button, input, select', live);
-        if (first) first.focus({ preventScroll: true });
-      }, 420);
-    }
 
     $$('[data-quote-tier]').forEach(function (b) {
       b.addEventListener('click', function () { jumpToForm(b.dataset.quoteTier, null); });
@@ -453,12 +592,11 @@
   }
 
   /* ============================================================
-     MENU EM ECRÃ INTEIRO
+     MENU
      ============================================================ */
   function initMenu() {
     var burger = $('#burger'), menu = $('#menu');
     if (!burger || !menu) return;
-
     function setMenu(open) {
       burger.setAttribute('aria-expanded', String(open));
       burger.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
@@ -468,7 +606,7 @@
         document.body.classList.add('is-locked');
         if (window.__lenis) window.__lenis.stop();
         if (hasGSAP && !REDUCE) {
-          gsap.fromTo('.menu__link', { opacity: 0, y: 24 },
+          gsap.fromTo('.menu__link', { opacity: 0, y: 26 },
             { opacity: 1, y: 0, duration: .6, stagger: .055, ease: 'power3.out', delay: .18 });
         }
       } else {
@@ -478,13 +616,8 @@
         setTimeout(function () { if (!menu.classList.contains('is-open')) menu.hidden = true; }, 720);
       }
     }
-
-    burger.addEventListener('click', function () {
-      setMenu(burger.getAttribute('aria-expanded') !== 'true');
-    });
-    $$('.menu__link, .menu__foot a', menu).forEach(function (a) {
-      a.addEventListener('click', function () { setMenu(false); });
-    });
+    burger.addEventListener('click', function () { setMenu(burger.getAttribute('aria-expanded') !== 'true'); });
+    $$('.menu__link, .menu__foot a', menu).forEach(function (a) { a.addEventListener('click', function () { setMenu(false); }); });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && burger.getAttribute('aria-expanded') === 'true') { setMenu(false); burger.focus(); }
       if (menu.classList.contains('is-open')) trap(e, menu);
@@ -495,22 +628,19 @@
      ARRANQUE
      ============================================================ */
   $('#year').textContent = new Date().getFullYear();
-  renderCards();
   tick();
   setInterval(tick, 20000);
+  initDeck();
+  initSearch();
   initForm();
   initMenu();
 
-  /* imagens que aparecem suavemente */
   $$('.fade-img').forEach(function (img) {
     if (img.complete) img.classList.add('is-loaded');
     else img.addEventListener('load', function () { img.classList.add('is-loaded'); });
   });
 
-  /* gaveta */
   document.addEventListener('click', function (e) {
-    var hit = e.target.closest('[data-dest]');
-    if (hit && hit.classList.contains('card__hit')) { openDrawer(hit.dataset.dest); return; }
     if (e.target.closest('[data-drawer-close]')) closeDrawer();
   });
   document.addEventListener('keydown', function (e) {
@@ -519,14 +649,12 @@
     trap(e, $('#drawerPanel'));
   });
 
-  /* voltar ao topo */
   var toTop = $('#toTop');
   toTop.addEventListener('click', function () {
     if (window.__lenis) window.__lenis.scrollTo(0, { duration: 1.3 });
     else window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
-  /* âncoras internas */
   $$('a[href^="#"]').forEach(function (a) {
     a.addEventListener('click', function (e) {
       var id = a.getAttribute('href');
@@ -540,25 +668,16 @@
   });
 
   /* ------------------------------------------------------------
-     Sem GSAP ou com movimento reduzido: tudo estático e legível
+     Sem GSAP ou movimento reduzido: tudo estático e legível
      ------------------------------------------------------------ */
   if (!hasGSAP || REDUCE) {
     var pl = $('#preload');
     if (pl) pl.remove();
-    var vp = $('#railViewport');
-    if (vp) {
-      vp.style.overflowX = 'auto';
-      $('#railPrev').addEventListener('click', function () { vp.scrollBy({ left: -340, behavior: 'smooth' }); });
-      $('#railNext').addEventListener('click', function () { vp.scrollBy({ left: 340, behavior: 'smooth' }); });
-    }
     return;
   }
 
   gsap.registerPlugin(ScrollTrigger);
 
-  /* ------------------------------------------------------------
-     Scroll suave
-     ------------------------------------------------------------ */
   if (typeof window.Lenis !== 'undefined') {
     var lenis = new Lenis({ duration: 1.05, smoothWheel: true, touchMultiplier: 1.6 });
     window.__lenis = lenis;
@@ -567,13 +686,9 @@
     gsap.ticker.lagSmoothing(0);
   }
 
-  /* ------------------------------------------------------------
-     Pré-carregamento + entrada do herói
-     ------------------------------------------------------------ */
-  var preload = $('#preload'), fill = $('#preloadFill'), num = $('#preloadNum');
-  var counter = { v: 0 };
-  var intro = gsap.timeline();
-  intro
+  /* ---------- pré-carregamento + herói ---------- */
+  var preload = $('#preload'), fill = $('#preloadFill'), num = $('#preloadNum'), counter = { v: 0 };
+  gsap.timeline()
     .to(fill, { scaleX: 1, duration: .95, ease: 'power2.inOut' }, 0)
     .to(counter, {
       v: 100, duration: .95, ease: 'power2.inOut',
@@ -588,20 +703,23 @@
     .from('.hero h1 .ln__i', { yPercent: 112, duration: 1.05, stagger: .09, ease: 'expo.out' }, '-=0.55')
     .from('[data-hero="3"]', { opacity: 0, y: 18, duration: .8, ease: 'power3.out' }, '-=0.65')
     .from('[data-hero="4"]', { opacity: 0, y: 18, duration: .8, ease: 'power3.out' }, '-=0.62')
+    .from('.float', { opacity: 0, x: 34, duration: .8, stagger: .1, ease: 'power3.out' }, '-=0.75')
     .from('.readout__grid > *', { opacity: 0, y: 10, duration: .6, stagger: .05, ease: 'power2.out' }, '-=0.6');
 
-  gsap.to('#heroMedia', {
-    yPercent: 13, ease: 'none',
-    scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true }
-  });
-  gsap.to('.hero__body, .readout', {
-    opacity: 0, ease: 'none',
-    scrollTrigger: { trigger: '.hero', start: '40% top', end: 'bottom top', scrub: true }
+  gsap.to('#heroMedia', { yPercent: 13, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
+  gsap.to('.hero__body, .readout, .hero__float', { opacity: 0, ease: 'none', scrollTrigger: { trigger: '.hero', start: '40% top', end: 'bottom top', scrub: true } });
+
+  /* ---------- parallax dos fundos de secção ---------- */
+  $$('section .bg__img, footer .bg__img').forEach(function (img) {
+    var host = img.closest('section, footer');
+    if (!host) return;
+    gsap.fromTo(img, { yPercent: -7 }, {
+      yPercent: 7, ease: 'none',
+      scrollTrigger: { trigger: host, start: 'top bottom', end: 'bottom top', scrub: true }
+    });
   });
 
-  /* ------------------------------------------------------------
-     Navegação, progresso, rota
-     ------------------------------------------------------------ */
+  /* ---------- navegação, progresso, rota ---------- */
   var nav = $('#nav'), progressBar = $('#progressBar');
   var routeLive = $('#routeLive'), routePlane = $('#routePlane');
   var routeOn = routeLive && window.matchMedia('(min-width:1180px)').matches;
@@ -620,7 +738,6 @@
     }
   });
 
-  /* secção activa na navegação */
   $$('.nav__link').forEach(function (link) {
     var sec = document.querySelector(link.getAttribute('href'));
     if (!sec) return;
@@ -630,9 +747,7 @@
     });
   });
 
-  /* ------------------------------------------------------------
-     Manifesto — palavras que acendem
-     ------------------------------------------------------------ */
+  /* ---------- manifesto ---------- */
   var man = $('[data-manifesto]');
   if (man) {
     (function wrapWords(node) {
@@ -648,28 +763,20 @@
           });
           node.replaceChild(frag, n);
         } else if (n.nodeType === 1) {
-          if (n.classList.contains('hl')) n.classList.add('w');
-          else wrapWords(n);
+          if (n.classList.contains('hl')) n.classList.add('w'); else wrapWords(n);
         }
       });
     })(man);
-
     gsap.from(man.querySelectorAll('.w'), {
-      opacity: .16, stagger: .55, ease: 'none',
-      scrollTrigger: { trigger: man, start: 'top 82%', end: 'bottom 62%', scrub: .7 }
+      opacity: .18, stagger: .55, ease: 'none',
+      scrollTrigger: { trigger: man, start: 'top 84%', end: 'bottom 64%', scrub: .7 }
     });
   }
 
-  /* ------------------------------------------------------------
-     Revelações e contadores
-     ------------------------------------------------------------ */
+  /* ---------- revelações e contadores ---------- */
   $$('[data-reveal]').forEach(function (el) {
-    gsap.from(el, {
-      opacity: 0, y: 26, duration: .95, ease: 'power3.out',
-      scrollTrigger: { trigger: el, start: 'top 88%', once: true }
-    });
+    gsap.from(el, { opacity: 0, y: 30, duration: .95, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%', once: true } });
   });
-
   var groups = new Map();
   $$('[data-reveal-stagger]').forEach(function (el) {
     var p = el.parentElement;
@@ -677,12 +784,8 @@
     groups.get(p).push(el);
   });
   groups.forEach(function (items, parent) {
-    gsap.from(items, {
-      opacity: 0, y: 24, duration: .85, stagger: .07, ease: 'power3.out',
-      scrollTrigger: { trigger: parent, start: 'top 85%', once: true }
-    });
+    gsap.from(items, { opacity: 0, y: 28, duration: .85, stagger: .07, ease: 'power3.out', scrollTrigger: { trigger: parent, start: 'top 86%', once: true } });
   });
-
   $$('[data-count]').forEach(function (el) {
     var end = parseFloat(el.dataset.count), sfx = el.dataset.suffix || '', o = { v: 0 };
     gsap.to(o, {
@@ -692,109 +795,8 @@
     });
   });
 
-  /* ------------------------------------------------------------
-     CARROSSEL — fixação horizontal, setas, arrasto, progresso
-     ------------------------------------------------------------ */
+  /* ---------- Cabo Verde ---------- */
   var mm = gsap.matchMedia();
-  var railFill = $('#railFill');
-  var railPrev = $('#railPrev'), railNext = $('#railNext');
-
-  mm.add('(min-width: 860px)', function () {
-    var viewport = $('#railViewport'), track = $('#railTrack');
-    if (!viewport || !track) return;
-
-    var distance = function () { return Math.max(1, track.scrollWidth - window.innerWidth); };
-    var pad = function () { return window.innerHeight * 0.4; };
-
-    var scrubTween = gsap.to(track, {
-      x: function () { return -distance(); },
-      ease: 'none',
-      scrollTrigger: {
-        trigger: viewport, start: 'top top',
-        end: function () { return '+=' + (distance() + pad()); },
-        pin: true, scrub: .85, anticipatePin: 1, invalidateOnRefresh: true,
-        onUpdate: function (self) {
-          gsap.set(railFill, { scaleX: self.progress });
-          railPrev.disabled = self.progress < .01;
-          railNext.disabled = self.progress > .99;
-        }
-      }
-    });
-
-    /* parallax dentro de cada cartão */
-    $$('.card').forEach(function (card) {
-      var img = $('.card__img', card);
-      if (!img) return;
-      gsap.fromTo(img, { xPercent: -9 }, {
-        xPercent: 9, ease: 'none',
-        scrollTrigger: { trigger: card, containerAnimation: scrubTween, start: 'left right', end: 'right left', scrub: true }
-      });
-    });
-
-    /* setas — avançam um cartão de cada vez */
-    function stepBy(dir) {
-      var card = $('.card');
-      if (!card) return;
-      var cw = card.getBoundingClientRect().width + 18;
-      var ratio = (distance() + pad()) / distance();
-      var y = (window.__lenis ? window.__lenis.scroll : window.scrollY) + dir * cw * ratio;
-      if (window.__lenis) window.__lenis.scrollTo(y, { duration: .7 });
-      else window.scrollTo({ top: y, behavior: 'smooth' });
-    }
-    var onPrev = function () { stepBy(-1); };
-    var onNext = function () { stepBy(1); };
-    railPrev.addEventListener('click', onPrev);
-    railNext.addEventListener('click', onNext);
-
-    /* arrastar na horizontal move a página */
-    var dragging = false, startX = 0, startY = 0;
-    function down(e) {
-      if (e.target.closest('button')) return;
-      dragging = true; startX = e.clientX;
-      startY = window.__lenis ? window.__lenis.scroll : window.scrollY;
-      viewport.classList.add('is-dragging');
-      viewport.setPointerCapture(e.pointerId);
-    }
-    function move(e) {
-      if (!dragging) return;
-      var ratio = (distance() + pad()) / distance();
-      var y = startY + (startX - e.clientX) * ratio;
-      if (window.__lenis) window.__lenis.scrollTo(y, { immediate: true });
-      else window.scrollTo(0, y);
-    }
-    function up() { dragging = false; viewport.classList.remove('is-dragging'); }
-    viewport.addEventListener('pointerdown', down);
-    viewport.addEventListener('pointermove', move);
-    viewport.addEventListener('pointerup', up);
-    viewport.addEventListener('pointercancel', up);
-
-    return function () {
-      gsap.set(track, { clearProps: 'x' });
-      railPrev.removeEventListener('click', onPrev);
-      railNext.removeEventListener('click', onNext);
-      viewport.removeEventListener('pointerdown', down);
-      viewport.removeEventListener('pointermove', move);
-      viewport.removeEventListener('pointerup', up);
-      viewport.removeEventListener('pointercancel', up);
-    };
-  });
-
-  /* em telemóvel o carrossel desliza nativamente */
-  mm.add('(max-width: 859px)', function () {
-    var viewport = $('#railViewport');
-    if (!viewport) return;
-    var onScroll = function () {
-      var max = viewport.scrollWidth - viewport.clientWidth;
-      gsap.set(railFill, { scaleX: max > 0 ? viewport.scrollLeft / max : 0 });
-    };
-    viewport.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-    return function () { viewport.removeEventListener('scroll', onScroll); };
-  });
-
-  /* ------------------------------------------------------------
-     Cabo Verde + editorial
-     ------------------------------------------------------------ */
   mm.add('(min-width: 760px)', function () {
     var st = $('#cvSticky'), media = $('#cvMedia');
     if (!st || !media) return;
@@ -802,10 +804,7 @@
       clipPath: 'inset(0% 0% round 0px)', scale: 1, ease: 'none',
       scrollTrigger: { trigger: st, start: 'top bottom', end: 'top top', scrub: .6 }
     });
-    gsap.to(media, {
-      yPercent: 8, ease: 'none',
-      scrollTrigger: { trigger: st, start: 'top top', end: 'bottom top', scrub: true }
-    });
+    gsap.to(media, { yPercent: 8, ease: 'none', scrollTrigger: { trigger: st, start: 'top top', end: 'bottom top', scrub: true } });
   });
 
   var kri = $('#kriolu');
@@ -819,17 +818,7 @@
     });
   }
 
-  var diffImg = $('#diffImg');
-  if (diffImg) {
-    gsap.fromTo(diffImg, { yPercent: -6, scale: 1.1 }, {
-      yPercent: 6, ease: 'none',
-      scrollTrigger: { trigger: diffImg.parentElement, start: 'top bottom', end: 'bottom top', scrub: true }
-    });
-  }
-
-  /* ------------------------------------------------------------
-     Marquee
-     ------------------------------------------------------------ */
+  /* ---------- marquee ---------- */
   var mTrack = $('#marqueeTrack');
   if (mTrack) {
     mTrack.innerHTML += mTrack.innerHTML;
@@ -844,22 +833,33 @@
     });
   }
 
-  /* ------------------------------------------------------------
-     Cursor e magnetismo
-     ------------------------------------------------------------ */
-  if (window.matchMedia('(hover:hover) and (pointer:fine) and (min-width:1024px)').matches) {
+  /* ---------- inclinação 3D dos painéis de vidro ---------- */
+  if (FINE) {
+    $$('.tilt').forEach(function (el) {
+      el.addEventListener('mousemove', function (e) {
+        var r = el.getBoundingClientRect();
+        var px = (e.clientX - r.left) / r.width - .5;
+        var py = (e.clientY - r.top) / r.height - .5;
+        gsap.to(el, { rotateY: px * 6, rotateX: -py * 6, transformPerspective: 900, duration: .5, ease: 'power3.out' });
+      });
+      el.addEventListener('mouseleave', function () {
+        gsap.to(el, { rotateX: 0, rotateY: 0, duration: .75, ease: 'power3.out' });
+      });
+    });
+
+    /* cursor e magnetismo */
     var cur = $('#cursor'), curT = $('#cursorT');
     var cx = gsap.quickTo(cur, 'x', { duration: .42, ease: 'power3' });
     var cy = gsap.quickTo(cur, 'y', { duration: .42, ease: 'power3' });
     window.addEventListener('mousemove', function (e) { cx(e.clientX); cy(e.clientY); });
     document.addEventListener('mouseleave', function () { gsap.to(cur, { opacity: 0, duration: .3 }); });
     document.addEventListener('mouseenter', function () { gsap.to(cur, { opacity: 1, duration: .3 }); });
-
     document.addEventListener('mouseover', function (e) {
-      if (e.target.closest('.card__hit')) { curT.textContent = 'ver'; cur.classList.add('is-big'); }
+      var c = e.target.closest('.deck__card');
+      if (c) { curT.textContent = c.classList.contains('is-active') ? 'abrir' : 'ver'; cur.classList.add('is-big'); }
     });
     document.addEventListener('mouseout', function (e) {
-      if (e.target.closest('.card__hit')) cur.classList.remove('is-big');
+      if (e.target.closest('.deck__card')) cur.classList.remove('is-big');
     });
 
     $$('[data-magnetic]').forEach(function (el) {
@@ -874,6 +874,6 @@
     });
   }
 
-  window.addEventListener('load', function () { ScrollTrigger.refresh(); });
+  window.addEventListener('load', function () { ScrollTrigger.refresh(); layoutDeck(false); });
 
 })();

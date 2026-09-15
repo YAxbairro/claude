@@ -36,25 +36,31 @@
   <a class="nav__logo" href="#topo" aria-label="AYAM Viagens e Turismo — início">
     <img src="assets/ayam-logo.png" alt="AYAM Viagens &amp; Turismo" width="832" height="320">
   </a>
-  <div class="nav__links" id="navLinks">
+  <div class="nav__links">
     <a class="nav__link" href="#sobre">Sobre</a>
     <a class="nav__link" href="#servicos">Serviços</a>
-    <a class="nav__link" href="#voos">Bilhetes aéreos</a>
+    <a class="nav__link" href="#voos">Voos</a>
     <a class="nav__link" href="#destinos">Destinos</a>
     <a class="nav__link" href="#pacotes">Pacotes</a>
     <a class="nav__link" href="#orcamento">Contacto</a>
   </div>
   <div class="nav__right">
+    <button class="icobtn" id="searchOpen" aria-label="Procurar destino">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+    </button>
     <a class="nav__cta btn btn--sm" href="#orcamento" data-magnetic>Pedir proposta</a>
-    <button class="burger" id="burger" aria-expanded="false" aria-controls="menu" aria-label="Abrir menu">
+    <button class="icobtn burger" id="burger" aria-expanded="false" aria-controls="menu" aria-label="Abrir menu">
       <span class="burger__box" aria-hidden="true"><span></span><span></span></span>
     </button>
   </div>
 </nav>
 
-<!-- ============ MENU EM ECRÃ INTEIRO ============ -->
+<!-- ============ MENU ============ -->
 <div class="menu" id="menu" hidden>
-  <div class="menu__bg" aria-hidden="true"></div>
+  <div class="bg" aria-hidden="true">
+    <img class="bg__img" id="menuBg" src="assets/bg-lazer.jpg" alt="" loading="lazy">
+    <div class="bg__scrim bg__scrim--deep"></div>
+  </div>
   <nav class="menu__links" aria-label="Navegação em ecrã inteiro">
     <a class="menu__link" href="#sobre"><i>01</i> Sobre nós</a>
     <a class="menu__link" href="#servicos"><i>02</i> Serviços</a>
@@ -71,12 +77,31 @@
   </div>
 </div>
 
+<!-- ============ PESQUISA ============ -->
+<div class="search" id="search" role="dialog" aria-modal="true" aria-label="Procurar destino">
+  <div class="search__scrim" data-search-close></div>
+  <div class="search__panel">
+    <div class="search__field">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+      <input type="text" id="searchInput" placeholder="Para onde quer ir?" autocomplete="off" spellcheck="false" aria-label="Procurar destino">
+      <span class="search__esc">ESC</span>
+    </div>
+    <div class="search__results" id="searchResults" role="listbox" aria-label="Resultados"></div>
+  </div>
+</div>
+
 <!-- ============ HERÓI ============ -->
 <header class="hero" id="topo">
   <div class="hero__media" id="heroMedia">
     <img src="assets/hero.jpg" alt="Vista aérea de um atol tropical de águas turquesa" width="1920" height="1080" fetchpriority="high">
   </div>
   <div class="hero__scrim"></div>
+
+  <div class="hero__float" id="heroFloat" aria-hidden="true">
+    <div class="float"><b>Aconselhamento pessoal</b><span>Desenhamos a viagem consigo, do primeiro desejo ao último detalhe.</span></div>
+    <div class="float"><b>Roteiros à medida</b><span>Do bilhete simples entre ilhas à volta ao mundo.</span></div>
+    <div class="float"><b>Há mais de 10 anos</b><span>Rigor internacional, a partir de Cabo Verde.</span></div>
+  </div>
 
   <div class="hero__body">
     <div class="wrap">
@@ -113,37 +138,30 @@
 
 <!-- ============ SOBRE ============ -->
 <section class="section" id="sobre" aria-labelledby="sobre-h">
+  <div class="bg" aria-hidden="true">
+    <img class="bg__img" src="assets/bg-sobre.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async">
+    <div class="bg__scrim"></div>
+  </div>
   <div class="wrap">
-    <div class="about__top">
-      <div>
-        <p class="eyebrow" data-reveal>Sobre nós</p>
+    <div class="about">
+      <div class="glass about__main tilt" data-reveal>
+        <p class="eyebrow">Sobre nós</p>
         <h2 id="sobre-h" class="manifesto" data-manifesto>
-          A AYAM é uma agência 100% cabo-verdiana, com <span class="hl">alma local</span> e <span class="hl">visão global</span>. Atuamos com o rigor das melhores companhias do mundo.
+          A AYAM é uma agência 100% cabo-verdiana, com <span class="hl">alma local</span> e <span class="hl">visão global</span>.
         </h2>
-      </div>
-      <div>
-        <p class="lede" data-reveal>Combinamos serviço personalizado, tecnologia de ponta e parcerias internacionais de excelência, garantindo um atendimento completo, eficiente e humano. Cada viagem é tratada com profissionalismo, atenção ao detalhe e paixão por servir — como as grandes agências, mas com o nosso toque único.</p>
-
-        <div class="about__cols">
-          <div class="fact" data-reveal>
-            <span class="fact__n" data-count="10" data-suffix="+">0</span>
-            <span class="fact__l">anos de experiência com rigor internacional</span>
-          </div>
-          <div class="fact" data-reveal>
-            <span class="fact__n" data-count="360" data-suffix="°">0</span>
-            <span class="fact__l">serviço integrado, do início ao regresso</span>
-          </div>
+        <p class="lede">Atuamos com o rigor das melhores companhias do mundo, mas com o nosso toque único: atendimento humano, atento e autêntico.</p>
+        <div style="margin-top:6px">
+          <a class="btn btn--ghost btn--sm" href="#caboverde" data-magnetic>A nossa raiz</a>
         </div>
-
-        <div class="cvpair">
-          <figure data-reveal>
-            <img class="fade-img" src="assets/cv-a.jpg" alt="Baía de Mindelo, ilha de São Vicente" width="760" height="560" loading="lazy" decoding="async">
-            <figcaption>Mindelo · VXE</figcaption>
-          </figure>
-          <figure data-reveal>
-            <img class="fade-img" src="assets/cv-b.jpg" alt="Barcos de pesca em Santa Maria, ilha do Sal" width="760" height="560" loading="lazy" decoding="async">
-            <figcaption>Santa Maria · SID</figcaption>
-          </figure>
+      </div>
+      <div class="about__side">
+        <div class="glass fact tilt" data-reveal>
+          <span class="fact__n" data-count="10" data-suffix="+">0</span>
+          <span class="fact__l">anos de experiência com rigor internacional</span>
+        </div>
+        <div class="glass fact tilt" data-reveal>
+          <span class="fact__n" data-count="360" data-suffix="°">0</span>
+          <span class="fact__l">serviço integrado, do início ao regresso</span>
         </div>
       </div>
     </div>
@@ -151,188 +169,197 @@
 </section>
 
 <!-- ============ SERVIÇOS ============ -->
-<section class="section" id="servicos" style="padding-top:0" aria-labelledby="servicos-h">
+<section class="section" id="servicos" aria-labelledby="servicos-h">
+  <div class="bg" aria-hidden="true">
+    <img class="bg__img" src="assets/bg-servicos.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async">
+    <div class="bg__scrim bg__scrim--even"></div>
+  </div>
   <div class="wrap">
-    <div class="svc-head">
-      <p class="eyebrow" data-reveal>Serviços integrados</p>
-      <h2 id="servicos-h" style="font-size:var(--t-xl);font-weight:300" data-reveal>Do início <em style="font-style:italic;color:var(--gold)">ao regresso.</em></h2>
-      <p class="lede" data-reveal>Uma viagem bem feita é aquela em que o cliente não se preocupa com nada. Só desfruta.</p>
+    <div class="head">
+      <p class="eyebrow" data-reveal>Serviços</p>
+      <h2 id="servicos-h" data-reveal>Do início <em>ao regresso.</em></h2>
+      <p class="lede" data-reveal>Uma viagem bem feita é aquela em que o cliente não se preocupa com nada.</p>
     </div>
 
-    <div class="svc-lead" data-reveal>
-      <div class="svc-lead__t">
-        <p class="mono" style="color:var(--gold)">O NOSSO NÚCLEO</p>
-        <h3>Bilhetes aéreos, <em>em todas as classes.</em></h3>
-        <p>Parceria directa com as companhias internacionais mais prestigiadas. Tarifas optimizadas, rotas complexas resolvidas, e assistência antes, durante e depois da emissão.</p>
-        <a class="btn btn--ghost btn--sm" href="#voos" style="align-self:flex-start" data-magnetic>Como funciona</a>
-      </div>
-      <div class="svc-lead__cabins">
-        <div class="cabin"><span class="cabin__c mono">Y</span><span class="cabin__n">Económica</span></div>
-        <div class="cabin"><span class="cabin__c mono">J</span><span class="cabin__n">Executiva</span></div>
-        <div class="cabin"><span class="cabin__c mono">F</span><span class="cabin__n">Primeira</span></div>
-      </div>
-    </div>
-
-    <div class="svc-grid">
-      <article class="svc" data-reveal-stagger>
+    <div class="svcs">
+      <article class="glass svc tilt" data-reveal-stagger>
+        <span class="svc__i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c.6 0 1 .8 1 1.8v4.5l7 4v2.2l-7-2v3.7l1.8 1.4v1.6L12 18.4l-2.8.8v-1.6L11 16.2v-3.7l-7 2v-2.2l7-4V3.8C11 2.8 11.4 2 12 2z"/></svg></span>
+        <h3>Bilhetes aéreos</h3>
+        <p>Todas as classes, tarifas optimizadas e rotas complexas resolvidas.</p>
+      </article>
+      <article class="glass svc tilt" data-reveal-stagger>
         <span class="svc__i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M3 21h18M9 21v-6h6v6"/><path d="M8 11h.01M12 11h.01M16 11h.01"/></svg></span>
-        <h4>Hotéis e resorts</h4>
-        <p>Unidades de luxo, boutique e conveniência, seleccionadas uma a uma.</p>
+        <h3>Hotéis e resorts</h3>
+        <p>Luxo, boutique e conveniência — seleccionados um a um.</p>
       </article>
-      <article class="svc" data-reveal-stagger>
-        <span class="svc__i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16V9l2-5h12l2 5v7"/><path d="M2 16h20v3H2z"/><circle cx="7" cy="12.5" r="1.2"/><circle cx="17" cy="12.5" r="1.2"/><path d="M6 19v2M18 19v2"/></svg></span>
-        <h4>Transfers privados</h4>
-        <p>Serviço executivo à chegada e à partida, com motorista dedicado.</p>
-      </article>
-      <article class="svc" data-reveal-stagger>
+      <article class="glass svc tilt" data-reveal-stagger>
         <span class="svc__i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3v-5l2-5h14l2 5v5h-2"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/><path d="M9.5 17h5"/></svg></span>
-        <h4>Aluguer de viaturas</h4>
-        <p>Frota premium e convencional, com entrega no aeroporto ou ao domicílio.</p>
+        <h3>Transfers e viaturas</h3>
+        <p>Serviço executivo à chegada e frota premium à sua espera.</p>
       </article>
-      <article class="svc" data-reveal-stagger>
+      <article class="glass svc tilt" data-reveal-stagger>
         <span class="svc__i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v13H3z"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M3 12h18"/><path d="M12 12v2"/></svg></span>
-        <h4>Pacotes sob medida</h4>
-        <p>Roteiros exclusivos desenhados de raiz, do primeiro desejo ao último detalhe.</p>
+        <h3>Pacotes sob medida</h3>
+        <p>Roteiros desenhados de raiz, ao seu ritmo e à sua medida.</p>
       </article>
-      <article class="svc" data-reveal-stagger>
+      <article class="glass svc tilt" data-reveal-stagger>
         <span class="svc__i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.4-3.2 8.2-8 9-4.8-.8-8-4.6-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg></span>
-        <h4>Vistos e seguros</h4>
-        <p>Gestão completa de documentação e cobertura de viagem, sem surpresas.</p>
+        <h3>Vistos e seguros</h3>
+        <p>Documentação e cobertura tratadas por nós, sem surpresas.</p>
       </article>
-      <article class="svc" data-reveal-stagger>
+      <article class="glass svc tilt" data-reveal-stagger>
         <span class="svc__i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0115 0"/></svg></span>
-        <h4>Travel Agent dedicado</h4>
-        <p>Uma pessoa responsável pela sua viagem, do planeamento ao regresso.</p>
-      </article>
-      <article class="svc" data-reveal-stagger>
-        <span class="svc__i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg></span>
-        <h4>Atendimento onde estiver</h4>
-        <p>Presencial, digital ou ao domicílio — com marcação prévia.</p>
-      </article>
-      <article class="svc" data-reveal-stagger>
-        <span class="svc__i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 1.9"/></svg></span>
-        <h4>Apoio 24/7</h4>
-        <p>Um número que atende, esteja onde estiver, à hora que for.</p>
+        <h3>Travel Agent dedicado</h3>
+        <p>Uma pessoa responsável pela sua viagem, com apoio 24/7.</p>
       </article>
     </div>
   </div>
 </section>
 
 <!-- ============ BILHETES AÉREOS ============ -->
-<section class="section air" id="voos" aria-labelledby="voos-h">
+<section class="section" id="voos" aria-labelledby="voos-h">
+  <div class="bg" aria-hidden="true">
+    <img class="bg__img" src="assets/bg-voos.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async">
+    <div class="bg__scrim"></div>
+  </div>
   <div class="wrap">
-    <div class="air__grid">
-      <div>
-        <p class="eyebrow" data-reveal>Bilhetes aéreos</p>
-        <h2 id="voos-h" data-reveal>Ao nível das <em>melhores companhias.</em></h2>
-        <p class="lede" data-reveal>Trabalhamos em parceria directa com as mais prestigiadas companhias aéreas internacionais. Com a AYAM, cada viagem começa com conforto, eficiência e prestígio.</p>
-        <div style="margin-top:26px" data-reveal>
-          <a class="btn" href="#orcamento" data-magnetic>Pedir cotação de voo</a>
+    <div class="air">
+      <div class="glass air__panel tilt" data-reveal>
+        <p class="eyebrow">Bilhetes aéreos</p>
+        <h2 id="voos-h" style="font-size:var(--t-xl);font-weight:300">Ao nível das <em style="font-style:italic;color:var(--gold)">melhores companhias.</em></h2>
+        <p class="lede">Parceria directa com as companhias internacionais mais prestigiadas.</p>
+        <div class="cabins">
+          <div class="cabin"><span class="cabin__c mono">Y</span><span class="cabin__n">Económica</span></div>
+          <div class="cabin"><span class="cabin__c mono">J</span><span class="cabin__n">Executiva</span></div>
+          <div class="cabin"><span class="cabin__c mono">F</span><span class="cabin__n">Primeira</span></div>
+        </div>
+        <div style="margin-top:8px">
+          <a class="btn btn--sm" href="#orcamento" data-magnetic>Pedir cotação</a>
         </div>
       </div>
 
-      <div class="promises">
+      <div class="glass promises" data-reveal>
         <div class="promise" data-reveal-stagger>
           <span class="promise__n mono">01</span>
           <span class="promise__t">Tarifas optimizadas e transparentes, sem custos escondidos.</span>
         </div>
         <div class="promise" data-reveal-stagger>
           <span class="promise__n mono">02</span>
-          <span class="promise__t">Acesso a voos em todas as classes, incluindo executiva e primeira.</span>
+          <span class="promise__t">Prioridade no check-in, assistência VIP e serviços lounge.</span>
         </div>
         <div class="promise" data-reveal-stagger>
           <span class="promise__n mono">03</span>
-          <span class="promise__t">Prioridade no check-in e bagagem, assistência VIP e serviços lounge.</span>
-        </div>
-        <div class="promise" data-reveal-stagger>
-          <span class="promise__n mono">04</span>
           <span class="promise__t">Soluções para voos intercontinentais e rotas complexas.</span>
         </div>
         <div class="promise" data-reveal-stagger>
-          <span class="promise__n mono">05</span>
-          <span class="promise__t">Atendimento 24h — antes, durante e após a emissão.</span>
+          <span class="promise__n mono">04</span>
+          <span class="promise__t">Atendimento 24h, antes e depois da emissão.</span>
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ============ DESTINOS — carrossel 3D ============ -->
+<section class="deck-sec" id="destinos" aria-labelledby="destinos-h">
+  <div class="deck-bgs" id="deckBgs" aria-hidden="true"></div>
+  <div class="bg__scrim bg__scrim--deep" style="position:absolute;inset:0;z-index:1" aria-hidden="true"></div>
+
+  <div class="wrap">
+    <div class="head" style="margin-bottom:0;max-width:40ch">
+      <p class="eyebrow" data-reveal>Destinos</p>
+      <h2 id="destinos-h" data-reveal>Escolha um. <em>Nós desenhamos o resto.</em></h2>
+    </div>
+  </div>
+
+  <div class="deck" id="deck" role="group" aria-label="Carrossel de destinos" tabindex="0">
+    <div class="deck__stage" id="deckStage"></div>
+    <div class="deck__nav">
+      <button class="deck__arrow" id="deckPrev" aria-label="Destino anterior">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button class="deck__arrow" id="deckNext" aria-label="Destino seguinte">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="deck__dots" id="deckDots"></div>
+
+  <div class="wrap" style="margin-top:clamp(18px,2.6vw,30px)">
+    <div class="glass deck-info" id="deckInfo">
+      <div class="deck-info__t">
+        <span class="deck-info__c" id="diCountry">—</span>
+        <h3 class="deck-info__n" id="diName">—</h3>
+      </div>
+      <div>
+        <p class="deck-info__d" id="diDesc"></p>
+        <div class="deck-info__facts" id="diFacts"></div>
+      </div>
+      <div class="deck-info__cta">
+        <button class="btn btn--sm" id="diOpen">Ver detalhes</button>
+        <button class="btn btn--ghost btn--sm" id="diQuote">Pedir proposta</button>
+      </div>
+    </div>
+    <p class="deck__hint mono">Arraste, use as setas do teclado ou clique num cartão</p>
   </div>
 </section>
 
 <!-- ============ DOIS CAMINHOS ============ -->
-<section class="section" style="padding-bottom:0" aria-labelledby="perfis-h">
+<section class="section section--tight" aria-labelledby="perfis-h">
   <div class="wrap">
-    <p class="eyebrow" data-reveal>Dois caminhos</p>
-    <h2 id="perfis-h" style="font-size:var(--t-xl);font-weight:300;margin-block:14px clamp(28px,4vw,48px);max-width:20ch" data-reveal>Para empresas e para <em style="font-style:italic;color:var(--gold)">sonhos pessoais.</em></h2>
+    <div class="head">
+      <p class="eyebrow" data-reveal>Dois caminhos</p>
+      <h2 id="perfis-h" data-reveal>Para empresas e para <em>sonhos pessoais.</em></h2>
+    </div>
     <div class="tracks">
       <article class="track" data-reveal>
+        <div class="track__bg" aria-hidden="true">
+          <img src="assets/bg-corp.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async">
+        </div>
         <p class="mono" style="color:var(--gold)">CORPORATIVO</p>
         <h3>Fazemos da logística <em>uma arte.</em></h3>
         <ul class="track__list">
-          <li><span>Planeamento estratégico de deslocações profissionais</span></li>
-          <li><span>Gestão de viagens de equipas, eventos, reuniões e formações</span></li>
+          <li><span>Gestão de viagens de equipas, eventos e formações</span></li>
           <li><span>Retiros empresariais e viagens de incentivo</span></li>
           <li><span>Optimização de custos e relatórios personalizados</span></li>
-          <li><span>Apoio 24h para executivos em viagem</span></li>
-          <li><span>Travel Manager exclusivo para cada empresa</span></li>
-          <li><span>Consultoria em políticas de viagem corporativa</span></li>
+          <li><span>Travel Manager exclusivo e apoio 24h</span></li>
         </ul>
-        <p class="track__foot">E da eficiência, uma promessa cumprida.</p>
       </article>
 
       <article class="track" data-reveal>
+        <div class="track__bg" aria-hidden="true">
+          <img src="assets/bg-lazer.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async">
+        </div>
         <p class="mono" style="color:var(--gold)">PARTICULAR</p>
         <h3>Experiências <em>com classe.</em></h3>
         <ul class="track__list">
-          <li><span>Escapadinhas, circuitos culturais, viagens românticas e em família</span></li>
-          <li><span>Lua-de-mel com roteiro personalizado e serviço premium</span></li>
-          <li><span>Viagens de luxo, retiros de bem-estar e experiências exclusivas</span></li>
-          <li><span>Cruzeiros de prestígio e turismo de aventura</span></li>
-          <li><span>Consultoria e planeamento personalizado</span></li>
-          <li><span>Apoio constante em todas as fases da viagem</span></li>
+          <li><span>Lua-de-mel com roteiro personalizado</span></li>
+          <li><span>Escapadinhas, circuitos culturais e viagens em família</span></li>
+          <li><span>Retiros de bem-estar e turismo de aventura</span></li>
+          <li><span>Cruzeiros de prestígio e experiências exclusivas</span></li>
         </ul>
-        <p class="track__foot">Um mundo inteiro à medida do seu sonho.</p>
       </article>
     </div>
-  </div>
-</section>
-
-<!-- ============ DESTINOS ============ -->
-<section class="rail" id="destinos" aria-labelledby="destinos-h">
-  <div class="wrap">
-    <div class="rail__head">
-      <h2 id="destinos-h" data-reveal>Os nossos <em>destinos.</em></h2>
-      <p class="rail__note mono" data-reveal>Tempos de viagem indicativos a partir da Praia (RAI)</p>
-    </div>
-    <div class="rail__bar">
-      <span class="rail__hint mono">Deslize para ver mais →</span>
-      <div class="rail__progress" aria-hidden="true"><i id="railFill"></i></div>
-      <div class="rail__arrows">
-        <button class="rail__arrow" id="railPrev" aria-label="Destinos anteriores" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <button class="rail__arrow" id="railNext" aria-label="Próximos destinos">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div class="rail__viewport" id="railViewport">
-    <div class="rail__track" id="railTrack" role="list"></div>
   </div>
 </section>
 
 <!-- ============ PACOTES ============ -->
 <section class="section" id="pacotes" aria-labelledby="pacotes-h">
+  <div class="bg" aria-hidden="true">
+    <img class="bg__img" src="assets/bg-pacotes.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async">
+    <div class="bg__scrim bg__scrim--even"></div>
+  </div>
   <div class="wrap">
-    <p class="eyebrow" data-reveal>Os nossos pacotes</p>
-    <h2 id="pacotes-h" style="font-size:var(--t-xl);font-weight:300;margin-block:14px 16px;max-width:18ch" data-reveal>Três formas de <em style="font-style:italic;color:var(--gold)">partir.</em></h2>
-    <p class="lede" style="margin-bottom:clamp(30px,4vw,50px)" data-reveal>Desenhamos experiências únicas para todos os cantos do mundo. Trabalhamos com os melhores parceiros globais para garantir conforto, segurança e momentos verdadeiramente inesquecíveis.</p>
+    <div class="head">
+      <p class="eyebrow" data-reveal>Pacotes</p>
+      <h2 id="pacotes-h" data-reveal>Três formas de <em>partir.</em></h2>
+    </div>
 
     <div class="tiers">
-      <article class="tier" data-reveal-stagger>
+      <article class="glass tier tilt" data-reveal-stagger>
         <span class="tier__n">Escapadinha</span>
         <span class="tier__len mono">3 A 5 NOITES</span>
-        <p class="tier__d">Uma pausa curta e bem resolvida. Ideal para fins-de-semana prolongados, entre ilhas ou a poucas horas de voo.</p>
         <ul class="tier__list">
           <li>Voos e estadia reservados</li>
           <li>Transfer de chegada e partida</li>
@@ -343,78 +370,76 @@
           <span class="mono" style="color:var(--stone-dim)">A partir de</span>
           <b>Sob consulta</b>
         </div>
-        <button class="btn btn--ghost btn--sm btn--block" data-quote-tier="Escapadinha" style="margin-top:14px">Pedir proposta</button>
+        <button class="btn btn--ghost btn--sm btn--block" data-quote-tier="Escapadinha">Pedir proposta</button>
       </article>
 
-      <article class="tier tier--feature" data-reveal-stagger>
+      <article class="glass tier tier--feature tilt" data-reveal-stagger>
         <span class="tier__flag">Mais procurado</span>
         <span class="tier__n">Circuito</span>
         <span class="tier__len mono">7 A 12 NOITES</span>
-        <p class="tier__d">Vários destinos, um só roteiro. Cultura, natureza e descanso combinados com o ritmo certo.</p>
         <ul class="tier__list">
           <li>Voos multi-destino e ligações internas</li>
           <li>Estadias seleccionadas em cada etapa</li>
-          <li>Transfers e aluguer de viatura</li>
           <li>Experiências reservadas com antecedência</li>
-          <li>Gestão de vistos e documentação</li>
           <li>Travel Agent dedicado</li>
         </ul>
         <div class="tier__price">
           <span class="mono" style="color:var(--stone-dim)">A partir de</span>
           <b>Sob consulta</b>
         </div>
-        <button class="btn btn--sm btn--block" data-quote-tier="Circuito" style="margin-top:14px">Pedir proposta</button>
+        <button class="btn btn--sm btn--block" data-quote-tier="Circuito">Pedir proposta</button>
       </article>
 
-      <article class="tier" data-reveal-stagger>
+      <article class="glass tier tilt" data-reveal-stagger>
         <span class="tier__n">Sob <em>medida</em></span>
         <span class="tier__len mono">SEM LIMITE</span>
-        <p class="tier__d">Desenhado de raiz a partir do que imagina. Lua-de-mel, aniversário marcante, volta ao mundo ou retiro de empresa.</p>
         <ul class="tier__list">
           <li>Roteiro construído consigo, do zero</li>
           <li>Classe executiva e primeira classe</li>
-          <li>Resorts e hotéis boutique de excepção</li>
           <li>Experiências privadas e guias locais</li>
-          <li>Assistência VIP em aeroporto</li>
-          <li>Apoio 24/7 durante toda a viagem</li>
+          <li>Assistência VIP e apoio 24/7</li>
         </ul>
         <div class="tier__price">
           <span class="mono" style="color:var(--stone-dim)">A partir de</span>
           <b>Sob consulta</b>
         </div>
-        <button class="btn btn--ghost btn--sm btn--block" data-quote-tier="Sob medida" style="margin-top:14px">Pedir proposta</button>
+        <button class="btn btn--ghost btn--sm btn--block" data-quote-tier="Sob medida">Pedir proposta</button>
       </article>
     </div>
   </div>
 </section>
 
-<!-- ============ COMO TRABALHAMOS ============ -->
+<!-- ============ PROCESSO ============ -->
 <section class="section section--tight" aria-labelledby="processo-h">
-  <div class="wrap" style="margin-bottom:clamp(26px,3.4vw,42px)">
-    <p class="eyebrow" data-reveal>Como trabalhamos</p>
-    <h2 id="processo-h" style="font-size:var(--t-xl);font-weight:300;margin-top:14px;max-width:18ch" data-reveal>Quatro passos, <em style="font-style:italic;color:var(--gold)">sem surpresas.</em></h2>
+  <div class="bg" aria-hidden="true">
+    <img class="bg__img" src="assets/bg-processo.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async">
+    <div class="bg__scrim"></div>
   </div>
   <div class="wrap">
+    <div class="head">
+      <p class="eyebrow" data-reveal>Como trabalhamos</p>
+      <h2 id="processo-h" data-reveal>Quatro passos, <em>sem surpresas.</em></h2>
+    </div>
     <ol class="steps">
-      <li class="step-c" data-reveal-stagger>
+      <li class="glass step-c tilt" data-reveal-stagger>
         <span class="step-c__n">01</span>
-        <h4>Conversa</h4>
-        <p>Ouvimos o que imagina: quem viaja, quando, com que orçamento e o que não pode faltar.</p>
+        <h3>Conversa</h3>
+        <p>Ouvimos quem viaja, quando, e o que não pode faltar.</p>
       </li>
-      <li class="step-c" data-reveal-stagger>
+      <li class="glass step-c tilt" data-reveal-stagger>
         <span class="step-c__n">02</span>
-        <h4>Proposta</h4>
-        <p>Desenhamos o roteiro com voos, estadias e experiências, com valores claros e alternativas.</p>
+        <h3>Proposta</h3>
+        <p>Roteiro com voos, estadias e valores claros.</p>
       </li>
-      <li class="step-c" data-reveal-stagger>
+      <li class="glass step-c tilt" data-reveal-stagger>
         <span class="step-c__n">03</span>
-        <h4>Reserva</h4>
-        <p>Tratamos das emissões, vistos, seguros e transfers. Recebe tudo organizado num só lugar.</p>
+        <h3>Reserva</h3>
+        <p>Emissões, vistos, seguros e transfers tratados por nós.</p>
       </li>
-      <li class="step-c" data-reveal-stagger>
+      <li class="glass step-c tilt" data-reveal-stagger>
         <span class="step-c__n">04</span>
-        <h4>Acompanhamento</h4>
-        <p>Estamos disponíveis antes, durante e depois. Se algo mudar em viagem, resolvemos.</p>
+        <h3>Acompanhamento</h3>
+        <p>Se algo mudar em viagem, resolvemos.</p>
       </li>
     </ol>
   </div>
@@ -435,86 +460,47 @@
   </div>
 </section>
 
-<!-- ============ DIFERENCIAIS ============ -->
-<section class="section" aria-labelledby="diff-h">
+<!-- ============ NÚMEROS + MISSÃO ============ -->
+<section class="section section--tight" aria-labelledby="numeros-h">
+  <div class="bg" aria-hidden="true">
+    <img class="bg__img" src="assets/bg-numeros.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async">
+    <div class="bg__scrim bg__scrim--even"></div>
+  </div>
   <div class="wrap">
-    <div class="diff__grid">
-      <figure class="diff__fig" data-reveal>
-        <img src="assets/editorial.jpg" alt="Falésia calcária sobre o mar em Railay, Tailândia" width="1100" height="1450" loading="lazy" decoding="async" id="diffImg">
-        <figcaption class="diff__cap mono">
-          <span>O verdadeiro luxo está no cuidado</span>
-          <span>com os detalhes</span>
-        </figcaption>
-      </figure>
-
-      <div>
-        <p class="eyebrow" data-reveal>O que nos diferencia</p>
-        <h2 id="diff-h" style="font-size:var(--t-xl);font-weight:300;margin-block:14px clamp(24px,3vw,38px);max-width:16ch" data-reveal>Rigor, empatia e <em style="font-style:italic;color:var(--gold)">eficácia.</em></h2>
-        <div class="diff__list">
-          <div class="diff__item" data-reveal-stagger><span class="diff__k mono">01</span><span class="diff__t">Atendimento personalizado com padrão premium</span></div>
-          <div class="diff__item" data-reveal-stagger><span class="diff__k mono">02</span><span class="diff__t">Parcerias com as principais companhias aéreas e redes hoteleiras do mundo</span></div>
-          <div class="diff__item" data-reveal-stagger><span class="diff__k mono">03</span><span class="diff__t">Equipa sénior com formação internacional</span></div>
-          <div class="diff__item" data-reveal-stagger><span class="diff__k mono">04</span><span class="diff__t">Planeamento estratégico, consultoria e follow-up</span></div>
-          <div class="diff__item" data-reveal-stagger><span class="diff__k mono">05</span><span class="diff__t">Apoio 24/7 em qualquer parte do mundo</span></div>
-          <div class="diff__item" data-reveal-stagger><span class="diff__k mono">06</span><span class="diff__t">Gestão de viagens com detalhe, cuidado e confiança</span></div>
-          <div class="diff__item" data-reveal-stagger><span class="diff__k mono">07</span><span class="diff__t">Rigor, empatia e eficácia em todas as etapas</span></div>
-        </div>
+    <h2 id="numeros-h" class="eyebrow" data-reveal style="margin-bottom:22px">A AYAM em números</h2>
+    <div class="stats">
+      <div class="glass stat tilt" data-reveal-stagger>
+        <span class="stat__n"><span data-count="10">0</span><span>+</span></span>
+        <span class="stat__l">anos de experiência</span>
+      </div>
+      <div class="glass stat tilt" data-reveal-stagger>
+        <span class="stat__n"><span data-count="24">0</span><span>/7</span></span>
+        <span class="stat__l">apoio em qualquer parte do mundo</span>
+      </div>
+      <div class="glass stat tilt" data-reveal-stagger>
+        <span class="stat__n"><span data-count="360">0</span><span>°</span></span>
+        <span class="stat__l">serviço, do início ao regresso</span>
+      </div>
+      <div class="glass stat tilt" data-reveal-stagger>
+        <span class="stat__n"><span data-count="100">0</span><span>%</span></span>
+        <span class="stat__l">cabo-verdiana, de alma e de raiz</span>
       </div>
     </div>
-  </div>
-</section>
 
-<!-- ============ MISSÃO / VISÃO / VALORES ============ -->
-<section class="section mv" aria-labelledby="valores-h">
-  <div class="wrap">
-    <div class="mv__two">
-      <div class="mv__cell" data-reveal>
+    <div class="mv">
+      <div class="glass mv__cell" data-reveal>
         <p class="mono" style="color:var(--stone-dim)">MISSÃO</p>
         <h3>O que fazemos</h3>
-        <p>Criar experiências de viagem memoráveis, seguras e personalizadas, com um serviço de qualidade internacional, a partir de Cabo Verde — sempre com empatia, inovação e excelência.</p>
+        <p>Criar experiências de viagem memoráveis, seguras e personalizadas, com qualidade internacional, a partir de Cabo Verde.</p>
       </div>
-      <div class="mv__cell" data-reveal>
+      <div class="glass mv__cell" data-reveal>
         <p class="mono" style="color:var(--stone-dim)">VISÃO</p>
         <h3>Onde chegamos</h3>
-        <p>Ser reconhecida como a melhor agência de viagens de Cabo Verde, com presença e reputação de excelência nos mercados internacionais.</p>
+        <p>Ser a melhor agência de viagens de Cabo Verde, com reputação de excelência nos mercados internacionais.</p>
       </div>
-    </div>
-
-    <p class="eyebrow" id="valores-h" style="margin-bottom:18px" data-reveal>Valores</p>
-    <div class="values">
-      <div class="value" data-reveal-stagger><span class="value__n">Globalidade</span><span class="value__d">Ligamos Cabo Verde ao mundo com classe</span></div>
-      <div class="value" data-reveal-stagger><span class="value__n">Rigor</span><span class="value__d">Cumprimos com exigência e profissionalismo</span></div>
-      <div class="value" data-reveal-stagger><span class="value__n">Proximidade</span><span class="value__d">Atendimento humano, atento e autêntico</span></div>
-      <div class="value" data-reveal-stagger><span class="value__n">Excelência</span><span class="value__d">Trabalhamos com os melhores, para os melhores</span></div>
-      <div class="value" data-reveal-stagger><span class="value__n">Transparência</span><span class="value__d">Clareza, confiança e verdade em tudo</span></div>
-      <div class="value" data-reveal-stagger><span class="value__n">Inovação</span><span class="value__d">Usamos tecnologia para servir melhor</span></div>
-      <div class="value" data-reveal-stagger><span class="value__n">Responsabilidade</span><span class="value__d">O seu tempo e tranquilidade são sagrados</span></div>
-      <div class="value" data-reveal-stagger><span class="value__n">For Your Time</span><span class="value__d">A promessa que assinamos em cada viagem</span></div>
     </div>
   </div>
 </section>
-
-<!-- ============ NÚMEROS ============ -->
-<div class="wrap">
-  <div class="stats">
-    <div class="stat" data-reveal-stagger>
-      <span class="stat__n"><span data-count="10">0</span><span>+</span></span>
-      <span class="stat__l">anos de experiência</span>
-    </div>
-    <div class="stat" data-reveal-stagger>
-      <span class="stat__n"><span data-count="24">0</span><span>/7</span></span>
-      <span class="stat__l">apoio em qualquer parte do mundo</span>
-    </div>
-    <div class="stat" data-reveal-stagger>
-      <span class="stat__n"><span data-count="360">0</span><span>°</span></span>
-      <span class="stat__l">serviço, do início ao regresso</span>
-    </div>
-    <div class="stat" data-reveal-stagger>
-      <span class="stat__n"><span data-count="100">0</span><span>%</span></span>
-      <span class="stat__l">cabo-verdiana, de alma e de raiz</span>
-    </div>
-  </div>
-</div>
 
 <!-- ============ MARQUEE ============ -->
 <div class="marquee" aria-hidden="true">
@@ -524,15 +510,19 @@
 </div>
 
 <!-- ============ PEDIDO DE PROPOSTA ============ -->
-<section class="section quote" id="orcamento" aria-labelledby="orcamento-h">
+<section class="section" id="orcamento" aria-labelledby="orcamento-h">
+  <div class="bg" aria-hidden="true">
+    <img class="bg__img" src="assets/bg-form.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async">
+    <div class="bg__scrim"></div>
+  </div>
   <div class="wrap">
     <div class="quote__grid">
       <div>
         <p class="eyebrow" data-reveal>Pedir proposta</p>
-        <h2 id="orcamento-h" data-reveal>Diga-nos para onde. <em>Nós tratamos do resto.</em></h2>
-        <p class="lede" data-reveal>Responda a quatro perguntas rápidas. No fim, enviamos tudo organizado para o nosso WhatsApp — sem formulários intermináveis e sem esperar por email.</p>
+        <h2 id="orcamento-h" style="font-size:var(--t-xl);font-weight:300;margin-block:14px 16px;max-width:13ch" data-reveal>Diga-nos para onde. <em style="font-style:italic;color:var(--gold)">Nós tratamos do resto.</em></h2>
+        <p class="lede" data-reveal>Quatro perguntas rápidas. No fim enviamos tudo organizado para o nosso WhatsApp.</p>
 
-        <div class="channels" style="margin-top:clamp(28px,3.6vw,44px)">
+        <div class="channels">
           <a class="channel" href="https://wa.me/2389990900" target="_blank" rel="noopener" data-reveal-stagger>
             <span class="channel__k mono">Telefone</span>
             <span class="channel__v">+238 999 09 00</span>
@@ -551,11 +541,9 @@
         </div>
       </div>
 
-      <form class="form" id="quoteForm" novalidate data-reveal>
+      <form class="glass form" id="quoteForm" novalidate data-reveal>
         <div class="form__top">
-          <div class="form__meter" aria-hidden="true">
-            <i id="m1"></i><i id="m2"></i><i id="m3"></i><i id="m4"></i>
-          </div>
+          <div class="form__meter" aria-hidden="true"><i id="m1"></i><i id="m2"></i><i id="m3"></i><i id="m4"></i></div>
           <div class="form__count mono">
             <span>Passo <b id="stepNow">1</b> de 4</span>
             <span id="stepName">Tipo de viagem</span>
@@ -563,8 +551,6 @@
         </div>
 
         <div class="form__stage" aria-live="polite">
-
-          <!-- 1 -->
           <fieldset class="step" data-step="1" style="border:0;padding:0;margin:0">
             <legend class="step__q" style="padding:0">Que tipo de viagem tem em mente?</legend>
             <div class="chips" id="chipsTipo" role="group" aria-label="Tipo de viagem">
@@ -580,7 +566,6 @@
             <p class="field__err" id="err1"></p>
           </fieldset>
 
-          <!-- 2 -->
           <fieldset class="step" data-step="2" hidden style="border:0;padding:0;margin:0">
             <legend class="step__q" style="padding:0">Para onde gostaria de ir?</legend>
             <p class="step__hint">Pode escolher mais do que um.</p>
@@ -592,7 +577,6 @@
             <p class="field__err" id="err2"></p>
           </fieldset>
 
-          <!-- 3 -->
           <fieldset class="step" data-step="3" hidden style="border:0;padding:0;margin:0">
             <legend class="step__q" style="padding:0">Quando, e quantos vão?</legend>
             <div class="grid2">
@@ -615,25 +599,17 @@
               <div class="field">
                 <label for="adultos">Adultos</label>
                 <div class="stepper" data-stepper="adultos" data-min="1" data-max="20">
-                  <button type="button" data-dir="-1" aria-label="Menos adultos">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg>
-                  </button>
+                  <button type="button" data-dir="-1" aria-label="Menos adultos"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
                   <output id="adultos" name="adultos">2</output>
-                  <button type="button" data-dir="1" aria-label="Mais adultos">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-                  </button>
+                  <button type="button" data-dir="1" aria-label="Mais adultos"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
                 </div>
               </div>
               <div class="field">
                 <label for="criancas">Crianças</label>
                 <div class="stepper" data-stepper="criancas" data-min="0" data-max="20">
-                  <button type="button" data-dir="-1" aria-label="Menos crianças" disabled>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg>
-                  </button>
+                  <button type="button" data-dir="-1" aria-label="Menos crianças" disabled><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
                   <output id="criancas" name="criancas">0</output>
-                  <button type="button" data-dir="1" aria-label="Mais crianças">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-                  </button>
+                  <button type="button" data-dir="1" aria-label="Mais crianças"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
                 </div>
               </div>
             </div>
@@ -649,7 +625,6 @@
             </div>
           </fieldset>
 
-          <!-- 4 -->
           <fieldset class="step" data-step="4" hidden style="border:0;padding:0;margin:0">
             <legend class="step__q" style="padding:0">Como falamos consigo?</legend>
             <div class="field">
@@ -664,23 +639,21 @@
             </div>
             <div class="field">
               <label for="nota">Alguma coisa que devamos saber? (opcional)</label>
-              <textarea id="nota" name="nota" placeholder="Datas fixas, aniversário, preferências alimentares, mobilidade…"></textarea>
+              <textarea id="nota" name="nota" placeholder="Datas fixas, aniversário, preferências alimentares…"></textarea>
             </div>
             <div class="review" id="review"></div>
           </fieldset>
 
-          <!-- concluído -->
           <div class="step form__done" data-step="5" hidden>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.6 2.6L16 9.5"/></svg>
             <h3>Pedido pronto a enviar</h3>
-            <p style="color:var(--stone);max-width:36ch">Abrimos o WhatsApp com tudo já escrito. Se não abrir, use um dos botões abaixo.</p>
+            <p style="color:var(--stone);max-width:34ch">Abrimos o WhatsApp com tudo já escrito. Se não abrir, use os botões abaixo.</p>
             <div style="display:flex;flex-direction:column;gap:9px;width:100%;max-width:300px">
               <a class="btn btn--block" id="waLink" href="https://wa.me/2389990900" target="_blank" rel="noopener">Abrir no WhatsApp</a>
               <a class="btn btn--ghost btn--sm btn--block" id="mailLink" href="mailto:ayam.reservas@gmail.com">Enviar por email</a>
               <button type="button" class="form__back" id="restart" style="align-self:center">Fazer outro pedido</button>
             </div>
           </div>
-
         </div>
 
         <div class="form__nav" id="formNav">
@@ -696,11 +669,15 @@
 
 <!-- ============ RODAPÉ ============ -->
 <footer class="foot">
+  <div class="bg" aria-hidden="true">
+    <img class="bg__img" src="assets/bg-foot.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async">
+    <div class="bg__scrim bg__scrim--deep"></div>
+  </div>
   <div class="wrap">
     <div class="foot__grid">
       <div>
         <div class="foot__logo"><img src="assets/ayam-logo.png" alt="AYAM Viagens &amp; Turismo" width="832" height="320"></div>
-        <p style="margin-top:16px;max-width:34ch">Agência de viagens e turismo 100% cabo-verdiana. Alma local, visão global.</p>
+        <p style="margin-top:16px;max-width:32ch">Agência de viagens e turismo 100% cabo-verdiana. Alma local, visão global.</p>
         <p class="mono" style="margin-top:14px;color:var(--gold)">For Your Time</p>
       </div>
       <div>
@@ -711,7 +688,6 @@
           <li><a href="#voos">Bilhetes aéreos</a></li>
           <li><a href="#destinos">Destinos</a></li>
           <li><a href="#pacotes">Pacotes</a></li>
-          <li><a href="#caboverde">Cabo Verde</a></li>
           <li><a href="#orcamento">Pedir proposta</a></li>
         </ul>
       </div>
@@ -728,17 +704,11 @@
     <div class="foot__bar mono">
       <span>© <span id="year">2026</span> AYAM Viagens &amp; Turismo</span>
       <span class="credits">
-        Fotografia sob licença Creative Commons via Wikimedia Commons —
-        Maldivas: Matheenfaiz (CC BY-SA 4.0) ·
-        Fogo &amp; Sal: Cayambe / IDS.photos (CC BY-SA 3.0 / 2.0) ·
-        Mindelo: Caroline Granycome (CC BY-SA 2.0) ·
-        Dubai: Sergei Gussev (CC BY 2.0) ·
-        Lisboa: Dale Cruse (CC BY 4.0) ·
-        Rio: CidAlledi (CC BY-SA 4.0) ·
-        Krabi: V. Argenberg / Nnthurber (CC BY 4.0 / CC BY-SA 4.0) ·
-        Quioto: B. C. Tørrissen (CC BY-SA 4.0) ·
-        Positano: Bernard Gagnon (CC BY 4.0) ·
-        Bali: Philip Nalangan (CC BY 4.0)
+        Fotografia Creative Commons via Wikimedia Commons —
+        Maldivas: Matheenfaiz · Fogo &amp; Sal: Cayambe / IDS.photos · Mindelo: C. Granycome ·
+        Santo Antão: CaptainDarwin · Dubai: S. Gussev · Lisboa: D. Cruse · Rio: CidAlledi ·
+        Krabi: V. Argenberg / Nnthurber · Quioto: B. C. Tørrissen · Positano: B. Gagnon ·
+        Bali: P. Nalangan · Lofoten: Ximonic · Saara: H. Ogawa · Céu: H. Knight (CC0) / Joma433
       </span>
     </div>
   </div>
