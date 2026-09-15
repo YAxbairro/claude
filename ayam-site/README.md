@@ -18,9 +18,20 @@ vendor/           GSAP 3.12.5, ScrollTrigger, Lenis 1.1.13
 
 ### Como está construído
 
+**Tema creme**, a partir da campanha "Só precisa escolher o destino.": fundo
+creme, tipografia bordô, ouro em fios finos e detalhes.
+
 Cada secção tem **fotografia de fundo** (`.bg` + `.bg__img` + `.bg__scrim`) e o
-conteúdo vive em **painéis de vidro** (`.glass`) por cima. Não há blocos de texto
-sobre fundo liso — foi essa a principal mudança de direcção.
+conteúdo vive em **painéis de vidro claro** (`.glass`) por cima. Não há blocos de
+texto sobre fundo liso.
+
+Dois cuidados que o tema claro obriga e que é fácil esquecer ao mexer nas cores:
+
+- **Os véus (`.bg__scrim`) clareiam, não escurecem.** As fotografias de fundo são
+  geradas já claras e desfocadas, para o texto bordô assentar por cima.
+- **`--gold` (#A9750F) é mais escuro que o ouro do logótipo.** Sobre creme, o
+  #D8900C do logótipo não tem contraste suficiente para texto. O ouro da marca
+  vive em `--gold-lit`, e usa-se só em preenchimentos (botões, barras, realces).
 
 Nomes de ficheiros de imagem:
 
