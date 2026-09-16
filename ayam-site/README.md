@@ -142,6 +142,14 @@ lado nenhum — existem apenas na conversa de WhatsApp. Para ter um registo
   com deslocamento circular — o cartão activo fica sempre ao centro, com cartões
   dos dois lados, e a navegação dá a volta nos extremos. Funciona com setas,
   pontos, arrasto, teclado e clique. O fundo da secção troca com o destino activo.
+- **Rota viva** (`.routeline`, na secção Destinos): um avião percorre o arco de
+  Praia até ao destino activo, desenhando o rasto atrás de si, e a rota refaz-se
+  sempre que o carrossel muda. Vive no fluxo normal do documento, de propósito —
+  ao contrário do pré-carregamento, que é `position:fixed`, aparece em qualquer
+  contexto, incluindo dentro de molduras altas. Os pinos dos extremos são
+  posicionados em percentagens tiradas do `viewBox` (`600×110`, extremos em
+  `x=2` e `x=598`, `y=96`): ao mudar o `d` dos caminhos é preciso acertar
+  `.routeline__pin` em `styles.css`.
 - **Pesquisa**: abre pelo ícone da barra ou pela tecla `/`; filtra por nome, país,
   código IATA ou etiqueta; navega com as setas e escolhe com `Enter`.
 - **Telemóvel**: menu em ecrã inteiro abaixo de 1040 px; a gaveta transforma-se em

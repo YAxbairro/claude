@@ -7,6 +7,13 @@
   var REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var hasGSAP = typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined';
   var FINE = window.matchMedia('(hover:hover) and (pointer:fine) and (min-width:1024px)').matches;
+
+  /* Nenhum ecrã real tem uma janela com mais de 1600px de altura. Quando isso
+     acontece, a página está dentro de uma moldura alta e quem rola é a de fora:
+     o scrollY interior fica sempre a zero. Aqui nada de visível pode depender
+     do scroll, senão metade do conteúdo fica parada em opacidade zero — e o
+     que é animado desenha-se onde ninguém olha. */
+  var EMBED = window.innerHeight > 1600;
   var WA = '2389990900';
   var MAIL = 'ayam.reservas@gmail.com';
 
@@ -167,6 +174,110 @@
     updateInfo(animate);
   }
 
+  /* ============================================================
+     ROTA VIVA
+     O avião vive dentro do documento, não numa camada fixa: voa de
+     Praia até ao destino activo, em ciclo, e refaz a rota sempre que
+     o carrossel muda. Por estar no fluxo normal, aparece em qualquer
+     contexto — incluindo dentro de molduras altas, onde tudo o que é
+     `position:fixed` se desenha fora do que se vê.
+     ============================================================ */
+  var rlTrail, rlPlane, rlSvg, rlVb, rlDot, rlLen = 0, rlTl = null;
+  var rlT = { v: 0 };
+
+  function routeBind() {
+    if (rlTrail !== undefined) return rlTrail;
+    rlTrail = $('#rlTrail');
+    rlPlane = $('#rlPlane');
+    if (!rlTrail || !rlPlane) { rlTrail = null; return null; }
+    rlSvg = rlTrail.ownerSVGElement;
+    rlVb = rlSvg.viewBox.baseVal;
+    rlDot = $('#rlPinTo');
+    rlLen = rlTrail.getTotalLength();
+    return rlTrail;
+  }
+
+  /* põe o avião no ponto rlT.v da rota, virado para onde segue.
+     preserveAspectRatio="none" dá escalas diferentes em x e y — o ângulo
+     tem de contar com as duas, senão o nariz aponta ao lado. */
+  function routePlace() {
+    if (!rlTrail) return;
+    var r = rlSvg.getBoundingClientRect();
+    if (!r.width) return;
+    var sx = r.width / rlVb.width, sy = r.height / rlVb.height;
+    var d = rlLen * rlT.v;
+    var a = rlTrail.getPointAtLength(d);
+    /* a tangente mede-se num troço recuado do fim: em cima do último ponto os
+       dois pontos coincidem e o ângulo degenerava — o avião aterrava de nariz no ar */
+    var d0 = Math.max(0, Math.min(rlLen - 3, d));
+    var t0 = rlTrail.getPointAtLength(d0), t1 = rlTrail.getPointAtLength(d0 + 3);
+    var ang = Math.atan2((t1.y - t0.y) * sy, (t1.x - t0.x) * sx) * 180 / Math.PI + 90;
+    rlPlane.style.transform =
+      'translate(' + (a.x * sx).toFixed(2) + 'px,' + (a.y * sy).toFixed(2) + 'px) rotate(' + ang.toFixed(2) + 'deg)';
+  }
+
+  function routeText(d) {
+    var c = $('#rlCode');
+    if (!c) return;
+    c.textContent = d.code;
+    $('#rlCity').textContent = d.name;
+    $('#rlDur').textContent = d.flight;
+  }
+
+  /* sem GSAP ou com movimento reduzido: rota desenhada, avião pousado no destino */
+  function routeStatic() {
+    if (!routeBind()) return;
+    rlTrail.style.strokeDasharray = 'none';
+    rlTrail.style.strokeDashoffset = '0';
+    rlT.v = 1;
+    routePlace();
+    rlPlane.style.opacity = '1';
+  }
+
+  function routeFly(restart) {
+    if (!routeBind()) return;
+    if (!hasGSAP || REDUCE) { routeStatic(); return; }
+
+    if (rlTl) {
+      if (restart) {
+        var wasPaused = rlTl.paused();
+        rlTl.restart();
+        if (wasPaused) rlTl.pause();
+      }
+      return;
+    }
+
+    var land = function () {
+      if (!rlDot) return;
+      rlDot.classList.remove('is-land');
+      void rlDot.offsetWidth;                  /* força o reinício da animação */
+      rlDot.classList.add('is-land');
+    };
+
+    rlTl = gsap.timeline({ repeat: -1, repeatDelay: .45, paused: true })
+      .set(rlT, { v: 0 })
+      .set(rlTrail, { strokeDasharray: rlLen, strokeDashoffset: rlLen })
+      .call(routePlace)
+      .to(rlPlane, { opacity: 1, duration: .35, ease: 'power2.out' }, 0)
+      .to(rlT, { v: 1, duration: 3.6, ease: 'power1.inOut', onUpdate: routePlace }, 0)
+      .to(rlTrail, { strokeDashoffset: 0, duration: 3.6, ease: 'power1.inOut' }, 0)
+      .call(land, null, 3.45)
+      .to(rlPlane, { opacity: 0, duration: .4, ease: 'power2.in' }, 3.8)
+      /* o rasto apaga-se de Praia para o destino, e a rota fica livre outra vez */
+      .to(rlTrail, { strokeDashoffset: -rlLen, duration: 1.15, ease: 'power2.inOut' }, 4.15);
+
+    /* fora do ecrã não vale a pena gastar quadros — mas dentro de uma moldura
+       alta o observador nunca dispara para o que está lá em baixo, e aí voa sempre */
+    var host = $('#routeLine');
+    if (!EMBED && host && window.IntersectionObserver) {
+      new IntersectionObserver(function (es) {
+        es.forEach(function (e) { if (e.isIntersecting) rlTl.play(); else rlTl.pause(); });
+      }, { rootMargin: '140px 0px' }).observe(host);
+    } else {
+      rlTl.play();
+    }
+  }
+
   function updateInfo(animate) {
     var d = DESTINOS[active];
     if (!d) return;
@@ -180,6 +291,8 @@
       ].map(function (f) {
         return '<span class="deck-info__f"><span class="deck-info__fk">' + f[0] + '</span><span class="deck-info__fv">' + f[1] + '</span></span>';
       }).join('');
+      routeText(d);
+      routeFly(true);
     };
     if (hasGSAP && animate && !REDUCE) {
       var panel = $('#deckInfo');
@@ -245,7 +358,7 @@
     $('#diOpen').addEventListener('click', function () { openDrawer(DESTINOS[active].id); });
     $('#diQuote').addEventListener('click', function () { jumpToForm(null, destLabel(DESTINOS[active])); });
 
-    window.addEventListener('resize', function () { layoutDeck(false); });
+    window.addEventListener('resize', function () { layoutDeck(false); routePlace(); });
   }
 
   /* ============================================================
@@ -706,12 +819,6 @@
   }
 
   gsap.registerPlugin(ScrollTrigger);
-
-  /* Nenhum ecrã real tem uma janela com mais de 1600px de altura. Quando isso
-     acontece, a página está dentro de uma moldura alta e quem rola é a de fora:
-     o scrollY interior fica sempre a zero. Aqui as revelações não podem depender
-     do scroll, senão metade do conteúdo fica parada em opacidade zero. */
-  var EMBED = window.innerHeight > 1600;
 
   if (typeof window.Lenis !== 'undefined') {
     var lenis = new Lenis({ duration: 1.05, smoothWheel: true, touchMultiplier: 1.6 });

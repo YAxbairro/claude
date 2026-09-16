@@ -322,7 +322,37 @@ if (window.innerHeight > 1600) document.documentElement.classList.add('is-embed'
 
   <div class="deck__dots" id="deckDots"></div>
 
-  <div class="wrap" style="margin-top:clamp(18px,2.6vw,30px)">
+  <div class="wrap">
+    <!-- rota viva: Praia até ao destino activo, em ciclo -->
+    <div class="routeline" id="routeLine">
+      <div class="routeline__arc">
+        <svg class="routeline__svg" viewBox="0 0 600 110" fill="none" preserveAspectRatio="none" aria-hidden="true">
+          <path id="rlBase" d="M2 96 C 150 4, 450 4, 598 96" stroke="currentColor" stroke-width="1.2"
+                stroke-linecap="round" stroke-dasharray="3 7"/>
+          <path id="rlTrail" d="M2 96 C 150 4, 450 4, 598 96" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+        <span class="routeline__pin routeline__pin--from" aria-hidden="true"></span>
+        <span class="routeline__pin routeline__pin--to" id="rlPinTo" aria-hidden="true"></span>
+        <span class="routeline__plane" id="rlPlane" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c.7 0 1.2.9 1.2 2v5.2l7.6 4.4c.4.2.6.6.6 1v1.3c0 .4-.4.7-.8.6l-7.4-2.2v4l2 1.6c.2.2.3.4.3.7v.9c0 .3-.3.5-.6.4L12 21l-2.9 1c-.3.1-.6-.1-.6-.4v-.9c0-.3.1-.5.3-.7l2-1.6v-4l-7.4 2.2c-.4.1-.8-.2-.8-.6v-1.3c0-.4.2-.8.6-1l7.6-4.4V4c0-1.1.5-2 1.2-2z"/></svg>
+        </span>
+        <span class="routeline__dur mono" id="rlDur">—</span>
+      </div>
+
+      <div class="routeline__ends">
+        <p class="routeline__end">
+          <span class="routeline__code mono">RAI</span>
+          <span class="routeline__city">Praia</span>
+        </p>
+        <p class="routeline__end routeline__end--to">
+          <span class="routeline__code mono" id="rlCode">—</span>
+          <span class="routeline__city" id="rlCity">—</span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap" style="margin-top:clamp(14px,2vw,24px)">
     <div class="glass deck-info" id="deckInfo">
       <div class="deck-info__t">
         <span class="deck-info__c" id="diCountry">—</span>

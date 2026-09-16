@@ -927,6 +927,69 @@ ul,ol{ margin:0; padding:0; list-style:none; }
 
 
 /* ============================================================
+   ROTA VIVA — Praia até ao destino activo
+   Fica no corpo da página, não em camada fixa: vê-se sempre.
+   ============================================================ */
+.routeline{
+  position:relative; z-index:2;
+  margin-top:clamp(16px,2.4vw,28px);
+  padding:clamp(14px,2vw,22px) clamp(16px,2.8vw,32px) clamp(12px,1.6vw,18px);
+  background:var(--glass); border:1px solid var(--glass-line);
+  border-radius:var(--r); box-shadow:var(--shadow);
+  backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur);
+}
+
+/* o arco ocupa toda a largura: os extremos do traço são os próprios aeroportos */
+.routeline__arc{ position:relative; height:clamp(74px,10vw,112px); }
+.routeline__svg{ position:absolute; inset:0; width:100%; height:100%; color:rgba(91,26,20,.26); overflow:visible; }
+.routeline__svg #rlTrail{ stroke:var(--gold-lit); }
+/* o tracejado anda devagar: a rota nunca está completamente parada */
+.routeline__svg #rlBase{ animation:rlDrift 2.6s linear infinite; }
+@keyframes rlDrift{ to{ stroke-dashoffset:-10; } }
+
+/* percentagens tiradas do viewBox 600×110: os extremos do traço estão
+   em (2, 96) e (598, 96) — os pinos assentam exactamente lá */
+.routeline__pin{
+  position:absolute; top:87.27%; width:9px; height:9px; margin:-4.5px 0 0 -4.5px;
+  border-radius:50%; background:var(--burgundy); box-shadow:0 0 0 4px rgba(91,26,20,.12);
+}
+.routeline__pin--from{ left:.333%; }
+.routeline__pin--to{ left:99.667%; background:var(--gold-lit); box-shadow:0 0 0 4px rgba(216,144,12,.2); }
+/* o ponto de chegada acende quando o avião aterra */
+.routeline__pin--to.is-land{ animation:rlLand .9s ease-out; }
+@keyframes rlLand{
+  0%{ box-shadow:0 0 0 4px rgba(216,144,12,.2); }
+  35%{ box-shadow:0 0 0 12px rgba(216,144,12,.32); }
+  100%{ box-shadow:0 0 0 4px rgba(216,144,12,.2); }
+}
+
+.routeline__plane{
+  position:absolute; left:0; top:0; width:22px; height:22px; margin:-11px 0 0 -11px;
+  color:var(--gold-lit); opacity:0;
+  filter:drop-shadow(0 1px 7px rgba(216,144,12,.55));
+}
+.routeline__plane svg{ width:100%; height:100%; display:block; }
+.routeline__dur{
+  position:absolute; left:50%; top:60%; transform:translate(-50%,-50%);
+  color:var(--stone); font-size:var(--t-xs); letter-spacing:.1em;
+  background:var(--glass-2); border:1px solid var(--glass-line);
+  padding:3px 12px; border-radius:100px; white-space:nowrap;
+}
+
+.routeline__ends{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-top:8px; }
+.routeline__end{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+.routeline__end--to{ text-align:right; align-items:flex-end; }
+.routeline__code{ color:var(--burgundy); font-size:var(--t-sm); letter-spacing:.18em; font-weight:500; }
+.routeline__city{ font-size:var(--t-xs); color:var(--stone); line-height:1.25; overflow-wrap:anywhere; }
+
+@media (max-width:520px){
+  .routeline{ padding:12px 14px 10px; }
+  .routeline__arc{ height:66px; }
+  .routeline__plane{ width:18px; height:18px; margin:-9px 0 0 -9px; }
+}
+}
+
+/* ============================================================
    MOLDURA ALTA
    Quando a página é mostrada dentro de uma moldura com milhares de
    píxeis de altura e quem rola é a página de fora, position:fixed
