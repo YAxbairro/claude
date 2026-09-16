@@ -391,6 +391,33 @@ if (window.innerHeight > 1600) document.documentElement.classList.add('is-embed'
   </div>
 </section>
 
+<!-- ============ CALENDÁRIO DE ÉPOCAS ============ -->
+<section class="section section--tight" id="epocas" aria-labelledby="epocas-h">
+  <div class="bg" aria-hidden="true">
+    <img class="bg__img" src="assets/bg-numeros.webp" alt="" width="1440" height="810" loading="lazy" decoding="async">
+    <div class="bg__scrim"></div>
+  </div>
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow" data-reveal>Quando ir</p>
+      <h2 id="epocas-h" data-reveal>Cada sítio tem <em>a sua altura.</em></h2>
+    </div>
+
+    <div class="glass seasons" data-reveal>
+      <div class="seasons__box" id="seasonsBox">
+        <table class="ss" id="ssTable">
+          <caption class="sr">Melhor época para viajar, por destino</caption>
+        </table>
+        <span class="ss__now" id="ssNow" aria-hidden="true"></span>
+      </div>
+      <p class="seasons__note">
+        <span class="seasons__key" aria-hidden="true"></span>
+        A barra marca a melhor altura para viajar. A linha assinala o mês actual.
+      </p>
+    </div>
+  </div>
+</section>
+
 <!-- ============ DOIS CAMINHOS ============ -->
 <section class="section section--tight" aria-labelledby="perfis-h">
   <div class="wrap">
@@ -731,7 +758,46 @@ if (window.innerHeight > 1600) document.documentElement.classList.add('is-embed'
           </fieldset>
 
           <div class="step form__done" data-step="5" hidden>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.6 2.6L16 9.5"/></svg>
+            <!-- cartão de embarque: o resumo do pedido com a forma de um bilhete -->
+            <div class="bpass" id="bpass">
+              <div class="bpass__main">
+                <div class="bpass__top">
+                  <img class="bpass__logo" src="assets/ayam-logo.webp" alt="AYAM Viagens &amp; Turismo" width="832" height="320">
+                  <span class="bpass__kind mono">Pedido de proposta</span>
+                </div>
+
+                <div class="bpass__route">
+                  <div class="bpass__pt">
+                    <span class="bpass__code">RAI</span>
+                    <span class="bpass__city">Praia</span>
+                  </div>
+                  <div class="bpass__mid" aria-hidden="true">
+                    <span class="bpass__dash"></span>
+                    <svg class="bpass__plane" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c.7 0 1.2.9 1.2 2v5.2l7.6 4.4c.4.2.6.6.6 1v1.3c0 .4-.4.7-.8.6l-7.4-2.2v4l2 1.6c.2.2.3.4.3.7v.9c0 .3-.3.5-.6.4L12 21l-2.9 1c-.3.1-.6-.1-.6-.4v-.9c0-.3.1-.5.3-.7l2-1.6v-4l-7.4 2.2c-.4.1-.8-.2-.8-.6v-1.3c0-.4.2-.8.6-1l7.6-4.4V4c0-1.1.5-2 1.2-2z"/></svg>
+                    <span class="bpass__dash"></span>
+                  </div>
+                  <div class="bpass__pt bpass__pt--to">
+                    <span class="bpass__code" id="bpTo">—</span>
+                    <span class="bpass__city" id="bpToCity">—</span>
+                  </div>
+                </div>
+
+                <dl class="bpass__grid">
+                  <div><dt>Passageiro</dt><dd id="bpName">—</dd></div>
+                  <div><dt>Partida</dt><dd id="bpMonth">—</dd></div>
+                  <div><dt>Duração</dt><dd id="bpNights">—</dd></div>
+                  <div><dt>Viajantes</dt><dd id="bpPax">—</dd></div>
+                </dl>
+              </div>
+
+              <div class="bpass__stub">
+                <span class="bpass__kind mono">Referência</span>
+                <span class="bpass__ref mono" id="bpRef">—</span>
+                <span class="bpass__bars" id="bpBars" aria-hidden="true"></span>
+                <span class="bpass__stubto mono" id="bpStubTo">—</span>
+              </div>
+            </div>
+
             <h3>Pedido pronto a enviar</h3>
             <p style="color:var(--stone);max-width:34ch">Abrimos o WhatsApp com tudo já escrito. Se não abrir, use os botões abaixo.</p>
             <div style="display:flex;flex-direction:column;gap:9px;width:100%;max-width:300px">
@@ -794,7 +860,8 @@ if (window.innerHeight > 1600) document.documentElement.classList.add('is-embed'
         Maldivas: Matheenfaiz · Fogo &amp; Sal: Cayambe / IDS.photos · Mindelo: C. Granycome ·
         Santo Antão: CaptainDarwin · Dubai: S. Gussev · Lisboa: D. Cruse · Rio: CidAlledi ·
         Krabi: V. Argenberg / Nnthurber · Quioto: B. C. Tørrissen · Positano: B. Gagnon ·
-        Bali: P. Nalangan · Lofoten: Ximonic · Saara: H. Ogawa · Céu: H. Knight (CC0) / Joma433
+        Bali: P. Nalangan · Lofoten: Ximonic · Saara: H. Ogawa · Céu: H. Knight (CC0) / Joma433 ·
+        Mapa-múndi gerado a partir do NASA Blue Marble (domínio público)
       </span>
     </div>
   </div>

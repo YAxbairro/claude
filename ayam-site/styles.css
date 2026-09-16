@@ -1076,6 +1076,155 @@ ul,ol{ margin:0; padding:0; list-style:none; }
 }
 
 /* ============================================================
+   CALENDÁRIO DE ÉPOCAS
+   Uma tabela a sério: destinos em linhas, meses em colunas. A barra
+   dourada marca a melhor altura, e a linha vertical o mês de hoje.
+   ============================================================ */
+.sr{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
+}
+
+.seasons{ margin-top:clamp(20px,3vw,36px); padding:clamp(16px,2.4vw,30px); }
+.seasons__box{ position:relative; }
+
+.ss{ width:100%; border-collapse:collapse; table-layout:fixed; }
+.ss th, .ss td{ padding:0; }
+
+.ss__m{
+  font-family:'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  font-size:var(--t-xs); letter-spacing:.06em; font-weight:400;
+  color:var(--stone); text-align:center; padding-bottom:10px;
+}
+.ss__m.is-now{ color:var(--burgundy); font-weight:500; }
+
+.ss__name{
+  width:23%; text-align:left; font-weight:400; padding:0 14px 0 0;
+  font-size:var(--t-sm); color:var(--stone); white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis;
+}
+.ss__row{ cursor:pointer; }
+.ss__row:hover .ss__name, .ss__row.is-on .ss__name{ color:var(--burgundy); }
+.ss__row.is-on .ss__name{ font-weight:500; }
+
+.ss__c{ padding:5px 0; }
+.ss__b{
+  display:block; height:11px; background:rgba(91,26,20,.075);
+  transform-origin:left center;
+}
+/* cor sólida, não ouro translúcido: com 1px de sobreposição entre células
+   o alfa somava-se e aparecia um risco escuro em cada costura */
+.ss__c.is-on .ss__b{ background:#E6BC70; transition:background-color .3s; }
+.ss__row:hover .ss__c.is-on .ss__b, .ss__row.is-on .ss__c.is-on .ss__b{ background:var(--gold-lit); }
+/* colunas com larguras fraccionárias deixavam um fio de fundo entre células
+   contíguas: a barra avança 1px sobre a seguinte e tapa a costura */
+.ss__c.is-on:not(.is-end) .ss__b{ width:calc(100% + 1px); }
+.ss__c.is-start .ss__b{ border-top-left-radius:100px; border-bottom-left-radius:100px; }
+.ss__c.is-end .ss__b{ border-top-right-radius:100px; border-bottom-right-radius:100px; }
+
+/* posicionada por JS a partir da geometria real da coluna do mês */
+.ss__now{
+  position:absolute; top:0; bottom:0; width:1px;
+  background:var(--burgundy); opacity:.28; pointer-events:none;
+}
+.ss__now::before{
+  content:''; position:absolute; top:-3px; left:-2.5px;
+  width:6px; height:6px; border-radius:50%; background:var(--burgundy);
+}
+
+.seasons__note{
+  margin-top:14px; font-size:var(--t-xs); color:var(--stone);
+  display:flex; align-items:center; gap:9px;
+}
+.seasons__key{
+  width:26px; height:8px; border-radius:100px; background:var(--gold-lit); flex:none;
+}
+
+@media (max-width:640px){
+  .seasons{ padding:14px 12px; }
+  .ss__name{ width:30%; font-size:var(--t-xs); padding-right:8px; }
+  .ss__m{ font-size:10px; letter-spacing:0; }
+  .ss__b{ height:9px; }
+  .seasons__note{ align-items:flex-start; }
+}
+
+/* ============================================================
+   CARTÃO DE EMBARQUE
+   O último passo do formulário: o resumo do pedido com a forma de um
+   bilhete. O talão separa-se por uma picotada; não há recortes porque
+   o cartão assenta sobre vidro e fotografia, e um recorte opaco não
+   combinava com o que estivesse por trás.
+   ============================================================ */
+.bpass{
+  width:100%; max-width:520px; text-align:left;
+  display:grid; grid-template-columns:minmax(0,1fr) auto;
+  background:#FFFCF6; border:1px solid var(--glass-line);
+  border-radius:var(--r); overflow:hidden;
+  box-shadow:0 18px 44px rgba(91,26,20,.16);
+}
+.bpass__main{ padding:clamp(16px,3vw,22px); min-width:0; }
+.bpass__top{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.bpass__logo{ width:78px; height:auto; }
+.bpass__kind{
+  font-size:10px; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--stone-dim); white-space:nowrap;
+}
+
+.bpass__route{
+  display:grid; grid-template-columns:auto minmax(24px,1fr) auto;
+  align-items:center; gap:10px;
+  margin-top:clamp(14px,2.4vw,20px);
+}
+.bpass__pt{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+.bpass__pt--to{ text-align:right; align-items:flex-end; }
+.bpass__code{
+  font-family:'Fraunces', Georgia, serif; font-size:clamp(26px,6vw,34px);
+  line-height:1; color:var(--burgundy); letter-spacing:.02em;
+}
+.bpass__city{
+  font-size:var(--t-xs); color:var(--stone); margin-top:3px;
+  max-width:15ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.bpass__mid{ display:flex; align-items:center; gap:5px; color:var(--gold-lit); }
+.bpass__dash{ flex:1; height:1px; background:repeating-linear-gradient(90deg, currentColor 0 3px, transparent 3px 7px); opacity:.55; }
+.bpass__plane{ width:15px; height:15px; flex:none; transform:rotate(90deg); }
+
+.bpass__grid{
+  display:grid; grid-template-columns:repeat(2, minmax(0,1fr));
+  gap:12px 14px; margin-top:clamp(16px,2.6vw,22px);
+  padding-top:clamp(14px,2.2vw,18px); border-top:1px solid var(--glass-line);
+}
+.bpass__grid dt{
+  font-family:'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--stone-dim);
+}
+.bpass__grid dd{ font-size:var(--t-sm); color:var(--burgundy); margin:3px 0 0; line-height:1.3; }
+
+.bpass__stub{
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px;
+  padding:clamp(14px,2.4vw,20px) clamp(10px,1.8vw,16px);
+  border-left:1.5px dashed var(--glass-lit);
+  background:rgba(91,26,20,.025); flex:none;
+}
+.bpass__ref{ font-size:var(--t-sm); letter-spacing:.14em; color:var(--burgundy); font-weight:500; white-space:nowrap; }
+.bpass__bars{ display:flex; align-items:flex-end; gap:1.5px; height:44px; }
+.bpass__bars i{ display:block; width:2px; background:var(--burgundy); opacity:.75; }
+.bpass__stubto{ font-size:10px; letter-spacing:.16em; color:var(--stone-dim); white-space:nowrap; }
+
+@media (max-width:560px){
+  .bpass{ grid-template-columns:minmax(0,1fr); }
+  .bpass__stub{
+    border-left:0; border-top:1.5px dashed var(--glass-lit);
+    flex-direction:row; align-items:center; justify-content:space-between;
+    gap:10px; padding:12px 16px;
+  }
+  /* a 300px não cabem rótulo, referência, código e rota: o rótulo é o que
+     menos falta — a referência explica-se sozinha na mensagem */
+  .bpass__stub .bpass__kind{ display:none; }
+  .bpass__bars{ height:26px; }
+}
+
+/* ============================================================
    MOLDURA ALTA
    Quando a página é mostrada dentro de uma moldura com milhares de
    píxeis de altura e quem rola é a página de fora, position:fixed

@@ -303,6 +303,7 @@
       routeText(d);
       routeFly(true);
       mapSetActive(active);
+      ssSetActive(active);
     };
     if (hasGSAP && animate && !REDUCE) {
       var panel = $('#deckInfo');
@@ -571,6 +572,118 @@
   }
 
   /* ============================================================
+     CALENDÁRIO DE ÉPOCAS
+     A época de cada destino está escrita em texto ("Nov — Jun",
+     "Mar — Abr · Out — Nov"): é isso que se lê na gaveta. Aqui é lida
+     para doze meses, para não haver duas fontes da mesma verdade.
+     ============================================================ */
+  var MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+  var ssRows = [], ssBox, ssNow;
+
+  function parseSeason(str) {
+    var on = [];
+    for (var i = 0; i < 12; i++) on.push(false);
+    String(str || '').split('·').forEach(function (part) {
+      var seg = part.trim().split(/\s*[—–-]\s*/);
+      if (seg.length === 2) {
+        var a = MESES.indexOf(seg[0]), b = MESES.indexOf(seg[1]);
+        if (a < 0 || b < 0) return;
+        var k = a, guard = 0;
+        while (guard++ < 13) { on[k] = true; if (k === b) break; k = (k + 1) % 12; }
+      } else {
+        var m = MESES.indexOf(seg[0]);
+        if (m >= 0) on[m] = true;
+      }
+    });
+    return on;
+  }
+
+  function initSeasons() {
+    var tbl = $('#ssTable');
+    if (!tbl) return;
+    ssBox = $('#seasonsBox');
+    ssNow = $('#ssNow');
+    var nowM = new Date().getMonth();
+
+    var head = document.createElement('thead');
+    var hr = document.createElement('tr');
+    /* table-layout:fixed tira as larguras da PRIMEIRA linha: sem esta classe
+       no canto, a coluna dos nomes ficava com 25px e cortava tudo */
+    hr.appendChild(document.createElement('th')).className = 'ss__name';
+    MESES.forEach(function (m, i) {
+      var th = document.createElement('th');
+      th.className = 'ss__m' + (i === nowM ? ' is-now' : '');
+      th.scope = 'col';
+      th.textContent = m;
+      hr.appendChild(th);
+    });
+    head.appendChild(hr);
+    tbl.appendChild(head);
+
+    var body = document.createElement('tbody');
+    DESTINOS.forEach(function (d, i) {
+      var on = parseSeason(d.season);
+      var tr = document.createElement('tr');
+      tr.className = 'ss__row';
+      tr.dataset.i = i;
+
+      var th = document.createElement('th');
+      th.className = 'ss__name';
+      th.scope = 'row';
+      th.textContent = d.name;
+      th.title = d.country + ' · ' + d.name;
+      tr.appendChild(th);
+
+      on.forEach(function (v, m) {
+        var td = document.createElement('td');
+        var cls = 'ss__c';
+        if (v) {
+          cls += ' is-on';
+          if (!on[(m + 11) % 12] || m === 0) cls += ' is-start';
+          if (!on[(m + 1) % 12] || m === 11) cls += ' is-end';
+        }
+        td.className = cls;
+        td.appendChild(document.createElement('span')).className = 'ss__b';
+        tr.appendChild(td);
+      });
+
+      tr.addEventListener('click', function () { goTo(i); });
+      body.appendChild(tr);
+      ssRows.push(tr);
+    });
+    tbl.appendChild(body);
+
+    ssPlaceNow(nowM);
+    window.addEventListener('resize', function () { ssPlaceNow(nowM); });
+    ssSetActive(active);
+  }
+
+  /* a linha do mês actual segue a coluna real, não uma percentagem
+     calculada à mão — a largura do rótulo muda com o ecrã */
+  function ssPlaceNow(m) {
+    if (!ssNow || !ssBox) return;
+    var th = $$('.ss__m', $('#ssTable'))[m];
+    if (!th) return;
+    var r = th.getBoundingClientRect(), b = ssBox.getBoundingClientRect();
+    if (!r.width) return;
+    ssNow.style.left = (r.left - b.left + r.width / 2) + 'px';
+  }
+
+  function ssSetActive(i) {
+    ssRows.forEach(function (tr, k) { tr.classList.toggle('is-on', k === i); });
+  }
+
+  /* as barras crescem da esquerda, linha a linha */
+  function ssReveal() {
+    if (!ssRows.length || !hasGSAP || REDUCE) return;
+    gsap.from('#ssTable .ss__c.is-on .ss__b', {
+      scaleX: 0, duration: .75, ease: 'power3.out',
+      stagger: { each: .012, from: 'start' }
+    });
+    gsap.from('#ssNow', { opacity: 0, duration: .6, ease: 'power2.out', delay: .5 });
+  }
+
+  /* ============================================================
      PESQUISA
      ============================================================ */
   function initSearch() {
@@ -705,7 +818,7 @@
   /* ============================================================
      FORMULÁRIO
      ============================================================ */
-  var state = { tipo: '', destinos: [], outro: '', adultos: 2, criancas: 0, nome: '', contacto: '', nota: '', tier: '' };
+  var state = { tipo: '', destinos: [], outro: '', adultos: 2, criancas: 0, nome: '', contacto: '', nota: '', tier: '', ref: '' };
   var stepNow = 1;
   var STEP_NAMES = ['Tipo de viagem', 'Destinos', 'Datas e viajantes', 'Os seus dados'];
 
@@ -780,8 +893,56 @@
       return '<div class="review__row"><span class="review__k">' + r[0] + '</span><span class="review__v">' + r[1] + '</span></div>';
     }).join('');
   }
+  /* uma referência curta, sem caracteres que se confundam (0/O, 1/I/L).
+     Não é um número de reserva: é o mesmo código no cartão e na mensagem,
+     para a agência e o cliente falarem do mesmo pedido. */
+  function makeRef() {
+    var A = 'ACDEFGHJKMNPQRTUVWXY34679', r = '';
+    for (var i = 0; i < 4; i++) r += A.charAt(Math.floor(Math.random() * A.length));
+    return 'AY-' + r;
+  }
+
+  /* preenche o cartão de embarque com o que o formulário recolheu */
+  function fillPass() {
+    if (!$('#bpass')) return;
+    var to = '—', toCity = '—';
+    if (state.destinos.length === 1) {
+      /* os chips guardam o rótulo ("País · Nome"), não o id */
+      var lbl = state.destinos[0];
+      var d = DESTINOS.filter(function (x) { return destLabel(x) === lbl; })[0];
+      if (d) { to = d.code; toCity = d.name; }
+      else { to = '···'; toCity = lbl; }
+    } else if (state.destinos.length > 1) {
+      to = 'MULTI'; toCity = state.destinos.length + ' destinos';
+    } else if (state.outro) {
+      to = '···'; toCity = state.outro;
+    }
+    $('#bpTo').textContent = to;
+    $('#bpToCity').textContent = toCity;
+    $('#bpToCity').title = toCity;
+    $('#bpStubTo').textContent = 'RAI → ' + to;
+    $('#bpName').textContent = state.nome || '—';
+    $('#bpMonth').textContent = $('#mes').value || '—';
+    $('#bpNights').textContent = $('#noites').value || '—';
+    $('#bpPax').textContent = paxLabel();
+    $('#bpRef').textContent = state.ref || '—';
+
+    /* barras decorativas, derivadas da referência para serem estáveis */
+    var bars = $('#bpBars'), seed = 0;
+    (state.ref || 'AYAM').split('').forEach(function (c) { seed += c.charCodeAt(0); });
+    bars.innerHTML = '';
+    for (var i = 0; i < 26; i++) {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      var b = document.createElement('i');
+      b.style.height = (38 + (seed % 62)) + '%';
+      b.style.width = ((seed >> 7) % 3 === 0 ? 3 : 1.5) + 'px';
+      bars.appendChild(b);
+    }
+  }
+
   function buildMessage() {
     var L = ['*Pedido de proposta — AYAM*', ''];
+    if (state.ref) L.push('Ref.: ' + state.ref);
     if (state.tier) L.push('Pacote: ' + state.tier);
     L.push('Tipo: ' + (state.tipo || 'A definir'));
     L.push('Destinos: ' + destinosLabel());
@@ -795,6 +956,20 @@
     L.push('', 'Enviado pelo site ayam.cv');
     return L.join('\n');
   }
+  /* o cartão chega como um bilhete que se pousa na mesa */
+  function passIn() {
+    var card = $('#bpass');
+    if (!card || !hasGSAP || REDUCE) return;
+    gsap.timeline()
+      .from(card, { opacity: 0, y: 26, rotateX: -16, transformPerspective: 900,
+                    transformOrigin: '50% 0%', duration: .8, ease: 'power3.out' })
+      .from('#bpass .bpass__code', { opacity: 0, y: 10, duration: .5, stagger: .08, ease: 'power3.out' }, .18)
+      .from('#bpass .bpass__dash', { scaleX: 0, transformOrigin: 'left center', duration: .5, ease: 'power2.out' }, .3)
+      .from('#bpass .bpass__plane', { opacity: 0, scale: .4, duration: .4, ease: 'back.out(2.4)' }, .42)
+      .from('#bpass .bpass__grid > div', { opacity: 0, y: 8, duration: .45, stagger: .05, ease: 'power2.out' }, .4)
+      .from('#bpass .bpass__bars i', { scaleY: 0, transformOrigin: 'bottom', duration: .35, stagger: .012, ease: 'power2.out' }, .5);
+  }
+
   function setErr(id, msg) { var el = $(id); if (el) el.textContent = msg || ''; }
 
   function validate(n) {
@@ -892,17 +1067,20 @@
     $('#btnNext').addEventListener('click', function () {
       if (!validate(stepNow)) return;
       if (stepNow < 4) { showStep(stepNow + 1, 1); return; }
+      state.ref = makeRef();
+      fillPass();
       var msg = buildMessage();
       $('#waLink').href = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(msg);
       $('#mailLink').href = 'mailto:' + MAIL +
         '?subject=' + encodeURIComponent('Pedido de proposta — ' + (state.nome || 'site')) +
         '&body=' + encodeURIComponent(msg);
       showStep(5, 1);
+      passIn();
       window.open($('#waLink').href, '_blank', 'noopener');
     });
     $('#btnBack').addEventListener('click', function () { if (stepNow > 1) showStep(stepNow - 1, -1); });
     $('#restart').addEventListener('click', function () {
-      state = { tipo: '', destinos: [], outro: '', adultos: 2, criancas: 0, nome: '', contacto: '', nota: '', tier: '' };
+      state = { tipo: '', destinos: [], outro: '', adultos: 2, criancas: 0, nome: '', contacto: '', nota: '', tier: '', ref: '' };
       $$('.chip').forEach(function (c) { c.setAttribute('aria-pressed', 'false'); });
       form.reset();
       $$('[data-stepper]').forEach(function (st) { $('output', st).textContent = st.dataset.stepper === 'adultos' ? '2' : '0'; });
@@ -982,6 +1160,7 @@
   setInterval(tick, 20000);
   initDeck();
   initMap();
+  initSeasons();
   initSearch();
   initForm();
   initMenu();
@@ -1259,6 +1438,11 @@
   if ($('#wmSvg')) {
     if (EMBED) gsap.delayedCall(1.4, wmReveal);
     else ScrollTrigger.create({ trigger: '#worldMap', start: 'top 82%', once: true, onEnter: wmReveal });
+  }
+
+  if ($('#ssTable')) {
+    if (EMBED) gsap.delayedCall(1.7, ssReveal);
+    else ScrollTrigger.create({ trigger: '#epocas', start: 'top 78%', once: true, onEnter: ssReveal });
   }
 
   /* ---------- a chegada do carrossel ---------- */

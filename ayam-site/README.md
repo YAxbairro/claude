@@ -12,6 +12,7 @@ _content.html     markup (fonte editável)
 styles.css        todo o sistema visual
 app.js            dados dos destinos + comportamento
 build.py          junta o <head> ao _content.html e gera o index.html
+tools-mapdots.py  regera assets/map-dots.webp (só é preciso ao mudar a projecção)
 assets/           fotografia tratada + logótipo + favicon
 vendor/           GSAP 3.12.5, ScrollTrigger, Lenis 1.1.13
 ```
@@ -41,6 +42,7 @@ Nomes de ficheiros de imagem:
 | `d-*.webp` | cartão vertical do carrossel | 680×850 | mostrado a 318 px, chega para ecrãs retina |
 | `w-*.webp` | imagem de topo da gaveta | 1040×693 | |
 | `og.jpg` | pré-visualização ao partilhar o link | 1200×630 | fica em JPEG: o WebP nem sempre é lido pelas pré-visualizações do WhatsApp |
+| `map-dots.webp` | mapa-múndi em pontos | 2000×744 | gerado, não fotografado — fundo transparente; ver as notas do mapa mais abaixo |
 
 Os caminhos das imagens de destino são construídos em `app.js` por concatenação
 (`'assets/d-' + d.id + '.webp'`). Ao mudar de formato, é preciso alterar aí também —
@@ -150,6 +152,22 @@ lado nenhum — existem apenas na conversa de WhatsApp. Para ter um registo
   posicionados em percentagens tiradas do `viewBox` (`600×110`, extremos em
   `x=2` e `x=598`, `y=96`): ao mudar o `d` dos caminhos é preciso acertar
   `.routeline__pin` em `styles.css`.
+- **Mapa-múndi** (`#mapa`): mapa de pontos com a Praia como origem e um arco
+  para cada destino; o arco activo acende e o avião percorre-o. O mapa de pontos
+  (`assets/map-dots.webp`) é gerado a partir de um raster equirectangular e vive
+  **dentro do SVG**, no mesmo sistema de coordenadas dos arcos — 1000 unidades
+  para 360° de longitude, topo em +78°. Por isso recortar o `viewBox` para ecrãs
+  estreitos move o mapa e as rotas juntos. Mudar a projecção obriga a regerar a
+  imagem e a acertar `WM_SCALE`/`WM_TOP` em `app.js`. A origem é o NASA Blue
+  Marble (domínio público) — não obriga a atribuição, mas fica creditada no
+  rodapé por transparência.
+- **Calendário de épocas** (`#epocas`): lê o campo `season` de cada destino
+  (`'Nov — Jun'`, `'Mar — Abr · Out — Nov'`) e transforma-o em doze meses. Não há
+  segunda lista de meses a manter — muda-se o texto em `DESTINOS` e a barra segue.
+  Épocas que atravessam o ano aparecem como dois troços, um em cada extremo.
+- **Cartão de embarque**: o último passo do formulário. A referência (`AY-XXXX`)
+  não é um número de reserva — é o mesmo código no cartão e na mensagem de
+  WhatsApp, para a agência e o cliente falarem do mesmo pedido.
 - **Pesquisa**: abre pelo ícone da barra ou pela tecla `/`; filtra por nome, país,
   código IATA ou etiqueta; navega com as setas e escolhe com `Enter`.
 - **Telemóvel**: menu em ecrã inteiro abaixo de 1040 px; a gaveta transforma-se em
