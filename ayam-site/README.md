@@ -13,6 +13,8 @@ styles.css        todo o sistema visual
 app.js            dados dos destinos + comportamento
 build.py          junta o <head> ao _content.html e gera o index.html
 tools-mapdots.py  regera assets/map-dots.webp (só é preciso ao mudar a projecção)
+tools-logo.py     regera assets/ayam-logo.webp a partir de fontes/ (limpeza do ruído)
+fontes/           originais que não são servidos — só entram nos tools-*.py
 assets/           fotografia tratada + logótipo + favicon
 vendor/           GSAP 3.12.5, ScrollTrigger, Lenis 1.1.13
 ```
@@ -126,7 +128,7 @@ lado nenhum — existem apenas na conversa de WhatsApp. Para ter um registo
 
 | O quê | Onde | Porquê |
 |---|---|---|
-| Logótipo | `assets/ayam-logo.png` | Foi extraído da apresentação em PDF, a 416×160 px. Um SVG ou PNG original fica nítido em qualquer tamanho. |
+| Logótipo | `assets/ayam-logo.webp` | **É a única peça da marca sem original.** Saiu da apresentação em PDF como JPEG de baixa resolução. O `tools-logo.py` limpa-lhe o ruído de compressão (58 169 cores → 14) e isso resolve o aspecto sujo, mas não devolve detalhe: um SVG ou o ficheiro vectorial da marca fica nítido em qualquer tamanho e é o que se deve pedir ao cliente. O original extraído fica em `fontes/`, fora de `assets/`, para não ir para o alojamento. |
 | Fotografia | `assets/*.webp` | São imagens Creative Commons de recurso. Fotografias próprias — clientes, equipa, escritório, viagens realizadas — valem muito mais e retiram a necessidade dos créditos no rodapé. |
 | Créditos | rodapé de `_content.html` | As licenças CC BY / CC BY-SA **obrigam** a manter a atribuição enquanto estas imagens forem usadas. Ao trocar por fotografia própria, apagar o bloco `.credits`. |
 | Preços dos pacotes | `_content.html`, secção Pacotes | Estão como "Sob consulta" de propósito — não inventámos valores. |
