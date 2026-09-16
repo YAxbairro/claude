@@ -41,6 +41,7 @@ Nomes de ficheiros de imagem:
 | `bg-*.webp` | fundo de secção e de destino | 1440×810 | qualidade baixa e ligeiramente desfocados de propósito — ficam atrás de véus escuros |
 | `d-*.webp` | cartão vertical do carrossel | 680×850 | mostrado a 318 px, chega para ecrãs retina |
 | `w-*.webp` | imagem de topo da gaveta | 1040×693 | |
+| `hero.webp` | fotografia do herói | 1760×990 | é a imagem LCP: não leva `loading="lazy"` e convém mantê-la abaixo dos ~290 KB |
 | `og.jpg` | pré-visualização ao partilhar o link | 1200×630 | fica em JPEG: o WebP nem sempre é lido pelas pré-visualizações do WhatsApp |
 | `map-dots.webp` | mapa-múndi em pontos | 2000×744 | gerado, não fotografado — fundo transparente; ver as notas do mapa mais abaixo |
 
