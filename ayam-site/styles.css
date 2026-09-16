@@ -924,3 +924,19 @@ ul,ol{ margin:0; padding:0; list-style:none; }
   .deck__card{ position:relative; left:auto; top:auto; flex:none; width:clamp(190px,60vw,240px); transform:none !important; opacity:1 !important; }
   .deck__card .deck__cap, .deck__card .deck__num{ opacity:1; }
 }
+
+
+/* ============================================================
+   MOLDURA ALTA
+   Quando a página é mostrada dentro de uma moldura com milhares de
+   píxeis de altura e quem rola é a página de fora, position:fixed
+   deixa de corresponder ao que o utilizador vê. Tudo o que estava
+   centrado ficava desenhado a meio da moldura — invisível.
+   ============================================================ */
+html.is-embed .preload{ place-items:start center; padding-top:min(120px, 14vh); }
+html.is-embed .menu{ justify-content:flex-start; }
+html.is-embed .drawer{ align-items:flex-start; }
+html.is-embed .drawer__panel{ height:min(720px, 100%); }
+html.is-embed .totop,
+html.is-embed .route,
+html.is-embed .cursor{ display:none; }

@@ -6,6 +6,13 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400..700&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="styles.css">
 
+<script>
+/* Nenhum ecrã real tem uma janela com mais de 1600px de altura. Quando isso
+   acontece, a página está dentro de uma moldura alta e position:fixed passa a
+   medir milhares de píxeis — tudo o que é centrado fica desenhado muito abaixo
+   do que se vê. Marcado aqui, antes de pintar, para não haver salto. */
+if (window.innerHeight > 1600) document.documentElement.classList.add('is-embed');
+</script>
 <a class="skip" href="#conteudo">Saltar para o conteúdo</a>
 <div class="grain" aria-hidden="true"></div>
 
