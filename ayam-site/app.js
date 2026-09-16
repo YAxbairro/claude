@@ -26,54 +26,63 @@
   var DESTINOS = [
     {
       id: 'fogo', country: 'Cabo Verde', name: 'Ilha do Fogo', code: 'SFL',
+      lat: 14.895, lon: -24.495,
       coords: '14.895° N · 24.495° W', season: 'Nov — Jun', flight: '0h35 · directo',
       tz: 'Atlantic/Cape_Verde', tags: ['Natureza', 'Entre ilhas', 'Aventura'], len: '3 a 5 noites',
       desc: 'Um vulcão activo com uma aldeia dentro da cratera. Chã das Caldeiras produz vinho e café em solo de lava, e a subida ao Pico faz-se de madrugada para chegar ao cume com o nascer do sol.'
     },
     {
       id: 'maldivas', country: 'Maldivas', name: 'Atol de Baa', code: 'MLE',
+      lat: 5.21, lon: 73.068,
       coords: '5.210° N · 73.068° E', season: 'Nov — Abr', flight: '≈ 20h · via LIS/DXB',
       tz: 'Indian/Maldives', tags: ['Lua-de-mel', 'Praia', 'Bem-estar'], len: '7 a 10 noites',
       desc: 'Reserva da Biosfera da UNESCO, é aqui que as mantas se juntam às centenas na baía de Hanifaru. Villas sobre a água, casa de mergulho privada e o silêncio de quem está longe de tudo.'
     },
     {
       id: 'dubai', country: 'Emirados', name: 'Dubai', code: 'DXB',
+      lat: 25.197, lon: 55.274,
       coords: '25.197° N · 55.274° E', season: 'Nov — Mar', flight: '≈ 13h · via LIS',
       tz: 'Asia/Dubai', tags: ['Cidade', 'Compras', 'Família'], len: '4 a 7 noites',
       desc: 'A escala que vale a viagem. Entre o deserto e o Golfo, hotelaria do mais alto nível, jantar no topo do mundo e madrugadas de balão sobre as dunas.'
     },
     {
       id: 'lisboa', country: 'Portugal', name: 'Lisboa', code: 'LIS',
+      lat: 38.714, lon: -9.139,
       coords: '38.714° N · 9.139° W', season: 'Abr — Out', flight: '≈ 5h30 · directo',
       tz: 'Europe/Lisbon', tags: ['Cidade', 'Cultura', 'Família'], len: '4 a 7 noites',
       desc: 'A ligação mais curta entre Cabo Verde e a Europa. Alfama ao amanhecer, mercados de bairro, e a porta de entrada para toda a rede de voos europeia.'
     },
     {
       id: 'rio', country: 'Brasil', name: 'Rio de Janeiro', code: 'GIG',
+      lat: -22.952, lon: -43.21,
       coords: '22.952° S · 43.210° W', season: 'Dez — Mar', flight: '≈ 11h · via LIS',
       tz: 'America/Sao_Paulo', tags: ['Cidade', 'Praia', 'Cultura'], len: '7 a 10 noites',
       desc: 'Do Pão de Açúcar ao pôr do sol no Arpoador, o Rio faz-se de miradouros e de música. Do outro lado do mesmo Atlântico, com a língua partilhada.'
     },
     {
       id: 'krabi', country: 'Tailândia', name: 'Railay, Krabi', code: 'KBV',
+      lat: 8.012, lon: 98.838,
       coords: '8.012° N · 98.838° E', season: 'Nov — Mar', flight: '≈ 19h · via LIS/BKK',
       tz: 'Asia/Bangkok', tags: ['Praia', 'Aventura', 'Lua-de-mel'], len: '10 a 14 noites',
       desc: 'Uma península só acessível por barco, fechada por falésias de calcário sobre o mar de Andamão. O sossego da Tailândia sem o ruído de Phuket.'
     },
     {
       id: 'quioto', country: 'Japão', name: 'Quioto', code: 'KIX',
+      lat: 35.009, lon: 135.667,
       coords: '35.009° N · 135.667° E', season: 'Mar — Abr · Out — Nov', flight: '≈ 20h · via LIS',
       tz: 'Asia/Tokyo', tags: ['Cultura', 'Cidade', 'Bem-estar'], len: '10 a 14 noites',
       desc: 'Mil e seiscentos templos, ruas de madeira e um bosque de bambu que assobia com o vento. Vá na floração das cerejeiras ou no vermelho dos áceres.'
     },
     {
       id: 'amalfi', country: 'Itália', name: 'Costa Amalfitana', code: 'NAP',
+      lat: 40.628, lon: 14.485,
       coords: '40.628° N · 14.485° E', season: 'Mai — Jun · Set', flight: '≈ 9h · via LIS',
       tz: 'Europe/Rome', tags: ['Lua-de-mel', 'Cultura', 'Praia'], len: '7 a 10 noites',
       desc: 'Positano desce a encosta até ao mar em socalcos de casas cor de açafrão. Almoço em Ravello e barco privado até Capri, longe das multidões de Agosto.'
     },
     {
       id: 'bali', country: 'Indonésia', name: 'Bali', code: 'DPS',
+      lat: -8.431, lon: 115.279,
       coords: '8.431° S · 115.279° E', season: 'Abr — Out', flight: '≈ 22h · via LIS/DXB',
       tz: 'Asia/Makassar', tags: ['Bem-estar', 'Lua-de-mel', 'Natureza'], len: '12 a 16 noites',
       desc: 'Os socalcos de arroz de Tegallalang ao amanhecer, retiros de ioga em Ubud e praias de areia negra vulcânica a sul. Uma ilha que se percorre devagar.'
@@ -293,6 +302,7 @@
       }).join('');
       routeText(d);
       routeFly(true);
+      mapSetActive(active);
     };
     if (hasGSAP && animate && !REDUCE) {
       var panel = $('#deckInfo');
@@ -359,6 +369,205 @@
     $('#diQuote').addEventListener('click', function () { jumpToForm(null, destLabel(DESTINOS[active])); });
 
     window.addEventListener('resize', function () { layoutDeck(false); routePlace(); });
+  }
+
+  /* ============================================================
+     MAPA-MÚNDI
+     Projecção equirectangular, a mesma com que o mapa de pontos foi
+     gerado: 1000 unidades para 360° de longitude, topo em +78°.
+     ============================================================ */
+  var WM_SCALE = 1000 / 360, WM_TOP = 78;
+  var PRAIA = { lat: 14.918, lon: -23.509, code: 'RAI', name: 'Praia' };
+  var NS = 'http://www.w3.org/2000/svg';
+
+  function mx(lon) { return (lon + 180) * WM_SCALE; }
+  function my(lat) { return (WM_TOP - lat) * WM_SCALE; }
+
+  var wmSvg, wmArcs = [], wmPlane, wmTip, wmHost, wmActive = -1, wmTl = null, wmHover = -1, wmReady = false;
+
+  /* arco de Bézier quadrático: a corda com um desvio perpendicular
+     proporcional à distância, sempre para o lado norte */
+  function wmArcD(a, b) {
+    var x1 = mx(a.lon), y1 = my(a.lat), x2 = mx(b.lon), y2 = my(b.lat);
+    var dx = x2 - x1, dy = y2 - y1;
+    var d = Math.sqrt(dx * dx + dy * dy) || 1;
+    var nx = -dy / d, ny = dx / d;
+    if (ny > 0) { nx = -nx; ny = -ny; }
+    var k = d * 0.19;
+    return 'M' + x1.toFixed(1) + ' ' + y1.toFixed(1) +
+           ' Q' + ((x1 + x2) / 2 + nx * k).toFixed(1) + ' ' + ((y1 + y2) / 2 + ny * k).toFixed(1) +
+           ' ' + x2.toFixed(1) + ' ' + y2.toFixed(1);
+  }
+
+  function el(tag, attrs) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  function initMap() {
+    wmSvg = $('#wmSvg');
+    if (!wmSvg) return;
+    wmHost = $('#worldMap');
+    wmTip = $('#wmTip');
+    wmPlane = $('#wmPlane');
+    var gArcs = $('#wmArcs'), gPins = $('#wmPins');
+
+    DESTINOS.forEach(function (d, i) {
+      var pth = el('path', { 'class': 'wm__arc', d: wmArcD(PRAIA, d), 'data-i': i });
+      gArcs.appendChild(pth);
+      wmArcs.push(pth);
+    });
+
+    /* origem: anel + ponto + rótulo, sempre visível */
+    var hx = mx(PRAIA.lon), hy = my(PRAIA.lat);
+    gPins.appendChild(el('circle', { 'class': 'wm__homering', cx: hx, cy: hy, r: 7, 'stroke-width': 1 }));
+    gPins.appendChild(el('circle', { 'class': 'wm__home', cx: hx, cy: hy, r: 3 }));
+    var lab = el('text', { 'class': 'wm__label', x: hx, y: hy + 19, 'text-anchor': 'middle' });
+    lab.textContent = 'RAI · PRAIA';
+    gPins.appendChild(lab);
+
+    DESTINOS.forEach(function (d, i) {
+      var x = mx(d.lon), y = my(d.lat);
+      gPins.appendChild(el('circle', { 'class': 'wm__halo', cx: x, cy: y, r: 4, 'stroke-width': 1.4, 'data-halo': i }));
+      gPins.appendChild(el('circle', { 'class': 'wm__pin', cx: x, cy: y, r: 2.6, 'data-pin': i }));
+      /* alvo generoso: 2.6 unidades são ~3px, impossível de acertar com o dedo */
+      var hit = el('circle', { 'class': 'wm__hit', cx: x, cy: y, r: 13, tabindex: 0,
+                               role: 'button', 'aria-label': d.country + ' · ' + d.name });
+      hit.addEventListener('mouseenter', function () { wmShowTip(i); });
+      hit.addEventListener('mouseleave', function () { wmShowTip(-1); });
+      hit.addEventListener('focus', function () { wmShowTip(i); mapSetActive(i); });
+      hit.addEventListener('blur', function () { wmShowTip(-1); });
+      hit.addEventListener('click', function () {
+        if (i === wmActive) openDrawer(d.id); else goTo(i);
+      });
+      hit.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDrawer(d.id); }
+      });
+      gPins.appendChild(hit);
+    });
+
+    wmFit();
+    window.addEventListener('resize', wmFit);
+    mapSetActive(active);
+    if (!hasGSAP || REDUCE) { wmReady = true; wmParkPlane(active); }
+  }
+
+  /* em ecrãs estreitos o mundo inteiro fica ilegível: recorta-se para a
+     janela que contém todos os destinos. Como o mapa vive dentro do SVG,
+     basta mudar o viewBox — pontos e rotas acompanham. */
+  function wmFit() {
+    if (!wmSvg) return;
+    var narrow = window.innerWidth <= 760;
+    var vb = narrow ? [352, 52, 566, 268] : [176, 38, 790, 294];
+    wmSvg.setAttribute('viewBox', vb.join(' '));
+    wmHost.style.setProperty('--wm-ratio', vb[2] + '/' + vb[3]);
+    if (wmActive >= 0) wmPositionTip(wmHover >= 0 ? wmHover : wmActive);
+  }
+
+  /* converte coordenadas do SVG em píxeis dentro do contentor */
+  function wmToPx(x, y) {
+    var vb = wmSvg.viewBox.baseVal, r = wmSvg.getBoundingClientRect();
+    var hr = wmHost.getBoundingClientRect();
+    var k = r.width / vb.width;
+    return { x: (x - vb.x) * k + (r.left - hr.left), y: (y - vb.y) * k + (r.top - hr.top) };
+  }
+
+  function wmPositionTip(i) {
+    if (!wmTip || i < 0 || !DESTINOS[i]) return;
+    var d = DESTINOS[i], pt = wmToPx(mx(d.lon), my(d.lat));
+    wmTip.style.left = pt.x + 'px';
+    wmTip.style.top = (pt.y - 12) + 'px';
+  }
+
+  function wmShowTip(i) {
+    wmHover = i;
+    if (!wmTip) return;
+    if (i < 0 || !DESTINOS[i]) { wmTip.classList.remove('is-on'); return; }
+    var d = DESTINOS[i];
+    wmTip.hidden = false;
+    wmTip.innerHTML = '<b>' + d.code + ' · ' + d.name + '</b><span>' + d.flight + '</span>';
+    wmPositionTip(i);
+    wmTip.classList.add('is-on');
+  }
+
+  function wmLegend(i) {
+    var box = $('#wmLegend'), d = DESTINOS[i];
+    if (!box || !d) return;
+    $('#wmlName').textContent = d.name;
+    $('#wmlMeta').textContent = d.country + ' · ' + d.code;
+    $('#wmlFlight').textContent = d.flight;
+    if (hasGSAP && !REDUCE) gsap.fromTo(box, { opacity: .3, y: 4 }, { opacity: 1, y: 0, duration: .4, ease: 'power3.out' });
+  }
+
+  /* acende a rota do destino activo e manda o avião percorrê-la */
+  function mapSetActive(i) {
+    if (!wmSvg || i === wmActive) return;
+    wmActive = i;
+    wmArcs.forEach(function (a, k) { a.classList.toggle('is-on', k === i); });
+    $$('.wm__pin', wmSvg).forEach(function (p) {
+      p.classList.toggle('is-on', +p.getAttribute('data-pin') === i);
+    });
+    $$('.wm__halo', wmSvg).forEach(function (p) {
+      p.classList.toggle('is-on', +p.getAttribute('data-halo') === i);
+    });
+    wmLegend(i);
+    if (!wmReady) return;                 /* a entrada em leque trata do primeiro voo */
+    if (!hasGSAP || REDUCE) { wmParkPlane(i); return; }
+    wmFlyTo(i);
+  }
+
+  function wmParkPlane(i) {
+    var arc = wmArcs[i];
+    if (!arc || !wmPlane) return;
+    var L = arc.getTotalLength(), p = arc.getPointAtLength(L), q = arc.getPointAtLength(Math.max(0, L - 3));
+    var ang = Math.atan2(p.y - q.y, p.x - q.x) * 180 / Math.PI + 90;
+    wmPlane.setAttribute('transform', 'translate(' + p.x.toFixed(2) + ',' + p.y.toFixed(2) + ') rotate(' + ang.toFixed(1) + ')');
+    wmPlane.setAttribute('opacity', '1');
+  }
+
+  function wmFlyTo(i) {
+    var arc = wmArcs[i];
+    if (!arc || !wmPlane) return;
+    if (wmTl) wmTl.kill();
+    /* um voo interrompido a meio deixava a rota anterior desenhada pela metade:
+       antes de partir, todas as rotas voltam ao traço inteiro */
+    wmArcs.forEach(function (a) { gsap.set(a, { clearProps: 'strokeDasharray,strokeDashoffset' }); });
+    var L = arc.getTotalLength(), o = { t: 0 };
+
+    var place = function () {
+      var d = L * o.t;
+      var p = arc.getPointAtLength(d);
+      var d0 = Math.max(0, Math.min(L - 3, d));
+      var a = arc.getPointAtLength(d0), b = arc.getPointAtLength(d0 + 3);
+      var ang = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI + 90;
+      wmPlane.setAttribute('transform', 'translate(' + p.x.toFixed(2) + ',' + p.y.toFixed(2) + ') rotate(' + ang.toFixed(1) + ')');
+    };
+
+    /* a rota redesenha-se à frente do avião */
+    gsap.set(arc, { strokeDasharray: L, strokeDashoffset: L });
+    place();
+    wmTl = gsap.timeline()
+      .to(wmPlane, { attr: { opacity: 1 }, duration: .3, ease: 'power2.out' }, 0)
+      .to(o, { t: 1, duration: 2.3, ease: 'power2.inOut', onUpdate: place }, 0)
+      .to(arc, { strokeDashoffset: 0, duration: 2.3, ease: 'power2.inOut' }, 0)
+      .to(wmPlane, { attr: { opacity: 0 }, duration: .45, ease: 'power2.in' }, 2.25);
+  }
+
+  /* entrada: os arcos desenham-se em leque a partir da Praia */
+  function wmReveal() {
+    if (!wmSvg || !hasGSAP || REDUCE || wmReady) return;
+    wmReady = true;
+    gsap.timeline()
+      .from('.wm__homering', { attr: { r: 0 }, opacity: 0, duration: .6, ease: 'power3.out' }, 0)
+      .from('.wm__home', { attr: { r: 0 }, duration: .5, ease: 'back.out(2)' }, .05)
+      .from('.wm__label', { opacity: 0, y: 6, duration: .5, ease: 'power2.out' }, .25)
+      .fromTo(wmArcs,
+        { strokeDasharray: 600, strokeDashoffset: 600 },
+        { strokeDashoffset: 0, duration: 1.15, stagger: .07, ease: 'power2.out',
+          onComplete: function () { wmArcs.forEach(function (a) { a.style.strokeDasharray = ''; a.style.strokeDashoffset = ''; }); } }, .2)
+      .from('.wm__pin', { attr: { r: 0 }, duration: .5, stagger: .06, ease: 'back.out(2.4)' }, .5)
+      .add(function () { wmTl = null; wmFlyTo(wmActive < 0 ? active : wmActive); }, 1.1);
   }
 
   /* ============================================================
@@ -772,6 +981,7 @@
   tick();
   setInterval(tick, 20000);
   initDeck();
+  initMap();
   initSearch();
   initForm();
   initMenu();
@@ -1044,6 +1254,12 @@
       onUpdate: function () { el.textContent = Math.round(o.v) + sfx; }
     });
   });
+
+  /* ---------- a entrada do mapa ---------- */
+  if ($('#wmSvg')) {
+    if (EMBED) gsap.delayedCall(1.4, wmReveal);
+    else ScrollTrigger.create({ trigger: '#worldMap', start: 'top 82%', once: true, onEnter: wmReveal });
+  }
 
   /* ---------- a chegada do carrossel ---------- */
   if (stage) {

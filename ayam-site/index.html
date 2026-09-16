@@ -371,6 +371,45 @@ if (window.innerHeight > 1600) document.documentElement.classList.add('is-embed'
   </div>
 </section>
 
+<!-- ============ MAPA-MÚNDI ============ -->
+<section class="section section--tight" id="mapa" aria-labelledby="mapa-h">
+  <div class="bg" aria-hidden="true">
+    <img class="bg__img" src="assets/bg-voos.webp" alt="" width="1440" height="810" loading="lazy" decoding="async">
+    <div class="bg__scrim bg__scrim--even"></div>
+  </div>
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow" data-reveal>O mundo</p>
+      <h2 id="mapa-h" data-reveal>Tudo parte da <em>Praia.</em></h2>
+    </div>
+
+    <div class="glass worldmap" id="worldMap" data-reveal>
+      <svg class="worldmap__svg" id="wmSvg" viewBox="0 0 1000 372"
+           role="img" aria-labelledby="wm-title">
+        <title id="wm-title">Mapa com as rotas da Praia para cada destino</title>
+        <image href="assets/map-dots.webp" x="0" y="0" width="1000" height="372"
+               preserveAspectRatio="none"></image>
+        <g id="wmArcs" fill="none" stroke-linecap="round"></g>
+        <g id="wmPlane" opacity="0" aria-hidden="true">
+          <path transform="scale(.5) translate(-12,-12)" fill="currentColor"
+                d="M12 2c.7 0 1.2.9 1.2 2v5.2l7.6 4.4c.4.2.6.6.6 1v1.3c0 .4-.4.7-.8.6l-7.4-2.2v4l2 1.6c.2.2.3.4.3.7v.9c0 .3-.3.5-.6.4L12 21l-2.9 1c-.3.1-.6-.1-.6-.4v-.9c0-.3.1-.5.3-.7l2-1.6v-4l-7.4 2.2c-.4.1-.8-.2-.8-.6v-1.3c0-.4.2-.8.6-1l7.6-4.4V4c0-1.1.5-2 1.2-2z"/>
+        </g>
+        <g id="wmPins"></g>
+      </svg>
+      <div class="worldmap__tip" id="wmTip" hidden aria-hidden="true"></div>
+
+      <div class="wmleg" id="wmLegend" aria-live="polite">
+        <p class="wmleg__k mono">Destino activo</p>
+        <p class="wmleg__n" id="wmlName">—</p>
+        <p class="wmleg__m mono" id="wmlMeta">—</p>
+        <p class="wmleg__f mono"><span class="wmleg__dot" aria-hidden="true"></span><span id="wmlFlight">—</span></p>
+      </div>
+
+      <p class="worldmap__hint mono">Passe por um ponto para ver o destino · clique para abrir</p>
+    </div>
+  </div>
+</section>
+
 <!-- ============ DOIS CAMINHOS ============ -->
 <section class="section section--tight" aria-labelledby="perfis-h">
   <div class="wrap">

@@ -990,6 +990,92 @@ ul,ol{ margin:0; padding:0; list-style:none; }
 }
 
 /* ============================================================
+   MAPA-MÚNDI
+   O mapa de pontos é uma imagem dentro do próprio SVG, no mesmo
+   sistema de coordenadas dos arcos (1000 unidades = 360° de longitude,
+   topo em +78°). Recortar pelo viewBox move o mapa e as rotas juntos —
+   não há alinhamento a manter à mão.
+   ============================================================ */
+.worldmap{
+  position:relative; margin-top:clamp(20px,3vw,36px);
+  padding:clamp(12px,2vw,22px);
+}
+.worldmap__svg{
+  display:block; width:100%; height:auto;
+  aspect-ratio:var(--wm-ratio, 1000/372);
+  color:var(--gold-lit);                      /* herdado pelo avião */
+  overflow:visible;
+}
+.worldmap__svg image{ opacity:.9; }
+
+.wm__arc{ stroke:rgba(91,26,20,.42); stroke-width:1.1; transition:stroke .3s, stroke-width .3s; }
+.wm__arc.is-on{ stroke:var(--gold-lit); stroke-width:2.1; }
+
+.wm__hit{ fill:transparent; cursor:pointer; }
+.wm__pin{ fill:var(--burgundy); transition:fill .3s; pointer-events:none; }
+.wm__pin.is-on{ fill:var(--gold-lit); }
+/* o destino activo pulsa: em rotas curtas (Praia—Fogo) o arco quase não
+   se vê, e é o pino que tem de dizer onde estamos */
+.wm__halo{ fill:none; stroke:var(--gold-lit); opacity:0; pointer-events:none; }
+.wm__halo.is-on{ animation:wmPulse 2.5s ease-out infinite; }
+@keyframes wmPulse{
+  0%   { r:3.5; opacity:.85; }
+  70%  { r:12;  opacity:0; }
+  100% { r:12;  opacity:0; }
+}
+.wm__home{ fill:var(--burgundy); }
+.wm__homering{ fill:none; stroke:var(--burgundy); opacity:.3; }
+
+/* rótulo da origem, sempre visível */
+.wm__label{ font-family:'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size:9px; letter-spacing:.16em; fill:var(--burgundy); }
+
+.worldmap__tip{
+  position:absolute; z-index:3; transform:translate(-50%,-100%);
+  pointer-events:none; white-space:nowrap;
+  background:var(--glass-2); border:1px solid var(--glass-line);
+  border-radius:100px; padding:5px 13px;
+  box-shadow:0 6px 20px rgba(91,26,20,.13);
+  opacity:0; transition:opacity .22s ease;
+}
+.worldmap__tip.is-on{ opacity:1; }
+.worldmap__tip b{ font-family:'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size:var(--t-xs); letter-spacing:.16em; color:var(--burgundy); font-weight:500; }
+.worldmap__tip span{ font-size:var(--t-xs); color:var(--stone); margin-left:9px; }
+
+.worldmap__hint{
+  margin-top:10px; text-align:center;
+  font-size:var(--t-xs); color:var(--stone); letter-spacing:.1em;
+}
+
+/* legenda: o destino activo por extenso, num canto onde não tapa rotas */
+.wmleg{
+  position:absolute; left:clamp(16px,2.4vw,30px); top:clamp(16px,2.4vw,30px); z-index:2;
+  background:var(--glass-2); border:1px solid var(--glass-line);
+  border-radius:var(--r-sm); padding:11px 16px 12px;
+  box-shadow:0 8px 26px rgba(91,26,20,.10);
+  max-width:min(46%, 250px); pointer-events:none;
+}
+.wmleg__k{ font-size:var(--t-xs); letter-spacing:.2em; text-transform:uppercase; color:var(--stone-dim); }
+.wmleg__n{ font-family:'Fraunces', Georgia, serif; font-size:var(--t-md); color:var(--burgundy); line-height:1.2; margin-top:3px; }
+.wmleg__m{ color:var(--stone); margin-top:3px; }
+.wmleg__f{ color:var(--burgundy); margin-top:7px; display:flex; align-items:center; gap:7px; }
+.wmleg__dot{ width:6px; height:6px; border-radius:50%; background:var(--gold-lit); flex:none; }
+
+@media (max-width:760px){
+  .worldmap{ padding:10px; }
+  .worldmap__hint{ display:none; }
+  /* o mapa fica com 330px de largura: uma legenda por cima tapava-o quase todo */
+  .wmleg{
+    position:static; max-width:none; margin-top:10px; padding:0;
+    background:none; border:0; box-shadow:none;
+    display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 10px;
+  }
+  .wmleg__k{ display:none; }
+  .wmleg__n{ font-size:var(--t-sm); }
+  .wmleg__m, .wmleg__f{ margin-top:0; }
+  .wmleg__m::before{ content:'·'; margin-right:9px; color:var(--stone-dim); }
+}
+
+/* ============================================================
    MOLDURA ALTA
    Quando a página é mostrada dentro de uma moldura com milhares de
    píxeis de altura e quem rola é a página de fora, position:fixed
