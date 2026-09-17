@@ -19,6 +19,9 @@ dependencies:
   path: 1.9.1
   path_provider: 2.1.6
   battery_plus: 6.2.3      # distingue "acabou a bateria" de "desligou o GPS"
+  # Intervalo largo enquanto a primeira compilação com este pacote não fica
+  # verde; fixa-se a seguir, como os outros.
+  share_plus: ">=10.1.0 <12.0.0"   # enviar os turnos ao dono pelo WhatsApp
 
 dev_dependencies:
   flutter_test:

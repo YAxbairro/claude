@@ -17,8 +17,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import 'package:share_plus/share_plus.dart';
+
 import 'armazem.dart';
 import 'regras.dart';
+import 'troca.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -116,6 +119,7 @@ class _EcraPrincipalState extends State<EcraPrincipal> {
   int? _precisaoM;
   int? _bateriaPct;
   bool _falsoDetectado = false;
+  bool _aEnviar = false;
 
   // rascunhos dos formulários
   String? _fotoTemp;
@@ -258,6 +262,39 @@ class _EcraPrincipalState extends State<EcraPrincipal> {
   }
 
   Carro get _carro => _frota.porId(_carroId);
+
+  /// Num piloto de um carro não há servidor: o condutor manda o ficheiro ao
+  /// dono pelo WhatsApp e o dono importa-o no painel. As fotos vão lá dentro,
+  /// porque são elas a prova.
+  Future<void> _enviarAoDono() async {
+    final fechados = _turnos.where((t) => t.estado == 'FECHADO').toList();
+    if (fechados.isEmpty) return;
+    setState(() => _aEnviar = true);
+    try {
+      final ficheiro = await escreverFicheiroDeTroca(
+        frota: _frota,
+        turnos: _turnos,
+      );
+      final tamanho = await ficheiro.length();
+      await SharePlus.instance.share(ShareParams(
+        files: [XFile(ficheiro.path)],
+        text: '${fechados.length} turnos do ${_carro.matricula} — '
+            'abrir no painel FleetCV.',
+      ));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('${fechados.length} turnos · '
+            '${nf(tamanho / 1048576, 1)} MB enviados'),
+      ));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não foi possível preparar o ficheiro.')),
+      );
+    } finally {
+      if (mounted) setState(() => _aEnviar = false);
+    }
+  }
 
   Future<void> _abrirTurno() async {
     final km = _kmRascunho;
@@ -570,8 +607,29 @@ class _EcraPrincipalState extends State<EcraPrincipal> {
                 style: TextStyle(color: Colors.grey),
               ),
             )
-          else
+          else ...[
             ...fechados.take(10).map(_linhaTurno),
+            const SizedBox(height: 6),
+            OutlinedButton.icon(
+              onPressed: _aEnviar ? null : _enviarAoDono,
+              icon: _aEnviar
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.ios_share, size: 19),
+              label: Text(_aEnviar
+                  ? 'A preparar…'
+                  : 'Enviar ${fechados.length} turnos ao dono'),
+              style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14)),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+                'Vai um ficheiro com os turnos e as fotos. O dono abre-o no '
+                'painel e vê tudo — sem precisar de rede no momento.',
+                style: TextStyle(fontSize: 12, color: Colors.grey)),
+          ],
         ]),
       ),
       Padding(

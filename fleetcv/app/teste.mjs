@@ -76,6 +76,27 @@ await p.click('#bt-frota'); await p.waitForTimeout(500);
 ok('preço guardado', true);
 await p.screenshot({ path: 'd-resumo.png', fullPage: true });
 
+// ── importar o ficheiro que a app Android produz ─────────────
+await p.click('[data-ir="dono-importar"]'); await p.waitForTimeout(400);
+await p.setInputFiles('#ficheiro-troca', 'troca_exemplo.json');
+await p.waitForTimeout(900);
+const imp = await p.textContent('#ecra');
+ok('importar da app Android', imp.includes('Importado'), imp.match(/turnos novos[^.]*/)?.[0]);
+
+await p.click('[data-ir="dono-resumo"]'); await p.waitForTimeout(500);
+const lista = await p.textContent('#ecra');
+ok('turno do Android na lista', lista.includes('CV-09-ZZ') && lista.includes('Jorge'));
+
+await p.click('[data-ir="dono-alertas"]'); await p.waitForTimeout(400);
+ok('alerta vindo do Android', (await p.textContent('#ecra')).includes('1.250 CVE'));
+
+await p.click('[data-ir="dono-resumo"]'); await p.waitForTimeout(300);
+await p.click('[data-ir="dono-importar"]'); await p.waitForTimeout(400);
+await p.setInputFiles('#ficheiro-troca', 'troca_exemplo.json');
+await p.waitForTimeout(700);
+ok('não duplica o que já cá está',
+   (await p.textContent('#ecra')).includes('já cá estavam'));
+
 await p.reload(); await p.waitForTimeout(800);
 ok('sobrevive a recarregar', (await p.textContent('#ecra')).includes('A frota'));
 console.log('\nerros JS:', erros.length ? erros : 'nenhum');

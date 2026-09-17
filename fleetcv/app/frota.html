@@ -230,7 +230,7 @@ var FROTA_OMISSAO = { precoLitro:145, carros:[
 var S = { papel:'condutor', ecra:'inicio', frota:null, eu:{nome:'', carroId:'c1'},
           turno:null, turnos:[], db:null, user:null, podeEscrever:true,
           gps:{estado:'parado', ultimo:0, precisao:null}, bateria:null,
-          fotos:{}, rascunho:{}, detalhe:null, fotosDetalhe:null, subs:[] };
+          fotos:{}, rascunho:{}, detalhe:null, fotosDetalhe:null, importado:null, subs:[] };
 var relogioTimer=null, watchId=null;
 
 /* ── utilitários ────────────────────────────────────────────── */
@@ -729,6 +729,28 @@ function pintarDono(){
     return [h,b];
   }
 
+  if(S.ecra==='dono-importar'){
+    h='<div><h1>Importar turnos</h1><p class="sub">Do telemóvel do condutor '+
+      'para aqui, sem servidor pelo meio.</p></div>'+
+      '<div class="cartao"><h2>Como funciona</h2><p class="nota" style="margin-top:6px">'+
+      '1. Na app Android, o condutor toca em <b>Enviar turnos ao dono</b><br>'+
+      '2. Escolhe o WhatsApp e manda-lhe o ficheiro<br>'+
+      '3. Descarrega-o e escolhe-o aqui em baixo<br><br>'+
+      'Vão os turnos <b>e as fotos</b>. Os que já cá estiverem não se duplicam — '+
+      'compara-se pelo número do turno.</p></div>'+
+      '<label class="foto" style="padding:26px 14px">'+
+      '<span class="ico">📥</span>'+
+      '<span class="tx">Escolher o ficheiro</span>'+
+      '<span class="tx2">um ficheiro .json vindo da app</span>'+
+      '<input type="file" accept="application/json,.json" id="ficheiro-troca"></label>';
+    if(S.importado)
+      h+='<div class="cartao '+(S.importado.erro?'mau':'bom')+'"><h2>'+
+        (S.importado.erro?'Não deu':'Importado')+'</h2><p class="nota">'+
+        esc(S.importado.texto)+'</p></div>';
+    b='<button class="bt pri" data-ir="dono-resumo">Voltar ao painel</button>';
+    return [h,b];
+  }
+
   if(S.ecra==='dono-motoristas'){
     var nomes={}; S.turnos.forEach(function(t){ if(t.condutor) nomes[t.condutor]=true; });
     var lista=Object.keys(nomes).map(function(n){ return {n:n, s:score(n)}; })
@@ -771,7 +793,8 @@ function pintarDono(){
   h+='<div class="abas">'+
     '<button data-ir="dono-alertas">Alertas'+(nAl?' ('+nAl+')':'')+'</button>'+
     '<button data-ir="dono-motoristas">Motoristas</button>'+
-    '<button data-ir="dono-frota">Frota</button></div>';
+    '<button data-ir="dono-frota">Frota</button>'+
+    '<button data-ir="dono-importar">Importar</button></div>';
   h+='<div><h2>Turnos</h2></div>';
   h+=fechados.length? '<div class="hist">'+fechados.slice(0,20).map(cartaoTurno).join('')+'</div>'
     : '<div class="cartao"><div class="vazio">Nenhum turno gravado ainda.<br>'+
@@ -786,7 +809,63 @@ document.addEventListener('change', function(ev){
   var i=ev.target;
   if(i.dataset&&i.dataset.foto&&i.files&&i.files[0])
     lerFoto(i.files[0], function(u){ S.fotos[i.dataset.foto]=u; pintar(); });
+  if(i.id==='ficheiro-troca'&&i.files&&i.files[0]) importarTroca(i.files[0]);
 });
+
+/// Recebe o ficheiro que a app Android produziu. O formato é o mesmo que este
+/// painel já usa por dentro, por isso não há tradução — e um erro de tradução
+/// é um erro que não pode acontecer.
+function importarTroca(ficheiro){
+  var fr=new FileReader();
+  fr.onerror=function(){
+    S.importado={erro:true, texto:'Não consegui ler o ficheiro.'}; pintar(); };
+  fr.onload=function(){
+    var d;
+    try{ d=JSON.parse(fr.result); }
+    catch(e){ S.importado={erro:true,
+      texto:'Isto não é um ficheiro do FleetCV.'}; pintar(); return; }
+    if(!d || !d.fleetcv || !Array.isArray(d.turnos)){
+      S.importado={erro:true, texto:'Isto não é um ficheiro do FleetCV.'};
+      pintar(); return;
+    }
+
+    // Carros que ainda não existem aqui entram; o preço do combustível fica
+    // como está — quem manda nele é o dono, não o telemóvel do condutor.
+    if(d.frota && Array.isArray(d.frota.carros)){
+      d.frota.carros.forEach(function(c){
+        if(!S.frota.carros.some(function(x){ return x.matricula===c.matricula; }))
+          S.frota.carros.push(c);
+      });
+      guardarFrota();
+    }
+
+    var novos=0, repetidos=0, fotos=0;
+    d.turnos.forEach(function(t){
+      if(!t.id || t.estado!=='FECHADO') return;
+      if(S.turnos.some(function(x){ return x.id===t.id; })){ repetidos++; return; }
+      var imagens=t.fotos||null;
+      delete t.fotos;                    // as fotos vão para documentos à parte
+      S.turnos.push(t); novos++;
+      if(S.db&&S.podeEscrever){
+        S.db.doc('turnos/'+t.id).set(leve(t)).catch(function(){});
+        if(imagens) Object.keys(imagens).forEach(function(k){
+          fotos++;
+          S.db.doc('turnos/'+t.id+'/fotos/'+k).set({img:imagens[k]})
+            .catch(function(){});
+        });
+      } else if(imagens){ t.fotos=imagens; }
+    });
+    S.turnos.sort(function(a,b){ return b.inicio-a.inicio; });
+    guardarLocal();
+
+    S.importado={ erro:false, texto: novos
+      ? novos+' turnos novos'+(fotos?', '+fotos+' fotos':'')+
+        (repetidos?' · '+repetidos+' já cá estavam':'')+'.'
+      : 'Nada de novo: estes '+repetidos+' turnos já cá estavam.' };
+    pintar();
+  };
+  fr.readAsText(ficheiro);
+}
 var suaveTimer=null;
 function pintarSuave(){ clearTimeout(suaveTimer); suaveTimer=setTimeout(function(){
   var ac=document.activeElement, id=ac&&ac.id, pos=ac&&ac.selectionStart;
@@ -830,7 +909,8 @@ function irPara(x){
   if(x==='abastecer'||x==='inicio'){ S.fotos={}; S.rascunho={}; }
   if(x==='fechar'){ S.fotos={};
     S.rascunho={kmF:S.turno.kmInicial+Math.round(kmDoRasto(S.turno.rasto))}; }
-  if(x.indexOf('dono')===0) S.detalhe=null;
+  if(x.indexOf('dono')===0){ S.detalhe=null; }
+  if(x!=='dono-importar') S.importado=null;
   S.ecra=x; pintar();
 }
 function verTurno(id){
