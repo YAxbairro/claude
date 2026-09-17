@@ -19,9 +19,9 @@ dependencies:
   path: 1.9.1
   path_provider: 2.1.6
   battery_plus: 6.2.3      # distingue "acabou a bateria" de "desligou o GPS"
-  # Intervalo largo enquanto a primeira compilação com este pacote não fica
-  # verde; fixa-se a seguir, como os outros.
-  share_plus: ">=10.1.0 <12.0.0"   # enviar os turnos ao dono pelo WhatsApp
+  # A 13 é a primeira que usa win32 ^6, como o geolocator 14. Abaixo disso as
+  # duas não coexistem — foi o próprio pub que apontou a saída.
+  share_plus: ">=13.0.0 <14.0.0"   # enviar os turnos ao dono pelo WhatsApp
 
 dev_dependencies:
   flutter_test:
