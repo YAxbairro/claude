@@ -43,6 +43,23 @@ A pasta `android/` é **gerada**, não guardada no repositório: são milhares d
 linhas de código de plataforma que ninguém edita. As permissões — a única parte
 que decidimos — estão em `preparar_android.py`, à vista.
 
+## Estado da compilação
+
+Execução nº 3 — **verde**. APK de 49,8 MB, analisado sem um único aviso,
+15 testes a passar.
+
+As versões das dependências estão **fixas** no `pubspec.yaml`, tiradas do
+`pubspec.lock` dessa compilação. Uma compilação que funciona hoje tem de
+funcionar daqui a seis meses.
+
+### Um aviso a resolver antes que se torne um erro
+
+O `battery_plus` ainda usa o Kotlin Gradle Plugin à moda antiga. Hoje é só um
+aviso; **versões futuras do Flutter vão recusar compilar**. Quando isso
+acontecer há duas saídas: actualizar o pacote, se entretanto migrar, ou
+deixá-lo cair — a bateria serve para uma coisa só, distinguir "acabou a
+bateria" de "desligou o GPS", e isso pode ler-se por outro caminho.
+
 ## Três limites, ditos com clareza
 
 - **Sem sincronização.** Os turnos ficam no aparelho. Ligá-los ao painel do dono
