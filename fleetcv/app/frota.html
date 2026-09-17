@@ -1,0 +1,957 @@
+<title>FleetCV Frota</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#EDF0F0; --surface:#FFFFFF; --surface2:#F4F7F7; --line:#D5DCDC; --line2:#E6EBEB;
+  --ink:#0F1618; --muted:#5C6A6C;
+  --accent:#0B7F8E; --accent-ink:#FFFFFF; --accent-wash:#E3F1F3;
+  --ok:#3E7B22; --ok-wash:#EAF2E4;
+  --warn:#A86A05; --warn-wash:#F8EEDC;
+  --crit:#B02E20; --crit-wash:#F8E6E3;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --display:'Archivo',var(--sans);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0B1011; --surface:#141A1B; --surface2:#1A2122; --line:#293233; --line2:#212929;
+  --ink:#E3E9E8; --muted:#8A9897;
+  --accent:#3FC0CE; --accent-ink:#06191C; --accent-wash:#122E32;
+  --ok:#77C34B; --ok-wash:#17280F;
+  --warn:#DCA43C; --warn-wash:#2E2310;
+  --crit:#E4776A; --crit-wash:#331714;
+}}
+:root[data-theme="dark"]{
+  --ground:#0B1011; --surface:#141A1B; --surface2:#1A2122; --line:#293233; --line2:#212929;
+  --ink:#E3E9E8; --muted:#8A9897;
+  --accent:#3FC0CE; --accent-ink:#06191C; --accent-wash:#122E32;
+  --ok:#77C34B; --ok-wash:#17280F;
+  --warn:#DCA43C; --warn-wash:#2E2310;
+  --crit:#E4776A; --crit-wash:#331714;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
+  font-size:15px; line-height:1.45; -webkit-font-smoothing:antialiased;
+  display:flex; flex-direction:column}
+.num{font-family:var(--mono); font-variant-numeric:tabular-nums}
+button{font:inherit; color:inherit}
+
+/* topo */
+.topo{background:var(--surface); border-bottom:1px solid var(--line); padding:10px 16px;
+  display:flex; align-items:center; gap:10px; position:sticky;
+  top:env(safe-area-inset-top,0px); z-index:10}
+.marca{font-family:var(--display); font-weight:700; font-size:15px; letter-spacing:-.02em;
+  display:flex; align-items:center; gap:6px}
+.marca .pt{width:8px; height:8px; border-radius:50%; background:var(--accent)}
+.topo .dir{margin-left:auto; display:flex; gap:7px; align-items:center}
+.pill{font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px;
+  background:var(--surface2); color:var(--muted); border:1px solid var(--line2);
+  white-space:nowrap}
+.pill.viva{background:var(--ok-wash); color:var(--ok); border-color:transparent}
+.pill.morta{background:var(--crit-wash); color:var(--crit); border-color:transparent}
+
+main{flex:1; overflow-y:auto; padding:16px; padding-bottom:8px}
+.col{max-width:520px; margin:0 auto; display:flex; flex-direction:column; gap:14px}
+
+h1{font-family:var(--display); font-size:21px; margin:0; letter-spacing:-.02em}
+h2{font-family:var(--display); font-size:15px; margin:0 0 2px; letter-spacing:-.01em}
+.sub{font-size:13px; color:var(--muted); margin:0}
+
+.cartao{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:15px}
+.cartao.aviso{background:var(--warn-wash); border-color:color-mix(in srgb,var(--warn) 35%,transparent)}
+.cartao.mau{background:var(--crit-wash); border-color:color-mix(in srgb,var(--crit) 35%,transparent)}
+.cartao.bom{background:var(--ok-wash); border-color:color-mix(in srgb,var(--ok) 35%,transparent)}
+
+.carro{display:flex; align-items:center; gap:12px}
+.carro .mat{font-family:var(--mono); font-weight:600; font-size:18px; letter-spacing:.02em}
+.carro .det{font-size:12.5px; color:var(--muted)}
+.carro .km{margin-left:auto; text-align:right}
+.carro .km b{font-family:var(--mono); font-size:17px; font-weight:500; display:block}
+.carro .km span{font-size:11px; color:var(--muted)}
+
+/* relógio do turno */
+.relogio{text-align:center; padding:10px 0 4px}
+.relogio .t{font-family:var(--mono); font-size:44px; font-weight:500; letter-spacing:-.03em;
+  line-height:1}
+.relogio .l{font-size:12px; color:var(--muted); margin-top:4px; letter-spacing:.06em;
+  text-transform:uppercase; font-weight:600}
+.metricas{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line2);
+  border-radius:10px; overflow:hidden; border:1px solid var(--line2); margin-top:12px}
+.metricas div{background:var(--surface); padding:10px 8px; text-align:center}
+.metricas b{font-family:var(--mono); font-size:19px; font-weight:500; display:block;
+  letter-spacing:-.02em}
+.metricas span{font-size:10.5px; color:var(--muted); text-transform:uppercase;
+  letter-spacing:.05em; font-weight:600}
+
+/* botões */
+.acoes{padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));
+  background:var(--surface); border-top:1px solid var(--line)}
+.acoes .col{gap:9px}
+.bt{display:block; width:100%; border:none; border-radius:12px; padding:16px;
+  font-size:16.5px; font-weight:600; cursor:pointer; text-align:center;
+  font-family:var(--display); letter-spacing:-.01em}
+.bt:active{transform:scale(.99)}
+.bt.pri{background:var(--accent); color:var(--accent-ink)}
+.bt.sec{background:var(--surface2); color:var(--ink); border:1px solid var(--line)}
+.bt.perigo{background:var(--crit); color:#fff}
+.bt:disabled{opacity:.45; cursor:not-allowed}
+.bt2{display:flex; gap:9px}
+.bt2 .bt{flex:1}
+.ligacao{background:none; border:none; color:var(--accent); font-size:13.5px; font-weight:600;
+  cursor:pointer; padding:8px; text-decoration:underline; text-underline-offset:3px}
+
+/* foto */
+.foto{position:relative; border:2px dashed var(--line); border-radius:12px; padding:22px 14px;
+  text-align:center; background:var(--surface2); cursor:pointer; display:block}
+.foto.feita{border-style:solid; border-color:var(--ok); padding:0; overflow:hidden}
+.foto img{width:100%; display:block; max-height:230px; object-fit:cover}
+.foto input{position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer}
+.foto .ico{font-size:26px; line-height:1}
+.foto .tx{font-weight:600; margin-top:7px; font-size:14.5px}
+.foto .tx2{font-size:12.5px; color:var(--muted); margin-top:2px}
+.foto .refazer{position:absolute; right:8px; bottom:8px; background:rgba(0,0,0,.72); color:#fff;
+  font-size:11.5px; font-weight:600; padding:5px 10px; border-radius:7px; z-index:2}
+
+label.campo{display:block}
+label.campo .lb{font-size:11.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--muted); margin-bottom:5px; display:block}
+input[type=number],input[type=text]{width:100%; padding:13px 14px; border-radius:10px;
+  border:1px solid var(--line); background:var(--surface); color:var(--ink);
+  font-family:var(--mono); font-size:19px; font-weight:500; -moz-appearance:textfield}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
+input:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+.ajuda{font-size:12px; color:var(--muted); margin-top:6px}
+
+/* verificações */
+.ver{display:flex; gap:10px; padding:10px 0; border-bottom:1px solid var(--line2);
+  align-items:flex-start}
+.ver:last-child{border-bottom:none}
+.ver .mk{flex:none; width:20px; height:20px; border-radius:50%; display:grid; place-items:center;
+  font-size:11px; font-weight:700; margin-top:1px}
+.ver .mk.s{background:var(--ok-wash); color:var(--ok)}
+.ver .mk.n{background:var(--warn-wash); color:var(--warn)}
+.ver .mk.c{background:var(--crit-wash); color:var(--crit)}
+.ver .tx{flex:1; min-width:0}
+.ver .t1{font-size:13.5px; font-weight:600}
+.ver .t2{font-size:12px; color:var(--muted)}
+.ver .vl{font-family:var(--mono); font-size:13.5px; font-weight:500; white-space:nowrap}
+
+.hist{display:flex; flex-direction:column; gap:8px}
+.ht{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:11px 13px;
+  display:flex; gap:10px; align-items:center; cursor:pointer; width:100%; text-align:left}
+.ht .d{font-size:12.5px; color:var(--muted)}
+.ht .m{font-family:var(--mono); font-weight:500}
+.ht .r{margin-left:auto; text-align:right; font-family:var(--mono); font-size:13px}
+.selo{font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:5px; white-space:nowrap}
+.selo.s{background:var(--ok-wash); color:var(--ok)}
+.selo.n{background:var(--warn-wash); color:var(--warn)}
+.selo.c{background:var(--crit-wash); color:var(--crit)}
+.vazio{text-align:center; padding:26px 16px; color:var(--muted); font-size:13.5px}
+
+.abas{display:flex; gap:2px; background:var(--surface2); border:1px solid var(--line);
+  border-radius:10px; padding:3px}
+.abas button{flex:1; border:none; background:none; padding:8px; border-radius:7px;
+  font-size:13px; font-weight:600; cursor:pointer; color:var(--muted)}
+.abas button[aria-selected="true"]{background:var(--surface); color:var(--ink);
+  box-shadow:0 1px 2px rgba(0,0,0,.08)}
+
+.nota{font-size:12px; color:var(--muted); line-height:1.5}
+.nota b{color:var(--ink)}
+.mapinha{width:100%; height:auto; display:block; border-radius:9px; background:var(--surface2);
+  border:1px solid var(--line2)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style><style>
+.papeis{display:flex; gap:2px; background:var(--surface2); border:1px solid var(--line);
+  border-radius:8px; padding:2px; margin-left:auto}
+.papeis button{border:none; background:none; padding:5px 11px; border-radius:6px;
+  font-size:12px; font-weight:600; cursor:pointer; color:var(--muted); font-family:var(--sans)}
+.papeis button[aria-selected="true"]{background:var(--surface); color:var(--ink)}
+.tiles{display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line2);
+  border:1px solid var(--line2); border-radius:11px; overflow:hidden}
+.tiles div{background:var(--surface); padding:12px 13px}
+.tiles b{font-family:var(--mono); font-size:22px; font-weight:500; display:block;
+  letter-spacing:-.02em; line-height:1.15}
+.tiles span{font-size:10.5px; color:var(--muted); text-transform:uppercase;
+  letter-spacing:.06em; font-weight:600}
+.tiles .al b{color:var(--warn)}
+.al0 b{color:var(--ok)!important}
+.alerta-l{display:grid; grid-template-columns:3px 1fr; border-radius:10px; overflow:hidden;
+  border:1px solid var(--line); background:var(--surface)}
+.alerta-l .fx{background:var(--warn)} .alerta-l.c .fx{background:var(--crit)}
+.alerta-l .cp{padding:12px 13px}
+.alerta-l .cab{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.selo.cod{font-family:var(--mono); font-weight:600; letter-spacing:0}
+.resolver{display:flex; gap:6px; margin-top:10px; flex-wrap:wrap}
+.resolver button{flex:1; min-width:96px; border:1px solid var(--line); background:var(--surface2);
+  border-radius:8px; padding:8px 6px; font-size:11.5px; font-weight:600; cursor:pointer;
+  font-family:var(--sans)}
+.resolver button:hover{border-color:var(--accent); color:var(--accent)}
+.resolvido{font-size:11.5px; color:var(--muted); margin-top:8px}
+.lista-carro{display:flex; gap:10px; align-items:center; padding:11px 0;
+  border-bottom:1px solid var(--line2); width:100%; text-align:left; background:none;
+  border-left:none; border-right:none; border-top:none; cursor:pointer}
+.lista-carro:last-child{border-bottom:none}
+.lista-carro.escolhido{background:var(--accent-wash); border-radius:9px; padding:11px 12px;
+  border-bottom-color:transparent}
+.fotos-g{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.fotos-g figure{margin:0}
+.fotos-g img{width:100%; border-radius:9px; border:1px solid var(--line); display:block}
+.fotos-g figcaption{font-size:11px; color:var(--muted); margin-top:4px; text-align:center}
+</style>
+<div class="topo">
+  <div class="marca"><span class="pt"></span>FleetCV</div>
+  <div class="papeis" id="papeis"></div>
+  <div class="dir" id="topo-dir"></div>
+</div>
+<main><div class="col" id="ecra"></div></main>
+<div class="acoes"><div class="col" id="acoes"></div></div>
+<script>
+(function(){
+"use strict";
+
+/* ═══════════════════════════════════════════════════════════════
+   FleetCV — condutor e dono no mesmo endereço.
+   A base de dados partilhada é por artefacto: um painel publicado
+   à parte teria uma base vazia e nunca veria estes turnos.
+   Os limites são os mesmos do motor SQL da Fase 1 (SPEC §15).
+   ═══════════════════════════════════════════════════════════════ */
+var LIM = { gapKm:3, kmMax:500, divAviso:15, divCritica:25, semSinalS:900,
+            precisaoMax:50, velMax:180, divLitrosPct:3, raioPostoM:150, paragemMinS:120 };
+
+// Penalizações do score — a mesma tabela de fleetcv.penalizacao
+var PEN = { A04:50, A06:40, A19:30, A15:30, A16:30, A14:30, A13:25, A12:25,
+            A08:15, A09:15, A11:10, A20:10, A21:5 };
+
+var FROTA_OMISSAO = { precoLitro:145, carros:[
+  { id:'c1', matricula:'CV-01-AB', marca:'Toyota', modelo:'Corolla', deposito:50, kmActual:120000 }
+]};
+
+var S = { papel:'condutor', ecra:'inicio', frota:null, eu:{nome:'', carroId:'c1'},
+          turno:null, turnos:[], db:null, user:null, podeEscrever:true,
+          gps:{estado:'parado', ultimo:0, precisao:null}, bateria:null,
+          fotos:{}, rascunho:{}, detalhe:null, fotosDetalhe:null, subs:[] };
+var relogioTimer=null, watchId=null;
+
+/* ── utilitários ────────────────────────────────────────────── */
+function nf(n,d){ d=d||0; var v=Math.abs(Number(n)||0).toFixed(d).split('.');
+  v[0]=v[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  return (Number(n)<0?'−':'')+v.join(','); }
+function hm(s){ s=Math.max(0,Math.floor(s));
+  return String(Math.floor(s/3600)).padStart(2,'0')+':'+
+         String(Math.floor(s%3600/60)).padStart(2,'0')+':'+
+         String(s%60).padStart(2,'0'); }
+function horas(ts){ var d=new Date(ts);
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+function dataCurta(ts){ var d=new Date(ts),
+  ds=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'],
+  ms=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  return ds[d.getDay()]+' '+d.getDate()+' '+ms[d.getMonth()]; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,
+  function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function uid(p){ return (p||'t')+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function hoje(ts){ var d=new Date(ts), h=new Date();
+  return d.getDate()===h.getDate()&&d.getMonth()===h.getMonth()&&d.getFullYear()===h.getFullYear(); }
+
+function dist(a,b,c,d){ var R=6371000,p=Math.PI/180;
+  return 2*R*Math.asin(Math.sqrt(Math.pow(Math.sin((c-a)*p/2),2)+
+    Math.cos(a*p)*Math.cos(c*p)*Math.pow(Math.sin((d-b)*p/2),2))); }
+function kmDoRasto(pts){ var m=0, ant=null;
+  for(var i=0;i<(pts||[]).length;i++){ var p=pts[i];
+    if(p[3]!=null&&p[3]>LIM.precisaoMax) continue;
+    if(ant){ var ds=(p[2]-ant[2])/1000, d=dist(ant[0],ant[1],p[0],p[1]);
+      if(ds>0&&(d/ds)*3.6<=LIM.velMax) m+=d; }
+    ant=p; }
+  return m/1000; }
+function maiorFalhaS(pts){ var mx=0;
+  for(var i=1;i<(pts||[]).length;i++) mx=Math.max(mx,(pts[i][2]-pts[i-1][2])/1000);
+  return mx; }
+function semSinalS(pts){ var t=0;
+  for(var i=1;i<(pts||[]).length;i++){ var g=(pts[i][2]-pts[i-1][2])/1000; if(g>300) t+=g; }
+  return t; }
+function carroDe(id){ var c=(S.frota.carros||[]).filter(function(x){return x.id===id;});
+  return c[0]||S.frota.carros[0]; }
+
+/* ── armazenamento ──────────────────────────────────────────── */
+function guardarLocal(){ try{ localStorage.setItem('fleetcv2', JSON.stringify(
+  {frota:S.frota, eu:S.eu, turno:S.turno, papel:S.papel,
+   turnos:S.turnos.slice(0,30)})); }catch(e){} }
+function lerLocal(){ try{ var r=localStorage.getItem('fleetcv2');
+  return r?JSON.parse(r):null; }catch(e){ return null; } }
+function leve(t){ var c={}; for(var k in t) if(k!=='fotos') c[k]=t[k];
+  if(c.rasto&&c.rasto.length>900){ var r=[], p=Math.ceil(c.rasto.length/900);
+    for(var i=0;i<c.rasto.length;i+=p) r.push(c.rasto[i]);
+    r.push(c.rasto[c.rasto.length-1]); c.rasto=r; }
+  return c; }
+var aEscrever=false, pendente=null;
+function guardarTurno(t, comFotos){
+  guardarLocal();
+  if(!S.db||!S.podeEscrever) return Promise.resolve();
+  if(aEscrever){ pendente=t; return Promise.resolve(); }
+  aEscrever=true;
+  return S.db.doc('turnos/'+t.id).set(leve(t)).then(function(){
+    if(!comFotos||!t.fotos) return;
+    var ps=[]; for(var k in t.fotos) if(t.fotos[k])
+      ps.push(S.db.doc('turnos/'+t.id+'/fotos/'+k).set({img:t.fotos[k]}).catch(function(){}));
+    return Promise.all(ps);
+  }).catch(function(e){ if(e&&e.code==='invalid_argument') S.podeEscrever=false; })
+    .then(function(){ aEscrever=false;
+      if(pendente){ var p=pendente; pendente=null; return guardarTurno(p,false); } });
+}
+function guardarFrota(){ guardarLocal();
+  if(S.db&&S.podeEscrever) S.db.doc('config/frota').set(S.frota).catch(function(){}); }
+
+function lerFoto(file,cb){ var fr=new FileReader();
+  fr.onload=function(){ var im=new Image();
+    im.onload=function(){ var max=520,k=Math.min(1,max/Math.max(im.width,im.height));
+      var cv=document.createElement('canvas');
+      cv.width=Math.round(im.width*k); cv.height=Math.round(im.height*k);
+      cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
+      try{ cb(cv.toDataURL('image/jpeg',0.6)); }catch(e){ cb(fr.result); } };
+    im.onerror=function(){ cb(fr.result); }; im.src=fr.result; };
+  fr.readAsDataURL(file); }
+
+/* ── GPS e bateria ──────────────────────────────────────────── */
+function ligarGps(){
+  if(!navigator.geolocation){ S.gps.estado='indisponivel'; pintarTopo(); return; }
+  if(watchId!=null) return;
+  S.gps.estado='a-procurar'; pintarTopo();
+  watchId=navigator.geolocation.watchPosition(function(pos){
+    S.gps.estado='ligado'; S.gps.ultimo=Date.now();
+    S.gps.precisao=Math.round(pos.coords.accuracy);
+    if(S.turno&&S.turno.estado==='ABERTO'){ var c=pos.coords;
+      S.turno.rasto.push([+c.latitude.toFixed(6), +c.longitude.toFixed(6), pos.timestamp,
+        Math.round(c.accuracy), c.speed==null?null:Math.round(c.speed*3.6)]);
+      if(S.turno.rasto.length%20===0) guardarTurno(S.turno,false); }
+    pintarTopo();
+  }, function(err){ S.gps.estado=err.code===1?'recusado':'sem-sinal'; pintarTopo(); },
+     {enableHighAccuracy:true, maximumAge:4000, timeout:25000});
+}
+function desligarGps(){ if(watchId!=null){ navigator.geolocation.clearWatch(watchId); watchId=null; }
+  S.gps.estado='parado'; }
+function lerBateria(){ if(!navigator.getBattery) return;
+  navigator.getBattery().then(function(b){ S.bateria=Math.round(b.level*100);
+    b.addEventListener('levelchange',function(){ S.bateria=Math.round(b.level*100); pintarTopo(); });
+    pintarTopo(); }).catch(function(){}); }
+
+/* ── as regras, aplicadas no fecho ──────────────────────────── */
+function avaliar(t){
+  var v=[], al=[];
+  var kmQ=(t.kmFinal||0)-t.kmInicial, kmG=t.kmGps!=null?t.kmGps:kmDoRasto(t.rasto);
+  var temRasto=(t.rasto||[]).length>5;
+
+  var fotosOk=!!(t.fotoKeys&&t.fotoKeys.indexOf('abertura')>=0&&t.fotoKeys.indexOf('fecho')>=0);
+  v.push({ok:fotosOk, t1:'Quadrante fotografado nas duas pontas',
+    t2:nf(t.kmInicial)+' → '+nf(t.kmFinal), vl:nf(kmQ)+' km'});
+  if(!fotosOk) al.push({c:'A11',n:'AVISO',d:'Turno sem foto do quadrante'});
+
+  if(temRasto){
+    var div=kmQ>0?(kmQ-kmG)/kmQ*100:0;
+    var mk=kmG>kmQ*1.10?'c':(div>=LIM.divCritica?'c':(Math.abs(div)>=LIM.divAviso?'n':'s'));
+    v.push({mk:mk, ok:mk==='s', t1:'Km do GPS batem com o quadrante',
+      t2:'divergência de '+nf(div,1)+'% · o GPS fica sempre um pouco abaixo',
+      vl:nf(kmG,1)+' km'});
+    if(mk==='c') al.push({c:kmG>kmQ*1.10?'A09':'A08',n:'CRITICO',
+      d:'Quadrante e GPS não batem ('+nf(div,1)+'%)'});
+    else if(mk==='n') al.push({c:'A07',n:'AVISO',d:'Divergência de km de '+nf(div,1)+'%'});
+
+    var falha=maiorFalhaS(t.rasto);
+    v.push({ok:falha<=LIM.semSinalS, t1:'Sinal de GPS sem falhas longas',
+      t2:'maior interrupção do sinal', vl:nf(falha/60)+' min'});
+    if(falha>LIM.semSinalS) al.push({c:'A03',n:'AVISO',
+      d:'Sem sinal de GPS durante '+nf(falha/60)+' minutos'});
+  } else {
+    v.push({mk:'n', ok:false, t1:'Sem percurso gravado',
+      t2:'o GPS não esteve activo durante o turno', vl:'—'});
+    al.push({c:'A03',n:'AVISO',d:'Turno sem percurso de GPS'});
+  }
+
+  if(t.gap>LIM.gapKm){
+    v.push({mk:'c', ok:false, t1:'O carro andou fora de turno',
+      t2:'abriu com '+nf(t.kmInicial)+', o fecho anterior foi '+nf(t.kmInicial-t.gap),
+      vl:'+'+nf(t.gap)+' km'});
+    al.push({c:'A19',n:'CRITICO',d:'O carro andou '+nf(t.gap)+' km sem turno aberto'});
+  }
+
+  (t.abastecimentos||[]).forEach(function(a,i){
+    v.push({ok:!!a.temFoto, t1:'Talão fotografado', t2:'abastecimento das '+horas(a.hora),
+      vl:nf(a.valor)+' CVE'});
+    if(!a.temFoto) al.push({c:'A11',n:'AVISO',d:'Abastecimento sem talão'});
+
+    var litros=a.valor/t.precoLitro, cabe=litros<=t.deposito*1.05;
+    v.push({mk:cabe?'s':'c', ok:cabe, t1:'Litros cabem no depósito',
+      t2:nf(litros,2)+' l num depósito de '+nf(t.deposito)+' l', vl:nf(litros,2)+' l'});
+    if(!cabe) al.push({c:'A13',n:'CRITICO',
+      d:'Declarou '+nf(litros,2)+' litros num depósito de '+nf(t.deposito)});
+
+    if(a.litrosTalao){
+      var d2=Math.abs(a.litrosTalao-litros)/litros*100, bate=d2<=LIM.divLitrosPct;
+      v.push({mk:bate?'s':'n', ok:bate, t1:'Valor pago bate com o talão',
+        t2:'pagou '+nf(a.valor)+' CVE, que a '+nf(t.precoLitro,2)+'/l dariam '+nf(litros,2)+
+           ' l · o talão mostra '+nf(a.litrosTalao,2)+' l',
+        vl:bate?'bate':nf(a.litrosTalao*t.precoLitro)+' CVE'});
+      if(!bate) al.push({c:'A12',n:'AVISO',
+        d:'Declarou '+nf(a.valor)+' CVE mas o talão dá '+nf(a.litrosTalao*t.precoLitro)+' CVE',
+        dif:Math.round(a.valor-a.litrosTalao*t.precoLitro)});
+    }
+    if(temRasto&&a.lat!=null){
+      var parado=0, ant=null;
+      t.rasto.forEach(function(p){
+        if(dist(p[0],p[1],a.lat,a.lon)<=LIM.raioPostoM){
+          if(ant!=null) parado+=(p[2]-ant)/1000; ant=p[2];
+        } else ant=null; });
+      var okP=parado>=LIM.paragemMinS;
+      v.push({mk:okP?'s':'c', ok:okP, t1:'O carro esteve mesmo parado no posto',
+        t2:'o percurso mostra '+nf(parado/60,1)+' min dentro de '+LIM.raioPostoM+' m do local',
+        vl:okP?'confirmado':'não'});
+      if(!okP) al.push({c:'A14',n:'CRITICO',d:'O rasto não mostra o carro parado no posto'});
+    }
+  });
+  return {verificacoes:v, alertas:al, kmQuadrante:kmQ, kmGps:kmG};
+}
+function alertasDe(t){ return (t.alertas&&t.alertas.length!==undefined)?t.alertas:avaliar(t).alertas; }
+function porResolver(t){ var r=t.resolucoes||{};
+  return alertasDe(t).filter(function(a){ return !r[a.c]; }); }
+
+function score(nome){
+  var lim=Date.now()-30*864e5, pen=0, limpos=0;
+  S.turnos.forEach(function(t){
+    if(t.condutor!==nome||t.estado!=='FECHADO'||t.inicio<lim) return;
+    var r=t.resolucoes||{}, als=alertasDe(t), maus=0;
+    als.forEach(function(a){
+      if(r[a.c]&&r[a.c].r==='ERRO_SISTEMA') return;   // regra mal calibrada não penaliza
+      pen+=PEN[a.c]||0; if(a.n!=='INFO') maus++; });
+    pen+=Math.min(Math.floor((t.semSinalS||0)/600),20);
+    if(!maus) limpos++;
+  });
+  return Math.max(0, Math.min(100, 100-pen+limpos*3));
+}
+
+/* ── pintar ─────────────────────────────────────────────────── */
+function pintarTopo(){
+  var p=[], rot={ligado:'GPS activo','a-procurar':'GPS a procurar',recusado:'GPS recusado',
+    'sem-sinal':'sem sinal',indisponivel:'sem GPS',parado:'GPS desligado'}[S.gps.estado];
+  if(S.papel==='condutor'){
+    var cls=S.gps.estado==='ligado'?'viva':
+      (S.gps.estado==='recusado'||S.gps.estado==='indisponivel'?'morta':'');
+    p.push('<span class="pill '+cls+'">'+rot+
+      (S.gps.estado==='ligado'&&S.gps.precisao?' ±'+S.gps.precisao+'m':'')+'</span>');
+    if(S.bateria!=null) p.push('<span class="pill">'+S.bateria+'%</span>');
+  }
+  document.getElementById('topo-dir').innerHTML=p.join('');
+  document.getElementById('papeis').innerHTML=
+    ['condutor','dono'].map(function(x){
+      return '<button data-papel="'+x+'" aria-selected="'+(S.papel===x)+'">'+
+        (x==='condutor'?'Condutor':'Dono')+'</button>'; }).join('');
+  var t=document.getElementById('relogio-t');
+  if(t&&S.turno&&S.turno.estado==='ABERTO'){
+    t.textContent=hm((Date.now()-S.turno.inicio)/1000);
+    var k=document.getElementById('m-km'), n=document.getElementById('m-pt');
+    if(k) k.textContent=nf(kmDoRasto(S.turno.rasto),1);
+    if(n) n.textContent=S.turno.rasto.length;
+  }
+}
+function foto(ch,ti,di){ var f=S.fotos[ch];
+  return f?'<label class="foto feita"><img src="'+f+'" alt="'+esc(ti)+'">'+
+    '<span class="refazer">Repetir</span>'+
+    '<input type="file" accept="image/*" capture="environment" data-foto="'+ch+'"></label>'
+   :'<label class="foto"><span class="ico">📷</span><span class="tx">'+esc(ti)+'</span>'+
+    '<span class="tx2">'+esc(di)+'</span>'+
+    '<input type="file" accept="image/*" capture="environment" data-foto="'+ch+'"></label>'; }
+function verLinhas(vs){ return vs.map(function(v){ var mk=v.mk||(v.ok?'s':'n');
+  return '<div class="ver"><span class="mk '+mk+'">'+(mk==='s'?'✓':'!')+'</span>'+
+    '<span class="tx"><span class="t1">'+esc(v.t1)+'</span><br>'+
+    '<span class="t2">'+esc(v.t2)+'</span></span><span class="vl">'+esc(v.vl)+'</span></div>';
+  }).join(''); }
+function mapinha(rasto){
+  var pts=(rasto||[]).filter(function(p){ return p[3]==null||p[3]<=LIM.precisaoMax; });
+  if(pts.length<3) return '';
+  var la=pts.map(function(p){return p[0];}), lo=pts.map(function(p){return p[1];});
+  var mnA=Math.min.apply(null,la), mxA=Math.max.apply(null,la);
+  var mnO=Math.min.apply(null,lo), mxO=Math.max.apply(null,lo);
+  var W=480,H=250,pad=16,kx=Math.cos(mnA*Math.PI/180);
+  var sO=(mxO-mnO)*kx||1e-9, sA=(mxA-mnA)||1e-9;
+  var s=Math.min((W-2*pad)/sO,(H-2*pad)/sA), ox=(W-sO*s)/2, oy=(H-sA*s)/2;
+  var d=pts.map(function(p,i){ return (i?'L':'M')+(ox+(p[1]-mnO)*kx*s).toFixed(1)+' '+
+    (H-(oy+(p[0]-mnA)*s)).toFixed(1); }).join(' ');
+  return '<svg class="mapinha" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Percurso do turno">'+
+    '<path d="'+d+'" fill="none" stroke="var(--accent)" stroke-width="2.2" '+
+    'stroke-linejoin="round" stroke-linecap="round"/></svg>'; }
+
+function pintar(){
+  var e=document.getElementById('ecra'), a=document.getElementById('acoes');
+  var h='', b='';
+  if(S.papel==='condutor') { var r=pintarCondutor(); h=r[0]; b=r[1]; }
+  else { var r2=pintarDono(); h=r2[0]; b=r2[1]; }
+  e.innerHTML=h; a.innerHTML=b; pintarTopo();
+}
+
+/* ═══ CONDUTOR ═══════════════════════════════════════════════ */
+function pintarCondutor(){
+  var c=carroDe(S.eu.carroId), h='', b='';
+
+  if(S.ecra==='inicio'){
+    var meus=S.turnos.filter(function(t){ return t.estado==='FECHADO'; });
+    h='<div class="cartao"><div class="carro">'+
+      '<div><div class="mat">'+esc(c.matricula)+'</div>'+
+      '<div class="det">'+esc((c.marca||'')+' '+(c.modelo||''))+'</div></div>'+
+      '<div class="km"><b>'+nf(c.kmActual)+'</b><span>km no quadrante</span></div></div>'+
+      (S.frota.carros.length>1
+        ? '<button class="ligacao" style="padding:8px 0 0" data-ir="escolher-carro">Trocar de carro</button>'
+        : '')+'</div>';
+
+    if(!S.eu.nome)
+      h+='<div class="cartao"><h2>Quem está a conduzir?</h2>'+
+        '<p class="sub" style="margin-bottom:10px">O nome fica gravado em cada turno.</p>'+
+        '<input type="text" id="nome" placeholder="O seu nome" value=""></div>';
+
+    if(S.gps.estado==='recusado'||S.gps.estado==='indisponivel')
+      h+='<div class="cartao aviso"><h2>Sem acesso ao GPS</h2><p class="nota">'+
+        'Este ecrã não conseguiu ligar a localização. O turno funciona na mesma — fotos e '+
+        'quilómetros — mas sem percurso. Abra a página em separador próprio e autorize.</p></div>';
+
+    h+='<div><h2>Os meus turnos</h2><p class="sub">'+
+      (S.db?'Guardados e visíveis ao dono.':'Guardados neste telemóvel.')+'</p></div>';
+    h+=meus.length? '<div class="hist">'+meus.slice(0,8).map(cartaoTurno).join('')+'</div>'
+      : '<div class="cartao"><div class="vazio">Ainda não gravou nenhum turno.<br>'+
+        'Toque em <b>Abrir turno</b> para começar.</div></div>';
+    b='<button class="bt pri" data-ir="abrir">Abrir turno</button>';
+  }
+
+  else if(S.ecra==='escolher-carro'){
+    h='<div><h1>Escolher carro</h1><p class="sub">Qual é o carro que vai levar hoje?</p></div>'+
+      '<div class="cartao">'+S.frota.carros.map(function(x){
+        return '<button class="lista-carro'+(x.id===S.eu.carroId?' escolhido':'')+
+          '" data-carro="'+x.id+'"><span><span class="mat num">'+esc(x.matricula)+'</span><br>'+
+          '<span class="det">'+esc((x.marca||'')+' '+(x.modelo||''))+'</span></span>'+
+          '<span class="r num" style="margin-left:auto">'+nf(x.kmActual)+' km</span></button>';
+      }).join('')+'</div>';
+    b='<button class="bt pri" data-ir="inicio">Pronto</button>';
+  }
+
+  else if(S.ecra==='abrir'){
+    var gap=(S.rascunho.km||c.kmActual)-c.kmActual;
+    h='<div><h1>Abrir turno</h1><p class="sub">'+esc(c.matricula)+
+      ' · fotografe o conta-quilómetros antes de arrancar.</p></div>'+
+      foto('abertura','Foto do quadrante','A câmara abre-se — não vale foto da galeria')+
+      '<label class="campo"><span class="lb">Km no quadrante</span>'+
+      '<input type="number" inputmode="numeric" id="km" value="'+(S.rascunho.km||c.kmActual)+'">'+
+      '<span class="ajuda">Último fecho: '+nf(c.kmActual)+' km</span></label>';
+    if(gap>LIM.gapKm)
+      h+='<div class="cartao mau"><h2>O carro andou '+nf(gap)+' km sem turno</h2>'+
+        '<p class="nota">Fica registado e o dono é avisado. Se foi à oficina, diga-lhe.</p></div>';
+    b='<button class="bt pri" id="bt-abrir"'+(S.fotos.abertura?'':' disabled')+'>'+
+      (S.fotos.abertura?'Começar turno':'Falta a foto do quadrante')+'</button>'+
+      '<button class="ligacao" data-ir="inicio">Cancelar</button>';
+  }
+
+  else if(S.ecra==='turno'){
+    var t=S.turno;
+    h='<div class="cartao"><div class="relogio">'+
+      '<div class="t num" id="relogio-t">'+hm((Date.now()-t.inicio)/1000)+'</div>'+
+      '<div class="l">'+esc(t.matricula)+' · desde as '+horas(t.inicio)+'</div></div>'+
+      '<div class="metricas">'+
+      '<div><b class="num" id="m-km">'+nf(kmDoRasto(t.rasto),1)+'</b><span>km GPS</span></div>'+
+      '<div><b class="num">'+nf(t.totalCve)+'</b><span>CVE</span></div>'+
+      '<div><b class="num" id="m-pt">'+t.rasto.length+'</b><span>pontos</span></div></div></div>';
+    if(t.abastecimentos.length)
+      h+='<div class="cartao"><h2>Abastecimentos de hoje</h2>'+t.abastecimentos.map(function(x){
+        return '<div class="ver"><span class="mk s">✓</span><span class="tx">'+
+          '<span class="t1">'+nf(x.valor)+' CVE · '+nf(x.valor/t.precoLitro,2)+' litros</span><br>'+
+          '<span class="t2">'+horas(x.hora)+(x.temFoto?' · com talão':' · sem talão')+
+          '</span></span></div>'; }).join('')+'</div>';
+    h+=mapinha(t.rasto);
+    h+='<div class="cartao aviso"><h2>Deixe o ecrã ligado</h2><p class="nota">'+
+      'Isto é uma página de navegador: quando o telemóvel adormece, o GPS pára e o percurso fica '+
+      'com um buraco. <b>Na app Android isso não acontece.</b> Por agora, telemóvel na corrente '+
+      'e ecrã aceso.</p></div>'+
+      '<p class="nota">O percurso só é gravado com o turno aberto. Ao fechar, deixa de haver '+
+      'localização — nem o dono a vê.</p>';
+    b='<button class="bt sec" data-ir="abastecer">Abasteci</button>'+
+      '<button class="bt perigo" data-ir="fechar">Fechar turno</button>';
+  }
+
+  else if(S.ecra==='abastecer'){
+    var val=S.rascunho.valor||0, lt=val?val/S.frota.precoLitro:0;
+    h='<div><h1>Abastecimento</h1><p class="sub">Registe agora, no posto. '+
+      'No fim do dia a conta já está feita.</p></div>'+
+      foto('talao','Foto do talão','É esta foto que prova o valor')+
+      '<label class="campo"><span class="lb">Valor pago (CVE)</span>'+
+      '<input type="number" inputmode="numeric" id="valor" value="'+(val||'')+'" placeholder="0">'+
+      '<span class="ajuda">'+(val?'A '+nf(S.frota.precoLitro,2)+' CVE/litro dá <b>'+nf(lt,2)+
+        ' litros</b>':'Preço oficial: '+nf(S.frota.precoLitro,2)+' CVE/litro')+'</span></label>'+
+      '<label class="campo"><span class="lb">Litros no talão '+
+      '<span style="text-transform:none;letter-spacing:0">(se der para ler)</span></span>'+
+      '<input type="number" inputmode="decimal" step="0.01" id="litros" value="'+
+      (S.rascunho.litros||'')+'" placeholder="—">'+
+      '<span class="ajuda">Se não bater com o valor pago, o dono é avisado.</span></label>';
+    if(lt>c.deposito*1.05)
+      h+='<div class="cartao mau"><h2>Não cabe no depósito</h2><p class="nota">'+nf(lt,2)+
+        ' litros num depósito de '+nf(c.deposito)+'. Confirme o valor.</p></div>';
+    b='<button class="bt pri" id="bt-abast"'+(val>0?'':' disabled')+'>Registar abastecimento</button>'+
+      '<button class="ligacao" data-ir="turno">Voltar</button>';
+  }
+
+  else if(S.ecra==='fechar'){
+    var t2=S.turno, kmF=S.rascunho.kmF||t2.kmInicial, perc=kmF-t2.kmInicial;
+    h='<div><h1>Fechar turno</h1><p class="sub">Última foto do quadrante e está feito.</p></div>'+
+      foto('fecho','Foto do quadrante','Como na abertura')+
+      '<label class="campo"><span class="lb">Km no quadrante</span>'+
+      '<input type="number" inputmode="numeric" id="kmF" value="'+kmF+'">'+
+      '<span class="ajuda">Abriu com '+nf(t2.kmInicial)+' km · '+
+      (perc>=0?nf(perc)+' km percorridos':'<b>não pode ser menor que a abertura</b>')+
+      '</span></label>';
+    if(perc>LIM.kmMax)
+      h+='<div class="cartao mau"><h2>Valor pouco provável</h2><p class="nota">'+nf(perc)+
+        ' km num turno. Confirme a foto — quase sempre é um dígito a mais.</p></div>';
+    b='<button class="bt pri" id="bt-fechar"'+
+      (S.fotos.fecho&&perc>=0&&perc<=LIM.kmMax?'':' disabled')+'>'+
+      (S.fotos.fecho?'Fechar turno':'Falta a foto do quadrante')+'</button>'+
+      '<button class="ligacao" data-ir="turno">Voltar ao turno</button>';
+  }
+
+  else if(S.ecra==='resumo'){
+    var t3=S.turnos[0]; if(!t3) return ['',''];
+    var av=avaliar(t3), cr=av.alertas.filter(function(x){return x.n==='CRITICO';}).length;
+    h='<div><h1>Turno fechado</h1><p class="sub">'+esc(t3.matricula)+' · '+horas(t3.inicio)+
+      '–'+horas(t3.fim)+' · '+nf((t3.fim-t3.inicio)/36e5,1)+' h</p></div>'+mapinha(t3.rasto)+
+      '<div class="cartao '+(cr?'mau':av.alertas.length?'aviso':'bom')+'"><h2>'+
+      (cr?'Há coisas para o dono ver':av.alertas.length?
+        av.alertas.length+' ponto'+(av.alertas.length>1?'s':'')+' a explicar':'Turno limpo')+
+      '</h2><p class="nota">'+(av.alertas.length?
+        av.alertas.map(function(x){return esc(x.d);}).join('<br>'):
+        'Todas as verificações passaram. Nada a explicar a ninguém.')+'</p></div>'+
+      '<div class="cartao"><h2 style="margin-bottom:6px">Verificações</h2>'+
+      verLinhas(av.verificacoes)+'</div>';
+    b='<button class="bt pri" data-ir="inicio">Voltar ao início</button>';
+  }
+  return [h,b];
+}
+function cartaoTurno(t){
+  var pr=porResolver(t), cr=pr.some(function(x){return x.n==='CRITICO';});
+  var cls=cr?'c':(pr.length?'n':'s');
+  return '<button class="ht" data-ver="'+t.id+'"><span>'+
+    '<span class="m">'+nf((t.kmFinal||0)-t.kmInicial)+' km</span>'+
+    '<span class="d"> · '+esc(t.matricula)+' · '+dataCurta(t.inicio)+'</span><br>'+
+    '<span class="d">'+esc(t.condutor||'—')+' · '+horas(t.inicio)+'–'+horas(t.fim)+' · '+
+    nf(t.totalCve)+' CVE</span></span><span class="r"><span class="selo '+cls+'">'+
+    (cls==='s'?'✓ limpo':cls==='n'?'▲ '+pr.length:'● rever')+'</span></span></button>';
+}
+
+/* ═══ DONO ═══════════════════════════════════════════════════ */
+function pintarDono(){
+  var h='', b='', fechados=S.turnos.filter(function(t){ return t.estado==='FECHADO'; });
+  var abertos=S.turnos.filter(function(t){ return t.estado==='ABERTO'; });
+
+  if(S.ecra==='dono-turno'&&S.detalhe){
+    var t=S.detalhe, av=avaliar(t), res=t.resolucoes||{};
+    h='<div><h1>'+dataCurta(t.inicio)+'</h1><p class="sub">'+esc(t.matricula)+' · '+
+      esc(t.condutor||'—')+' · '+horas(t.inicio)+'–'+horas(t.fim)+' · '+
+      nf((t.fim-t.inicio)/36e5,1)+' h</p></div>'+mapinha(t.rasto);
+    if(S.fotosDetalhe&&Object.keys(S.fotosDetalhe).length)
+      h+='<div class="fotos-g">'+Object.keys(S.fotosDetalhe).map(function(k){
+        return '<figure><img src="'+S.fotosDetalhe[k]+'" alt="'+esc(k)+'">'+
+          '<figcaption>'+({abertura:'Quadrante · abertura',fecho:'Quadrante · fecho'}[k]||
+          'Talão')+'</figcaption></figure>'; }).join('')+'</div>';
+    else if(t.fotoKeys&&t.fotoKeys.length)
+      h+='<p class="nota">A carregar as fotos…</p>';
+    h+='<div class="cartao"><h2 style="margin-bottom:6px">Verificações</h2>'+
+      verLinhas(av.verificacoes)+'</div>';
+    var difs=av.alertas.filter(function(x){return x.dif;});
+    if(difs.length)
+      h+='<div class="cartao aviso"><h2>Diferença por explicar</h2>'+
+        '<div class="num" style="font-size:27px;font-weight:500;color:var(--warn)">'+
+        nf(difs.reduce(function(s,x){return s+x.dif;},0))+' CVE</div></div>';
+    b='<button class="bt pri" data-ir="dono-alertas">Ver alertas</button>'+
+      '<button class="ligacao" data-ir="dono-resumo">Voltar</button>';
+    return [h,b];
+  }
+
+  if(S.ecra==='dono-alertas'){
+    var linhas=[];
+    S.turnos.forEach(function(t){
+      var res2=t.resolucoes||{};
+      alertasDe(t).forEach(function(al){ linhas.push({t:t, al:al, r:res2[al.c]}); });
+    });
+    linhas.sort(function(x,y){
+      if(!!x.r!==!!y.r) return x.r?1:-1;
+      if(x.al.n!==y.al.n) return x.al.n==='CRITICO'?-1:1;
+      return y.t.inicio-x.t.inicio; });
+    h='<div><h1>Alertas</h1><p class="sub">Fechar um alerta como <b>erro do sistema</b> '+
+      'tira-lhe a penalização — é assim que se descobre uma regra mal calibrada.</p></div>';
+    h+=linhas.length? linhas.map(function(L){
+        var cr=L.al.n==='CRITICO';
+        return '<div class="alerta-l'+(cr?' c':'')+(L.r?'" style="opacity:.6':'')+'">'+
+          '<div class="fx"></div><div class="cp"><div class="cab">'+
+          '<span class="selo '+(cr?'c':'n')+'">'+(cr?'● Crítico':'▲ Aviso')+'</span>'+
+          '<span class="selo cod n">'+esc(L.al.c)+'</span>'+
+          '<span class="d" style="font-size:12px;color:var(--muted)">'+dataCurta(L.t.inicio)+
+          ' · '+esc(L.t.matricula)+' · '+esc(L.t.condutor||'—')+'</span></div>'+
+          '<div style="font-weight:600;margin-top:7px;font-size:14px">'+esc(L.al.d)+'</div>'+
+          (L.r? '<div class="resolvido">Fechado como <b>'+
+              ({JUSTIFICADO:'justificado',CONFIRMADO:'desvio confirmado',
+                ERRO_SISTEMA:'erro do sistema'}[L.r.r])+'</b> · '+dataCurta(L.r.quando)+'</div>'
+            : '<div class="resolver">'+
+              '<button data-res="JUSTIFICADO" data-t="'+L.t.id+'" data-c="'+L.al.c+'">Justificado</button>'+
+              '<button data-res="CONFIRMADO" data-t="'+L.t.id+'" data-c="'+L.al.c+'">É desvio</button>'+
+              '<button data-res="ERRO_SISTEMA" data-t="'+L.t.id+'" data-c="'+L.al.c+'">Erro do sistema</button>'+
+              '</div>')+
+          '<button class="ligacao" style="padding:6px 0 0" data-ver="'+L.t.id+
+          '">Ver o turno</button></div></div>'; }).join('')
+      : '<div class="cartao"><div class="vazio">Nenhum alerta. Ou a frota anda bem, '+
+        'ou ainda não há turnos gravados.</div></div>';
+    b='<button class="bt pri" data-ir="dono-resumo">Voltar</button>';
+    return [h,b];
+  }
+
+  if(S.ecra==='dono-frota'){
+    h='<div><h1>Frota</h1><p class="sub">Carros e preço do combustível.</p></div>'+
+      '<label class="campo"><span class="lb">Preço da gasolina (CVE/litro)</span>'+
+      '<input type="number" inputmode="decimal" step="0.01" id="f-preco" value="'+
+      S.frota.precoLitro+'"><span class="ajuda">Fixado pela ARME, muda todos os meses. '+
+      'É daqui que saem os litros de cada abastecimento.</span></label>';
+    h+='<div class="cartao">'+S.frota.carros.map(function(x,i){
+      return '<div style="padding:11px 0;border-bottom:1px solid var(--line2)">'+
+        '<div style="display:flex;gap:9px;align-items:center">'+
+        '<input type="text" data-c-mat="'+i+'" value="'+esc(x.matricula)+
+        '" style="font-size:15px;flex:1"></div>'+
+        '<div style="display:flex;gap:9px;margin-top:7px">'+
+        '<label class="campo" style="flex:1"><span class="lb">Km</span>'+
+        '<input type="number" inputmode="numeric" data-c-km="'+i+'" value="'+x.kmActual+
+        '" style="font-size:15px"></label>'+
+        '<label class="campo" style="flex:1"><span class="lb">Depósito (l)</span>'+
+        '<input type="number" inputmode="numeric" data-c-dep="'+i+'" value="'+x.deposito+
+        '" style="font-size:15px"></label></div></div>'; }).join('')+
+      '<button class="ligacao" style="padding:10px 0 0" id="bt-carro">+ Acrescentar carro</button>'+
+      '</div>';
+    b='<button class="bt pri" id="bt-frota">Guardar</button>'+
+      '<button class="ligacao" data-ir="dono-resumo">Voltar</button>';
+    return [h,b];
+  }
+
+  if(S.ecra==='dono-motoristas'){
+    var nomes={}; S.turnos.forEach(function(t){ if(t.condutor) nomes[t.condutor]=true; });
+    var lista=Object.keys(nomes).map(function(n){ return {n:n, s:score(n)}; })
+      .sort(function(a,b2){ return a.s-b2.s; });
+    h='<div><h1>Motoristas</h1><p class="sub">Score dos últimos 30 dias. Mede '+
+      '<b>disciplina de registo</b>, não honestidade.</p></div>';
+    h+=lista.length? '<div class="cartao">'+lista.map(function(m){
+        var cor=m.s>=95?'var(--ok)':(m.s>=80?'var(--warn)':'var(--crit)');
+        var meus=S.turnos.filter(function(t){return t.condutor===m.n&&t.estado==='FECHADO';});
+        var kms=meus.reduce(function(s,t){return s+((t.kmFinal||0)-t.kmInicial);},0);
+        return '<div class="mot"><div class="cima"><span class="nome">'+esc(m.n)+'</span>'+
+          '<span class="sc" style="color:'+cor+'">'+m.s+'</span></div>'+
+          '<div class="barra"><span style="width:'+m.s+'%;background:'+cor+'"></span></div>'+
+          '<div class="porque">'+meus.length+' turnos · '+nf(kms)+' km</div></div>'; }).join('')+
+        '</div>'
+      : '<div class="cartao"><div class="vazio">Ainda não há turnos gravados.</div></div>';
+    b='<button class="bt pri" data-ir="dono-resumo">Voltar</button>';
+    return [h,b];
+  }
+
+  /* resumo */
+  var deHoje=fechados.filter(function(t){ return hoje(t.inicio); });
+  var km=deHoje.reduce(function(s,t){ return s+((t.kmFinal||0)-t.kmInicial); },0);
+  var cve=deHoje.reduce(function(s,t){ return s+(t.totalCve||0); },0);
+  var nAl=S.turnos.reduce(function(s,t){ return s+porResolver(t).length; },0);
+  h='<div><h1>A frota</h1><p class="sub">'+
+    (S.db?'Ao vivo, à medida que os condutores fecham turno.':
+          'Sem base partilhada — só os turnos deste telemóvel.')+'</p></div>'+
+    '<div class="tiles">'+
+    '<div><b class="num">'+nf(km)+'</b><span>km hoje</span></div>'+
+    '<div><b class="num">'+nf(cve)+'</b><span>CVE hoje</span></div>'+
+    '<div><b class="num">'+deHoje.length+'</b><span>turnos hoje</span></div>'+
+    '<div class="al'+(nAl?'':' al0')+'"><b class="num">'+nAl+'</b><span>por resolver</span></div>'+
+    '</div>';
+  if(abertos.length)
+    h+='<div class="cartao bom"><h2>'+abertos.length+' em turno agora</h2>'+
+      abertos.map(function(t){ return '<div class="nota" style="margin-top:5px">'+
+        '<b>'+esc(t.matricula)+'</b> · '+esc(t.condutor||'—')+' · desde as '+horas(t.inicio)+
+        ' · '+nf(kmDoRasto(t.rasto),1)+' km'; }).join('')+'</div>';
+  h+='<div class="abas">'+
+    '<button data-ir="dono-alertas">Alertas'+(nAl?' ('+nAl+')':'')+'</button>'+
+    '<button data-ir="dono-motoristas">Motoristas</button>'+
+    '<button data-ir="dono-frota">Frota</button></div>';
+  h+='<div><h2>Turnos</h2></div>';
+  h+=fechados.length? '<div class="hist">'+fechados.slice(0,20).map(cartaoTurno).join('')+'</div>'
+    : '<div class="cartao"><div class="vazio">Nenhum turno gravado ainda.<br>'+
+      'Passe ao papel de <b>Condutor</b> para gravar o primeiro.</div></div>';
+  b='<button class="bt sec" data-ir="dono-alertas">Alertas por resolver'+
+    (nAl?' · '+nAl:'')+'</button>';
+  return [h,b];
+}
+
+/* ═══ ACÇÕES ═════════════════════════════════════════════════ */
+document.addEventListener('change', function(ev){
+  var i=ev.target;
+  if(i.dataset&&i.dataset.foto&&i.files&&i.files[0])
+    lerFoto(i.files[0], function(u){ S.fotos[i.dataset.foto]=u; pintar(); });
+});
+var suaveTimer=null;
+function pintarSuave(){ clearTimeout(suaveTimer); suaveTimer=setTimeout(function(){
+  var ac=document.activeElement, id=ac&&ac.id, pos=ac&&ac.selectionStart;
+  pintar();
+  if(id){ var n=document.getElementById(id); if(n){ n.focus();
+    try{ n.setSelectionRange(pos,pos); }catch(e){} } } }, 280); }
+document.addEventListener('input', function(ev){
+  var t=ev.target, id=t.id;
+  if(id==='km'){ S.rascunho.km=+t.value; pintarSuave(); }
+  if(id==='valor'){ S.rascunho.valor=+t.value; pintarSuave(); }
+  if(id==='litros') S.rascunho.litros=+t.value;
+  if(id==='kmF'){ S.rascunho.kmF=+t.value; pintarSuave(); }
+  if(id==='nome') S.eu.nome=t.value;
+  if(id==='f-preco') S.rascunho.preco=+t.value;
+  if(t.dataset.cMat!=null) S.frota.carros[+t.dataset.cMat].matricula=t.value;
+  if(t.dataset.cKm!=null) S.frota.carros[+t.dataset.cKm].kmActual=+t.value;
+  if(t.dataset.cDep!=null) S.frota.carros[+t.dataset.cDep].deposito=+t.value;
+});
+document.addEventListener('click', function(ev){
+  var b=ev.target.closest('[data-papel],[data-ir],[data-ver],[data-carro],[data-res],'+
+    '#bt-abrir,#bt-abast,#bt-fechar,#bt-frota,#bt-carro');
+  if(!b) return;
+  var d=b.dataset;
+  if(d.papel){ S.papel=d.papel; S.ecra=d.papel==='dono'?'dono-resumo':'inicio';
+    S.detalhe=null; guardarLocal(); pintar(); return; }
+  if(d.carro){ S.eu.carroId=d.carro; guardarLocal(); pintar(); return; }
+  if(d.res){ resolver(d.t, d.c, d.res); return; }
+  if(d.ver){ verTurno(d.ver); return; }
+  if(d.ir){ irPara(d.ir); return; }
+  if(b.id==='bt-abrir') abrirTurno();
+  if(b.id==='bt-abast') registarAbastecimento();
+  if(b.id==='bt-fechar') fecharTurno();
+  if(b.id==='bt-frota') guardarDefinicoesFrota();
+  if(b.id==='bt-carro'){
+    S.frota.carros.push({id:uid('c'), matricula:'CV-00-XX', marca:'', modelo:'',
+      deposito:45, kmActual:0}); pintar(); }
+});
+function irPara(x){
+  var c=carroDe(S.eu.carroId);
+  if(x==='abrir'){ S.fotos={}; S.rascunho={km:c.kmActual}; ligarGps(); }
+  if(x==='abastecer'||x==='inicio'){ S.fotos={}; S.rascunho={}; }
+  if(x==='fechar'){ S.fotos={};
+    S.rascunho={kmF:S.turno.kmInicial+Math.round(kmDoRasto(S.turno.rasto))}; }
+  if(x.indexOf('dono')===0) S.detalhe=null;
+  S.ecra=x; pintar();
+}
+function verTurno(id){
+  var t=S.turnos.filter(function(x){return x.id===id;})[0]; if(!t) return;
+  S.detalhe=t; S.fotosDetalhe=null;
+  S.papel='dono'; S.ecra='dono-turno'; pintar();
+  if(S.db&&t.fotoKeys&&t.fotoKeys.length){
+    var got={};
+    Promise.all(t.fotoKeys.map(function(k){
+      return S.db.doc('turnos/'+t.id+'/fotos/'+k).get().then(function(s){
+        if(s.exists&&s.data().img) got[k]=s.data().img; }).catch(function(){});
+    })).then(function(){
+      if(S.detalhe&&S.detalhe.id===t.id){ S.fotosDetalhe=got; pintar(); } });
+  } else if(t.fotos){ S.fotosDetalhe=t.fotos; pintar(); }
+}
+function resolver(idT, cod, r){
+  var t=S.turnos.filter(function(x){return x.id===idT;})[0]; if(!t) return;
+  t.resolucoes=t.resolucoes||{};
+  t.resolucoes[cod]={r:r, quando:Date.now()};
+  guardarLocal();
+  if(S.db&&S.podeEscrever)
+    S.db.doc('turnos/'+t.id).update({resolucoes:t.resolucoes}).catch(function(){});
+  pintar();
+}
+function abrirTurno(){
+  var c=carroDe(S.eu.carroId), km=S.rascunho.km||c.kmActual;
+  if(km<c.kmActual){ alert('O quadrante não anda para trás. O último fecho foi '+
+    nf(c.kmActual)+' km.'); return; }
+  S.turno={ id:uid(), estado:'ABERTO', inicio:Date.now(), fim:null,
+    carroId:c.id, matricula:c.matricula, condutor:S.eu.nome||'Condutor',
+    kmInicial:km, kmFinal:null, gap:km-c.kmActual,
+    precoLitro:S.frota.precoLitro, deposito:c.deposito,
+    rasto:[], abastecimentos:[], totalCve:0, totalLitros:0,
+    fotoKeys:S.fotos.abertura?['abertura']:[], fotos:{abertura:S.fotos.abertura||null} };
+  ligarGps(); S.fotos={}; S.rascunho={};
+  guardarTurno(S.turno,true);
+  S.ecra='turno'; pintar();
+  if(!relogioTimer) relogioTimer=setInterval(pintarTopo,1000);
+}
+function registarAbastecimento(){
+  var v=S.rascunho.valor||0; if(v<=0) return;
+  var n=S.turno.abastecimentos.length+1;
+  var a={ hora:Date.now(), valor:v, litrosTalao:S.rascunho.litros||null,
+          temFoto:!!S.fotos.talao, lat:null, lon:null };
+  var u=S.turno.rasto[S.turno.rasto.length-1];
+  if(u){ a.lat=u[0]; a.lon=u[1]; }
+  S.turno.abastecimentos.push(a);
+  S.turno.totalCve+=v; S.turno.totalLitros+=v/S.turno.precoLitro;
+  if(S.fotos.talao){ S.turno.fotos['talao'+n]=S.fotos.talao; S.turno.fotoKeys.push('talao'+n); }
+  guardarTurno(S.turno,true);
+  S.fotos={}; S.rascunho={}; S.ecra='turno'; pintar();
+}
+function fecharTurno(){
+  var t=S.turno, kmF=S.rascunho.kmF;
+  if(kmF<t.kmInicial||kmF-t.kmInicial>LIM.kmMax) return;
+  t.kmFinal=kmF; t.fim=Date.now(); t.estado='FECHADO';
+  if(S.fotos.fecho){ t.fotos.fecho=S.fotos.fecho; t.fotoKeys.push('fecho'); }
+  t.kmGps=+kmDoRasto(t.rasto).toFixed(1);
+  t.semSinalS=Math.round(semSinalS(t.rasto));
+  t.bateriaFim=S.bateria;
+  t.alertas=avaliar(t).alertas;          // guardado: o dono vê o mesmo veredicto
+  desligarGps();
+  if(relogioTimer){ clearInterval(relogioTimer); relogioTimer=null; }
+  var c=carroDe(t.carroId); c.kmActual=kmF;
+  S.turnos=S.turnos.filter(function(x){ return x.id!==t.id; });
+  S.turnos.unshift(t); S.turno=null; S.fotos={}; S.rascunho={};
+  guardarTurno(t,true); guardarFrota();
+  S.ecra='resumo'; pintar();
+}
+function guardarDefinicoesFrota(){
+  if(S.rascunho.preco) S.frota.precoLitro=S.rascunho.preco;
+  S.rascunho={}; guardarFrota(); S.ecra='dono-resumo'; pintar();
+}
+
+/* ═══ ARRANQUE ═══════════════════════════════════════════════ */
+var L=lerLocal();
+S.frota = (L&&L.frota) || JSON.parse(JSON.stringify(FROTA_OMISSAO));
+if(!S.frota.carros||!S.frota.carros.length) S.frota.carros=FROTA_OMISSAO.carros.slice();
+S.eu = (L&&L.eu) || S.eu;
+if(!carroDe(S.eu.carroId)) S.eu.carroId=S.frota.carros[0].id;
+S.turnos = (L&&L.turnos) || [];
+S.papel = (L&&L.papel) || 'condutor';
+S.turno = (L&&L.turno&&L.turno.estado==='ABERTO') ? L.turno : null;
+if(S.turno){ S.papel='condutor'; S.ecra='turno'; ligarGps();
+  relogioTimer=setInterval(pintarTopo,1000); }
+else S.ecra = S.papel==='dono' ? 'dono-resumo' : 'inicio';
+pintar();
+lerBateria();
+
+// A base partilhada chega depois — a app já está de pé sem ela.
+if(window.claude&&window.claude.use){
+  window.claude.use('user').then(function(u){
+    if(!u) return; S.user=u;
+    try{ if(u.isOwner&&u.isOwner()&&!L){ S.papel='dono'; S.ecra='dono-resumo'; pintar(); } }catch(e){}
+  }).catch(function(){});
+
+  window.claude.use('db').then(function(db){
+    if(!db) return;
+    S.db=db;
+    db.doc('config/frota').get().then(function(s){
+      if(s.exists){ var f=s.data();
+        if(f.carros&&f.carros.length) S.frota=f;
+        if(!carroDe(S.eu.carroId)) S.eu.carroId=S.frota.carros[0].id; }
+      else db.doc('config/frota').set(S.frota).catch(function(){});
+      pintar();
+    }).catch(function(){});
+
+    S.subs.push(db.collection('turnos').orderBy('inicio','desc').limit(60)
+      .onSnapshot(function(q){
+        var vindos=q.docs.map(function(d){ return d.data(); })
+          .filter(function(t){ return t&&t.id&&t.inicio; });
+        var meuAberto=S.turno?S.turno.id:null;
+        var mapa={};
+        vindos.forEach(function(t){ if(t.id!==meuAberto) mapa[t.id]=t; });
+        S.turnos.forEach(function(t){ if(!mapa[t.id]&&t.id!==meuAberto) mapa[t.id]=t; });
+        S.turnos=Object.keys(mapa).map(function(k){ return mapa[k]; })
+          .sort(function(a,b){ return b.inicio-a.inicio; });
+        guardarLocal();
+        if(S.ecra!=='abrir'&&S.ecra!=='abastecer'&&S.ecra!=='fechar') pintar();
+      }, function(){}));
+  }).catch(function(){});
+}
+})();
+</script>
