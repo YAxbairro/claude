@@ -348,6 +348,7 @@ dono olhar para uma lista e saber com quem tem de falar.
 | Talão duplicado ou foto reutilizada (A15, A16) | −30 |
 | Carro não estava no posto (A14) | −30 |
 | Litros impossíveis (A13) | −25 |
+| Valor declarado acima do talão (A12) | −25 |
 | Divergência de km acima de 25% (A08, A09) | −15 |
 | Abastecimento sem talão (A11) | −10 |
 | Turno fechado automaticamente (A20) | −10 |

@@ -11,7 +11,9 @@ Depois: rent-a-car e carros de serviço de instituições.
 **Fase 1 concluída.** A lógica toda está implementada e testada, ainda sem interface.
 
 ```bash
-./fleetcv/db/run.sh      # recria a base de dados e corre os 18 cenários
+./fleetcv/db/run.sh                              # recria a base e corre os 18 cenários
+python3 fleetcv/db/demo/gerar_demo.py demo.sql   # uma semana de três táxis na Praia
+psql -X -A -t -d fleetcv -f fleetcv/db/demo/exportar_painel.sql -o dados.json
 ```
 
 👉 **[SPEC.md](SPEC.md)** — a fonte da verdade: regras, modelo de dados, alertas,

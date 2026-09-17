@@ -32,6 +32,7 @@ insert into fleetcv.penalizacao (codigo, pontos) values
   ('A16', 30),
   ('A14', 30),
   ('A13', 25),
+  ('A12', 25),   -- valor declarado acima do talão: a prova mais directa de desvio
   ('A08', 15),
   ('A09', 15),
   ('A11', 10),
