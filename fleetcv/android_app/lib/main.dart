@@ -184,7 +184,8 @@ class _EcraPrincipalState extends State<EcraPrincipal> {
       return;
     }
 
-    const definicoes = AndroidSettings(
+    // Não pode ser const: ForegroundNotificationConfig não tem construtor constante.
+    final definicoes = AndroidSettings(
       accuracy: LocationAccuracy.high,
       distanceFilter: 10,
       intervalDuration: Duration(seconds: 10),
