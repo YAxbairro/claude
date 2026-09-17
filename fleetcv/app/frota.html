@@ -1,285 +1,307 @@
-<title>FleetCV Frota</title>
+<title>FleetCV</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
 :root{
-  --ground:#EDF0F0; --surface:#FFFFFF; --surface2:#F4F7F7; --line:#D5DCDC; --line2:#E6EBEB;
-  --ink:#0F1618; --muted:#5C6A6C;
+  --ground:#EDF0F0; --surface:#FFFFFF; --surface2:#F4F7F7; --line:#D5DCDC; --line2:#E7ECEC;
+  --ink:#0F1618; --muted:#5C6A6C; --fraco:#8A9696;
   --accent:#0B7F8E; --accent-ink:#FFFFFF; --accent-wash:#E3F1F3;
   --ok:#3E7B22; --ok-wash:#EAF2E4;
   --warn:#A86A05; --warn-wash:#F8EEDC;
   --crit:#B02E20; --crit-wash:#F8E6E3;
+  --sombra:0 1px 2px rgba(15,22,24,.06), 0 10px 28px -20px rgba(15,22,24,.45);
   --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
   --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
   --display:'Archivo',var(--sans);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --ground:#0B1011; --surface:#141A1B; --surface2:#1A2122; --line:#293233; --line2:#212929;
-  --ink:#E3E9E8; --muted:#8A9897;
+  --ink:#E3E9E8; --muted:#8A9897; --fraco:#6B7877;
   --accent:#3FC0CE; --accent-ink:#06191C; --accent-wash:#122E32;
   --ok:#77C34B; --ok-wash:#17280F;
   --warn:#DCA43C; --warn-wash:#2E2310;
   --crit:#E4776A; --crit-wash:#331714;
+  --sombra:0 1px 2px rgba(0,0,0,.45), 0 10px 28px -20px rgba(0,0,0,.9);
 }}
 :root[data-theme="dark"]{
   --ground:#0B1011; --surface:#141A1B; --surface2:#1A2122; --line:#293233; --line2:#212929;
-  --ink:#E3E9E8; --muted:#8A9897;
+  --ink:#E3E9E8; --muted:#8A9897; --fraco:#6B7877;
   --accent:#3FC0CE; --accent-ink:#06191C; --accent-wash:#122E32;
   --ok:#77C34B; --ok-wash:#17280F;
   --warn:#DCA43C; --warn-wash:#2E2310;
   --crit:#E4776A; --crit-wash:#331714;
+  --sombra:0 1px 2px rgba(0,0,0,.45), 0 10px 28px -20px rgba(0,0,0,.9);
 }
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
-  font-size:15px; line-height:1.45; -webkit-font-smoothing:antialiased;
-  display:flex; flex-direction:column}
-.num{font-family:var(--mono); font-variant-numeric:tabular-nums}
+  font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  display:flex; flex-direction:column; overflow:hidden}
 button{font:inherit; color:inherit}
+.num{font-family:var(--mono); font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:var(--display); margin:0; letter-spacing:-.02em; text-wrap:balance}
+h1{font-size:22px} h2{font-size:16px} h3{font-size:14px}
 
-/* topo */
-.topo{background:var(--surface); border-bottom:1px solid var(--line); padding:10px 16px;
-  display:flex; align-items:center; gap:10px; position:sticky;
-  top:env(safe-area-inset-top,0px); z-index:10}
-.marca{font-family:var(--display); font-weight:700; font-size:15px; letter-spacing:-.02em;
-  display:flex; align-items:center; gap:6px}
-.marca .pt{width:8px; height:8px; border-radius:50%; background:var(--accent)}
+/* ── barra de cima ─────────────────────────────────────── */
+.topo{background:var(--surface); border-bottom:1px solid var(--line);
+  padding:10px 16px calc(10px); display:flex; gap:10px; align-items:center; flex:none;
+  padding-top:calc(10px + env(safe-area-inset-top,0px))}
+.logo{font-family:var(--display); font-weight:700; font-size:16px; display:flex;
+  gap:7px; align-items:center}
+.logo .pt{width:9px; height:9px; border-radius:50%; background:var(--accent); flex:none}
+.logo small{font-weight:400; font-size:12px; color:var(--muted); font-family:var(--sans)}
 .topo .dir{margin-left:auto; display:flex; gap:7px; align-items:center}
 .pill{font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px;
   background:var(--surface2); color:var(--muted); border:1px solid var(--line2);
   white-space:nowrap}
 .pill.viva{background:var(--ok-wash); color:var(--ok); border-color:transparent}
 .pill.morta{background:var(--crit-wash); color:var(--crit); border-color:transparent}
+.pill.demo{background:var(--accent-wash); color:var(--accent); border-color:transparent}
 
-main{flex:1; overflow-y:auto; padding:16px; padding-bottom:8px}
-.col{max-width:520px; margin:0 auto; display:flex; flex-direction:column; gap:14px}
+/* ── corpo ─────────────────────────────────────────────── */
+main{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch}
+.col{max-width:620px; margin:0 auto; padding:16px; display:flex; flex-direction:column;
+  gap:13px}
+.tit{display:flex; align-items:baseline; gap:9px; flex-wrap:wrap}
+.tit p{margin:0; font-size:13px; color:var(--muted)}
+.sub{margin:0; font-size:13.5px; color:var(--muted)}
 
-h1{font-family:var(--display); font-size:21px; margin:0; letter-spacing:-.02em}
-h2{font-family:var(--display); font-size:15px; margin:0 0 2px; letter-spacing:-.01em}
-.sub{font-size:13px; color:var(--muted); margin:0}
+/* ── barra de baixo ────────────────────────────────────── */
+.abaixo{flex:none; background:var(--surface); border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom,0px)}
+.nav{max-width:620px; margin:0 auto; display:flex}
+.nav button{flex:1; border:none; background:none; padding:9px 4px 8px; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:3px; color:var(--muted);
+  font-size:10.5px; font-weight:600; position:relative}
+.nav button[aria-current="page"]{color:var(--accent)}
+.nav .ic{font-size:18px; line-height:1}
+.nav .bolha{position:absolute; top:5px; left:calc(50% + 7px); min-width:16px; height:16px;
+  border-radius:9px; background:var(--crit); color:#fff; font-size:10px; font-weight:700;
+  display:grid; place-items:center; padding:0 4px}
+.accoes{max-width:620px; margin:0 auto; padding:10px 16px}
+.accoes>*+*{margin-top:8px}
 
-.cartao{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:15px}
-.cartao.aviso{background:var(--warn-wash); border-color:color-mix(in srgb,var(--warn) 35%,transparent)}
-.cartao.mau{background:var(--crit-wash); border-color:color-mix(in srgb,var(--crit) 35%,transparent)}
-.cartao.bom{background:var(--ok-wash); border-color:color-mix(in srgb,var(--ok) 35%,transparent)}
+/* ── peças ─────────────────────────────────────────────── */
+.cartao{background:var(--surface); border:1px solid var(--line); border-radius:12px;
+  padding:14px}
+.cartao.bom{background:var(--ok-wash); border-color:color-mix(in srgb,var(--ok) 30%,transparent)}
+.cartao.aviso{background:var(--warn-wash); border-color:color-mix(in srgb,var(--warn) 30%,transparent)}
+.cartao.mau{background:var(--crit-wash); border-color:color-mix(in srgb,var(--crit) 30%,transparent)}
+.cartao.destaque{background:var(--accent-wash); border-color:color-mix(in srgb,var(--accent) 30%,transparent)}
 
-.carro{display:flex; align-items:center; gap:12px}
-.carro .mat{font-family:var(--mono); font-weight:600; font-size:18px; letter-spacing:.02em}
-.carro .det{font-size:12.5px; color:var(--muted)}
-.carro .km{margin-left:auto; text-align:right}
-.carro .km b{font-family:var(--mono); font-size:17px; font-weight:500; display:block}
-.carro .km span{font-size:11px; color:var(--muted)}
-
-/* relógio do turno */
-.relogio{text-align:center; padding:10px 0 4px}
-.relogio .t{font-family:var(--mono); font-size:44px; font-weight:500; letter-spacing:-.03em;
-  line-height:1}
-.relogio .l{font-size:12px; color:var(--muted); margin-top:4px; letter-spacing:.06em;
-  text-transform:uppercase; font-weight:600}
-.metricas{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line2);
-  border-radius:10px; overflow:hidden; border:1px solid var(--line2); margin-top:12px}
-.metricas div{background:var(--surface); padding:10px 8px; text-align:center}
-.metricas b{font-family:var(--mono); font-size:19px; font-weight:500; display:block;
-  letter-spacing:-.02em}
-.metricas span{font-size:10.5px; color:var(--muted); text-transform:uppercase;
-  letter-spacing:.05em; font-weight:600}
-
-/* botões */
-.acoes{padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));
-  background:var(--surface); border-top:1px solid var(--line)}
-.acoes .col{gap:9px}
-.bt{display:block; width:100%; border:none; border-radius:12px; padding:16px;
-  font-size:16.5px; font-weight:600; cursor:pointer; text-align:center;
-  font-family:var(--display); letter-spacing:-.01em}
-.bt:active{transform:scale(.99)}
+.bt{display:block; width:100%; border:none; border-radius:11px; padding:15px;
+  font-family:var(--display); font-weight:600; font-size:16px; cursor:pointer;
+  text-align:center}
+.bt:active{transform:scale(.995)}
 .bt.pri{background:var(--accent); color:var(--accent-ink)}
 .bt.sec{background:var(--surface2); color:var(--ink); border:1px solid var(--line)}
 .bt.perigo{background:var(--crit); color:#fff}
 .bt:disabled{opacity:.45; cursor:not-allowed}
-.bt2{display:flex; gap:9px}
-.bt2 .bt{flex:1}
-.ligacao{background:none; border:none; color:var(--accent); font-size:13.5px; font-weight:600;
-  cursor:pointer; padding:8px; text-decoration:underline; text-underline-offset:3px}
+.bt.pequeno{padding:11px; font-size:14px}
+.par{display:flex; gap:8px} .par>*{flex:1}
+.lig{background:none; border:none; color:var(--accent); font-weight:600; font-size:13.5px;
+  cursor:pointer; padding:7px 0; text-decoration:underline; text-underline-offset:3px}
 
-/* foto */
-.foto{position:relative; border:2px dashed var(--line); border-radius:12px; padding:22px 14px;
-  text-align:center; background:var(--surface2); cursor:pointer; display:block}
-.foto.feita{border-style:solid; border-color:var(--ok); padding:0; overflow:hidden}
-.foto img{width:100%; display:block; max-height:230px; object-fit:cover}
-.foto input{position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer}
-.foto .ico{font-size:26px; line-height:1}
-.foto .tx{font-weight:600; margin-top:7px; font-size:14.5px}
-.foto .tx2{font-size:12.5px; color:var(--muted); margin-top:2px}
-.foto .refazer{position:absolute; right:8px; bottom:8px; background:rgba(0,0,0,.72); color:#fff;
-  font-size:11.5px; font-weight:600; padding:5px 10px; border-radius:7px; z-index:2}
-
-label.campo{display:block}
-label.campo .lb{font-size:11.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
-  color:var(--muted); margin-bottom:5px; display:block}
-input[type=number],input[type=text]{width:100%; padding:13px 14px; border-radius:10px;
+.campo{display:block}
+.campo .lb{display:block; font-size:11.5px; font-weight:600; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:5px}
+.campo .aj{display:block; font-size:12px; color:var(--muted); margin-top:5px}
+input[type=text],input[type=number]{width:100%; padding:12px 13px; border-radius:10px;
   border:1px solid var(--line); background:var(--surface); color:var(--ink);
-  font-family:var(--mono); font-size:19px; font-weight:500; -moz-appearance:textfield}
-input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
+  font-family:var(--mono); font-size:17px; font-weight:500; -moz-appearance:textfield}
+input[type=text]{font-family:var(--sans); font-size:15.5px}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 input:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
-.ajuda{font-size:12px; color:var(--muted); margin-top:6px}
 
-/* verificações */
-.ver{display:flex; gap:10px; padding:10px 0; border-bottom:1px solid var(--line2);
-  align-items:flex-start}
-.ver:last-child{border-bottom:none}
-.ver .mk{flex:none; width:20px; height:20px; border-radius:50%; display:grid; place-items:center;
-  font-size:11px; font-weight:700; margin-top:1px}
-.ver .mk.s{background:var(--ok-wash); color:var(--ok)}
-.ver .mk.n{background:var(--warn-wash); color:var(--warn)}
-.ver .mk.c{background:var(--crit-wash); color:var(--crit)}
-.ver .tx{flex:1; min-width:0}
-.ver .t1{font-size:13.5px; font-weight:600}
-.ver .t2{font-size:12px; color:var(--muted)}
-.ver .vl{font-family:var(--mono); font-size:13.5px; font-weight:500; white-space:nowrap}
-
-.hist{display:flex; flex-direction:column; gap:8px}
-.ht{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:11px 13px;
-  display:flex; gap:10px; align-items:center; cursor:pointer; width:100%; text-align:left}
-.ht .d{font-size:12.5px; color:var(--muted)}
-.ht .m{font-family:var(--mono); font-weight:500}
-.ht .r{margin-left:auto; text-align:right; font-family:var(--mono); font-size:13px}
-.selo{font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:5px; white-space:nowrap}
-.selo.s{background:var(--ok-wash); color:var(--ok)}
-.selo.n{background:var(--warn-wash); color:var(--warn)}
-.selo.c{background:var(--crit-wash); color:var(--crit)}
-.vazio{text-align:center; padding:26px 16px; color:var(--muted); font-size:13.5px}
-
-.abas{display:flex; gap:2px; background:var(--surface2); border:1px solid var(--line);
-  border-radius:10px; padding:3px}
-.abas button{flex:1; border:none; background:none; padding:8px; border-radius:7px;
-  font-size:13px; font-weight:600; cursor:pointer; color:var(--muted)}
-.abas button[aria-selected="true"]{background:var(--surface); color:var(--ink);
-  box-shadow:0 1px 2px rgba(0,0,0,.08)}
-
-.nota{font-size:12px; color:var(--muted); line-height:1.5}
-.nota b{color:var(--ink)}
-.mapinha{width:100%; height:auto; display:block; border-radius:9px; background:var(--surface2);
-  border:1px solid var(--line2)}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-</style><style>
-.papeis{display:flex; gap:2px; background:var(--surface2); border:1px solid var(--line);
-  border-radius:8px; padding:2px; margin-left:auto}
-.papeis button{border:none; background:none; padding:5px 11px; border-radius:6px;
-  font-size:12px; font-weight:600; cursor:pointer; color:var(--muted); font-family:var(--sans)}
-.papeis button[aria-selected="true"]{background:var(--surface); color:var(--ink)}
+/* números grandes */
 .tiles{display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line2);
-  border:1px solid var(--line2); border-radius:11px; overflow:hidden}
-.tiles div{background:var(--surface); padding:12px 13px}
-.tiles b{font-family:var(--mono); font-size:22px; font-weight:500; display:block;
+  border:1px solid var(--line2); border-radius:12px; overflow:hidden}
+.tiles>div{background:var(--surface); padding:13px}
+.tiles b{display:block; font-family:var(--mono); font-size:23px; font-weight:500;
   letter-spacing:-.02em; line-height:1.15}
 .tiles span{font-size:10.5px; color:var(--muted); text-transform:uppercase;
   letter-spacing:.06em; font-weight:600}
-.tiles .al b{color:var(--warn)}
-.al0 b{color:var(--ok)!important}
-.alerta-l{display:grid; grid-template-columns:3px 1fr; border-radius:10px; overflow:hidden;
-  border:1px solid var(--line); background:var(--surface)}
-.alerta-l .fx{background:var(--warn)} .alerta-l.c .fx{background:var(--crit)}
-.alerta-l .cp{padding:12px 13px}
-.alerta-l .cab{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
-.selo.cod{font-family:var(--mono); font-weight:600; letter-spacing:0}
-.resolver{display:flex; gap:6px; margin-top:10px; flex-wrap:wrap}
-.resolver button{flex:1; min-width:96px; border:1px solid var(--line); background:var(--surface2);
-  border-radius:8px; padding:8px 6px; font-size:11.5px; font-weight:600; cursor:pointer;
-  font-family:var(--sans)}
-.resolver button:hover{border-color:var(--accent); color:var(--accent)}
-.resolvido{font-size:11.5px; color:var(--muted); margin-top:8px}
-.lista-carro{display:flex; gap:10px; align-items:center; padding:11px 0;
-  border-bottom:1px solid var(--line2); width:100%; text-align:left; background:none;
-  border-left:none; border-right:none; border-top:none; cursor:pointer}
-.lista-carro:last-child{border-bottom:none}
-.lista-carro.escolhido{background:var(--accent-wash); border-radius:9px; padding:11px 12px;
-  border-bottom-color:transparent}
+.tiles .mau b{color:var(--crit)} .tiles .bom b{color:var(--ok)}
+
+/* linhas de lista */
+.linha{display:flex; gap:11px; align-items:center; width:100%; text-align:left;
+  background:var(--surface); border:1px solid var(--line); border-radius:11px;
+  padding:12px 13px; cursor:pointer}
+.linha:hover{border-color:var(--accent)}
+.linha .p{font-weight:600; font-size:14px}
+.linha .s{font-size:12.5px; color:var(--muted)}
+.linha .d{margin-left:auto; text-align:right}
+.selo{font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:6px; white-space:nowrap}
+.selo.s{background:var(--ok-wash); color:var(--ok)}
+.selo.n{background:var(--warn-wash); color:var(--warn)}
+.selo.c{background:var(--crit-wash); color:var(--crit)}
+.selo.i{background:var(--surface2); color:var(--muted)}
+
+/* verificações */
+.vf{display:flex; gap:11px; padding:11px 0; border-bottom:1px solid var(--line2);
+  align-items:flex-start}
+.vf:last-child{border-bottom:none}
+.vf .mk{flex:none; width:21px; height:21px; border-radius:50%; display:grid;
+  place-items:center; font-size:12px; font-weight:700; margin-top:1px}
+.vf .mk.s{background:var(--ok-wash); color:var(--ok)}
+.vf .mk.n{background:var(--crit-wash); color:var(--crit)}
+.vf .mk.z{background:var(--surface2); color:var(--muted)}
+.vf .tx{flex:1; min-width:0}
+.vf .t1{font-size:13.5px; font-weight:600}
+.vf .t2{font-size:12px; color:var(--muted); margin-top:1px}
+.vf .vl{font-family:var(--mono); font-size:13px; white-space:nowrap; color:var(--muted)}
+
+/* foto */
+.foto{position:relative; display:block; border:2px dashed var(--line); border-radius:12px;
+  padding:22px 14px; text-align:center; background:var(--surface2); cursor:pointer}
+.foto.feita{border-style:solid; border-color:var(--ok); padding:0; overflow:hidden}
+.foto img{width:100%; display:block; max-height:220px; object-fit:cover}
+.foto input{position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer}
+.foto .ic{font-size:26px} .foto .t{font-weight:600; margin-top:7px; font-size:14.5px}
+.foto .t2{font-size:12.5px; color:var(--muted); margin-top:2px}
+.foto .re{position:absolute; right:8px; bottom:8px; background:rgba(0,0,0,.72); color:#fff;
+  font-size:11.5px; font-weight:600; padding:5px 10px; border-radius:7px}
+
+/* turno a decorrer */
+.relogio{text-align:center; padding:6px 0 2px}
+.relogio .t{font-family:var(--mono); font-size:42px; font-weight:500; line-height:1;
+  letter-spacing:-.03em}
+.relogio .l{font-size:12px; color:var(--muted); margin-top:5px}
+.medidores{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line2);
+  border:1px solid var(--line2); border-radius:10px; overflow:hidden; margin-top:12px}
+.medidores>div{background:var(--surface); padding:9px 6px; text-align:center}
+.medidores b{display:block; font-family:var(--mono); font-size:18px; font-weight:500}
+.medidores span{font-size:10px; color:var(--muted); text-transform:uppercase;
+  letter-spacing:.05em; font-weight:600}
+
+.mapinha{width:100%; height:auto; display:block; border-radius:10px;
+  background:var(--surface2); border:1px solid var(--line2)}
 .fotos-g{display:grid; grid-template-columns:1fr 1fr; gap:8px}
 .fotos-g figure{margin:0}
 .fotos-g img{width:100%; border-radius:9px; border:1px solid var(--line); display:block}
 .fotos-g figcaption{font-size:11px; color:var(--muted); margin-top:4px; text-align:center}
+
+.vazio{text-align:center; padding:22px 14px; color:var(--muted); font-size:13.5px}
+.nota{font-size:12.5px; color:var(--muted); line-height:1.55}
+.nota b{color:var(--ink)}
+.passos{display:flex; gap:6px; margin-bottom:4px}
+.passos span{flex:1; height:4px; border-radius:2px; background:var(--line)}
+.passos span.on{background:var(--accent)}
+.scroll{overflow-x:auto; border:1px solid var(--line); border-radius:11px;
+  background:var(--surface)}
+table{border-collapse:collapse; width:100%; min-width:460px; font-size:13.5px}
+th{text-align:left; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--muted); font-weight:600; padding:9px 12px; background:var(--surface2);
+  border-bottom:1px solid var(--line); white-space:nowrap}
+td{padding:9px 12px; border-bottom:1px solid var(--line2)}
+tbody tr:last-child td{border-bottom:none}
+td.n{font-family:var(--mono); text-align:right; white-space:nowrap}
+tr.total td{font-weight:700; background:var(--surface2)}
+.barra{height:6px; border-radius:3px; background:var(--line2); overflow:hidden; margin-top:6px}
+.barra span{display:block; height:100%; border-radius:3px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
+
 <div class="topo">
-  <div class="marca"><span class="pt"></span>FleetCV</div>
-  <div class="papeis" id="papeis"></div>
+  <div class="logo"><span class="pt"></span>FleetCV<small id="logo-sub"></small></div>
   <div class="dir" id="topo-dir"></div>
 </div>
 <main><div class="col" id="ecra"></div></main>
-<div class="acoes"><div class="col" id="acoes"></div></div>
+<div class="abaixo"><div class="accoes" id="accoes"></div><div class="nav" id="nav"></div></div>
 <script>
 (function(){
 "use strict";
 
-/* ═══════════════════════════════════════════════════════════════
-   FleetCV — condutor e dono no mesmo endereço.
-   A base de dados partilhada é por artefacto: um painel publicado
-   à parte teria uma base vazia e nunca veria estes turnos.
-   Os limites são os mesmos do motor SQL da Fase 1 (SPEC §15).
-   ═══════════════════════════════════════════════════════════════ */
-var LIM = { gapKm:3, kmMax:500, divAviso:15, divCritica:25, semSinalS:900,
-            precisaoMax:50, velMax:180, divLitrosPct:3, raioPostoM:150, paragemMinS:120 };
+/* ════════════════════════════════════════════════════════════
+   FleetCV — controlo de frota para Cabo Verde
+   Um só endereço, dois papéis: condutor e dono.
+   Os limites são os mesmos do motor SQL (SPEC §15) e da app Android.
+   ════════════════════════════════════════════════════════════ */
 
-// Penalizações do score — a mesma tabela de fleetcv.penalizacao
-var PEN = { A04:50, A06:40, A19:30, A15:30, A16:30, A14:30, A13:25, A12:25,
-            A08:15, A09:15, A11:10, A20:10, A21:5 };
+var LIM = {
+  gapKm:3,             // o carro andou sem turno aberto
+  kmMax:500,           // km plausíveis num turno
+  divAviso:15,         // divergência entre conta-quilómetros e GPS
+  divCritica:25,
+  semSinalS:900,       // 15 minutos sem sinal
+  precisaoMax:50,      // pontos de GPS maus
+  velMax:180,          // saltos impossíveis
+  divLitrosPct:3,      // talão contra valor escrito
+  raioPostoM:150,
+  paragemMinS:120
+};
+var PENAL = { A04:50, A06:40, A19:30, A15:30, A16:30, A14:30, A13:25, A12:25,
+              A08:15, A09:15, A11:10, A20:10, A21:5 };
+var DIAS_UTEIS_MES = 22;
 
-var FROTA_OMISSAO = { precoLitro:145, carros:[
-  { id:'c1', matricula:'CV-01-AB', marca:'Toyota', modelo:'Corolla', deposito:50, kmActual:120000 }
-]};
+var S = {
+  pronto:false, papel:'dono', ecra:'hoje', passo:0,
+  frota:null, turnos:[], turno:null, eu:{nome:'', carroId:null},
+  db:null, podeEscrever:true,
+  gps:{estado:'desligado', precisao:null}, bateria:null,
+  fotos:{}, rasc:{}, detalhe:null, fotosDetalhe:null, aviso:null,
+  demo:{ligado:false, aCorrer:false, passo:0, cenario:null}
+};
+var vigia=null, relogio=null, cronoDemo=null;
 
-var S = { papel:'condutor', ecra:'inicio', frota:null, eu:{nome:'', carroId:'c1'},
-          turno:null, turnos:[], db:null, user:null, podeEscrever:true,
-          gps:{estado:'parado', ultimo:0, precisao:null}, bateria:null,
-          fotos:{}, rascunho:{}, detalhe:null, fotosDetalhe:null, importado:null, subs:[] };
-var relogioTimer=null, watchId=null;
-
-/* ── utilitários ────────────────────────────────────────────── */
-function nf(n,d){ d=d||0; var v=Math.abs(Number(n)||0).toFixed(d).split('.');
-  v[0]=v[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');
-  return (Number(n)<0?'−':'')+v.join(','); }
-function hm(s){ s=Math.max(0,Math.floor(s));
+/* ─── números e datas ─────────────────────────────────────── */
+function nf(v,d){ d=d||0;
+  var p=Math.abs(Number(v)||0).toFixed(d).split('.');
+  p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  return (Number(v)<0?'−':'')+p.join(','); }
+function hms(s){ s=Math.max(0,Math.floor(s));
   return String(Math.floor(s/3600)).padStart(2,'0')+':'+
          String(Math.floor(s%3600/60)).padStart(2,'0')+':'+
          String(s%60).padStart(2,'0'); }
-function horas(ts){ var d=new Date(ts);
+function hh(ms){ var d=new Date(ms);
   return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
-function dataCurta(ts){ var d=new Date(ts),
+function dia(ms){ var d=new Date(ms),
   ds=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'],
-  ms=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  return ds[d.getDay()]+' '+d.getDate()+' '+ms[d.getMonth()]; }
+  ms2=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  return ds[d.getDay()]+' '+d.getDate()+' '+ms2[d.getMonth()]; }
+function eHoje(ms){ var a=new Date(ms), b=new Date();
+  return a.toDateString()===b.toDateString(); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,
   function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
-function uid(p){ return (p||'t')+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
-function hoje(ts){ var d=new Date(ts), h=new Date();
-  return d.getDate()===h.getDate()&&d.getMonth()===h.getMonth()&&d.getFullYear()===h.getFullYear(); }
+function uid(p){ return (p||'t')+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 
-function dist(a,b,c,d){ var R=6371000,p=Math.PI/180;
-  return 2*R*Math.asin(Math.sqrt(Math.pow(Math.sin((c-a)*p/2),2)+
-    Math.cos(a*p)*Math.cos(c*p)*Math.pow(Math.sin((d-b)*p/2),2))); }
+/* ─── geografia ───────────────────────────────────────────── */
+function dist(a,b,c,d){ var R=6371000,g=Math.PI/180;
+  return 2*R*Math.asin(Math.sqrt(Math.pow(Math.sin((c-a)*g/2),2)+
+    Math.cos(a*g)*Math.cos(c*g)*Math.pow(Math.sin((d-b)*g/2),2))); }
 function kmDoRasto(pts){ var m=0, ant=null;
   for(var i=0;i<(pts||[]).length;i++){ var p=pts[i];
     if(p[3]!=null&&p[3]>LIM.precisaoMax) continue;
-    if(ant){ var ds=(p[2]-ant[2])/1000, d=dist(ant[0],ant[1],p[0],p[1]);
-      if(ds>0&&(d/ds)*3.6<=LIM.velMax) m+=d; }
+    if(ant){ var s=(p[2]-ant[2])/1000, d=dist(ant[0],ant[1],p[0],p[1]);
+      if(s>0&&(d/s)*3.6<=LIM.velMax) m+=d; }
     ant=p; }
   return m/1000; }
-function maiorFalhaS(pts){ var mx=0;
-  for(var i=1;i<(pts||[]).length;i++) mx=Math.max(mx,(pts[i][2]-pts[i-1][2])/1000);
+function maiorFalha(pts){ var mx=0;
+  for(var i=1;i<(pts||[]).length;i++){
+    if((pts[i-1][5]==null?100:pts[i-1][5])<=5) continue;
+    mx=Math.max(mx,(pts[i][2]-pts[i-1][2])/1000); }
   return mx; }
-function semSinalS(pts){ var t=0;
-  for(var i=1;i<(pts||[]).length;i++){ var g=(pts[i][2]-pts[i-1][2])/1000; if(g>300) t+=g; }
+function semSinal(pts){ var t=0;
+  for(var i=1;i<(pts||[]).length;i++){
+    if((pts[i-1][5]==null?100:pts[i-1][5])<=5) continue;
+    var g=(pts[i][2]-pts[i-1][2])/1000; if(g>300) t+=g; }
   return t; }
-function carroDe(id){ var c=(S.frota.carros||[]).filter(function(x){return x.id===id;});
-  return c[0]||S.frota.carros[0]; }
 
-/* ── armazenamento ──────────────────────────────────────────── */
-function guardarLocal(){ try{ localStorage.setItem('fleetcv2', JSON.stringify(
-  {frota:S.frota, eu:S.eu, turno:S.turno, papel:S.papel,
-   turnos:S.turnos.slice(0,30)})); }catch(e){} }
-function lerLocal(){ try{ var r=localStorage.getItem('fleetcv2');
+/* ─── frota ───────────────────────────────────────────────── */
+function frotaNova(){ return { nome:'', ilha:'Santiago', precoLitro:145, carros:[],
+  condutores:[], criadaEm:Date.now() }; }
+function carroDe(id){
+  var c=(S.frota.carros||[]).filter(function(x){ return x.id===id; });
+  return c[0]||S.frota.carros[0]||null; }
+
+/* ─── guardar ─────────────────────────────────────────────── */
+function guardarLocal(){ try{ localStorage.setItem('fleetcv3', JSON.stringify(
+  {frota:S.frota, eu:S.eu, papel:S.papel, turno:S.turno,
+   turnos:S.turnos.slice(0,40), demo:{ligado:S.demo.ligado}})); }catch(e){} }
+function lerLocal(){ try{ var r=localStorage.getItem('fleetcv3');
   return r?JSON.parse(r):null; }catch(e){ return null; } }
 function leve(t){ var c={}; for(var k in t) if(k!=='fotos') c[k]=t[k];
-  if(c.rasto&&c.rasto.length>900){ var r=[], p=Math.ceil(c.rasto.length/900);
+  if(c.rasto&&c.rasto.length>800){ var r=[],p=Math.ceil(c.rasto.length/800);
     for(var i=0;i<c.rasto.length;i+=p) r.push(c.rasto[i]);
     r.push(c.rasto[c.rasto.length-1]); c.rasto=r; }
   return c; }
@@ -296,104 +318,131 @@ function guardarTurno(t, comFotos){
     return Promise.all(ps);
   }).catch(function(e){ if(e&&e.code==='invalid_argument') S.podeEscrever=false; })
     .then(function(){ aEscrever=false;
-      if(pendente){ var p=pendente; pendente=null; return guardarTurno(p,false); } });
-}
+      if(pendente){ var p=pendente; pendente=null; return guardarTurno(p,false); } }); }
 function guardarFrota(){ guardarLocal();
   if(S.db&&S.podeEscrever) S.db.doc('config/frota').set(S.frota).catch(function(){}); }
 
-function lerFoto(file,cb){ var fr=new FileReader();
+/* ─── fotografia ──────────────────────────────────────────── */
+function lerFoto(f,cb){ var fr=new FileReader();
   fr.onload=function(){ var im=new Image();
-    im.onload=function(){ var max=520,k=Math.min(1,max/Math.max(im.width,im.height));
+    im.onload=function(){ var k=Math.min(1,520/Math.max(im.width,im.height));
       var cv=document.createElement('canvas');
       cv.width=Math.round(im.width*k); cv.height=Math.round(im.height*k);
       cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
       try{ cb(cv.toDataURL('image/jpeg',0.6)); }catch(e){ cb(fr.result); } };
     im.onerror=function(){ cb(fr.result); }; im.src=fr.result; };
-  fr.readAsDataURL(file); }
+  fr.readAsDataURL(f); }
 
-/* ── GPS e bateria ──────────────────────────────────────────── */
+/* ─── GPS ─────────────────────────────────────────────────── */
 function ligarGps(){
-  if(!navigator.geolocation){ S.gps.estado='indisponivel'; pintarTopo(); return; }
-  if(watchId!=null) return;
+  if(S.demo.ligado) return;
+  if(!navigator.geolocation){ S.gps.estado='indisponivel'; return; }
+  if(vigia!=null) return;
   S.gps.estado='a-procurar'; pintarTopo();
-  watchId=navigator.geolocation.watchPosition(function(pos){
-    S.gps.estado='ligado'; S.gps.ultimo=Date.now();
-    S.gps.precisao=Math.round(pos.coords.accuracy);
+  vigia=navigator.geolocation.watchPosition(function(pos){
+    S.gps.estado='ligado'; S.gps.precisao=Math.round(pos.coords.accuracy);
     if(S.turno&&S.turno.estado==='ABERTO'){ var c=pos.coords;
       S.turno.rasto.push([+c.latitude.toFixed(6), +c.longitude.toFixed(6), pos.timestamp,
-        Math.round(c.accuracy), c.speed==null?null:Math.round(c.speed*3.6)]);
+        Math.round(c.accuracy), c.speed==null?null:Math.round(c.speed*3.6), S.bateria]);
       if(S.turno.rasto.length%20===0) guardarTurno(S.turno,false); }
     pintarTopo();
   }, function(err){ S.gps.estado=err.code===1?'recusado':'sem-sinal'; pintarTopo(); },
-     {enableHighAccuracy:true, maximumAge:4000, timeout:25000});
-}
-function desligarGps(){ if(watchId!=null){ navigator.geolocation.clearWatch(watchId); watchId=null; }
-  S.gps.estado='parado'; }
+     {enableHighAccuracy:true, maximumAge:4000, timeout:25000}); }
+function desligarGps(){ if(vigia!=null){ navigator.geolocation.clearWatch(vigia); vigia=null; }
+  S.gps.estado='desligado'; }
 function lerBateria(){ if(!navigator.getBattery) return;
   navigator.getBattery().then(function(b){ S.bateria=Math.round(b.level*100);
-    b.addEventListener('levelchange',function(){ S.bateria=Math.round(b.level*100); pintarTopo(); });
+    b.addEventListener('levelchange',function(){ S.bateria=Math.round(b.level*100);
+      pintarTopo(); });
     pintarTopo(); }).catch(function(){}); }
 
-/* ── as regras, aplicadas no fecho ──────────────────────────── */
+/* ════════════════════════════════════════════════════════════
+   AS REGRAS — as mesmas contas do motor SQL
+   ════════════════════════════════════════════════════════════ */
 function avaliar(t){
   var v=[], al=[];
-  var kmQ=(t.kmFinal||0)-t.kmInicial, kmG=t.kmGps!=null?t.kmGps:kmDoRasto(t.rasto);
+  var kmQ=(t.kmFinal||0)-t.kmInicial;
+  var kmG=t.kmGps!=null?t.kmGps:kmDoRasto(t.rasto);
   var temRasto=(t.rasto||[]).length>5;
+  var fotosOk=!!(t.fotoKeys&&t.fotoKeys.indexOf('abertura')>=0&&
+                 t.fotoKeys.indexOf('fecho')>=0);
 
-  var fotosOk=!!(t.fotoKeys&&t.fotoKeys.indexOf('abertura')>=0&&t.fotoKeys.indexOf('fecho')>=0);
-  v.push({ok:fotosOk, t1:'Quadrante fotografado nas duas pontas',
+  v.push({ok:fotosOk, t1:'Fotografou o conta-quilómetros nas duas pontas',
     t2:nf(t.kmInicial)+' → '+nf(t.kmFinal), vl:nf(kmQ)+' km'});
-  if(!fotosOk) al.push({c:'A11',n:'AVISO',d:'Turno sem foto do quadrante'});
+  if(!fotosOk) al.push({c:'A11', n:'AVISO', d:'Turno sem foto do conta-quilómetros'});
 
-  if(temRasto){
-    var div=kmQ>0?(kmQ-kmG)/kmQ*100:0;
-    var mk=kmG>kmQ*1.10?'c':(div>=LIM.divCritica?'c':(Math.abs(div)>=LIM.divAviso?'n':'s'));
-    v.push({mk:mk, ok:mk==='s', t1:'Km do GPS batem com o quadrante',
-      t2:'divergência de '+nf(div,1)+'% · o GPS fica sempre um pouco abaixo',
-      vl:nf(kmG,1)+' km'});
-    if(mk==='c') al.push({c:kmG>kmQ*1.10?'A09':'A08',n:'CRITICO',
-      d:'Quadrante e GPS não batem ('+nf(div,1)+'%)'});
-    else if(mk==='n') al.push({c:'A07',n:'AVISO',d:'Divergência de km de '+nf(div,1)+'%'});
-
-    var falha=maiorFalhaS(t.rasto);
-    v.push({ok:falha<=LIM.semSinalS, t1:'Sinal de GPS sem falhas longas',
-      t2:'maior interrupção do sinal', vl:nf(falha/60)+' min'});
-    if(falha>LIM.semSinalS) al.push({c:'A03',n:'AVISO',
-      d:'Sem sinal de GPS durante '+nf(falha/60)+' minutos'});
-  } else {
-    v.push({mk:'n', ok:false, t1:'Sem percurso gravado',
-      t2:'o GPS não esteve activo durante o turno', vl:'—'});
-    al.push({c:'A03',n:'AVISO',d:'Turno sem percurso de GPS'});
+  if((t.pontosFalsos||0)>0){
+    v.push({ok:false, mk:'n', t1:'A localização é verdadeira',
+      t2:'o telemóvel denunciou uma aplicação de GPS falso', vl:'falsa'});
+    al.push({c:'A04', n:'CRITICO', d:'Localização falsa detectada'});
   }
 
   if(t.gap>LIM.gapKm){
-    v.push({mk:'c', ok:false, t1:'O carro andou fora de turno',
-      t2:'abriu com '+nf(t.kmInicial)+', o fecho anterior foi '+nf(t.kmInicial-t.gap),
+    v.push({ok:false, mk:'n', t1:'O carro não andou fora do turno',
+      t2:'o conta-quilómetros de hoje está à frente de onde ficou ontem',
       vl:'+'+nf(t.gap)+' km'});
-    al.push({c:'A19',n:'CRITICO',d:'O carro andou '+nf(t.gap)+' km sem turno aberto'});
+    al.push({c:'A19', n:'CRITICO',
+      d:'O carro andou '+nf(t.gap)+' km sem turno aberto',
+      dif:Math.round(t.gap*(t.consumoRef||7.5)/100*t.precoLitro)});
+  } else {
+    v.push({ok:true, t1:'O carro não andou fora do turno',
+      t2:'o conta-quilómetros continua onde ficou', vl:'bate'});
   }
 
-  (t.abastecimentos||[]).forEach(function(a,i){
-    v.push({ok:!!a.temFoto, t1:'Talão fotografado', t2:'abastecimento das '+horas(a.hora),
-      vl:nf(a.valor)+' CVE'});
-    if(!a.temFoto) al.push({c:'A11',n:'AVISO',d:'Abastecimento sem talão'});
+  if(temRasto){
+    var div=kmQ>0?(kmQ-kmG)/kmQ*100:0;
+    var gpsFrente=kmG>kmQ*1.10;
+    var critico=gpsFrente||div>=LIM.divCritica;
+    var aviso=!critico&&Math.abs(div)>=LIM.divAviso;
+    v.push({ok:!critico&&!aviso, mk:critico?'n':(aviso?'n':'s'),
+      t1:'Os km do GPS batem com o conta-quilómetros',
+      t2:(critico||aviso)
+        ? nf(kmQ-kmG)+' km andados sem se saber para onde'
+        : 'diferença de '+nf(div,1)+'% — normal, o GPS perde sinal às vezes',
+      vl:nf(kmG,1)+' km'});
+    if(critico) al.push({c:gpsFrente?'A09':'A08', n:'CRITICO',
+      d:'Conta-quilómetros e GPS não batem ('+nf(div,1)+'%)',
+      dif:gpsFrente?0:Math.round((kmQ-kmG)*(t.consumoRef||7.5)/100*t.precoLitro)});
+    else if(aviso) al.push({c:'A07', n:'AVISO',
+      d:'Diferença de km de '+nf(div,1)+'%'});
+
+    var falha=maiorFalha(t.rasto);
+    v.push({ok:falha<=LIM.semSinalS, t1:'O sinal de GPS não teve buracos',
+      t2:falha>LIM.semSinalS
+        ? 'e a bateria chegou ao fim do turno, por isso não foi o telemóvel a morrer'
+        : 'gravou o turno inteiro',
+      vl:nf(falha/60)+' min'});
+    if(falha>LIM.semSinalS) al.push({c:'A03', n:'AVISO',
+      d:'Sem sinal de GPS durante '+nf(falha/60)+' minutos'});
+  } else {
+    v.push({ok:false, t1:'Percurso gravado', t2:'o GPS não esteve ligado', vl:'—'});
+    al.push({c:'A03', n:'AVISO', d:'Turno sem percurso gravado'});
+  }
+
+  (t.abastecimentos||[]).forEach(function(a){
+    v.push({ok:!!a.temFoto, t1:'Fotografou o talão',
+      t2:'abastecimento das '+hh(a.hora), vl:nf(a.valor)+' CVE'});
+    if(!a.temFoto) al.push({c:'A11', n:'AVISO', d:'Abastecimento sem talão'});
 
     var litros=a.valor/t.precoLitro, cabe=litros<=t.deposito*1.05;
-    v.push({mk:cabe?'s':'c', ok:cabe, t1:'Litros cabem no depósito',
-      t2:nf(litros,2)+' l num depósito de '+nf(t.deposito)+' l', vl:nf(litros,2)+' l'});
-    if(!cabe) al.push({c:'A13',n:'CRITICO',
+    v.push({ok:cabe, mk:cabe?'s':'n', t1:'Os litros cabem no depósito',
+      t2:nf(litros,2)+' litros num depósito de '+nf(t.deposito),
+      vl:nf(litros,2)+' l'});
+    if(!cabe) al.push({c:'A13', n:'CRITICO',
       d:'Declarou '+nf(litros,2)+' litros num depósito de '+nf(t.deposito)});
 
     if(a.litrosTalao){
       var d2=Math.abs(a.litrosTalao-litros)/litros*100, bate=d2<=LIM.divLitrosPct;
-      v.push({mk:bate?'s':'n', ok:bate, t1:'Valor pago bate com o talão',
-        t2:'pagou '+nf(a.valor)+' CVE, que a '+nf(t.precoLitro,2)+'/l dariam '+nf(litros,2)+
-           ' l · o talão mostra '+nf(a.litrosTalao,2)+' l',
-        vl:bate?'bate':nf(a.litrosTalao*t.precoLitro)+' CVE'});
-      if(!bate) al.push({c:'A12',n:'AVISO',
-        d:'Declarou '+nf(a.valor)+' CVE mas o talão dá '+nf(a.litrosTalao*t.precoLitro)+' CVE',
-        dif:Math.round(a.valor-a.litrosTalao*t.precoLitro)});
+      var noTalao=Math.round(a.litrosTalao*t.precoLitro);
+      v.push({ok:bate, mk:bate?'s':'n', t1:'O que escreveu bate com o talão',
+        t2:bate ? 'escreveu '+nf(a.valor)+' CVE, e o talão diz o mesmo'
+                : 'escreveu '+nf(a.valor)+' CVE · o talão dá '+nf(noTalao)+' CVE',
+        vl:bate?'bate':nf(a.valor-noTalao)+' CVE'});
+      if(!bate) al.push({c:'A12', n:'AVISO',
+        d:'Escreveu '+nf(a.valor)+' CVE mas o talão dá '+nf(noTalao)+' CVE',
+        dif:a.valor-noTalao});
     }
+
     if(temRasto&&a.lat!=null){
       var parado=0, ant=null;
       t.rasto.forEach(function(p){
@@ -401,636 +450,962 @@ function avaliar(t){
           if(ant!=null) parado+=(p[2]-ant)/1000; ant=p[2];
         } else ant=null; });
       var okP=parado>=LIM.paragemMinS;
-      v.push({mk:okP?'s':'c', ok:okP, t1:'O carro esteve mesmo parado no posto',
-        t2:'o percurso mostra '+nf(parado/60,1)+' min dentro de '+LIM.raioPostoM+' m do local',
+      v.push({ok:okP, mk:okP?'s':'n', t1:'O carro esteve mesmo parado no posto',
+        t2:'o percurso mostra '+nf(parado/60,1)+' min parado no sítio do talão',
         vl:okP?'confirmado':'não'});
-      if(!okP) al.push({c:'A14',n:'CRITICO',d:'O rasto não mostra o carro parado no posto'});
+      if(!okP) al.push({c:'A14', n:'CRITICO',
+        d:'O percurso não mostra o carro parado no posto'});
     }
   });
+
   return {verificacoes:v, alertas:al, kmQuadrante:kmQ, kmGps:kmG};
 }
-function alertasDe(t){ return (t.alertas&&t.alertas.length!==undefined)?t.alertas:avaliar(t).alertas; }
+function alertasDe(t){ return (t.alertas&&t.alertas.length!==undefined)
+  ? t.alertas : avaliar(t).alertas; }
 function porResolver(t){ var r=t.resolucoes||{};
   return alertasDe(t).filter(function(a){ return !r[a.c]; }); }
-
+function dinheiroDe(t){ var r=t.resolucoes||{};
+  return alertasDe(t).reduce(function(s,a){
+    if(r[a.c]&&r[a.c].r==='ERRO_SISTEMA') return s;
+    return s+(a.dif||0); },0); }
 function score(nome){
-  var lim=Date.now()-30*864e5, pen=0, limpos=0;
+  var lim=Date.now()-30*864e5, pen=0, limpos=0, n=0;
   S.turnos.forEach(function(t){
     if(t.condutor!==nome||t.estado!=='FECHADO'||t.inicio<lim) return;
-    var r=t.resolucoes||{}, als=alertasDe(t), maus=0;
-    als.forEach(function(a){
-      if(r[a.c]&&r[a.c].r==='ERRO_SISTEMA') return;   // regra mal calibrada não penaliza
-      pen+=PEN[a.c]||0; if(a.n!=='INFO') maus++; });
+    n++;
+    var r=t.resolucoes||{}, maus=0;
+    alertasDe(t).forEach(function(a){
+      if(r[a.c]&&r[a.c].r==='ERRO_SISTEMA') return;
+      pen+=PENAL[a.c]||0; maus++; });
     pen+=Math.min(Math.floor((t.semSinalS||0)/600),20);
-    if(!maus) limpos++;
-  });
-  return Math.max(0, Math.min(100, 100-pen+limpos*3));
+    if(!maus) limpos++; });
+  return {valor:Math.max(0,Math.min(100,100-pen+limpos*3)), turnos:n, limpos:limpos};
 }
 
-/* ── pintar ─────────────────────────────────────────────────── */
-function pintarTopo(){
-  var p=[], rot={ligado:'GPS activo','a-procurar':'GPS a procurar',recusado:'GPS recusado',
-    'sem-sinal':'sem sinal',indisponivel:'sem GPS',parado:'GPS desligado'}[S.gps.estado];
-  if(S.papel==='condutor'){
-    var cls=S.gps.estado==='ligado'?'viva':
-      (S.gps.estado==='recusado'||S.gps.estado==='indisponivel'?'morta':'');
-    p.push('<span class="pill '+cls+'">'+rot+
-      (S.gps.estado==='ligado'&&S.gps.precisao?' ±'+S.gps.precisao+'m':'')+'</span>');
-    if(S.bateria!=null) p.push('<span class="pill">'+S.bateria+'%</span>');
+/* ════════════════════════════════════════════════════════════
+   MODO DEMONSTRAÇÃO
+   Para testar tudo sem carro, sem telemóvel, sem esperar duas
+   semanas. Os turnos são inventados; as contas que os avaliam
+   são exactamente as mesmas dos turnos verdadeiros.
+   ════════════════════════════════════════════════════════════ */
+
+var PRAIA = [14.9177, -23.5092];
+
+// Um táxi a andar numa malha de ruas: troços rectos e viragens.
+function percurso(semente, nPontos, inicioMs, intervaloS, opcoes){
+  opcoes = opcoes || {};
+  var r = semente, rnd = function(){ r=(r*1103515245+12345)%2147483648; return r/2147483648; };
+  var pts=[], lat=PRAIA[0], lon=PRAIA[1], rumo=Math.floor(rnd()*4)*90, t=0;
+  for(var i=0;i<nPontos;i++){
+    if(i%9===0) rumo += (rnd()<0.5?-90:90);
+    var rad=rumo*Math.PI/180, v=22+rnd()*26;           // 22 a 48 km/h
+    var d=v/3.6*intervaloS;
+    lat += Math.cos(rad)*d/111320 + (rnd()-0.5)*0.00008;
+    lon += Math.sin(rad)*d/(111320*Math.cos(lat*Math.PI/180)) + (rnd()-0.5)*0.00008;
+    if(Math.abs(lat-PRAIA[0])>0.035) rumo=(rumo+180)%360;
+    if(Math.abs(lon-PRAIA[1])>0.035) rumo=(rumo+180)%360;
+    t += intervaloS;
+    var bat = Math.round(100 - 45*i/nPontos);
+    pts.push([+lat.toFixed(6), +lon.toFixed(6), inicioMs+t*1000, 8+Math.round(rnd()*8),
+              Math.round(v), bat]);
   }
-  document.getElementById('topo-dir').innerHTML=p.join('');
-  document.getElementById('papeis').innerHTML=
-    ['condutor','dono'].map(function(x){
-      return '<button data-papel="'+x+'" aria-selected="'+(S.papel===x)+'">'+
-        (x==='condutor'?'Condutor':'Dono')+'</button>'; }).join('');
-  var t=document.getElementById('relogio-t');
-  if(t&&S.turno&&S.turno.estado==='ABERTO'){
-    t.textContent=hm((Date.now()-S.turno.inicio)/1000);
-    var k=document.getElementById('m-km'), n=document.getElementById('m-pt');
-    if(k) k.textContent=nf(kmDoRasto(S.turno.rasto),1);
-    if(n) n.textContent=S.turno.rasto.length;
+  // paragem no posto, a meio
+  var meio=Math.floor(nPontos*0.5), posto=pts[meio];
+  var extra=[];
+  for(var k=1;k<=7;k++)
+    extra.push([posto[0], posto[1], posto[2]+k*60000, 7, 0, posto[5]]);
+  pts = pts.slice(0,meio+1).concat(extra,
+        pts.slice(meio+1).map(function(p){ return [p[0],p[1],p[2]+7*60000,p[3],p[4],p[5]]; }));
+
+  // buraco: o motorista desligou o GPS
+  if(opcoes.buracoMin){
+    var a=Math.floor(pts.length*0.62), b=Math.floor(pts.length*0.80);
+    var salto=opcoes.buracoMin*60000;
+    pts = pts.slice(0,a).concat(pts.slice(b).map(function(p){
+      return [p[0],p[1],p[2]+salto,p[3],p[4],p[5]]; }));
   }
+  return {pontos:pts, postoLat:posto[0], postoLon:posto[1], postoMs:posto[2]+120000};
 }
-function foto(ch,ti,di){ var f=S.fotos[ch];
-  return f?'<label class="foto feita"><img src="'+f+'" alt="'+esc(ti)+'">'+
-    '<span class="refazer">Repetir</span>'+
-    '<input type="file" accept="image/*" capture="environment" data-foto="'+ch+'"></label>'
-   :'<label class="foto"><span class="ico">📷</span><span class="tx">'+esc(ti)+'</span>'+
-    '<span class="tx2">'+esc(di)+'</span>'+
-    '<input type="file" accept="image/*" capture="environment" data-foto="'+ch+'"></label>'; }
-function verLinhas(vs){ return vs.map(function(v){ var mk=v.mk||(v.ok?'s':'n');
-  return '<div class="ver"><span class="mk '+mk+'">'+(mk==='s'?'✓':'!')+'</span>'+
-    '<span class="tx"><span class="t1">'+esc(v.t1)+'</span><br>'+
-    '<span class="t2">'+esc(v.t2)+'</span></span><span class="vl">'+esc(v.vl)+'</span></div>';
-  }).join(''); }
-function mapinha(rasto){
+
+// Os cinco casos que o sistema tem de saber distinguir.
+var CASOS = [
+  {id:'limpo',  nome:'Dia normal',            peso:10},
+  {id:'talao',  nome:'Inflacionou o talão',   peso:0},
+  {id:'noite',  nome:'Usou o carro à noite',  peso:0},
+  {id:'gps',    nome:'Desligou o GPS',        peso:0},
+  {id:'bidao',  nome:'Encheu um bidão',       peso:0}
+];
+
+function turnoInventado(caso, carro, condutor, quando, semente){
+  var intervalo=30, n=300 + (semente % 7)*22;   // turnos de durações diferentes
+  var p = percurso(semente, n, quando, intervalo,
+                   {buracoMin: caso==='gps' ? 52 : 0});
+  var kmG = kmDoRasto(p.pontos);
+  var kmQ = Math.round(kmG*1.035);                    // o GPS fica sempre um pouco abaixo
+  if(caso==='gps') kmQ = Math.round(kmG+40);          // andou sem sinal
+  var gap = caso==='noite' ? 37 : 0;
+  var litros = Math.max(10, kmQ*(carro.consumoRef||7.5)/100*1.25);
+  var valor = Math.round(litros*S.frota.precoLitro/50)*50;
+  var litrosTalao = valor/S.frota.precoLitro;
+  if(caso==='talao') litrosTalao = +(litrosTalao*0.62).toFixed(2);
+  if(caso==='bidao'){ valor = Math.round(40*S.frota.precoLitro);
+                      litrosTalao = 40; }
+
+  var t = {
+    id:uid('d'), estado:'FECHADO', demo:true,
+    inicio:quando, fim:p.pontos[p.pontos.length-1][2],
+    carroId:carro.id, matricula:carro.matricula, condutor:condutor,
+    kmInicial:carro.kmActual+gap, kmFinal:carro.kmActual+gap+kmQ, gap:gap,
+    precoLitro:S.frota.precoLitro, deposito:carro.deposito,
+    consumoRef:carro.consumoRef||7.5,
+    rasto:p.pontos, kmGps:+kmG.toFixed(1),
+    semSinalS:Math.round(semSinal(p.pontos)),
+    bateriaFim:p.pontos[p.pontos.length-1][5],
+    abastecimentos:[{hora:p.postoMs, valor:valor, litrosTalao:+litrosTalao.toFixed(2),
+                     temFoto:true, lat:p.postoLat, lon:p.postoLon}],
+    totalCve:valor, totalLitros:valor/S.frota.precoLitro,
+    fotoKeys:['abertura','talao1','fecho'], pontosFalsos:0,
+    caso:caso
+  };
+  t.alertas = avaliar(t).alertas;
+  carro.kmActual = t.kmFinal;
+  return t;
+}
+
+/// Gera duas semanas de operação com os cinco casos lá dentro.
+function gerarDemonstracao(){
+  if(!S.frota.carros.length) return;
+  var condutores = S.frota.condutores.length
+    ? S.frota.condutores.map(function(c){ return c.nome; })
+    : ['António Semedo','Jorge Tavares','Nuno Rocha'];
+  var casos = ['limpo','limpo','limpo','talao','limpo','limpo','noite','limpo',
+               'gps','limpo','limpo','bidao','limpo','limpo','limpo'];
+  var novos = [], semente = 7;
+  var nCarros = S.frota.carros.length;
+  var nDias = Math.ceil(casos.length / nCarros);
+  var base = new Date(); base.setHours(0,0,0,0);
+  for(var i=0;i<casos.length;i++){
+    var carro = S.frota.carros[i % nCarros];
+    var condutor = condutores[i % condutores.length];
+    var d = Math.floor(i / nCarros);
+    // termina ontem e recua; cada carro sai a uma hora diferente, como na vida real
+    var quando = base.getTime() - (nDias-d)*864e5 + (6*60 + (i%nCarros)*35)*60000;
+    novos.push(turnoInventado(casos[i], carro, condutor, quando, semente+=13));
+  }
+  S.turnos = novos.concat(S.turnos.filter(function(t){ return !t.demo; }))
+    .sort(function(a,b){ return b.inicio-a.inicio; });
+  S.demo.ligado = true;
+  guardarFrota(); guardarLocal();
+  if(S.db&&S.podeEscrever) novos.forEach(function(t){
+    S.db.doc('turnos/'+t.id).set(leve(t)).catch(function(){}); });
+}
+
+function limparDemonstracao(){
+  var fora = S.turnos.filter(function(t){ return t.demo; });
+  S.turnos = S.turnos.filter(function(t){ return !t.demo; });
+  S.demo.ligado = false;
+  if(S.db&&S.podeEscrever) fora.forEach(function(t){
+    S.db.doc('turnos/'+t.id).delete().catch(function(){}); });
+  guardarLocal();
+}
+
+/* ─── turno de demonstração ao vivo ───────────────────────── */
+function arrancarTurnoDemo(){
+  var carro = carroDe(S.eu.carroId);
+  var p = percurso(Date.now()%100000, 340, Date.now(), 30, {});
+  S.demo.pontos = p.pontos; S.demo.posto = p;
+  S.demo.passo = 0; S.demo.aCorrer = true;
+  cronoDemo = setInterval(function(){
+    if(!S.turno||S.turno.estado!=='ABERTO'){ pararTurnoDemo(); return; }
+    for(var k=0;k<6&&S.demo.passo<S.demo.pontos.length;k++){
+      var pt = S.demo.pontos[S.demo.passo++];
+      // Os pontos ficam espaçados como ficariam num carro a sério — 30 segundos —
+      // senão a conta dos quilómetros dava números impossíveis.
+      S.turno.rasto.push([pt[0], pt[1], S.turno.inicio + S.demo.passo*30000,
+                          pt[3], pt[4], pt[5]]);
+    }
+    S.gps.estado='ligado'; S.gps.precisao=9;
+    if(S.ecra==='turno') pintar(); else pintarTopo();
+    if(S.demo.passo>=S.demo.pontos.length) pararTurnoDemo();
+  }, 220);
+}
+function pararTurnoDemo(){ if(cronoDemo){ clearInterval(cronoDemo); cronoDemo=null; }
+  S.demo.aCorrer=false; }
+
+/* ════════════════════════════════════════════════════════════
+   PEÇAS DO ECRÃ
+   ════════════════════════════════════════════════════════════ */
+function el(id){ return document.getElementById(id); }
+
+function mapinha(rasto, altura){
   var pts=(rasto||[]).filter(function(p){ return p[3]==null||p[3]<=LIM.precisaoMax; });
   if(pts.length<3) return '';
   var la=pts.map(function(p){return p[0];}), lo=pts.map(function(p){return p[1];});
   var mnA=Math.min.apply(null,la), mxA=Math.max.apply(null,la);
   var mnO=Math.min.apply(null,lo), mxO=Math.max.apply(null,lo);
-  var W=480,H=250,pad=16,kx=Math.cos(mnA*Math.PI/180);
+  var W=480, H=altura||240, pad=18, kx=Math.cos(mnA*Math.PI/180);
   var sO=(mxO-mnO)*kx||1e-9, sA=(mxA-mnA)||1e-9;
   var s=Math.min((W-2*pad)/sO,(H-2*pad)/sA), ox=(W-sO*s)/2, oy=(H-sA*s)/2;
-  var d=pts.map(function(p,i){ return (i?'L':'M')+(ox+(p[1]-mnO)*kx*s).toFixed(1)+' '+
-    (H-(oy+(p[0]-mnA)*s)).toFixed(1); }).join(' ');
-  return '<svg class="mapinha" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Percurso do turno">'+
-    '<path d="'+d+'" fill="none" stroke="var(--accent)" stroke-width="2.2" '+
-    'stroke-linejoin="round" stroke-linecap="round"/></svg>'; }
-
-function pintar(){
-  var e=document.getElementById('ecra'), a=document.getElementById('acoes');
-  var h='', b='';
-  if(S.papel==='condutor') { var r=pintarCondutor(); h=r[0]; b=r[1]; }
-  else { var r2=pintarDono(); h=r2[0]; b=r2[1]; }
-  e.innerHTML=h; a.innerHTML=b; pintarTopo();
+  var X=function(x){ return ox+(x-mnO)*kx*s; }, Y=function(y){ return H-(oy+(y-mnA)*s); };
+  // parte o traço onde houve um salto grande de tempo: é ali o buraco do sinal
+  var partes=[], act=[];
+  for(var i=0;i<pts.length;i++){
+    if(i&&(pts[i][2]-pts[i-1][2])>300000){ if(act.length>1) partes.push(act); act=[]; }
+    act.push((act.length?'L':'M')+X(pts[i][1]).toFixed(1)+' '+Y(pts[i][0]).toFixed(1));
+  }
+  if(act.length>1) partes.push(act);
+  var svg='<svg class="mapinha" viewBox="0 0 '+W+' '+H+'" role="img" '+
+    'aria-label="Percurso do turno">'+
+    '<defs><pattern id="g'+H+'" width="32" height="32" patternUnits="userSpaceOnUse">'+
+    '<path d="M32 0H0V32" fill="none" stroke="var(--line2)" stroke-width="1"/></pattern></defs>'+
+    '<rect width="'+W+'" height="'+H+'" fill="url(#g'+H+')"/>';
+  partes.forEach(function(p){ svg+='<path d="'+p.join(' ')+'" fill="none" '+
+    'stroke="var(--accent)" stroke-width="2.3" stroke-linejoin="round" '+
+    'stroke-linecap="round"/>'; });
+  if(partes.length>1) svg+='<text x="'+(W/2)+'" y="16" fill="var(--crit)" font-size="11" '+
+    'font-weight="700" text-anchor="middle" font-family="IBM Plex Sans,sans-serif">'+
+    'o traço está cortado onde o sinal falhou</text>';
+  svg+='<circle cx="'+X(pts[0][1]).toFixed(1)+'" cy="'+Y(pts[0][0]).toFixed(1)+
+    '" r="4.5" fill="var(--ok)"/>'+
+    '<circle cx="'+X(pts[pts.length-1][1]).toFixed(1)+'" cy="'+
+    Y(pts[pts.length-1][0]).toFixed(1)+'" r="4.5" fill="var(--ink)"/></svg>';
+  return svg;
 }
 
-/* ═══ CONDUTOR ═══════════════════════════════════════════════ */
-function pintarCondutor(){
-  var c=carroDe(S.eu.carroId), h='', b='';
+function verifs(vs){
+  return '<div class="cartao">'+vs.map(function(v){
+    var mk=v.mk||(v.ok?'s':'n');
+    return '<div class="vf"><span class="mk '+mk+'">'+
+      (mk==='z'?'~':(mk==='s'?'✓':'!'))+'</span>'+
+      '<span class="tx"><span class="t1">'+esc(v.t1)+'</span><br>'+
+      '<span class="t2">'+esc(v.t2)+'</span></span>'+
+      '<span class="vl">'+esc(v.vl)+'</span></div>'; }).join('')+'</div>';
+}
 
-  if(S.ecra==='inicio'){
-    var meus=S.turnos.filter(function(t){ return t.estado==='FECHADO'; });
-    h='<div class="cartao"><div class="carro">'+
-      '<div><div class="mat">'+esc(c.matricula)+'</div>'+
-      '<div class="det">'+esc((c.marca||'')+' '+(c.modelo||''))+'</div></div>'+
-      '<div class="km"><b>'+nf(c.kmActual)+'</b><span>km no quadrante</span></div></div>'+
-      (S.frota.carros.length>1
-        ? '<button class="ligacao" style="padding:8px 0 0" data-ir="escolher-carro">Trocar de carro</button>'
-        : '')+'</div>';
+function caixaFoto(chave, titulo, dica){
+  var f=S.fotos[chave];
+  return f
+    ? '<label class="foto feita"><img src="'+f+'" alt="'+esc(titulo)+'">'+
+      '<span class="re">Repetir</span>'+
+      '<input type="file" accept="image/*" capture="environment" data-foto="'+chave+'"></label>'
+    : '<label class="foto"><span class="ic">📷</span><span class="t">'+esc(titulo)+'</span>'+
+      '<span class="t2">'+esc(dica)+'</span>'+
+      '<input type="file" accept="image/*" capture="environment" data-foto="'+chave+'"></label>';
+}
 
-    if(!S.eu.nome)
-      h+='<div class="cartao"><h2>Quem está a conduzir?</h2>'+
-        '<p class="sub" style="margin-bottom:10px">O nome fica gravado em cada turno.</p>'+
-        '<input type="text" id="nome" placeholder="O seu nome" value=""></div>';
+function linhaTurno(t){
+  var pr=porResolver(t);
+  var cls=pr.some(function(x){return x.n==='CRITICO';})?'c':(pr.length?'n':'s');
+  var rot=cls==='s'?'tudo bem':(cls==='n'?pr.length+' a ver':'a investigar');
+  return '<button class="linha" data-turno="'+t.id+'">'+
+    '<span><span class="p">'+nf((t.kmFinal||0)-t.kmInicial)+' km · '+esc(t.matricula)+
+    (t.demo?' <span class="selo i">exemplo</span>':'')+'</span><br>'+
+    '<span class="s">'+esc(t.condutor||'—')+' · '+dia(t.inicio)+' · '+
+    hh(t.inicio)+'–'+hh(t.fim)+' · '+nf(t.totalCve)+' CVE</span></span>'+
+    '<span class="d"><span class="selo '+cls+'">'+rot+'</span></span></button>';
+}
 
-    if(S.gps.estado==='recusado'||S.gps.estado==='indisponivel')
-      h+='<div class="cartao aviso"><h2>Sem acesso ao GPS</h2><p class="nota">'+
-        'Este ecrã não conseguiu ligar a localização. O turno funciona na mesma — fotos e '+
-        'quilómetros — mas sem percurso. Abra a página em separador próprio e autorize.</p></div>';
+/* ════════════════════════════════════════════════════════════
+   ECRÃS
+   ════════════════════════════════════════════════════════════ */
 
-    h+='<div><h2>Os meus turnos</h2><p class="sub">'+
-      (S.db?'Guardados e visíveis ao dono.':'Guardados neste telemóvel.')+'</p></div>';
-    h+=meus.length? '<div class="hist">'+meus.slice(0,8).map(cartaoTurno).join('')+'</div>'
-      : '<div class="cartao"><div class="vazio">Ainda não gravou nenhum turno.<br>'+
-        'Toque em <b>Abrir turno</b> para começar.</div></div>';
-    b='<button class="bt pri" data-ir="abrir">Abrir turno</button>';
+/* ─── 1 · Configuração inicial ────────────────────────────── */
+function ecraSetup(){
+  var f=S.frota, h='', b='';
+  h+='<div class="passos">'+[0,1,2].map(function(i){
+    return '<span class="'+(i<=S.passo?'on':'')+'"></span>'; }).join('')+'</div>';
+
+  if(S.passo===0){
+    h+='<div class="tit"><h1>Bem-vindo</h1></div>'+
+      '<p class="sub">Em três passos fica pronto. Um minuto.</p>'+
+      '<label class="campo"><span class="lb">Nome da sua empresa</span>'+
+      '<input type="text" id="s-nome" value="'+esc(f.nome)+'" placeholder="Táxis Praia, Lda">'+
+      '</label>'+
+      '<label class="campo"><span class="lb">Ilha</span>'+
+      '<input type="text" id="s-ilha" value="'+esc(f.ilha)+'"></label>'+
+      '<div class="cartao destaque"><p class="nota"><b>Só quer ver como funciona?</b> '+
+      'Salte isto e carregue em «Ver com dados de exemplo» — enche-se sozinho com duas '+
+      'semanas de trabalho de três táxis.</p></div>';
+    b='<button class="bt pri" data-fazer="passo1">Continuar</button>'+
+      '<button class="bt sec pequeno" data-fazer="demo-rapida">Ver com dados de exemplo</button>';
   }
+  else if(S.passo===1){
+    h+='<div class="tit"><h1>Os seus carros</h1></div>'+
+      '<p class="sub">Precisa de três coisas por carro: a matrícula, os quilómetros que '+
+      'o conta-quilómetros marca agora, e quantos litros leva o depósito.</p>';
+    h+=f.carros.map(function(c,i){
+      return '<div class="cartao"><label class="campo"><span class="lb">Matrícula</span>'+
+        '<input type="text" data-c="mat" data-i="'+i+'" value="'+esc(c.matricula)+'"></label>'+
+        '<div class="par" style="margin-top:9px">'+
+        '<label class="campo"><span class="lb">Km agora</span>'+
+        '<input type="number" inputmode="numeric" data-c="km" data-i="'+i+'" value="'+
+        c.kmActual+'"></label>'+
+        '<label class="campo"><span class="lb">Depósito (l)</span>'+
+        '<input type="number" inputmode="numeric" data-c="dep" data-i="'+i+'" value="'+
+        c.deposito+'"></label></div>'+
+        (f.carros.length>1?'<button class="lig" data-fazer="tirar-carro" data-i="'+i+
+          '">Tirar este carro</button>':'')+'</div>'; }).join('');
+    h+='<button class="bt sec pequeno" data-fazer="mais-carro">+ Acrescentar carro</button>';
+    b='<button class="bt pri" data-fazer="passo2">Continuar</button>'+
+      '<button class="lig" data-fazer="passo0">Voltar</button>';
+  }
+  else {
+    h+='<div class="tit"><h1>Preço do combustível</h1></div>'+
+      '<p class="sub">É daqui que saem os litros de cada abastecimento. Quando a ARME '+
+      'mudar o preço, muda-se aqui — em nenhum outro sítio.</p>'+
+      '<label class="campo"><span class="lb">Gasolina (CVE por litro)</span>'+
+      '<input type="number" inputmode="decimal" step="0.01" id="s-preco" value="'+
+      f.precoLitro+'"><span class="aj">Assim, 2.000 escudos são sempre '+
+      nf(2000/f.precoLitro,2)+' litros. Ninguém pode inventar.</span></label>'+
+      '<label class="campo"><span class="lb">Quem conduz (um nome por linha)</span>'+
+      '<input type="text" id="s-cond" value="'+
+      esc(f.condutores.map(function(c){return c.nome;}).join(', '))+
+      '" placeholder="António, Jorge, Nuno">'+
+      '<span class="aj">Separe por vírgulas. Pode mudar depois.</span></label>';
+    b='<button class="bt pri" data-fazer="terminar">Está pronto</button>'+
+      '<button class="lig" data-fazer="passo1">Voltar</button>';
+  }
+  return [h,b];
+}
 
-  else if(S.ecra==='escolher-carro'){
-    h='<div><h1>Escolher carro</h1><p class="sub">Qual é o carro que vai levar hoje?</p></div>'+
-      '<div class="cartao">'+S.frota.carros.map(function(x){
-        return '<button class="lista-carro'+(x.id===S.eu.carroId?' escolhido':'')+
-          '" data-carro="'+x.id+'"><span><span class="mat num">'+esc(x.matricula)+'</span><br>'+
-          '<span class="det">'+esc((x.marca||'')+' '+(x.modelo||''))+'</span></span>'+
-          '<span class="r num" style="margin-left:auto">'+nf(x.kmActual)+' km</span></button>';
-      }).join('')+'</div>';
-    b='<button class="bt pri" data-ir="inicio">Pronto</button>';
+/* ─── 2 · Condutor ────────────────────────────────────────── */
+function ecraCondutor(){
+  var h='', b='', carro=carroDe(S.eu.carroId);
+  if(!carro) return ['<div class="cartao"><div class="vazio">Ainda não há carros.</div></div>',''];
+
+  if(S.ecra==='condutor'){
+    h='<div class="cartao"><div style="display:flex;gap:12px;align-items:center">'+
+      '<div><div style="font-family:var(--mono);font-weight:600;font-size:18px">'+
+      esc(carro.matricula)+'</div>'+
+      '<div class="s" style="font-size:12.5px;color:var(--muted)">'+
+      esc((carro.marca||'')+' '+(carro.modelo||''))+'</div></div>'+
+      '<div style="margin-left:auto;text-align:right">'+
+      '<div class="num" style="font-size:17px;font-weight:500">'+nf(carro.kmActual)+'</div>'+
+      '<div style="font-size:11px;color:var(--muted)">km no conta-quilómetros</div>'+
+      '</div></div>'+
+      (S.frota.carros.length>1?'<button class="lig" data-fazer="trocar-carro" '+
+        'style="padding:8px 0 0">Trocar de carro</button>':'')+'</div>';
+    if(!S.eu.nome)
+      h+='<label class="campo"><span class="lb">O seu nome</span>'+
+        '<input type="text" id="c-nome" placeholder="Como se chama?" value="">'+
+        '<span class="aj">Fica gravado em cada turno que abrir.</span></label>';
+    if(S.gps.estado==='recusado')
+      h+='<div class="cartao aviso"><h3>Sem acesso ao GPS</h3><p class="nota" '+
+        'style="margin-top:5px">O turno funciona na mesma — fotos e quilómetros — mas '+
+        'sem percurso. Abra esta página num separador próprio e autorize a localização.</p></div>';
+    var meus=S.turnos.filter(function(t){ return t.estado==='FECHADO'&&
+      (!S.eu.nome||t.condutor===S.eu.nome); });
+    h+='<div class="tit"><h2>Os meus turnos</h2></div>';
+    h+= meus.length ? meus.slice(0,8).map(linhaTurno).join('')
+      : '<div class="cartao"><div class="vazio">Ainda não gravou nenhum turno.</div></div>';
+    b='<button class="bt pri" data-fazer="ir-abrir">Abrir turno</button>';
   }
 
   else if(S.ecra==='abrir'){
-    var gap=(S.rascunho.km||c.kmActual)-c.kmActual;
-    h='<div><h1>Abrir turno</h1><p class="sub">'+esc(c.matricula)+
-      ' · fotografe o conta-quilómetros antes de arrancar.</p></div>'+
-      foto('abertura','Foto do quadrante','A câmara abre-se — não vale foto da galeria')+
-      '<label class="campo"><span class="lb">Km no quadrante</span>'+
-      '<input type="number" inputmode="numeric" id="km" value="'+(S.rascunho.km||c.kmActual)+'">'+
-      '<span class="ajuda">Último fecho: '+nf(c.kmActual)+' km</span></label>';
+    var km=S.rasc.km==null?carro.kmActual:S.rasc.km, gap=km-carro.kmActual;
+    h='<div class="tit"><h1>Abrir turno</h1></div>'+
+      '<p class="sub">'+esc(carro.matricula)+' · fotografe o conta-quilómetros antes de arrancar.</p>'+
+      caixaFoto('abertura','Foto do conta-quilómetros',
+        S.demo.ligado?'em demonstração pode usar qualquer imagem':'a câmara abre-se sozinha')+
+      '<label class="campo"><span class="lb">Quantos km marca</span>'+
+      '<input type="number" inputmode="numeric" id="km" value="'+km+'">'+
+      '<span class="aj">Da última vez ficou em '+nf(carro.kmActual)+' km.</span></label>';
     if(gap>LIM.gapKm)
-      h+='<div class="cartao mau"><h2>O carro andou '+nf(gap)+' km sem turno</h2>'+
-        '<p class="nota">Fica registado e o dono é avisado. Se foi à oficina, diga-lhe.</p></div>';
-    b='<button class="bt pri" id="bt-abrir"'+(S.fotos.abertura?'':' disabled')+'>'+
-      (S.fotos.abertura?'Começar turno':'Falta a foto do quadrante')+'</button>'+
-      '<button class="ligacao" data-ir="inicio">Cancelar</button>';
+      h+='<div class="cartao mau"><h3>O carro andou '+nf(gap)+' km sem turno</h3>'+
+        '<p class="nota" style="margin-top:5px">Fica registado e o dono é avisado. '+
+        'Se o carro foi à oficina, diga-lhe.</p></div>';
+    b='<button class="bt pri" data-fazer="abrir-turno"'+(S.fotos.abertura?'':' disabled')+
+      '>'+(S.fotos.abertura?'Começar':'Falta a foto')+'</button>'+
+      '<button class="lig" data-fazer="ir-condutor">Cancelar</button>';
   }
 
   else if(S.ecra==='turno'){
     var t=S.turno;
     h='<div class="cartao"><div class="relogio">'+
-      '<div class="t num" id="relogio-t">'+hm((Date.now()-t.inicio)/1000)+'</div>'+
-      '<div class="l">'+esc(t.matricula)+' · desde as '+horas(t.inicio)+'</div></div>'+
-      '<div class="metricas">'+
-      '<div><b class="num" id="m-km">'+nf(kmDoRasto(t.rasto),1)+'</b><span>km GPS</span></div>'+
-      '<div><b class="num">'+nf(t.totalCve)+'</b><span>CVE</span></div>'+
-      '<div><b class="num" id="m-pt">'+t.rasto.length+'</b><span>pontos</span></div></div></div>';
+      '<div class="t num">'+hms((Date.now()-t.inicio)/1000)+'</div>'+
+      '<div class="l">'+esc(t.matricula)+' · começou às '+hh(t.inicio)+'</div></div>'+
+      '<div class="medidores">'+
+      '<div><b class="num">'+nf(kmDoRasto(t.rasto),1)+'</b><span>km andados</span></div>'+
+      '<div><b class="num">'+nf(t.totalCve)+'</b><span>CVE gastos</span></div>'+
+      '<div><b class="num">'+t.rasto.length+'</b><span>pontos</span></div></div></div>';
     if(t.abastecimentos.length)
-      h+='<div class="cartao"><h2>Abastecimentos de hoje</h2>'+t.abastecimentos.map(function(x){
-        return '<div class="ver"><span class="mk s">✓</span><span class="tx">'+
-          '<span class="t1">'+nf(x.valor)+' CVE · '+nf(x.valor/t.precoLitro,2)+' litros</span><br>'+
-          '<span class="t2">'+horas(x.hora)+(x.temFoto?' · com talão':' · sem talão')+
+      h+='<div class="cartao"><h3>Já abasteceu hoje</h3>'+t.abastecimentos.map(function(a){
+        return '<div class="vf"><span class="mk s">✓</span><span class="tx">'+
+          '<span class="t1">'+nf(a.valor)+' CVE · '+nf(a.valor/t.precoLitro,2)+' litros</span>'+
+          '<br><span class="t2">'+hh(a.hora)+(a.temFoto?' · com talão':' · sem talão')+
           '</span></span></div>'; }).join('')+'</div>';
-    h+=mapinha(t.rasto);
-    h+='<div class="cartao aviso"><h2>Deixe o ecrã ligado</h2><p class="nota">'+
-      'Isto é uma página de navegador: quando o telemóvel adormece, o GPS pára e o percurso fica '+
-      'com um buraco. <b>Na app Android isso não acontece.</b> Por agora, telemóvel na corrente '+
-      'e ecrã aceso.</p></div>'+
-      '<p class="nota">O percurso só é gravado com o turno aberto. Ao fechar, deixa de haver '+
-      'localização — nem o dono a vê.</p>';
-    b='<button class="bt sec" data-ir="abastecer">Abasteci</button>'+
-      '<button class="bt perigo" data-ir="fechar">Fechar turno</button>';
+    h+=mapinha(t.rasto, 210);
+    if(S.demo.ligado)
+      h+='<div class="cartao destaque"><p class="nota"><b>Turno de demonstração.</b> '+
+        'O carro anda sozinho e depressa — umas horas de trabalho em quinze segundos. '+
+        'Pode abastecer e fechar quando quiser.</p></div>';
+    h+='<p class="nota">O percurso só é gravado com o turno aberto. Quando fechar, '+
+       'deixa de haver localização — nem o dono a pode ver.</p>';
+    b='<div class="par"><button class="bt sec" data-fazer="ir-abastecer">Abasteci</button>'+
+      '<button class="bt perigo" data-fazer="ir-fechar">Fechar turno</button></div>';
   }
 
   else if(S.ecra==='abastecer'){
-    var val=S.rascunho.valor||0, lt=val?val/S.frota.precoLitro:0;
-    h='<div><h1>Abastecimento</h1><p class="sub">Registe agora, no posto. '+
-      'No fim do dia a conta já está feita.</p></div>'+
-      foto('talao','Foto do talão','É esta foto que prova o valor')+
-      '<label class="campo"><span class="lb">Valor pago (CVE)</span>'+
+    var val=S.rasc.valor||0, lt=val?val/S.frota.precoLitro:0;
+    h='<div class="tit"><h1>Abasteci</h1></div>'+
+      '<p class="sub">Registe agora, no posto. No fim do dia a conta já está feita.</p>'+
+      caixaFoto('talao','Foto do talão','é esta foto que prova o valor')+
+      '<label class="campo"><span class="lb">Quanto pagou (CVE)</span>'+
       '<input type="number" inputmode="numeric" id="valor" value="'+(val||'')+'" placeholder="0">'+
-      '<span class="ajuda">'+(val?'A '+nf(S.frota.precoLitro,2)+' CVE/litro dá <b>'+nf(lt,2)+
-        ' litros</b>':'Preço oficial: '+nf(S.frota.precoLitro,2)+' CVE/litro')+'</span></label>'+
-      '<label class="campo"><span class="lb">Litros no talão '+
-      '<span style="text-transform:none;letter-spacing:0">(se der para ler)</span></span>'+
+      '<span class="aj">'+(val
+        ? 'A '+nf(S.frota.precoLitro,2)+' por litro, dá <b>'+nf(lt,2)+' litros</b>.'
+        : 'Preço do mês: '+nf(S.frota.precoLitro,2)+' CVE por litro.')+'</span></label>'+
+      '<label class="campo"><span class="lb">Litros escritos no talão</span>'+
       '<input type="number" inputmode="decimal" step="0.01" id="litros" value="'+
-      (S.rascunho.litros||'')+'" placeholder="—">'+
-      '<span class="ajuda">Se não bater com o valor pago, o dono é avisado.</span></label>';
-    if(lt>c.deposito*1.05)
-      h+='<div class="cartao mau"><h2>Não cabe no depósito</h2><p class="nota">'+nf(lt,2)+
-        ' litros num depósito de '+nf(c.deposito)+'. Confirme o valor.</p></div>';
-    b='<button class="bt pri" id="bt-abast"'+(val>0?'':' disabled')+'>Registar abastecimento</button>'+
-      '<button class="ligacao" data-ir="turno">Voltar</button>';
+      (S.rasc.litros||'')+'" placeholder="se der para ler">'+
+      '<span class="aj">Se não bater com o que pagou, o dono é avisado.</span></label>';
+    if(lt>carro.deposito*1.05)
+      h+='<div class="cartao mau"><h3>Não cabe no depósito</h3><p class="nota" '+
+        'style="margin-top:5px">'+nf(lt,2)+' litros num depósito de '+nf(carro.deposito)+
+        '. Confirme o valor.</p></div>';
+    b='<button class="bt pri" data-fazer="guardar-abast"'+(val>0?'':' disabled')+
+      '>Registar</button><button class="lig" data-fazer="ir-turno">Voltar</button>';
   }
 
   else if(S.ecra==='fechar'){
-    var t2=S.turno, kmF=S.rascunho.kmF||t2.kmInicial, perc=kmF-t2.kmInicial;
-    h='<div><h1>Fechar turno</h1><p class="sub">Última foto do quadrante e está feito.</p></div>'+
-      foto('fecho','Foto do quadrante','Como na abertura')+
-      '<label class="campo"><span class="lb">Km no quadrante</span>'+
+    var t2=S.turno, kmF=S.rasc.kmF==null?t2.kmInicial:S.rasc.kmF;
+    var perc=kmF-t2.kmInicial;
+    h='<div class="tit"><h1>Fechar turno</h1></div>'+
+      '<p class="sub">Última foto do conta-quilómetros e está feito.</p>'+
+      caixaFoto('fecho','Foto do conta-quilómetros','como fez de manhã')+
+      '<label class="campo"><span class="lb">Quantos km marca agora</span>'+
       '<input type="number" inputmode="numeric" id="kmF" value="'+kmF+'">'+
-      '<span class="ajuda">Abriu com '+nf(t2.kmInicial)+' km · '+
-      (perc>=0?nf(perc)+' km percorridos':'<b>não pode ser menor que a abertura</b>')+
+      '<span class="aj">Começou com '+nf(t2.kmInicial)+' km · '+
+      (perc>=0?'andou '+nf(perc)+' km':'<b>não pode ser menos do que de manhã</b>')+
       '</span></label>';
     if(perc>LIM.kmMax)
-      h+='<div class="cartao mau"><h2>Valor pouco provável</h2><p class="nota">'+nf(perc)+
-        ' km num turno. Confirme a foto — quase sempre é um dígito a mais.</p></div>';
-    b='<button class="bt pri" id="bt-fechar"'+
+      h+='<div class="cartao mau"><h3>Parece a mais</h3><p class="nota" style="margin-top:5px">'+
+        nf(perc)+' km num turno é pouco provável. Confirme a foto — quase sempre é um '+
+        'algarismo a mais.</p></div>';
+    b='<button class="bt pri" data-fazer="fechar-turno"'+
       (S.fotos.fecho&&perc>=0&&perc<=LIM.kmMax?'':' disabled')+'>'+
-      (S.fotos.fecho?'Fechar turno':'Falta a foto do quadrante')+'</button>'+
-      '<button class="ligacao" data-ir="turno">Voltar ao turno</button>';
-  }
-
-  else if(S.ecra==='resumo'){
-    var t3=S.turnos[0]; if(!t3) return ['',''];
-    var av=avaliar(t3), cr=av.alertas.filter(function(x){return x.n==='CRITICO';}).length;
-    h='<div><h1>Turno fechado</h1><p class="sub">'+esc(t3.matricula)+' · '+horas(t3.inicio)+
-      '–'+horas(t3.fim)+' · '+nf((t3.fim-t3.inicio)/36e5,1)+' h</p></div>'+mapinha(t3.rasto)+
-      '<div class="cartao '+(cr?'mau':av.alertas.length?'aviso':'bom')+'"><h2>'+
-      (cr?'Há coisas para o dono ver':av.alertas.length?
-        av.alertas.length+' ponto'+(av.alertas.length>1?'s':'')+' a explicar':'Turno limpo')+
-      '</h2><p class="nota">'+(av.alertas.length?
-        av.alertas.map(function(x){return esc(x.d);}).join('<br>'):
-        'Todas as verificações passaram. Nada a explicar a ninguém.')+'</p></div>'+
-      '<div class="cartao"><h2 style="margin-bottom:6px">Verificações</h2>'+
-      verLinhas(av.verificacoes)+'</div>';
-    b='<button class="bt pri" data-ir="inicio">Voltar ao início</button>';
+      (S.fotos.fecho?'Fechar':'Falta a foto')+'</button>'+
+      '<button class="lig" data-fazer="ir-turno">Voltar ao turno</button>';
   }
   return [h,b];
 }
-function cartaoTurno(t){
-  var pr=porResolver(t), cr=pr.some(function(x){return x.n==='CRITICO';});
-  var cls=cr?'c':(pr.length?'n':'s');
-  return '<button class="ht" data-ver="'+t.id+'"><span>'+
-    '<span class="m">'+nf((t.kmFinal||0)-t.kmInicial)+' km</span>'+
-    '<span class="d"> · '+esc(t.matricula)+' · '+dataCurta(t.inicio)+'</span><br>'+
-    '<span class="d">'+esc(t.condutor||'—')+' · '+horas(t.inicio)+'–'+horas(t.fim)+' · '+
-    nf(t.totalCve)+' CVE</span></span><span class="r"><span class="selo '+cls+'">'+
-    (cls==='s'?'✓ limpo':cls==='n'?'▲ '+pr.length:'● rever')+'</span></span></button>';
-}
 
-/* ═══ DONO ═══════════════════════════════════════════════════ */
-function pintarDono(){
-  var h='', b='', fechados=S.turnos.filter(function(t){ return t.estado==='FECHADO'; });
+/* ─── 3 · Dono ────────────────────────────────────────────── */
+function ecraDono(){
+  var h='', b='';
+  var fechados=S.turnos.filter(function(t){ return t.estado==='FECHADO'; });
   var abertos=S.turnos.filter(function(t){ return t.estado==='ABERTO'; });
+  var nAl=S.turnos.reduce(function(s,t){ return s+porResolver(t).length; },0);
 
-  if(S.ecra==='dono-turno'&&S.detalhe){
-    var t=S.detalhe, av=avaliar(t), res=t.resolucoes||{};
-    h='<div><h1>'+dataCurta(t.inicio)+'</h1><p class="sub">'+esc(t.matricula)+' · '+
-      esc(t.condutor||'—')+' · '+horas(t.inicio)+'–'+horas(t.fim)+' · '+
-      nf((t.fim-t.inicio)/36e5,1)+' h</p></div>'+mapinha(t.rasto);
+  if(S.ecra==='hoje'){
+    var hoje=fechados.filter(function(t){ return eHoje(t.inicio); });
+    var base=hoje.length?hoje:fechados.slice(0,3);
+    var km=base.reduce(function(s,t){ return s+((t.kmFinal||0)-t.kmInicial); },0);
+    var cve=base.reduce(function(s,t){ return s+(t.totalCve||0); },0);
+    var porExplicar=S.turnos.reduce(function(s,t){ return s+dinheiroDe(t); },0);
+
+    h='<div class="tit"><h1>'+(hoje.length?'Hoje':'Últimos dias')+'</h1>'+
+      '<p>'+esc(S.frota.nome||'A sua frota')+'</p></div>';
+    h+='<div class="tiles">'+
+      '<div><b class="num">'+nf(km)+'</b><span>km</span></div>'+
+      '<div><b class="num">'+nf(cve)+'</b><span>CVE em combustível</span></div>'+
+      '<div><b class="num">'+base.length+'</b><span>turnos</span></div>'+
+      '<div class="'+(porExplicar>0?'mau':'bom')+'"><b class="num">'+nf(porExplicar)+
+      '</b><span>CVE por explicar</span></div></div>';
+    if(abertos.length)
+      h+='<div class="cartao bom"><h3>'+abertos.length+' em turno agora</h3>'+
+        abertos.map(function(t){ return '<p class="nota" style="margin-top:5px"><b>'+
+          esc(t.matricula)+'</b> · '+esc(t.condutor)+' · desde as '+hh(t.inicio)+' · '+
+          nf(kmDoRasto(t.rasto),1)+' km</p>'; }).join('')+'</div>';
+    if(nAl)
+      h+='<button class="linha" data-fazer="ir-alertas" style="border-color:var(--crit)">'+
+        '<span><span class="p" style="color:var(--crit)">'+nAl+' '+
+        (nAl===1?'coisa':'coisas')+' para ver</span><br>'+
+        '<span class="s">toque para resolver uma a uma</span></span>'+
+        '<span class="d" style="font-size:20px">›</span></button>';
+    h+='<div class="tit"><h2>Últimos turnos</h2></div>';
+    h+= fechados.length ? fechados.slice(0,6).map(linhaTurno).join('')
+      : '<div class="cartao"><div class="vazio">Ainda não há turnos.<br>'+
+        'Carregue em baixo para encher com dados de exemplo.</div></div>';
+    if(!fechados.length)
+      b='<button class="bt pri" data-fazer="gerar-demo">Ver com dados de exemplo</button>';
+  }
+
+  else if(S.ecra==='turnos'){
+    h='<div class="tit"><h1>Turnos</h1><p>'+fechados.length+' gravados</p></div>';
+    h+= fechados.length ? fechados.slice(0,40).map(linhaTurno).join('')
+      : '<div class="cartao"><div class="vazio">Ainda não há turnos.</div></div>';
+  }
+
+  else if(S.ecra==='alertas'){
+    var linhas=[];
+    S.turnos.forEach(function(t){ var r=t.resolucoes||{};
+      alertasDe(t).forEach(function(a){ linhas.push({t:t, a:a, r:r[a.c]}); }); });
+    linhas.sort(function(x,y){
+      if(!!x.r!==!!y.r) return x.r?1:-1;
+      if(x.a.n!==y.a.n) return x.a.n==='CRITICO'?-1:1;
+      return y.t.inicio-x.t.inicio; });
+    h='<div class="tit"><h1>Para ver</h1></div>'+
+      '<p class="sub">Feche cada um com uma de três respostas. A terceira — '+
+      '<b>não fazia sentido</b> — tira a culpa ao condutor e diz-nos que a regra '+
+      'está mal apertada.</p>';
+    h+= linhas.length ? linhas.map(function(L){
+        var cr=L.a.n==='CRITICO';
+        return '<div class="cartao'+(cr?' mau':' aviso')+'"'+(L.r?' style="opacity:.55"':'')+'>'+
+          '<div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">'+
+          '<span class="selo '+(cr?'c':'n')+'">'+(cr?'importante':'a ver')+'</span>'+
+          '<span class="s" style="font-size:12px;color:var(--muted)">'+dia(L.t.inicio)+
+          ' · '+esc(L.t.matricula)+' · '+esc(L.t.condutor)+'</span></div>'+
+          '<div style="font-weight:600;margin-top:7px;font-size:14.5px">'+esc(L.a.d)+'</div>'+
+          (L.a.dif?'<div class="num" style="font-size:20px;font-weight:500;margin-top:5px;'+
+            'color:var(--crit)">'+nf(L.a.dif)+' CVE</div>':'')+
+          (L.r
+            ? '<p class="nota" style="margin-top:7px">Fechado como <b>'+
+              ({JUSTIFICADO:'justificado',CONFIRMADO:'é mesmo desvio',
+                ERRO_SISTEMA:'não fazia sentido'}[L.r.r])+'</b></p>'
+            : '<div class="par" style="margin-top:10px">'+
+              '<button class="bt sec pequeno" data-res="JUSTIFICADO" data-t="'+L.t.id+
+              '" data-c="'+L.a.c+'">Tem explicação</button>'+
+              '<button class="bt sec pequeno" data-res="CONFIRMADO" data-t="'+L.t.id+
+              '" data-c="'+L.a.c+'">É mesmo desvio</button>'+
+              '<button class="bt sec pequeno" data-res="ERRO_SISTEMA" data-t="'+L.t.id+
+              '" data-c="'+L.a.c+'">Não fazia sentido</button></div>')+
+          '<button class="lig" data-turno="'+L.t.id+'">Ver o turno todo</button></div>';
+      }).join('')
+      : '<div class="cartao bom"><div class="vazio">Nada para ver.<br>'+
+        'Ou a frota anda bem, ou ainda não há turnos.</div></div>';
+  }
+
+  else if(S.ecra==='equipa'){
+    var nomes={}; S.turnos.forEach(function(t){ if(t.condutor) nomes[t.condutor]=1; });
+    var lista=Object.keys(nomes).map(function(n){ var s=score(n); s.nome=n; return s; })
+      .sort(function(a,b){ return a.valor-b.valor; });
+    h='<div class="tit"><h1>Quem conduz</h1></div>'+
+      '<p class="sub">O número mede <b>cuidado a registar</b>, não honestidade. '+
+      'Um condutor cuidadoso com um telemóvel velho vai ter número baixo — e isso '+
+      'tem de se saber antes de acusar seja quem for.</p>';
+    h+= lista.length ? lista.map(function(m){
+        var cor=m.valor>=95?'var(--ok)':(m.valor>=80?'var(--warn)':'var(--crit)');
+        return '<div class="cartao"><div style="display:flex;align-items:baseline;gap:8px">'+
+          '<span style="font-weight:600">'+esc(m.nome)+'</span>'+
+          '<span class="num" style="margin-left:auto;font-size:19px;font-weight:500;color:'+
+          cor+'">'+m.valor+'</span></div>'+
+          '<div class="barra"><span style="width:'+m.valor+'%;background:'+cor+'"></span></div>'+
+          '<p class="nota" style="margin-top:6px">'+m.turnos+' turnos · '+m.limpos+
+          ' sem nada a apontar</p></div>'; }).join('')
+      : '<div class="cartao"><div class="vazio">Ainda não há turnos gravados.</div></div>';
+  }
+
+  else if(S.ecra==='relatorio'){
+    var mes={}; fechados.forEach(function(t){
+      var d=new Date(t.inicio), k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+      mes[k]=mes[k]||{km:0,cve:0,litros:0,n:0,explicar:0};
+      mes[k].km+=(t.kmFinal||0)-t.kmInicial; mes[k].cve+=t.totalCve||0;
+      mes[k].litros+=t.totalLitros||0; mes[k].n++; mes[k].explicar+=dinheiroDe(t); });
+    var chaves=Object.keys(mes).sort().reverse();
+    h='<div class="tit"><h1>Contas</h1></div>'+
+      '<p class="sub">O que a frota andou e o que custou.</p>';
+    h+= chaves.length ? '<div class="scroll"><table><thead><tr><th>Mês</th>'+
+      '<th style="text-align:right">Turnos</th><th style="text-align:right">Km</th>'+
+      '<th style="text-align:right">Combustível</th>'+
+      '<th style="text-align:right">Por km</th>'+
+      '<th style="text-align:right">Por explicar</th></tr></thead><tbody>'+
+      chaves.map(function(k){ var m=mes[k];
+        return '<tr><td>'+k+'</td><td class="n">'+m.n+'</td>'+
+          '<td class="n">'+nf(m.km)+'</td><td class="n">'+nf(m.cve)+'</td>'+
+          '<td class="n">'+nf(m.km?m.cve/m.km:0,2)+'</td>'+
+          '<td class="n"'+(m.explicar?' style="color:var(--crit);font-weight:600"':'')+'>'+
+          nf(m.explicar)+'</td></tr>'; }).join('')+'</tbody></table></div>'
+      : '<div class="cartao"><div class="vazio">Ainda não há contas para fazer.</div></div>';
+    var total=S.turnos.reduce(function(s,t){ return s+dinheiroDe(t); },0);
+    if(total>0)
+      h+='<div class="cartao mau"><h3>Dinheiro por explicar</h3>'+
+        '<div class="num" style="font-size:29px;font-weight:500;color:var(--crit);'+
+        'margin-top:5px">'+nf(total)+' CVE</div>'+
+        '<p class="nota" style="margin-top:6px">Ao ritmo destes dias, seriam cerca de <b>'+
+        nf(total/Math.max(fechados.length,1)*DIAS_UTEIS_MES*S.frota.carros.length)+
+        ' CVE por mês</b> na frota toda.</p></div>';
+  }
+
+  else if(S.ecra==='turno-detalhe'&&S.detalhe){
+    var t3=S.detalhe, av=avaliar(t3);
+    h='<div class="tit"><h1>'+dia(t3.inicio)+'</h1></div>'+
+      '<p class="sub">'+esc(t3.matricula)+' · '+esc(t3.condutor)+' · '+hh(t3.inicio)+'–'+
+      hh(t3.fim)+' · '+nf((t3.fim-t3.inicio)/36e5,1)+' horas</p>';
+    h+=mapinha(t3.rasto, 230);
     if(S.fotosDetalhe&&Object.keys(S.fotosDetalhe).length)
       h+='<div class="fotos-g">'+Object.keys(S.fotosDetalhe).map(function(k){
         return '<figure><img src="'+S.fotosDetalhe[k]+'" alt="'+esc(k)+'">'+
-          '<figcaption>'+({abertura:'Quadrante · abertura',fecho:'Quadrante · fecho'}[k]||
-          'Talão')+'</figcaption></figure>'; }).join('')+'</div>';
-    else if(t.fotoKeys&&t.fotoKeys.length)
-      h+='<p class="nota">A carregar as fotos…</p>';
-    h+='<div class="cartao"><h2 style="margin-bottom:6px">Verificações</h2>'+
-      verLinhas(av.verificacoes)+'</div>';
-    var difs=av.alertas.filter(function(x){return x.dif;});
-    if(difs.length)
-      h+='<div class="cartao aviso"><h2>Diferença por explicar</h2>'+
-        '<div class="num" style="font-size:27px;font-weight:500;color:var(--warn)">'+
-        nf(difs.reduce(function(s,x){return s+x.dif;},0))+' CVE</div></div>';
-    b='<button class="bt pri" data-ir="dono-alertas">Ver alertas</button>'+
-      '<button class="ligacao" data-ir="dono-resumo">Voltar</button>';
-    return [h,b];
+          '<figcaption>'+({abertura:'Conta-quilómetros · manhã',
+            fecho:'Conta-quilómetros · fim'}[k]||'Talão')+'</figcaption></figure>';
+      }).join('')+'</div>';
+    else if(t3.demo)
+      h+='<p class="nota">Turno de exemplo: as fotos não existem, mas todas as contas '+
+        'em baixo são reais.</p>';
+    h+=verifs(av.verificacoes);
+    var d=dinheiroDe(t3);
+    if(d>0) h+='<div class="cartao mau"><h3>Por explicar neste turno</h3>'+
+      '<div class="num" style="font-size:27px;font-weight:500;color:var(--crit);'+
+      'margin-top:4px">'+nf(d)+' CVE</div></div>';
+    b='<button class="bt sec" data-fazer="voltar">Voltar</button>';
   }
 
-  if(S.ecra==='dono-alertas'){
-    var linhas=[];
-    S.turnos.forEach(function(t){
-      var res2=t.resolucoes||{};
-      alertasDe(t).forEach(function(al){ linhas.push({t:t, al:al, r:res2[al.c]}); });
-    });
-    linhas.sort(function(x,y){
-      if(!!x.r!==!!y.r) return x.r?1:-1;
-      if(x.al.n!==y.al.n) return x.al.n==='CRITICO'?-1:1;
-      return y.t.inicio-x.t.inicio; });
-    h='<div><h1>Alertas</h1><p class="sub">Fechar um alerta como <b>erro do sistema</b> '+
-      'tira-lhe a penalização — é assim que se descobre uma regra mal calibrada.</p></div>';
-    h+=linhas.length? linhas.map(function(L){
-        var cr=L.al.n==='CRITICO';
-        return '<div class="alerta-l'+(cr?' c':'')+(L.r?'" style="opacity:.6':'')+'">'+
-          '<div class="fx"></div><div class="cp"><div class="cab">'+
-          '<span class="selo '+(cr?'c':'n')+'">'+(cr?'● Crítico':'▲ Aviso')+'</span>'+
-          '<span class="selo cod n">'+esc(L.al.c)+'</span>'+
-          '<span class="d" style="font-size:12px;color:var(--muted)">'+dataCurta(L.t.inicio)+
-          ' · '+esc(L.t.matricula)+' · '+esc(L.t.condutor||'—')+'</span></div>'+
-          '<div style="font-weight:600;margin-top:7px;font-size:14px">'+esc(L.al.d)+'</div>'+
-          (L.r? '<div class="resolvido">Fechado como <b>'+
-              ({JUSTIFICADO:'justificado',CONFIRMADO:'desvio confirmado',
-                ERRO_SISTEMA:'erro do sistema'}[L.r.r])+'</b> · '+dataCurta(L.r.quando)+'</div>'
-            : '<div class="resolver">'+
-              '<button data-res="JUSTIFICADO" data-t="'+L.t.id+'" data-c="'+L.al.c+'">Justificado</button>'+
-              '<button data-res="CONFIRMADO" data-t="'+L.t.id+'" data-c="'+L.al.c+'">É desvio</button>'+
-              '<button data-res="ERRO_SISTEMA" data-t="'+L.t.id+'" data-c="'+L.al.c+'">Erro do sistema</button>'+
-              '</div>')+
-          '<button class="ligacao" style="padding:6px 0 0" data-ver="'+L.t.id+
-          '">Ver o turno</button></div></div>'; }).join('')
-      : '<div class="cartao"><div class="vazio">Nenhum alerta. Ou a frota anda bem, '+
-        'ou ainda não há turnos gravados.</div></div>';
-    b='<button class="bt pri" data-ir="dono-resumo">Voltar</button>';
-    return [h,b];
+  else if(S.ecra==='mais'){
+    h='<div class="tit"><h1>Mais</h1></div>';
+    h+='<div class="cartao '+(S.demo.ligado?'destaque':'')+'">'+
+      '<h3>Dados de exemplo</h3><p class="nota" style="margin-top:5px">'+
+      (S.demo.ligado
+        ? 'Está a ver duas semanas de trabalho inventado — três táxis, quinze turnos, '+
+          'com os cinco casos que interessam lá dentro. <b>As contas são reais</b>: é o '+
+          'mesmo sistema que julga os turnos verdadeiros.'
+        : 'Enche a aplicação com duas semanas de trabalho de três táxis, para poder '+
+          'experimentar tudo sem carro nenhum.')+'</p>'+
+      '<div style="margin-top:10px">'+
+      (S.demo.ligado
+        ? '<button class="bt sec pequeno" data-fazer="limpar-demo">Apagar os dados de exemplo</button>'
+        : '<button class="bt pri pequeno" data-fazer="gerar-demo">Encher com dados de exemplo</button>')+
+      '</div></div>';
+    h+='<button class="linha" data-fazer="ir-relatorio"><span><span class="p">Contas</span>'+
+      '<br><span class="s">o que a frota andou e o que custou</span></span>'+
+      '<span class="d" style="font-size:20px">›</span></button>';
+    h+='<button class="linha" data-fazer="ir-definicoes"><span><span class="p">'+
+      'Carros e preço</span><br><span class="s">'+S.frota.carros.length+' carros · '+
+      nf(S.frota.precoLitro,2)+' CVE por litro</span></span>'+
+      '<span class="d" style="font-size:20px">›</span></button>';
+    h+='<button class="linha" data-fazer="papel-condutor"><span><span class="p">'+
+      'Passar a condutor</span><br><span class="s">para gravar um turno neste telemóvel'+
+      '</span></span><span class="d" style="font-size:20px">›</span></button>';
+    h+='<p class="nota">Os dados ficam guardados e são os mesmos para quem abrir este '+
+      'endereço. '+(S.db?'Está ligado à base partilhada.':'Neste momento só neste aparelho.')+
+      '</p>';
   }
 
-  if(S.ecra==='dono-frota'){
-    h='<div><h1>Frota</h1><p class="sub">Carros e preço do combustível.</p></div>'+
-      '<label class="campo"><span class="lb">Preço da gasolina (CVE/litro)</span>'+
-      '<input type="number" inputmode="decimal" step="0.01" id="f-preco" value="'+
-      S.frota.precoLitro+'"><span class="ajuda">Fixado pela ARME, muda todos os meses. '+
+  else if(S.ecra==='definicoes'){
+    h='<div class="tit"><h1>Carros e preço</h1></div>'+
+      '<label class="campo"><span class="lb">Gasolina (CVE por litro)</span>'+
+      '<input type="number" inputmode="decimal" step="0.01" id="d-preco" value="'+
+      S.frota.precoLitro+'"><span class="aj">Muda todos os meses, com a ARME. '+
       'É daqui que saem os litros de cada abastecimento.</span></label>';
-    h+='<div class="cartao">'+S.frota.carros.map(function(x,i){
-      return '<div style="padding:11px 0;border-bottom:1px solid var(--line2)">'+
-        '<div style="display:flex;gap:9px;align-items:center">'+
-        '<input type="text" data-c-mat="'+i+'" value="'+esc(x.matricula)+
-        '" style="font-size:15px;flex:1"></div>'+
-        '<div style="display:flex;gap:9px;margin-top:7px">'+
-        '<label class="campo" style="flex:1"><span class="lb">Km</span>'+
-        '<input type="number" inputmode="numeric" data-c-km="'+i+'" value="'+x.kmActual+
-        '" style="font-size:15px"></label>'+
-        '<label class="campo" style="flex:1"><span class="lb">Depósito (l)</span>'+
-        '<input type="number" inputmode="numeric" data-c-dep="'+i+'" value="'+x.deposito+
-        '" style="font-size:15px"></label></div></div>'; }).join('')+
-      '<button class="ligacao" style="padding:10px 0 0" id="bt-carro">+ Acrescentar carro</button>'+
-      '</div>';
-    b='<button class="bt pri" id="bt-frota">Guardar</button>'+
-      '<button class="ligacao" data-ir="dono-resumo">Voltar</button>';
-    return [h,b];
+    h+=S.frota.carros.map(function(c,i){
+      return '<div class="cartao"><label class="campo"><span class="lb">Matrícula</span>'+
+        '<input type="text" data-c="mat" data-i="'+i+'" value="'+esc(c.matricula)+'"></label>'+
+        '<div class="par" style="margin-top:9px">'+
+        '<label class="campo"><span class="lb">Km agora</span>'+
+        '<input type="number" inputmode="numeric" data-c="km" data-i="'+i+'" value="'+
+        c.kmActual+'"></label>'+
+        '<label class="campo"><span class="lb">Depósito (l)</span>'+
+        '<input type="number" inputmode="numeric" data-c="dep" data-i="'+i+'" value="'+
+        c.deposito+'"></label></div></div>'; }).join('');
+    h+='<button class="bt sec pequeno" data-fazer="mais-carro">+ Acrescentar carro</button>';
+    b='<button class="bt pri" data-fazer="guardar-definicoes">Guardar</button>'+
+      '<button class="lig" data-fazer="voltar">Voltar</button>';
   }
-
-  if(S.ecra==='dono-importar'){
-    h='<div><h1>Importar turnos</h1><p class="sub">Do telemóvel do condutor '+
-      'para aqui, sem servidor pelo meio.</p></div>'+
-      '<div class="cartao"><h2>Como funciona</h2><p class="nota" style="margin-top:6px">'+
-      '1. Na app Android, o condutor toca em <b>Enviar turnos ao dono</b><br>'+
-      '2. Escolhe o WhatsApp e manda-lhe o ficheiro<br>'+
-      '3. Descarrega-o e escolhe-o aqui em baixo<br><br>'+
-      'Vão os turnos <b>e as fotos</b>. Os que já cá estiverem não se duplicam — '+
-      'compara-se pelo número do turno.</p></div>'+
-      '<label class="foto" style="padding:26px 14px">'+
-      '<span class="ico">📥</span>'+
-      '<span class="tx">Escolher o ficheiro</span>'+
-      '<span class="tx2">um ficheiro .json vindo da app</span>'+
-      '<input type="file" accept="application/json,.json" id="ficheiro-troca"></label>';
-    if(S.importado)
-      h+='<div class="cartao '+(S.importado.erro?'mau':'bom')+'"><h2>'+
-        (S.importado.erro?'Não deu':'Importado')+'</h2><p class="nota">'+
-        esc(S.importado.texto)+'</p></div>';
-    b='<button class="bt pri" data-ir="dono-resumo">Voltar ao painel</button>';
-    return [h,b];
-  }
-
-  if(S.ecra==='dono-motoristas'){
-    var nomes={}; S.turnos.forEach(function(t){ if(t.condutor) nomes[t.condutor]=true; });
-    var lista=Object.keys(nomes).map(function(n){ return {n:n, s:score(n)}; })
-      .sort(function(a,b2){ return a.s-b2.s; });
-    h='<div><h1>Motoristas</h1><p class="sub">Score dos últimos 30 dias. Mede '+
-      '<b>disciplina de registo</b>, não honestidade.</p></div>';
-    h+=lista.length? '<div class="cartao">'+lista.map(function(m){
-        var cor=m.s>=95?'var(--ok)':(m.s>=80?'var(--warn)':'var(--crit)');
-        var meus=S.turnos.filter(function(t){return t.condutor===m.n&&t.estado==='FECHADO';});
-        var kms=meus.reduce(function(s,t){return s+((t.kmFinal||0)-t.kmInicial);},0);
-        return '<div class="mot"><div class="cima"><span class="nome">'+esc(m.n)+'</span>'+
-          '<span class="sc" style="color:'+cor+'">'+m.s+'</span></div>'+
-          '<div class="barra"><span style="width:'+m.s+'%;background:'+cor+'"></span></div>'+
-          '<div class="porque">'+meus.length+' turnos · '+nf(kms)+' km</div></div>'; }).join('')+
-        '</div>'
-      : '<div class="cartao"><div class="vazio">Ainda não há turnos gravados.</div></div>';
-    b='<button class="bt pri" data-ir="dono-resumo">Voltar</button>';
-    return [h,b];
-  }
-
-  /* resumo */
-  var deHoje=fechados.filter(function(t){ return hoje(t.inicio); });
-  var km=deHoje.reduce(function(s,t){ return s+((t.kmFinal||0)-t.kmInicial); },0);
-  var cve=deHoje.reduce(function(s,t){ return s+(t.totalCve||0); },0);
-  var nAl=S.turnos.reduce(function(s,t){ return s+porResolver(t).length; },0);
-  h='<div><h1>A frota</h1><p class="sub">'+
-    (S.db?'Ao vivo, à medida que os condutores fecham turno.':
-          'Sem base partilhada — só os turnos deste telemóvel.')+'</p></div>'+
-    '<div class="tiles">'+
-    '<div><b class="num">'+nf(km)+'</b><span>km hoje</span></div>'+
-    '<div><b class="num">'+nf(cve)+'</b><span>CVE hoje</span></div>'+
-    '<div><b class="num">'+deHoje.length+'</b><span>turnos hoje</span></div>'+
-    '<div class="al'+(nAl?'':' al0')+'"><b class="num">'+nAl+'</b><span>por resolver</span></div>'+
-    '</div>';
-  if(abertos.length)
-    h+='<div class="cartao bom"><h2>'+abertos.length+' em turno agora</h2>'+
-      abertos.map(function(t){ return '<div class="nota" style="margin-top:5px">'+
-        '<b>'+esc(t.matricula)+'</b> · '+esc(t.condutor||'—')+' · desde as '+horas(t.inicio)+
-        ' · '+nf(kmDoRasto(t.rasto),1)+' km'; }).join('')+'</div>';
-  h+='<div class="abas">'+
-    '<button data-ir="dono-alertas">Alertas'+(nAl?' ('+nAl+')':'')+'</button>'+
-    '<button data-ir="dono-motoristas">Motoristas</button>'+
-    '<button data-ir="dono-frota">Frota</button>'+
-    '<button data-ir="dono-importar">Importar</button></div>';
-  h+='<div><h2>Turnos</h2></div>';
-  h+=fechados.length? '<div class="hist">'+fechados.slice(0,20).map(cartaoTurno).join('')+'</div>'
-    : '<div class="cartao"><div class="vazio">Nenhum turno gravado ainda.<br>'+
-      'Passe ao papel de <b>Condutor</b> para gravar o primeiro.</div></div>';
-  b='<button class="bt sec" data-ir="dono-alertas">Alertas por resolver'+
-    (nAl?' · '+nAl:'')+'</button>';
   return [h,b];
 }
 
-/* ═══ ACÇÕES ═════════════════════════════════════════════════ */
-document.addEventListener('change', function(ev){
-  var i=ev.target;
-  if(i.dataset&&i.dataset.foto&&i.files&&i.files[0])
-    lerFoto(i.files[0], function(u){ S.fotos[i.dataset.foto]=u; pintar(); });
-  if(i.id==='ficheiro-troca'&&i.files&&i.files[0]) importarTroca(i.files[0]);
-});
+/* ════════════════════════════════════════════════════════════
+   NAVEGAÇÃO E PINTURA
+   ════════════════════════════════════════════════════════════ */
+var TABS_DONO = [
+  {id:'hoje', ic:'🏠', nm:'Hoje'},
+  {id:'turnos', ic:'📋', nm:'Turnos'},
+  {id:'alertas', ic:'⚠️', nm:'Ver'},
+  {id:'equipa', ic:'👤', nm:'Equipa'},
+  {id:'mais', ic:'⚙️', nm:'Mais'}
+];
+var TABS_CONDUTOR = [
+  {id:'condutor', ic:'🚕', nm:'Turno'},
+  {id:'mais', ic:'⚙️', nm:'Mais'}
+];
 
-/// Recebe o ficheiro que a app Android produziu. O formato é o mesmo que este
-/// painel já usa por dentro, por isso não há tradução — e um erro de tradução
-/// é um erro que não pode acontecer.
-function importarTroca(ficheiro){
-  var fr=new FileReader();
-  fr.onerror=function(){
-    S.importado={erro:true, texto:'Não consegui ler o ficheiro.'}; pintar(); };
-  fr.onload=function(){
-    var d;
-    try{ d=JSON.parse(fr.result); }
-    catch(e){ S.importado={erro:true,
-      texto:'Isto não é um ficheiro do FleetCV.'}; pintar(); return; }
-    if(!d || !d.fleetcv || !Array.isArray(d.turnos)){
-      S.importado={erro:true, texto:'Isto não é um ficheiro do FleetCV.'};
-      pintar(); return;
-    }
-
-    // Carros que ainda não existem aqui entram; o preço do combustível fica
-    // como está — quem manda nele é o dono, não o telemóvel do condutor.
-    if(d.frota && Array.isArray(d.frota.carros)){
-      d.frota.carros.forEach(function(c){
-        if(!S.frota.carros.some(function(x){ return x.matricula===c.matricula; }))
-          S.frota.carros.push(c);
-      });
-      guardarFrota();
-    }
-
-    var novos=0, repetidos=0, fotos=0;
-    d.turnos.forEach(function(t){
-      if(!t.id || t.estado!=='FECHADO') return;
-      if(S.turnos.some(function(x){ return x.id===t.id; })){ repetidos++; return; }
-      var imagens=t.fotos||null;
-      delete t.fotos;                    // as fotos vão para documentos à parte
-      S.turnos.push(t); novos++;
-      if(S.db&&S.podeEscrever){
-        S.db.doc('turnos/'+t.id).set(leve(t)).catch(function(){});
-        if(imagens) Object.keys(imagens).forEach(function(k){
-          fotos++;
-          S.db.doc('turnos/'+t.id+'/fotos/'+k).set({img:imagens[k]})
-            .catch(function(){});
-        });
-      } else if(imagens){ t.fotos=imagens; }
-    });
-    S.turnos.sort(function(a,b){ return b.inicio-a.inicio; });
-    guardarLocal();
-
-    S.importado={ erro:false, texto: novos
-      ? novos+' turnos novos'+(fotos?', '+fotos+' fotos':'')+
-        (repetidos?' · '+repetidos+' já cá estavam':'')+'.'
-      : 'Nada de novo: estes '+repetidos+' turnos já cá estavam.' };
-    pintar();
-  };
-  fr.readAsText(ficheiro);
+function pintarTopo(){
+  var p=[];
+  if(S.papel==='condutor'){
+    var rot={ligado:'GPS ligado','a-procurar':'a procurar',recusado:'GPS recusado',
+      'sem-sinal':'sem sinal',indisponivel:'sem GPS',desligado:'GPS desligado'}[S.gps.estado];
+    var cls=S.gps.estado==='ligado'?'viva':
+      (S.gps.estado==='recusado'||S.gps.estado==='indisponivel'?'morta':'');
+    p.push('<span class="pill '+cls+'">'+rot+'</span>');
+    if(S.bateria!=null) p.push('<span class="pill">'+S.bateria+'%</span>');
+  }
+  if(S.demo.ligado) p.push('<span class="pill demo">exemplo</span>');
+  var e=el('topo-dir'); if(e) e.innerHTML=p.join('');
+  var l=el('logo-sub');
+  if(l) l.textContent = S.frota&&S.frota.nome ? ' · '+S.frota.nome : '';
 }
-var suaveTimer=null;
-function pintarSuave(){ clearTimeout(suaveTimer); suaveTimer=setTimeout(function(){
-  var ac=document.activeElement, id=ac&&ac.id, pos=ac&&ac.selectionStart;
+
+function pintarNav(){
+  var n=el('nav');
+  if(!S.pronto||S.ecra==='setup'){ n.innerHTML=''; return; }
+  var tabs = S.papel==='dono' ? TABS_DONO : TABS_CONDUTOR;
+  var nAl = S.turnos.reduce(function(s,t){ return s+porResolver(t).length; },0);
+  n.innerHTML = tabs.map(function(t){
+    var activo = S.ecra===t.id ||
+      (t.id==='turnos'&&S.ecra==='turno-detalhe') ||
+      (t.id==='mais'&&(S.ecra==='definicoes'||S.ecra==='relatorio')) ||
+      (t.id==='condutor'&&['abrir','turno','abastecer','fechar'].indexOf(S.ecra)>=0);
+    return '<button data-tab="'+t.id+'"'+(activo?' aria-current="page"':'')+'>'+
+      '<span class="ic">'+t.ic+'</span>'+t.nm+
+      (t.id==='alertas'&&nAl?'<span class="bolha">'+nAl+'</span>':'')+'</button>';
+  }).join('');
+}
+
+function pintar(){
+  var r;
+  if(S.ecra==='setup'||!S.pronto) r=ecraSetup();
+  else if(S.papel==='condutor'&&['condutor','abrir','turno','abastecer','fechar']
+          .indexOf(S.ecra)>=0) r=ecraCondutor();
+  else r=ecraDono();
+  el('ecra').innerHTML=r[0];
+  el('accoes').innerHTML=r[1]||'';
+  pintarTopo(); pintarNav();
+}
+var adiado=null;
+function pintarSuave(){ clearTimeout(adiado); adiado=setTimeout(function(){
+  var a=document.activeElement, id=a&&a.id, pos=a&&a.selectionStart;
   pintar();
-  if(id){ var n=document.getElementById(id); if(n){ n.focus();
-    try{ n.setSelectionRange(pos,pos); }catch(e){} } } }, 280); }
-document.addEventListener('input', function(ev){
-  var t=ev.target, id=t.id;
-  if(id==='km'){ S.rascunho.km=+t.value; pintarSuave(); }
-  if(id==='valor'){ S.rascunho.valor=+t.value; pintarSuave(); }
-  if(id==='litros') S.rascunho.litros=+t.value;
-  if(id==='kmF'){ S.rascunho.kmF=+t.value; pintarSuave(); }
-  if(id==='nome') S.eu.nome=t.value;
-  if(id==='f-preco') S.rascunho.preco=+t.value;
-  if(t.dataset.cMat!=null) S.frota.carros[+t.dataset.cMat].matricula=t.value;
-  if(t.dataset.cKm!=null) S.frota.carros[+t.dataset.cKm].kmActual=+t.value;
-  if(t.dataset.cDep!=null) S.frota.carros[+t.dataset.cDep].deposito=+t.value;
-});
-document.addEventListener('click', function(ev){
-  var b=ev.target.closest('[data-papel],[data-ir],[data-ver],[data-carro],[data-res],'+
-    '#bt-abrir,#bt-abast,#bt-fechar,#bt-frota,#bt-carro');
-  if(!b) return;
-  var d=b.dataset;
-  if(d.papel){ S.papel=d.papel; S.ecra=d.papel==='dono'?'dono-resumo':'inicio';
-    S.detalhe=null; guardarLocal(); pintar(); return; }
-  if(d.carro){ S.eu.carroId=d.carro; guardarLocal(); pintar(); return; }
-  if(d.res){ resolver(d.t, d.c, d.res); return; }
-  if(d.ver){ verTurno(d.ver); return; }
-  if(d.ir){ irPara(d.ir); return; }
-  if(b.id==='bt-abrir') abrirTurno();
-  if(b.id==='bt-abast') registarAbastecimento();
-  if(b.id==='bt-fechar') fecharTurno();
-  if(b.id==='bt-frota') guardarDefinicoesFrota();
-  if(b.id==='bt-carro'){
-    S.frota.carros.push({id:uid('c'), matricula:'CV-00-XX', marca:'', modelo:'',
-      deposito:45, kmActual:0}); pintar(); }
-});
+  if(id){ var x=el(id); if(x){ x.focus(); try{ x.setSelectionRange(pos,pos); }catch(e){} } }
+}, 300); }
+
+/* ════════════════════════════════════════════════════════════
+   O QUE OS BOTÕES FAZEM
+   ════════════════════════════════════════════════════════════ */
+function novoCarro(){ return {id:uid('c'), matricula:'', marca:'', modelo:'',
+  deposito:45, kmActual:0, consumoRef:7.5}; }
+
 function irPara(x){
-  var c=carroDe(S.eu.carroId);
-  if(x==='abrir'){ S.fotos={}; S.rascunho={km:c.kmActual}; ligarGps(); }
-  if(x==='abastecer'||x==='inicio'){ S.fotos={}; S.rascunho={}; }
-  if(x==='fechar'){ S.fotos={};
-    S.rascunho={kmF:S.turno.kmInicial+Math.round(kmDoRasto(S.turno.rasto))}; }
-  if(x.indexOf('dono')===0){ S.detalhe=null; }
-  if(x!=='dono-importar') S.importado=null;
+  var carro=carroDe(S.eu.carroId);
+  if(x==='abrir'){ S.fotos={}; S.rasc={km:carro?carro.kmActual:0}; ligarGps(); }
+  if(x==='abastecer'||x==='condutor'||x==='hoje') { S.fotos={}; S.rasc={}; }
+  if(x==='fechar'&&S.turno){ S.fotos={};
+    S.rasc={kmF:S.turno.kmInicial+Math.round(kmDoRasto(S.turno.rasto))}; }
   S.ecra=x; pintar();
+  el('ecra').parentNode.scrollTop=0;
 }
+
+function abrirTurno(){
+  var carro=carroDe(S.eu.carroId), km=S.rasc.km==null?carro.kmActual:S.rasc.km;
+  if(!S.fotos.abertura) return;
+  if(km<carro.kmActual){ alert('O conta-quilómetros não anda para trás. '+
+    'Da última vez ficou em '+nf(carro.kmActual)+' km.'); return; }
+  S.turno={ id:uid(), estado:'ABERTO', inicio:Date.now(), fim:null,
+    carroId:carro.id, matricula:carro.matricula,
+    condutor:S.eu.nome||'Condutor', kmInicial:km, kmFinal:null, gap:km-carro.kmActual,
+    precoLitro:S.frota.precoLitro, deposito:carro.deposito,
+    consumoRef:carro.consumoRef||7.5, rasto:[], abastecimentos:[],
+    totalCve:0, totalLitros:0, pontosFalsos:0,
+    fotoKeys:['abertura'], fotos:{abertura:S.fotos.abertura} };
+  S.fotos={}; S.rasc={};
+  guardarTurno(S.turno,true);
+  if(S.demo.ligado) arrancarTurnoDemo(); else ligarGps();
+  if(!relogio) relogio=setInterval(function(){
+    if(S.ecra==='turno') pintar(); }, 1000);
+  irPara('turno');
+}
+
+function guardarAbastecimento(){
+  var v=S.rasc.valor||0; if(v<=0||!S.turno) return;
+  var n=S.turno.abastecimentos.length+1;
+  var u=S.turno.rasto[S.turno.rasto.length-1];
+  S.turno.abastecimentos.push({hora:Date.now(), valor:v,
+    litrosTalao:S.rasc.litros||null, temFoto:!!S.fotos.talao,
+    lat:u?u[0]:null, lon:u?u[1]:null});
+  S.turno.totalCve+=v; S.turno.totalLitros+=v/S.turno.precoLitro;
+  if(S.fotos.talao){ S.turno.fotos['talao'+n]=S.fotos.talao;
+    S.turno.fotoKeys.push('talao'+n); }
+  guardarTurno(S.turno,true);
+  S.fotos={}; S.rasc={}; irPara('turno');
+}
+
+function fecharTurno(){
+  var t=S.turno, kmF=S.rasc.kmF; if(!t||!S.fotos.fecho) return;
+  var perc=kmF-t.kmInicial;
+  if(perc<0||perc>LIM.kmMax) return;
+  t.kmFinal=kmF; t.fim=Date.now(); t.estado='FECHADO';
+  t.fotos.fecho=S.fotos.fecho; t.fotoKeys.push('fecho');
+  t.kmGps=+kmDoRasto(t.rasto).toFixed(1);
+  t.semSinalS=Math.round(semSinal(t.rasto));
+  t.bateriaFim=S.bateria;
+  t.alertas=avaliar(t).alertas;
+  pararTurnoDemo(); desligarGps();
+  if(relogio){ clearInterval(relogio); relogio=null; }
+  var c=carroDe(t.carroId); if(c) c.kmActual=kmF;
+  S.turnos=S.turnos.filter(function(x){ return x.id!==t.id; });
+  S.turnos.unshift(t); S.turno=null; S.fotos={}; S.rasc={};
+  guardarTurno(t,true); guardarFrota();
+  verTurno(t.id);
+}
+
 function verTurno(id){
-  var t=S.turnos.filter(function(x){return x.id===id;})[0]; if(!t) return;
-  S.detalhe=t; S.fotosDetalhe=null;
-  S.papel='dono'; S.ecra='dono-turno'; pintar();
-  if(S.db&&t.fotoKeys&&t.fotoKeys.length){
+  var t=S.turnos.filter(function(x){ return x.id===id; })[0]; if(!t) return;
+  S.detalhe=t; S.fotosDetalhe=t.fotos||null;
+  S.papel='dono'; S.ecra='turno-detalhe'; pintar();
+  el('ecra').parentNode.scrollTop=0;
+  if(S.db&&!t.demo&&t.fotoKeys&&t.fotoKeys.length&&!t.fotos){
     var got={};
     Promise.all(t.fotoKeys.map(function(k){
       return S.db.doc('turnos/'+t.id+'/fotos/'+k).get().then(function(s){
         if(s.exists&&s.data().img) got[k]=s.data().img; }).catch(function(){});
     })).then(function(){
       if(S.detalhe&&S.detalhe.id===t.id){ S.fotosDetalhe=got; pintar(); } });
-  } else if(t.fotos){ S.fotosDetalhe=t.fotos; pintar(); }
+  }
 }
+
 function resolver(idT, cod, r){
-  var t=S.turnos.filter(function(x){return x.id===idT;})[0]; if(!t) return;
-  t.resolucoes=t.resolucoes||{};
-  t.resolucoes[cod]={r:r, quando:Date.now()};
+  var t=S.turnos.filter(function(x){ return x.id===idT; })[0]; if(!t) return;
+  t.resolucoes=t.resolucoes||{}; t.resolucoes[cod]={r:r, quando:Date.now()};
   guardarLocal();
   if(S.db&&S.podeEscrever)
     S.db.doc('turnos/'+t.id).update({resolucoes:t.resolucoes}).catch(function(){});
   pintar();
 }
-function abrirTurno(){
-  var c=carroDe(S.eu.carroId), km=S.rascunho.km||c.kmActual;
-  if(km<c.kmActual){ alert('O quadrante não anda para trás. O último fecho foi '+
-    nf(c.kmActual)+' km.'); return; }
-  S.turno={ id:uid(), estado:'ABERTO', inicio:Date.now(), fim:null,
-    carroId:c.id, matricula:c.matricula, condutor:S.eu.nome||'Condutor',
-    kmInicial:km, kmFinal:null, gap:km-c.kmActual,
-    precoLitro:S.frota.precoLitro, deposito:c.deposito,
-    rasto:[], abastecimentos:[], totalCve:0, totalLitros:0,
-    fotoKeys:S.fotos.abertura?['abertura']:[], fotos:{abertura:S.fotos.abertura||null} };
-  ligarGps(); S.fotos={}; S.rascunho={};
-  guardarTurno(S.turno,true);
-  S.ecra='turno'; pintar();
-  if(!relogioTimer) relogioTimer=setInterval(pintarTopo,1000);
-}
-function registarAbastecimento(){
-  var v=S.rascunho.valor||0; if(v<=0) return;
-  var n=S.turno.abastecimentos.length+1;
-  var a={ hora:Date.now(), valor:v, litrosTalao:S.rascunho.litros||null,
-          temFoto:!!S.fotos.talao, lat:null, lon:null };
-  var u=S.turno.rasto[S.turno.rasto.length-1];
-  if(u){ a.lat=u[0]; a.lon=u[1]; }
-  S.turno.abastecimentos.push(a);
-  S.turno.totalCve+=v; S.turno.totalLitros+=v/S.turno.precoLitro;
-  if(S.fotos.talao){ S.turno.fotos['talao'+n]=S.fotos.talao; S.turno.fotoKeys.push('talao'+n); }
-  guardarTurno(S.turno,true);
-  S.fotos={}; S.rascunho={}; S.ecra='turno'; pintar();
-}
-function fecharTurno(){
-  var t=S.turno, kmF=S.rascunho.kmF;
-  if(kmF<t.kmInicial||kmF-t.kmInicial>LIM.kmMax) return;
-  t.kmFinal=kmF; t.fim=Date.now(); t.estado='FECHADO';
-  if(S.fotos.fecho){ t.fotos.fecho=S.fotos.fecho; t.fotoKeys.push('fecho'); }
-  t.kmGps=+kmDoRasto(t.rasto).toFixed(1);
-  t.semSinalS=Math.round(semSinalS(t.rasto));
-  t.bateriaFim=S.bateria;
-  t.alertas=avaliar(t).alertas;          // guardado: o dono vê o mesmo veredicto
-  desligarGps();
-  if(relogioTimer){ clearInterval(relogioTimer); relogioTimer=null; }
-  var c=carroDe(t.carroId); c.kmActual=kmF;
-  S.turnos=S.turnos.filter(function(x){ return x.id!==t.id; });
-  S.turnos.unshift(t); S.turno=null; S.fotos={}; S.rascunho={};
-  guardarTurno(t,true); guardarFrota();
-  S.ecra='resumo'; pintar();
-}
-function guardarDefinicoesFrota(){
-  if(S.rascunho.preco) S.frota.precoLitro=S.rascunho.preco;
-  S.rascunho={}; guardarFrota(); S.ecra='dono-resumo'; pintar();
+
+function lerCampos(){
+  ['s-nome','s-ilha','s-preco','s-cond','c-nome','d-preco'].forEach(function(id){
+    var n=el(id); if(!n) return;
+    if(id==='s-nome') S.frota.nome=n.value;
+    if(id==='s-ilha') S.frota.ilha=n.value;
+    if(id==='s-preco'||id==='d-preco') S.frota.precoLitro=+n.value||S.frota.precoLitro;
+    if(id==='c-nome') S.eu.nome=n.value;
+    if(id==='s-cond') S.frota.condutores=n.value.split(',')
+      .map(function(x){ return x.trim(); }).filter(Boolean)
+      .map(function(x){ return {nome:x}; });
+  });
 }
 
-/* ═══ ARRANQUE ═══════════════════════════════════════════════ */
+document.addEventListener('input', function(ev){
+  var t=ev.target, id=t.id;
+  if(id==='km'){ S.rasc.km=+t.value; pintarSuave(); }
+  if(id==='valor'){ S.rasc.valor=+t.value; pintarSuave(); }
+  if(id==='litros') S.rasc.litros=+t.value;
+  if(id==='kmF'){ S.rasc.kmF=+t.value; pintarSuave(); }
+  if(id==='c-nome') S.eu.nome=t.value;
+  if(t.dataset.c!=null){
+    var c=S.frota.carros[+t.dataset.i]; if(!c) return;
+    if(t.dataset.c==='mat') c.matricula=t.value;
+    if(t.dataset.c==='km') c.kmActual=+t.value||0;
+    if(t.dataset.c==='dep') c.deposito=+t.value||45;
+  }
+});
+
+document.addEventListener('change', function(ev){
+  var i=ev.target;
+  if(i.dataset&&i.dataset.foto&&i.files&&i.files[0])
+    lerFoto(i.files[0], function(u){ S.fotos[i.dataset.foto]=u; pintar(); });
+});
+
+document.addEventListener('click', function(ev){
+  var b=ev.target.closest('[data-fazer],[data-tab],[data-turno],[data-res]');
+  if(!b) return;
+  var d=b.dataset;
+
+  if(d.tab){ S.detalhe=null;
+    if(d.tab==='condutor'||d.tab==='mais'||S.papel==='dono') irPara(d.tab);
+    return; }
+  if(d.turno){ verTurno(d.turno); return; }
+  if(d.res){ resolver(d.t, d.c, d.res); return; }
+
+  var f=d.fazer;
+  if(f==='passo0'){ lerCampos(); S.passo=0; pintar(); }
+  if(f==='passo1'){ lerCampos();
+    if(!S.frota.carros.length) S.frota.carros.push(novoCarro());
+    S.passo=1; pintar(); }
+  if(f==='passo2'){ lerCampos(); S.passo=2; pintar(); }
+  if(f==='mais-carro'){ lerCampos(); S.frota.carros.push(novoCarro()); pintar(); }
+  if(f==='tirar-carro'){ S.frota.carros.splice(+d.i,1); pintar(); }
+  if(f==='terminar'){
+    lerCampos();
+    S.frota.carros=S.frota.carros.filter(function(c){ return c.matricula.trim(); });
+    if(!S.frota.carros.length) S.frota.carros=[Object.assign(novoCarro(),
+      {matricula:'CV-01-AB', kmActual:120000, deposito:50})];
+    S.eu.carroId=S.frota.carros[0].id;
+    guardarFrota(); S.pronto=true; S.papel='dono'; irPara('hoje'); }
+  if(f==='demo-rapida'){
+    lerCampos();
+    if(!S.frota.nome) S.frota.nome='Táxis Praia, Lda';
+    S.frota.carros=[
+      Object.assign(novoCarro(),{matricula:'CV-01-AB',marca:'Toyota',modelo:'Corolla',
+        kmActual:120000,deposito:50}),
+      Object.assign(novoCarro(),{matricula:'CV-02-CD',marca:'Nissan',modelo:'Almera',
+        kmActual:208400,deposito:46}),
+      Object.assign(novoCarro(),{matricula:'CV-03-EF',marca:'Hyundai',modelo:'Accent',
+        kmActual:64300,deposito:45})];
+    S.frota.condutores=[{nome:'António Semedo'},{nome:'Jorge Tavares'},{nome:'Nuno Rocha'}];
+    S.eu.carroId=S.frota.carros[0].id;
+    S.pronto=true; S.papel='dono';
+    gerarDemonstracao(); irPara('hoje'); }
+  if(f==='gerar-demo'){ gerarDemonstracao(); irPara('hoje'); }
+  if(f==='limpar-demo'){ limparDemonstracao(); pintar(); }
+  if(f==='ir-abrir') irPara('abrir');
+  if(f==='abrir-turno') abrirTurno();
+  if(f==='ir-turno') irPara('turno');
+  if(f==='ir-abastecer') irPara('abastecer');
+  if(f==='guardar-abast') guardarAbastecimento();
+  if(f==='ir-fechar') irPara('fechar');
+  if(f==='fechar-turno') fecharTurno();
+  if(f==='ir-condutor') irPara('condutor');
+  if(f==='ir-alertas') irPara('alertas');
+  if(f==='ir-relatorio') irPara('relatorio');
+  if(f==='ir-definicoes') irPara('definicoes');
+  if(f==='guardar-definicoes'){ lerCampos(); guardarFrota(); irPara('mais'); }
+  if(f==='voltar'){ S.detalhe=null; irPara(S.papel==='dono'?'hoje':'condutor'); }
+  if(f==='papel-condutor'){ S.papel='condutor'; guardarLocal(); irPara('condutor'); }
+  if(f==='papel-dono'){ S.papel='dono'; guardarLocal(); irPara('hoje'); }
+  if(f==='trocar-carro'){
+    var i=S.frota.carros.findIndex(function(c){ return c.id===S.eu.carroId; });
+    S.eu.carroId=S.frota.carros[(i+1)%S.frota.carros.length].id;
+    guardarLocal(); pintar(); }
+});
+
+/* ════════════════════════════════════════════════════════════
+   ARRANQUE
+   ════════════════════════════════════════════════════════════ */
 var L=lerLocal();
-S.frota = (L&&L.frota) || JSON.parse(JSON.stringify(FROTA_OMISSAO));
-if(!S.frota.carros||!S.frota.carros.length) S.frota.carros=FROTA_OMISSAO.carros.slice();
+S.frota = (L&&L.frota) || frotaNova();
 S.eu = (L&&L.eu) || S.eu;
-if(!carroDe(S.eu.carroId)) S.eu.carroId=S.frota.carros[0].id;
 S.turnos = (L&&L.turnos) || [];
-S.papel = (L&&L.papel) || 'condutor';
+S.papel = (L&&L.papel) || 'dono';
+S.demo.ligado = !!(L&&L.demo&&L.demo.ligado);
 S.turno = (L&&L.turno&&L.turno.estado==='ABERTO') ? L.turno : null;
-if(S.turno){ S.papel='condutor'; S.ecra='turno'; ligarGps();
-  relogioTimer=setInterval(pintarTopo,1000); }
-else S.ecra = S.papel==='dono' ? 'dono-resumo' : 'inicio';
+S.pronto = !!(S.frota.carros && S.frota.carros.length);
+if(!S.pronto){ S.ecra='setup'; S.passo=0; }
+else {
+  if(!carroDe(S.eu.carroId)) S.eu.carroId=S.frota.carros[0].id;
+  if(S.turno){ S.papel='condutor'; S.ecra='turno';
+    if(S.demo.ligado) arrancarTurnoDemo(); else ligarGps();
+    relogio=setInterval(function(){ if(S.ecra==='turno') pintar(); },1000); }
+  else S.ecra = S.papel==='dono' ? 'hoje' : 'condutor';
+}
 pintar();
 lerBateria();
 
-// A base partilhada chega depois — a app já está de pé sem ela.
+// A base partilhada chega depois. A aplicação já está de pé sem ela.
 if(window.claude&&window.claude.use){
-  window.claude.use('user').then(function(u){
-    if(!u) return; S.user=u;
-    try{ if(u.isOwner&&u.isOwner()&&!L){ S.papel='dono'; S.ecra='dono-resumo'; pintar(); } }catch(e){}
-  }).catch(function(){});
-
   window.claude.use('db').then(function(db){
     if(!db) return;
     S.db=db;
     db.doc('config/frota').get().then(function(s){
-      if(s.exists){ var f=s.data();
-        if(f.carros&&f.carros.length) S.frota=f;
-        if(!carroDe(S.eu.carroId)) S.eu.carroId=S.frota.carros[0].id; }
-      else db.doc('config/frota').set(S.frota).catch(function(){});
-      pintar();
+      if(s.exists&&s.data().carros&&s.data().carros.length){
+        S.frota=s.data();
+        if(!carroDe(S.eu.carroId)) S.eu.carroId=S.frota.carros[0].id;
+        if(!S.pronto){ S.pronto=true; S.ecra=S.papel==='dono'?'hoje':'condutor'; }
+        pintar();
+      } else if(S.pronto) guardarFrota();
     }).catch(function(){});
 
-    S.subs.push(db.collection('turnos').orderBy('inicio','desc').limit(60)
+    db.collection('turnos').orderBy('inicio','desc').limit(60)
       .onSnapshot(function(q){
-        var vindos=q.docs.map(function(d){ return d.data(); })
-          .filter(function(t){ return t&&t.id&&t.inicio; });
-        var meuAberto=S.turno?S.turno.id:null;
-        var mapa={};
-        vindos.forEach(function(t){ if(t.id!==meuAberto) mapa[t.id]=t; });
-        S.turnos.forEach(function(t){ if(!mapa[t.id]&&t.id!==meuAberto) mapa[t.id]=t; });
+        var meu=S.turno?S.turno.id:null, mapa={};
+        q.docs.map(function(d){ return d.data(); })
+          .filter(function(t){ return t&&t.id&&t.inicio&&t.id!==meu; })
+          .forEach(function(t){ mapa[t.id]=t; });
+        S.turnos.forEach(function(t){ if(!mapa[t.id]&&t.id!==meu) mapa[t.id]=t; });
         S.turnos=Object.keys(mapa).map(function(k){ return mapa[k]; })
           .sort(function(a,b){ return b.inicio-a.inicio; });
+        S.demo.ligado = S.turnos.some(function(t){ return t.demo; });
         guardarLocal();
-        if(S.ecra!=='abrir'&&S.ecra!=='abastecer'&&S.ecra!=='fechar') pintar();
-      }, function(){}));
+        if(['abrir','abastecer','fechar','setup'].indexOf(S.ecra)<0) pintar();
+      }, function(){});
   }).catch(function(){});
 }
 })();

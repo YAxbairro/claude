@@ -1,44 +1,51 @@
-# FleetCV — app (Fase 2)
+# FleetCV — a aplicação
 
-Uma só página, dois papéis: **condutor** e **dono**, a partilhar a mesma base de dados.
+Um só endereço, dois papéis: **condutor** e **dono**.
 
 ```
-frota.html    a aplicação inteira (sem dependências, sem compilação)
-teste.mjs     percorre os dois papéis de ponta a ponta com GPS e fotos simuladas
+frota.html   a aplicação inteira, sem compilação nem dependências
+teste.mjs    22 verificações que percorrem os dois papéis do princípio ao fim
 ```
 
-## Porque é uma página só
+## Como está organizada
 
-A base de dados partilhada é **por artefacto**. Um painel publicado num endereço
-separado teria uma base vazia e nunca veria os turnos gravados pelo condutor. Por isso
-os dois papéis vivem no mesmo sítio, com um interruptor no topo.
+**Primeira vez** → três passos: nome da empresa, os carros, o preço do combustível.
+Ou o atalho **«Ver com dados de exemplo»**, que enche tudo sozinho.
 
-## O que guarda
+**Condutor** — Turno · Mais
+Abrir turno (foto do conta-quilómetros) → conduzir → «Abasteci» (foto do talão) →
+fechar turno (foto). No fim vê as contas do seu próprio turno.
 
-| Caminho | O quê |
-|---|---|
-| `config/frota` | carros e preço do combustível fixado pela ARME |
-| `turnos/<id>` | o turno: km, rasto de GPS, abastecimentos, alertas, resoluções |
-| `turnos/<id>/fotos/<tipo>` | fotos do quadrante e dos talões, em documentos à parte |
+**Dono** — Hoje · Turnos · Ver · Equipa · Mais
+- **Hoje**: km, combustível, turnos, e o dinheiro que falta explicar
+- **Ver**: cada coisa encontrada, com três respostas possíveis
+- **Equipa**: quem regista com cuidado e quem não
+- **Mais**: contas do mês, carros e preço, dados de exemplo
 
-Sem base partilhada disponível, a app continua a funcionar e guarda tudo no telemóvel.
+## Os dados de exemplo
 
-## Regras
+Duas semanas de trabalho de três táxis, com os cinco casos lá dentro: dias normais,
+um talão inflacionado, um carro usado à noite, um GPS desligado e um bidão cheio.
 
-Os limites são os mesmos do motor SQL da Fase 1 — 3 km de tolerância no quadrante,
-15% e 25% de divergência, 500 km máximos por turno, 150 m de raio no posto. **Mudar um
-limite obriga a mudá-lo nos dois sítios** (`LIM` aqui, `SPEC.md §15` e as definições da
-organização no SQL).
+**As contas são as verdadeiras.** O que é inventado são os turnos; o sistema que os
+julga é o mesmo que julga os turnos reais — os mesmos limites de `LIM`, as mesmas
+regras do motor SQL da Fase 1 e da app Android.
+
+Serve para duas coisas: experimentar tudo sem carro, e mostrar a um dono de táxis
+no telemóvel, em dois minutos.
 
 ## Testar
 
 ```bash
-npm i playwright && node teste.mjs      # 17 verificações, dois papéis
+npm i playwright && node teste.mjs
 ```
 
-## O que esta versão ainda não faz
+Percorre a configuração inicial, os dados de exemplo, os alertas, a resolução de um
+alerta, o detalhe de um turno, a equipa, as contas, e um turno inteiro gravado do
+princípio ao fim no papel de condutor.
 
-- **O GPS pára quando o telemóvel adormece.** É um limite do navegador, não da app.
-  Só a app Android nativa (Fase 3) grava com o ecrã apagado.
-- Sem detecção de localização falsa (`mock`): a web não a expõe. O Android expõe.
-- Sem leitura automática do quadrante e do talão — os números escrevem-se à mão.
+## O que ainda não faz
+
+- **O GPS pára quando o telemóvel adormece** — é um limite do navegador. A app
+  Android (`fleetcv/android_app`) grava com o ecrã apagado.
+- **Não lê o conta-quilómetros nem o talão sozinha.** Os números escrevem-se à mão.
