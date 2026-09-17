@@ -21,7 +21,7 @@ dependencies:
   battery_plus: 6.2.3      # distingue "acabou a bateria" de "desligou o GPS"
   # A 13 é a primeira que usa win32 ^6, como o geolocator 14. Abaixo disso as
   # duas não coexistem — foi o próprio pub que apontou a saída.
-  share_plus: ">=13.0.0 <14.0.0"   # enviar os turnos ao dono pelo WhatsApp
+  share_plus: 13.3.0       # enviar os turnos ao dono pelo WhatsApp
 
 dev_dependencies:
   flutter_test:

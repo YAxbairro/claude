@@ -45,8 +45,8 @@ que decidimos — estão em `preparar_android.py`, à vista.
 
 ## Estado da compilação
 
-Execução nº 3 — **verde**. APK de 49,8 MB, analisado sem um único aviso,
-15 testes a passar.
+Execução nº 6 — **verde**. APK de 50,6 MB, analisado sem um único aviso,
+20 testes a passar.
 
 As versões das dependências estão **fixas** no `pubspec.yaml`, tiradas do
 `pubspec.lock` dessa compilação. Uma compilação que funciona hoje tem de
@@ -62,8 +62,10 @@ bateria" de "desligou o GPS", e isso pode ler-se por outro caminho.
 
 ## Três limites, ditos com clareza
 
-- **Sem sincronização.** Os turnos ficam no aparelho. Ligá-los ao painel do dono
-  precisa de um servidor (Supabase) e de uma conta que ainda não existe.
+- **Sem sincronização automática.** Os turnos ficam no aparelho, e vão para o
+  painel do dono por ficheiro: **Enviar turnos ao dono** → WhatsApp → o dono
+  importa-o. Num piloto de um carro faz o mesmo trabalho que um servidor.
+  A sincronização a sério precisa de Supabase e de uma conta que ainda não existe.
 - **Sem leitura automática** do quadrante e do talão. Os números escrevem-se à
   mão. A leitura offline (ML Kit) entra depois desta compilação estar verde.
 - **O Android pode na mesma matar o serviço** em aparelhos com poupança de
