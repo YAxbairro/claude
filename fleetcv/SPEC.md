@@ -198,7 +198,8 @@ automático.** Os valores entre parêntesis são configuráveis por organizaçã
 | **R09** | Mais de **15 min** sem qualquer ponto de GPS com turno aberto → alerta. |
 | **R10** | Qualquer ponto com `mock = true` → alerta **crítico** imediato. Localização falsa é acto deliberado, não é engano. |
 | **R11** | Paragem de mais de **20 min** fora das zonas conhecidas → alerta informativo. |
-| **R12** | Divergência acima de **5 min** entre hora do telemóvel e hora do servidor → relógio marcado como suspeito e todos os eventos desse turno ficam sinalizados. |
+| **R12** | Relógio adulterado, detectado por duas vias independentes: **(a)** o telemóvel mede o seu próprio desvio contra o servidor em cada sincronização e reporta-o — acima de **5 min** é alerta; **(b)** dentro de um mesmo lote, a diferença entre horas de sistema tem de bater com o contador monotónico do Android (que não se pode alterar) — mais de **60 s** de discrepância significa que alguém mexeu no relógio a meio do turno. |
+| *(nota)* | Comparar a hora do telemóvel com a hora do servidor **não serve**: em modo offline o atraso é legítimo e diário. Seria o alerta falso mais comum de todos. |
 
 ### 5.3 Fecho de turno
 
@@ -207,7 +208,7 @@ automático.** Os valores entre parêntesis são configuráveis por organizaçã
 | **R13** | Foto do quadrante obrigatória, ao vivo. Km final ≥ km inicial. |
 | **R14** | `km_percorridos = km_final − km_inicial`. Fora do intervalo plausível (0–500 km) → bloqueia e pede reconfirmação da foto. |
 | **R15** | Compara-se `km_percorridos` (quadrante) com `km_gps` (soma do rasto). O GPS costuma ficar **3 a 8% abaixo** — é normal, perde sinal. |
-| **R16** | Divergência acima de **15%** → alerta. Acima de **25%** com o quadrante à frente → alerta crítico: andou sem GPS. |
+| **R16** | A divergência mede-se sobre o quadrante — o número declarado: `(km_quadrante − km_gps) ÷ km_quadrante`. A partir de **15%** → aviso; a partir de **25%** → crítico: andou sem GPS. |
 | **R17** | Se `km_gps > km_quadrante + 10%` → o quadrante está errado ou foi adulterado. Alerta crítico. |
 | **R18** | O total de combustível do turno é **calculado pela app**, nunca escrito pelo motorista. |
 
@@ -351,7 +352,7 @@ dono olhar para uma lista e saber com quem tem de falar.
 | Abastecimento sem talão (A11) | −10 |
 | Turno fechado automaticamente (A20) | −10 |
 | Fecho pelo gestor (A21) | −5 |
-| Cada 10 min sem sinal de GPS | −1 *(máx. −20 por turno)* |
+| Cada 10 min completos sem sinal de GPS | −1 *(máx. −20 por turno)* |
 
 **Recuperação:** +3 por cada turno completo e sem alertas, até ao máximo de 100.
 
@@ -530,7 +531,7 @@ carro             id · organizacao_id · matricula · marca · modelo · ano
 indisponibilidade id · carro_id · inicio · fim · motivo
 
 turno             id(uuid do telemóvel) · organizacao_id · carro_id · motorista_id
-                  estado · aberto_em · fechado_em
+                  estado · aberto_em · fechado_em · bateria_final_pct
                   km_inicial · km_inicial_ocr · foto_inicial_id
                   km_final   · km_final_ocr   · foto_final_id
                   km_gps_m · duracao_s · segundos_sem_gps
@@ -539,7 +540,8 @@ turno             id(uuid do telemóvel) · organizacao_id · carro_id · motori
                   ⚠ imutável quando estado ≠ ABERTO (gatilho)
 
 ponto_gps         id · turno_id · lat · lon · precisao_m · velocidade_kmh
-                  bateria_pct · mock(bool) · capturado_em · recebido_em
+                  bateria_pct · mock(bool) · monotonico_ms · desvio_relogio_s
+                  capturado_em · recebido_em
                   ⚠ tabela particionada por mês
 
 abastecimento     id(uuid do telemóvel) · turno_id · carro_id · motorista_id
@@ -552,13 +554,16 @@ posto             id · organizacao_id(nulo = global) · nome · marca · lat ·
 preco_combustivel id · ilha · tipo · preco_cve_litro · valido_de · valido_ate
                   (actualizado quando a ARME publica)
 
-zona              id · organizacao_id · nome · poligono(geojson) · tipo
+zona              id · organizacao_id · nome · lat · lon · raio_m · tipo
+                  (círculos, não polígonos: evita a dependência de PostGIS e
+                   chega para base, postos e área de operação)
 
 foto              id · organizacao_id · caminho · hash_sha256 · bytes
                   capturado_em · lat · lon · tipo
 
 alerta            id · organizacao_id · codigo · nivel · turno_id · carro_id
-                  motorista_id · dados(jsonb) · criado_em
+                  motorista_id · abastecimento_id · dados(jsonb) · ocorrencias
+                  ocorrido_em (hora do facto) · criado_em (hora da gravação)
                   fechado_em · fechado_por · resolucao · nota
 
 score_motorista   motorista_id · janela_de · janela_ate · valor · detalhe(jsonb)
@@ -643,17 +648,19 @@ querer mexer neles sem publicar nova versão da app.
 Cada fase termina com **algo que se pode testar**. Nenhuma fase começa sem a anterior
 estar aceite.
 
-### Fase 0 — Especificação ← *estamos aqui*
+### Fase 0 — Especificação ✅
+**Entregue.** Falta a revisão do Yanick contra a realidade de Cabo Verde (secção 19).
 **Entrega:** este documento, revisto e corrigido pelo Yanick.
 **Aceite quando:** as regras R01–R34 estiverem confirmadas contra a realidade de Cabo Verde.
 
-### Fase 1 — Fundação (base de dados e regras)
-**Entrega:** esquema Postgres, regras em SQL, dados de teste, testes automáticos.
-**Aceite quando:** um script simula **30 dias de turnos** — incluindo turnos honestos e as
-14 fraudes da secção 7 — e o sistema apanha exactamente os alertas esperados, **sem
-interface nenhuma**. Se a lógica não estiver certa aqui, nenhum ecrã bonito a salva.
+### Fase 1 — Fundação (base de dados e regras) ✅ ← *feito*
+**Entregue:** `fleetcv/db/` — esquema PostgreSQL, as 34 regras em SQL, dados de partida de
+uma frota da Praia, e 18 cenários com 48 verificações automáticas.
+**Correr:** `./fleetcv/db/run.sh`
+**Resultado:** 48/48 verificações passam, sem interface nenhuma. Se a lógica não estivesse
+certa aqui, nenhum ecrã bonito a salvava.
 
-### Fase 2 — Painel do dono
+### Fase 2 — Painel do dono ← *a seguir*
 **Entrega:** web com mapa, turnos, alertas e relatórios, sobre os dados de teste.
 **Aceite quando:** for possível abrir um turno de teste e ver percurso, fotos, contas e
 alertas — e perceber a história toda sem explicação nenhuma.
@@ -749,3 +756,23 @@ Precisam de resposta do Yanick antes ou durante a Fase 1.
 | **CVE** | Escudo cabo-verdiano |
 | **ARME** | Entidade que fixa os preços dos combustíveis em Cabo Verde |
 | **Localização falsa** | App que engana o GPS do telemóvel (*mock location*) |
+
+---
+
+## 21. Registo de alterações
+
+### v0.2 — depois da Fase 1
+
+Escrever o código obrigou a corrigir quatro coisas que estavam erradas na v0.1. Ficam
+registadas com o motivo, porque o motivo é mais importante do que a correcção.
+
+| O que mudou | Porquê |
+|---|---|
+| **R12 — deteção do relógio adulterado** foi refeita | A regra original comparava a hora do telemóvel com a do servidor. Isso **quebra em modo offline**: um turno sincronizado ao fim do dia tem horas legitimamente atrasadas, e teria dado alerta falso todos os dias. Agora usa o desvio que o próprio telemóvel mede na sincronização, mais o contador monotónico do Android — que não se pode alterar nem em modo de avião |
+| **Alertas passaram a ter `ocorrido_em` além de `criado_em`** | Um alerta estava a ser datado pela hora em que a linha era gravada. Com sincronização offline, um turno de terça-feira que só sobe na quinta contava no relatório de quinta e desaparecia do de terça. O score chegou a dar 100 a um motorista apanhado com GPS falso — foi um teste que apanhou isto |
+| **Zonas passaram de polígonos a círculos** | Polígonos obrigavam a PostGIS. Centro e raio chegam para base, postos e área de operação, e a instalação fica muito mais simples |
+| **R16 — a divergência mede-se sobre o quadrante**, com limites ≥15% e ≥25% | Faltava dizer sobre que número se calcula a percentagem. Sobre o GPS ou sobre o quadrante dá resultados diferentes, e a fronteira exacta entre aviso e crítico dependia disso |
+
+**Também foi preciso decidir, e ficou assim:** só contam para "tempo sem sinal" as falhas
+acima de 5 minutos (a amostragem normal nunca lá chega); um intervalo que começa logo a
+seguir a um ponto com bateria ≤5% não conta nem penaliza, porque a bateria prova a causa.
