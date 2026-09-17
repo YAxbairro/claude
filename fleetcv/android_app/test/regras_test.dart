@@ -141,8 +141,13 @@ void main() {
 
   test('C15 · quadrante muito à frente do GPS', () {
     final r = rasto(pontos: 41, metrosPorPonto: 250, intervaloS: 30); // 10 km
-    expect(codigos(avaliar(pontos: r, kmFinal: 120013)), contains('A08'));
-    expect(codigos(avaliar(pontos: r, kmFinal: 120011)), isEmpty);
+    // A divergência mede-se sobre o quadrante, que é o número declarado.
+    // Estes três casos fixam as duas fronteiras, para ninguém as mexer por engano.
+    expect(codigos(avaliar(pontos: r, kmFinal: 120011)), isEmpty); //  9,1% · normal
+    expect(codigos(avaliar(pontos: r, kmFinal: 120013)),
+        contains('A07')); // 23,1% · aviso
+    expect(codigos(avaliar(pontos: r, kmFinal: 120014)),
+        contains('A08')); // 28,6% · crítico
   });
 
   test('GPS à frente do quadrante é sinal de quadrante mexido', () {
