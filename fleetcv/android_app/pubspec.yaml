@@ -1,0 +1,27 @@
+name: fleetcv
+description: Controlo de frota para Cabo Verde — app do condutor.
+publish_to: none
+version: 0.3.0+3
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+# Intervalos largos de propósito: o primeiro objectivo é um APK que compile.
+# Assim que a compilação ficar verde, fixam-se as versões do pubspec.lock gerado.
+dependencies:
+  flutter:
+    sdk: flutter
+  geolocator: ">=12.0.0 <15.0.0"      # posição + isMocked + serviço em primeiro plano
+  image_picker: ">=1.0.0 <2.0.0"      # câmara do telemóvel
+  sqflite: ">=2.3.0 <3.0.0"           # turnos gravados no aparelho
+  path: ">=1.8.0 <2.0.0"
+  path_provider: ">=2.1.0 <3.0.0"
+  battery_plus: ">=5.0.0 <7.0.0"      # distingue "acabou a bateria" de "desligou o GPS"
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ">=3.0.0 <6.0.0"
+
+flutter:
+  uses-material-design: true

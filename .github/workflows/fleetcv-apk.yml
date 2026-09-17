@@ -1,0 +1,65 @@
+name: FleetCV · APK
+
+# O APK do condutor é compilado aqui: não é preciso ter o SDK Android instalado
+# em lado nenhum. Termina com o ficheiro pronto a instalar, nos artefactos da
+# execução.
+on:
+  push:
+    paths:
+      - 'fleetcv/android_app/**'
+      - '.github/workflows/fleetcv-apk.yml'
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: fleetcv/android_app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Gerar o esqueleto Android
+        run: |
+          # O código nosso é lib/ e test/; a pasta android/ é gerada, para não
+          # guardarmos no repositório milhares de linhas que ninguém lê.
+          cp -r lib /tmp/lib && cp -r test /tmp/test && cp pubspec.yaml /tmp/pubspec.yaml
+          flutter create --platforms=android --project-name fleetcv --org cv.fleetcv .
+          rm -rf lib test && cp -r /tmp/lib lib && cp -r /tmp/test test
+          cp /tmp/pubspec.yaml pubspec.yaml
+
+      - name: Permissões
+        run: python3 preparar_android.py
+
+      - name: Dependências
+        run: flutter pub get
+
+      - name: Analisar
+        run: flutter analyze --no-fatal-infos
+
+      - name: Testar as regras
+        run: flutter test
+
+      - name: Compilar o APK
+        run: flutter build apk --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fleetcv-apk
+          path: fleetcv/android_app/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+
+      - name: Versão bloqueada das dependências
+        if: always()
+        run: cat pubspec.lock || true
