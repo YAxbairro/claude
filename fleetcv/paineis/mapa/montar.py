@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Mete o mapa da Praia (dados + desenho) dentro de cada painel.
+"""Mete as partes comuns — o mapa da Praia e a nuvem — dentro de cada painel.
 
 Os painéis são ficheiros únicos — abrem com dois cliques, sem servidor,
 sem internet. Por isso o mapa tem de ir lá dentro. Este script é que o
@@ -12,10 +12,9 @@ FIM = '/*MAPA>>>*/'
 
 def montar(painel):
     h = io.open(painel, encoding='utf-8').read()
-    bloco = (INI + '\n'
-             + io.open('mapa_praia.js',  encoding='utf-8').read().rstrip() + '\n'
-             + io.open('mapa_render.js', encoding='utf-8').read().rstrip() + '\n'
-             + FIM)
+    bloco = INI + '\n' + '\n'.join(
+        io.open(f, encoding='utf-8').read().rstrip()
+        for f in ('mapa_praia.js', 'mapa_render.js', 'nuvem.js')) + '\n' + FIM
     if INI in h:
         h = re.sub(re.escape(INI) + r'.*?' + re.escape(FIM), lambda m: bloco, h, flags=re.S)
     else:

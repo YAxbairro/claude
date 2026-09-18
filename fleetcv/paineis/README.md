@@ -28,12 +28,60 @@ ser, o script recusa-se a juntar e diz o quê.
 Entradas de exemplo: condutor `antonio@exemplo.cv` / `1234`;
 proprietário `patrao@exemplo.cv` / `9999`.
 
+## Como é que os dois painéis falam um com o outro
+
+Antes, cada painel guardava as coisas no seu próprio telemóvel e nunca
+se viam. Agora há um sítio comum — `mapa/nuvem.js` — e tudo o que
+acontece de um lado aparece do outro em segundos, sem ninguém carregar
+em "actualizar":
+
+    o condutor abre turno   ──►  aparece no mapa do patrão
+    o carro anda            ──►  o patrão vê a seta a mexer e os km a subir
+    o condutor abastece     ──►  aparece na hora, com o posto e o valor
+    o condutor fecha        ──►  entra no histórico, já com as contas feitas
+    o patrão mexe na frota  ──►  o telemóvel do condutor recebe a mudança
+
+A nuvem tem **dois motores, com a mesma porta**, e o resto do código não
+sabe qual está a ser usado:
+
+| Motor | Liga o quê | Quando é usado |
+|---|---|---|
+| de longe | telemóveis diferentes, em sítios diferentes | quando a base de dados partilhada está disponível |
+| de perto | separadores e janelas do mesmo aparelho | quando não está — e é o que torna isto testável |
+
+Três cuidados mandam no desenho todo:
+
+1. **Escrever custa.** Um turno de oito horas dá milhares de pontos de
+   GPS. A posição sobe de 4 em 4 segundos e só se o carro mexeu; o
+   rasto inteiro é gravado de 45 em 45 segundos, aos pedaços. Se a
+   nuvem se queixar do ritmo, a aplicação abranda em vez de insistir.
+2. **Cada papel escreve o seu.** O condutor escreve o turno dele e onde
+   está; o patrão escreve os carros, os condutores e as respostas aos
+   alertas. Dois telemóveis nunca escrevem a mesma linha.
+3. **As provas viajam feitas.** Quando o condutor fecha o turno, é o
+   telemóvel dele que calcula a que distância chegou do posto e quanto
+   tempo lá esteve parado. O patrão recebe dois números em vez de
+   milhares de pontos de GPS.
+
+Sem nuvem e sem rede continua tudo a trabalhar com o que está guardado
+no próprio telemóvel, e sobe quando voltar — o condutor não pode ficar
+parado à porta de um cliente à espera de rede.
+
+**Uma limitação a saber:** para os painéis falarem entre telemóveis
+diferentes, a página publicada tem de declarar a base de dados
+partilhada, e isso torna-a interna à organização — quem a abre tem de
+ter sessão iniciada nessa organização. Para um piloto com os condutores
+a entrar com contas próprias, serve. Para o produto a sério, com
+condutores que só têm o telemóvel deles, é preciso um servidor.
+
 ## O mapa
 
 Não há mapa de internet nenhum: os telemóveis dos condutores gastam
 dados e muitas vezes não têm rede. Por isso o mapa da Praia vai dentro
 do próprio ficheiro.
 
+    mapa/nuvem.js          o sítio comum: quem escreve o quê, com que
+                           ritmo, e o que fazer quando não há rede
     mapa/mapa_praia.js     a Praia a sério, tirada do OpenStreetMap:
                            31 linhas de costa, 455 ruas, 11 postos de
                            combustível e 40 bairros, todos com o nome
@@ -56,6 +104,8 @@ Os painéis ficam com uma cópia do mapa lá dentro entre as marcas
     node teste_condutor.mjs     # 31 verificações
     node teste_dono.mjs         # 44 verificações
     node teste_junto.mjs        # 16 verificações ao ficheiro junto
+    node teste_tempo_real.mjs   # 15 verificações com os dois painéis
+                                #  abertos ao mesmo tempo
 
 Precisa do Playwright (`npm i playwright`) e do Chromium.
 `_moldura.html` só serve a um dos testes: imita a janela em que o

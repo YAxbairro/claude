@@ -794,3 +794,23 @@ fechou um buraco que ninguém tinha visto.
 dizer *qual* das três coisas falhou — a página está numa moldura e o telemóvel nem chega
 a perguntar, o condutor não autorizou, ou ainda não apanhou satélites. Um "sem GPS" sem
 explicação deixa o condutor preso no ecrã e o turno por abrir.
+
+### v0.4 — os dois painéis a falar em tempo real
+
+Até aqui cada painel guardava as coisas no seu telemóvel e nunca se viam: o turno que o
+António fechava não chegava ao patrão. Ligá-los obrigou a decidir o que viaja pela rede e
+o que não viaja.
+
+| O que mudou | Porquê |
+|---|---|
+| **A posição sobe de 4 em 4 segundos, e só se o carro mexeu** | Um turno de oito horas dá milhares de pontos de GPS. Uma escrita por ponto esgotava o ritmo permitido e a aplicação era travada a meio do dia — e o condutor pagava os dados. Se a nuvem se queixar do ritmo, a aplicação abranda em vez de insistir |
+| **O rasto viaja aos pedaços, de 45 em 45 segundos** | Um documento tem tamanho máximo. Um turno inteiro num só não cabe, e uma gravação falhada levaria o turno todo à frente. Aos pedaços, o que já subiu fica |
+| **As provas calculam-se no telemóvel do condutor** | O patrão precisa de saber se o carro esteve no posto do talão, não dos milhares de pontos que respondem a essa pergunta. A distância ao posto e o tempo parado (R24) passam a ser calculados ao fechar o turno e viajam como dois números |
+| **Os km ao vivo vêm contados do telemóvel** | O patrão só recebe o rabicho do percurso, o suficiente para o desenhar. Contar os quilómetros outra vez aqui dava só os últimos — o número do turno andava para trás enquanto o carro andava para a frente |
+| **Cada papel escreve o seu** | O condutor escreve o turno dele e onde está; o patrão escreve os carros, os condutores e as respostas aos alertas. Sem isto, dois telemóveis escreviam a mesma linha e o último a chegar apagava o outro |
+
+**Também foi preciso decidir, e ficou assim:** um turno que não dá notícias há mais de 10
+minutos deixa de contar como "a decorrer" — o telemóvel morreu ou ficou sem rede, e o
+mapa não pode continuar a mostrar um carro parado como se estivesse a trabalhar. E sem
+ligação nenhuma tudo continua a funcionar com o que está guardado no próprio telemóvel:
+o condutor não pode ficar à porta de um cliente à espera de rede.

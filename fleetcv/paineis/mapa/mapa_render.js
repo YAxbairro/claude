@@ -392,3 +392,43 @@ function percursoPorRuas(rnd, quantos, passoM){
   }
   return saida;
 }
+
+
+/* ════════════════════════════════════════════════════════════
+   A PROVA DO POSTO
+   O talão diz um posto. O GPS diz por onde o carro andou. Isto junta
+   as duas coisas num número que cabe no turno: a que distância o
+   carro chegou do posto, e quanto tempo lá esteve parado.
+
+   Fica calculado no telemóvel do condutor, quando ele fecha o turno,
+   porque é lá que está o rasto inteiro. O patrão recebe só o
+   resultado — assim não é preciso mandar milhares de pontos de GPS
+   pela rede dele só para responder a uma pergunta de dois números.
+   ════════════════════════════════════════════════════════════ */
+function provaDoPosto(rasto, nomePosto, raio){
+  if(!nomePosto || !(rasto||[]).length) return null;
+  var posto=null;
+  (MAPA_PRAIA.postos||[]).forEach(function(x){ if(x.nome===nomePosto) posto=x; });
+  if(!posto) return null;                  /* posto escrito à mão: não dá */
+  raio = raio || 150;
+  var perto=[], maisPerto=1e9;
+  for(var i=0;i<rasto.length;i++){
+    var d=_dist(rasto[i][0], rasto[i][1], posto.lat, posto.lon);
+    if(d<maisPerto) maisPerto=d;
+    if(d<=raio) perto.push(rasto[i]);
+  }
+  return {
+    metros: Math.round(maisPerto),
+    esteve: perto.length>0,
+    parouS: perto.length ? Math.round((perto[perto.length-1][2]-perto[0][2])/1000) : 0
+  };
+}
+
+/* O maior buraco de sinal, em segundos. Mesma ideia: calcula-se onde
+   está o rasto e viaja só o número. */
+function maiorBuraco(rasto){
+  var mx=0;
+  for(var i=1;i<(rasto||[]).length;i++)
+    mx=Math.max(mx, (rasto[i][2]-rasto[i-1][2])/1000);
+  return Math.round(mx);
+}

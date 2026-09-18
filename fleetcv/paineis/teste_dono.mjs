@@ -17,17 +17,18 @@ await p.fill('#i-cod','9999'); await p.click('[data-f="entrar"]'); await p.waitF
 // ── MAPA ──
 const mp = await txt();
 ok('MAPA · abre com a frota', mp.includes('A frota agora'));
-ok('há carros em turno ao vivo', mp.includes('em turno neste momento'));
+/* Sem condutores a conduzir não há nada ao vivo — e tem de dizê-lo
+   em vez de mostrar um mapa vazio sem explicação. O tempo real
+   verifica-se em teste_tempo_real.mjs, com os dois painéis abertos. */
+ok('diz que ninguém está em turno', mp.includes('Nenhum carro em turno'));
 ok('mapa desenhado', await p.isVisible('.mapa'));
 ok('CVE por explicar', mp.includes('por explicar'));
 await p.screenshot({path:'d1-mapa.png'});
 
-// carro ao vivo → turno ao vivo
-await p.click('[data-turno="vivo0"]'); await p.waitForTimeout(600);
-ok('turno ao vivo abre', (await txt()).includes('Em turno agora'));
-const km1 = await txt();
-await p.waitForTimeout(3500);
-ok('o turno ao vivo actualiza sozinho', (await txt())!==km1);
+// um turno do histórico
+await p.locator('[data-turno]').first().click(); await p.waitForTimeout(900);
+ok('turno do histórico abre', /km andados/i.test(await txt()));
+ok('foi buscar o percurso', await p.isVisible('.mapa'));
 await p.click('#voltar'); await p.waitForTimeout(400);
 ok('o botão voltar funciona', (await txt()).includes('A frota agora'));
 
@@ -90,7 +91,9 @@ await p.locator('[data-turno]').first().click(); await p.waitForTimeout(600);
 const tu = await txt();
 ok('TURNO · abre do alerta', tu.includes('As contas'));
 ok('mapa do percurso', await p.isVisible('.mapa'));
-ok('botão de ver o carro andar', tu.includes('Ver o carro andar'));
+/* o percurso vem da nuvem: o botão só aparece quando ele chegar */
+await p.locator('[data-f="replay"]').waitFor({timeout:15000}).catch(()=>{});
+ok('botão de ver o carro andar', await p.isVisible('[data-f="replay"]'));
 await p.click('[data-f="replay"]'); await p.waitForTimeout(1600);
 ok('o percurso anima', (await txt()).includes('Parar'));
 await p.screenshot({path:'d5-turno.png'});
