@@ -58,7 +58,7 @@ ok('e diz quem é e em que carro',
 /* os km do carro que está a andar. O cartão dele é o que diz
    "desde as" — os outros são turnos do histórico, e o resumo do mês
    também tem a palavra "km". */
-const aoVivo = patrao.locator('[data-turno]', { hasText:'desde as' }).first();
+const aoVivo = patrao.locator('[data-vivo]', { hasText:'desde as' }).first();
 const kmDo=async()=>{
   const t=await aoVivo.textContent().catch(()=>'');
   const m=(t||'').match(/([\d,.]+) km/); return m?parseFloat(m[1].replace(',','.')):0; };
@@ -71,7 +71,10 @@ ok('e diz em que bairro vai', /desde as/.test(await aoVivo.textContent()),
    (await aoVivo.textContent()).split('·')[0].trim().split('\n').pop());
 
 /* o patrão abre o turno ao vivo e vê o carro no mapa */
+/* tocar no carro abre o cartão com tudo à vista; o turno
+   completo, com o mapa, abre-se a partir dele */
 await aoVivo.click(); await patrao.waitForTimeout(900);
+await patrao.locator('.carro-cx .bt.sec').click(); await patrao.waitForTimeout(900);
 ok('o patrão abre o turno a decorrer',
    (await patrao.textContent('#ecra')).includes('Em turno agora'));
 ok('com o carro no mapa da Praia', await patrao.isVisible('.mapa'));

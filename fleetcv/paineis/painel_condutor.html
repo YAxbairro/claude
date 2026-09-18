@@ -121,6 +121,16 @@ input:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
   text-transform:uppercase; color:var(--muted); margin:-2px 0}
 
 /* volante */
+.mapinha{position:relative; height:200px; border-radius:14px; overflow:hidden;
+  border:1px solid var(--line); background:var(--surface2)}
+.turno-lin{display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+  padding:14px 15px; border-radius:14px; border:1px solid var(--line);
+  background:var(--surface); box-shadow:var(--sombra); cursor:pointer;
+  font-family:var(--sans); color:var(--ink)}
+.turno-lin:hover{border-color:var(--accent)}
+.turno-lin .selo{margin-left:auto; font-size:11px; font-weight:700;
+  padding:3px 8px; border-radius:6px; white-space:nowrap}
+.turno-lin .seta{color:var(--muted); font-size:19px}
 .volante{position:relative; flex:1; min-height:320px; border-radius:16px; overflow:hidden;
   border:1px solid var(--line); background:var(--surface2); box-shadow:var(--sombra)}
 .mapa{position:absolute; inset:0; width:100%; height:100%; display:block}
@@ -376,7 +386,11 @@ function desenharMapa(op){
     (MAPA_PRAIA.postos||[]).forEach(function(p){
       var x=pr.X(p.lon), y=pr.Y(p.lat);
       if(x<-14||x>W+14||y<-14||y>H+14) return;
-      svg += '<g transform="translate('+x.toFixed(1)+','+y.toFixed(1)+')">'+
+      svg += '<g class="posto-mapa" data-posto-mapa="'+
+        String(p.nome).replace(/[&<>"]/g,'')+'" role="button" tabindex="0" '+
+        'transform="translate('+x.toFixed(1)+','+y.toFixed(1)+')">'+
+        '<title>'+String(p.nome).replace(/[&<>]/g,'')+'</title>'+
+        '<circle r="15" fill="transparent"/>'+
         '<circle r="6" fill="var(--warn-wash)" stroke="var(--warn)" stroke-width="1.2" '+
         'opacity=".9"/><path d="M-1.6 -2.6h3.2v5.2h-3.2z" fill="var(--warn)"/></g>'; });
 
@@ -445,10 +459,22 @@ function desenharMapa(op){
         String(op.rotuloCarro).replace(/[&<>]/g,'')+'</text>':'')+'</g>';
   }
 
-  /* os outros carros da frota */
+  /* Os carros da frota. Cada um é um botão: quem toca num carro
+     quer saber daquele carro, e não há motivo para o obrigar a
+     procurá-lo depois numa lista por baixo do mapa. O círculo
+     transparente por trás é o que se toca — a seta sozinha era
+     pequena de mais para um dedo. */
   (op.carros||[]).forEach(function(c){
     var x=pr.X(c.lon), y=pr.Y(c.lat), cor=c.cor||'var(--ok)';
-    svg += '<g transform="translate('+x.toFixed(1)+','+y.toFixed(1)+')">'+
+    var escolhido = op.escolhido && op.escolhido===c.id;
+    svg += '<g class="carro-mapa'+(escolhido?' on':'')+'" '+
+      (c.id?'data-vivo="'+String(c.id).replace(/[^\w-]/g,'')+'" ':'')+
+      'transform="translate('+x.toFixed(1)+','+y.toFixed(1)+')" '+
+      'role="button" tabindex="0" aria-label="'+
+      String(c.rotulo||'carro').replace(/[&<>"]/g,'')+'">'+
+      '<circle r="26" fill="transparent"/>'+
+      (escolhido?'<circle r="21" fill="none" stroke="'+cor+'" stroke-width="2" '+
+        'opacity=".85"/>':'')+
       '<circle r="16" fill="'+cor+'" opacity=".16"><animate attributeName="r" '+
       'values="12;20;12" dur="2.6s" repeatCount="indefinite"/></circle>'+
       '<g transform="rotate('+(c.ang||0).toFixed(0)+')">'+
@@ -1250,7 +1276,7 @@ var LIM = {gapKm:3, kmMax:500, precisaoMax:50, velMax:180, divLitros:3};
 
 var S = {ecra:'entrar', eu:null, carro:null, turno:null, turnos:[],
          gps:{estado:'desligado', precisao:null, vel:0, porque:null, autoriz:null}, bateria:null,
-         foto:null, r:{}, aviso:null, simular:false};
+         foto:null, r:{}, aviso:null, simular:false, verTurno:null};
 var vigia=null, tic=null, cronoSim=null, ultima=null, vista={}, primeiroTiro=null;
 var salvo=null;
 var medida={W:400,H:620};
@@ -1723,11 +1749,23 @@ function pintar(){
   }
 
   else if(S.ecra==='resumo'){
-    var t4=S.turnos[0], c=contas(t4);
+    /* O mesmo ecrã serve para o turno que o condutor acabou de fechar
+       e para qualquer um que ele queira rever na lista dele. */
+    var t4 = S.verTurno
+      ? S.turnos.filter(function(x){ return x.id===S.verTurno; })[0] || S.turnos[0]
+      : S.turnos[0];
+    if(!t4){ S.ecra='carro'; return pintar(); }
+    var c=contas(t4);
     var mau=c.v.filter(function(x){ return !x.ok; }).length;
-    h='<h1>Turno terminado</h1>'+
+    h='<h1>'+(S.verTurno?dt(t4.inicio):'Turno terminado')+'</h1>'+
       '<p class="sub">'+esc(t4.matricula)+' · '+hh(t4.inicio)+'–'+hh(t4.fim)+' · '+
       nf((t4.fim-t4.inicio)/36e5,1)+' horas</p>'+
+      ((t4.rasto||[]).length>3
+        ? '<div class="mapinha">'+desenharMapa({pts:t4.rasto, W:400, H:220, pad:18,
+            minSpan:0.006, abast:(t4.abast||[]).map(function(a){
+              return {lat:a.lat, lon:a.lon, posto:a.posto}; }),
+            rotulo:'O caminho que fez neste turno'})+'</div>'
+        : '')+
       '<div class="cartao '+(mau?'aviso':'bom')+'"><h2>'+
       (mau?mau+' ponto'+(mau>1?'s':'')+' a explicar ao patrão':'Está tudo certo')+'</h2>'+
       '<p class="p-nota" style="margin-top:5px">'+
@@ -1741,23 +1779,27 @@ function pintar(){
     if(c.dif>0) h+='<div class="cartao mau"><h2>Por explicar</h2>'+
       '<div class="num" style="font-size:28px;font-weight:500;color:var(--crit);'+
       'margin-top:4px">'+nf(c.dif)+' CVE</div></div>';
-    b='<button class="bt pri" data-f="ir-carro">Novo turno</button>'+
-      '<button class="lig" data-f="ir-meus">Os meus turnos</button>';
+    b = S.verTurno
+      ? '<button class="bt pri" data-f="ir-meus">Voltar aos meus turnos</button>'
+      : '<button class="bt pri" data-f="ir-carro">Novo turno</button>'+
+        '<button class="lig" data-f="ir-meus">Os meus turnos</button>';
   }
 
   else if(S.ecra==='meus'){
     h='<h1>Os meus turnos</h1>';
+    h+='<p class="sub">Toque num turno para o rever com o mapa.</p>';
     h+= S.turnos.length ? S.turnos.map(function(t){
         var c2=contas(t), mau=c2.v.filter(function(x){return !x.ok;}).length;
-        return '<div class="cartao"><div style="display:flex;gap:10px;align-items:center">'+
+        return '<button class="turno-lin" data-ver="'+esc(t.id)+'">'+
           '<span><span style="font-weight:600">'+nf(t.kmFim-t.kmInicio)+' km · '+
           esc(t.matricula)+'</span><br><span class="s" style="font-size:12.5px;'+
           'color:var(--muted)">'+dt(t.inicio)+' · '+hh(t.inicio)+'–'+hh(t.fim)+' · '+
           nf(t.totalCve)+' CVE</span></span>'+
-          '<span style="margin-left:auto;font-size:11px;font-weight:700;padding:3px 8px;'+
-          'border-radius:6px;background:'+(mau?'var(--warn-wash)':'var(--ok-wash)')+
-          ';color:'+(mau?'var(--warn)':'var(--ok)')+'">'+
-          (mau?mau+' a ver':'tudo bem')+'</span></div></div>'; }).join('')
+          '<span class="selo" style="background:'+
+          (mau?'var(--warn-wash)':'var(--ok-wash)')+';color:'+
+          (mau?'var(--warn)':'var(--ok)')+'">'+
+          (mau?mau+' a ver':'tudo bem')+'</span>'+
+          '<span class="seta">›</span></button>'; }).join('')
       : '<div class="cartao"><div class="vazio">Ainda não terminou nenhum turno.</div></div>';
     b='<button class="bt pri" data-f="ir-carro">Abrir turno</button>'+
       '<button class="lig" data-f="sair">Sair</button>';
@@ -1797,12 +1839,13 @@ document.addEventListener('change', function(e){
 });
 
 document.addEventListener('click', function(e){
-  var b=e.target.closest('[data-f],[data-carro],[data-posto]');
+  var b=e.target.closest('[data-f],[data-carro],[data-posto],[data-ver]');
   if(!b) return;
   var d=b.dataset;
   if(d.carro){ S.carro=FROTA.carros.filter(function(c){ return c.id===d.carro; })[0];
     S.foto=null; S.r={km:S.carro.km}; S.ecra='km-inicio'; pintar(); return; }
   if(d.posto!=null){ S.r.posto=d.posto; pintar(); return; }
+  if(d.ver){ S.verTurno=d.ver; S.ecra='resumo'; pintar(); return; }
 
   var f=d.f;
   if(f==='entrar'){
@@ -1824,7 +1867,7 @@ document.addEventListener('click', function(e){
     Nuvem.sair();
     S.eu=null; S.r={}; guardar(); S.ecra='entrar'; pintar(); }
   if(f==='ir-carro'){ S.foto=null; S.r={}; S.ecra='carro'; pintar(); }
-  if(f==='ir-meus'){ S.ecra='meus'; pintar(); }
+  if(f==='ir-meus'){ S.verTurno=null; S.ecra='meus'; pintar(); }
   if(f==='ir-gps'){ S.simular=false; ligarGps(); S.ecra='gps'; pintar(); }
   if(f==='pedir-gps'){ ligarGps(); pintar(); }
   if(f==='comecar') comecar(false);

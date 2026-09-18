@@ -17,7 +17,13 @@ Como é que dois programas cabem no mesmo ficheiro sem se estorvarem:
     relógios e o ecrã são sempre de um só.
   · O mapa da Praia — vai uma vez só, e serve os dois.
 """
-import io, re, sys
+import io, re, sys, subprocess
+
+# Os painéis levam lá dentro uma cópia do mapa e da nuvem. Se um
+# desses módulos mudou e os painéis não foram montados, juntava-se
+# aqui uma versão velha sem dar erro nenhum — por isso monta-se
+# sempre primeiro.
+subprocess.run([sys.executable, 'montar.py'], check=True)
 
 COND, DONO = 'painel_condutor.html', 'painel_dono.html'
 SAIDA = 'fleetcv.html'

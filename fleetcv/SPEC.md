@@ -833,3 +833,21 @@ que é mesmo verificada em vez de acordada.
 guardado tal como é, porque o condutor escreve-o ao volante e o patrão precisa de o poder
 ver para lho dizer ao telefone. É uma escolha, não um descuido — e obriga a que isto viva
 atrás de https, senão o código viaja à vista de quem estiver na mesma rede.
+
+### v0.6 — tocar no carro, e tudo o resto
+
+O patrão via os carros a andar no mapa e não podia fazer nada com eles: para saber de um,
+tinha de o procurar numa lista por baixo. Passou a ser o contrário — toca-se no carro e
+aparece tudo dele ali mesmo.
+
+| O que mudou | Porquê |
+|---|---|
+| **Cada carro no mapa é um botão** | Quem toca num carro quer saber daquele carro. O cartão que abre diz há quanto tempo anda, quantos quilómetros, se já abasteceu (e onde, e quanto), em que bairro vai, a que velocidade, a bateria e a precisão do GPS — e tudo lá dentro leva a algum lado: a matrícula à ficha do carro, o nome à ficha do condutor, o abastecimento ao turno |
+| **Um turno a decorrer deixou de ser julgado pelas contas do fecho** | O cartão dizia "5 coisas para ver" num turno a meio — entre elas "sem foto do conta-quilómetros", que o condutor só tira ao terminar. Era acusá-lo de não ter feito o que ainda não chegou a hora de fazer. Agora, a meio, só se verifica o que já dá: o combustível, o sinal, e o carro ter andado fora de turno |
+| **Há um ecrã com todos os turnos** | Só havia os últimos cinco no mapa. Procurar um turno de há duas semanas, ou ver o que um carro fez em Setembro, não era possível. Chega-se lá do resumo, da linha do mês nas contas, da ficha do carro e da ficha do condutor, e filtra-se por aquilo que interessa |
+| **O abastecimento dentro de um turno leva o filme ao momento certo** | A pergunta do patrão é "onde é que ele estava quando diz que abasteceu?". Agora responde-se com um toque: o percurso pára naquele instante, e a linha diz a que distância da bomba o carro chegou — ou que nunca lá esteve |
+| **A tabela das contas passou a cartões** | Tinha seis colunas e num telemóvel ficava mais larga do que o ecrã. A coluna que mais interessa, o que está por explicar, era a última — a que o patrão nunca via sem arrastar para o lado |
+
+**Também foi preciso decidir, e ficou assim:** nenhum botão pode existir sem destino. O
+teste varre o ecrã no fim e falha se encontrar um — foi assim que se apanhou o ecrã novo
+a esconder a barra de navegação inteira.

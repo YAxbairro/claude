@@ -155,7 +155,17 @@ body.condutor .foto .re{position:absolute; right:8px; bottom:8px; background:rgb
 body.condutor .ou{text-align:center; font-size:12px; font-weight:700; letter-spacing:.14em;
   text-transform:uppercase; color:var(--muted); margin:-2px 0}
 body.condutor /* volante */
-.volante{position:relative; flex:1; min-height:320px; border-radius:16px; overflow:hidden;
+.mapinha{position:relative; height:200px; border-radius:14px; overflow:hidden;
+  border:1px solid var(--line); background:var(--surface2)}
+body.condutor .turno-lin{display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+  padding:14px 15px; border-radius:14px; border:1px solid var(--line);
+  background:var(--surface); box-shadow:var(--sombra); cursor:pointer;
+  font-family:var(--sans); color:var(--ink)}
+body.condutor .turno-lin:hover{border-color:var(--accent)}
+body.condutor .turno-lin .selo{margin-left:auto; font-size:11px; font-weight:700;
+  padding:3px 8px; border-radius:6px; white-space:nowrap}
+body.condutor .turno-lin .seta{color:var(--muted); font-size:19px}
+body.condutor .volante{position:relative; flex:1; min-height:320px; border-radius:16px; overflow:hidden;
   border:1px solid var(--line); background:var(--surface2); box-shadow:var(--sombra)}
 body.condutor .mapa{position:absolute; inset:0; width:100%; height:100%; display:block}
 body.condutor .hud{position:absolute; top:0; left:0; right:0; padding:14px 16px 0; display:flex;
@@ -289,6 +299,38 @@ body.dono .tiles span{font-size:10px; color:var(--muted); text-transform:upperca
   letter-spacing:.06em; font-weight:700}
 body.dono .tiles .mau b{color:var(--crit)}
 body.dono .tiles .bom b{color:var(--ok)}
+body.dono .carro-mapa, body.dono .posto-mapa{cursor:pointer}
+body.dono .item.mes{align-items:flex-start; padding:13px 14px}
+body.dono .mes-nums{display:grid; grid-template-columns:repeat(4,auto); gap:1px 16px;
+  margin-top:7px; justify-content:start}
+body.dono .mes-nums b{font-family:var(--mono); font-size:16px; font-weight:500;
+  grid-row:1; text-align:left}
+body.dono .mes-nums i{font-style:normal; font-size:10.5px; color:var(--muted); grid-row:2;
+  text-transform:uppercase; letter-spacing:.05em; font-weight:700}
+body.dono .mes-mau{display:block; margin-top:9px; font-size:12.5px; font-weight:600;
+  color:var(--crit)}
+body.dono .mes-bom{display:block; margin-top:9px; font-size:12.5px; color:var(--ok)}
+body.dono .carro-mapa:focus-visible, body.dono .posto-mapa:focus-visible{outline:2px solid var(--accent)}
+body.dono .carro-cx{padding-top:13px; border-color:var(--accent); animation:entra-dono .18s ease}
+@keyframes entra-dono{from{opacity:0; transform:translateY(-5px)}to{opacity:1}}
+body.dono .carro-topo{display:flex; align-items:flex-start; gap:10px; margin-bottom:3px}
+body.dono .carro-topo>div{flex:1; line-height:1.45}
+body.dono .carro-topo .s{font-size:12.5px; color:var(--muted)}
+body.dono .lig.forte{font-family:var(--mono); font-weight:600; font-size:15.5px}
+body.dono .fechar{flex:none; width:29px; height:29px; border-radius:9px; border:1px solid var(--line);
+  background:var(--surface2); color:var(--muted); font-size:17px; line-height:1;
+  cursor:pointer; display:grid; place-items:center}
+body.dono .fechar:hover{border-color:var(--crit); color:var(--crit)}
+body.dono .carro-onde{margin:2px 0 11px}
+body.dono .tiles.tres{grid-template-columns:repeat(3,1fr); margin:0 0 10px}
+body.dono .tiles.tres>div{padding:9px 6px}
+body.dono .tiles.tres b{font-size:17px}
+body.dono .tiles.clic>div[data-tile]{cursor:pointer}
+body.dono .tiles.clic>div[data-tile]:hover{background:var(--surface2)}
+body.dono .item.fino{padding:9px 12px; margin-top:6px}
+body.dono .item.alerta-cx{margin-top:8px; border-color:var(--crit)}
+body.dono .item.alerta-cx .p{color:var(--crit)}
+body.dono .dica{margin:9px 2px 0; font-size:12.5px; color:var(--muted); text-align:center}
 body.dono .mapa{width:100%; display:block; border-radius:12px; background:var(--surface2);
   border:1px solid var(--line)}
 body.dono .mapa-grande{height:auto}
@@ -538,7 +580,11 @@ function desenharMapa(op){
     (MAPA_PRAIA.postos||[]).forEach(function(p){
       var x=pr.X(p.lon), y=pr.Y(p.lat);
       if(x<-14||x>W+14||y<-14||y>H+14) return;
-      svg += '<g transform="translate('+x.toFixed(1)+','+y.toFixed(1)+')">'+
+      svg += '<g class="posto-mapa" data-posto-mapa="'+
+        String(p.nome).replace(/[&<>"]/g,'')+'" role="button" tabindex="0" '+
+        'transform="translate('+x.toFixed(1)+','+y.toFixed(1)+')">'+
+        '<title>'+String(p.nome).replace(/[&<>]/g,'')+'</title>'+
+        '<circle r="15" fill="transparent"/>'+
         '<circle r="6" fill="var(--warn-wash)" stroke="var(--warn)" stroke-width="1.2" '+
         'opacity=".9"/><path d="M-1.6 -2.6h3.2v5.2h-3.2z" fill="var(--warn)"/></g>'; });
 
@@ -607,10 +653,22 @@ function desenharMapa(op){
         String(op.rotuloCarro).replace(/[&<>]/g,'')+'</text>':'')+'</g>';
   }
 
-  /* os outros carros da frota */
+  /* Os carros da frota. Cada um é um botão: quem toca num carro
+     quer saber daquele carro, e não há motivo para o obrigar a
+     procurá-lo depois numa lista por baixo do mapa. O círculo
+     transparente por trás é o que se toca — a seta sozinha era
+     pequena de mais para um dedo. */
   (op.carros||[]).forEach(function(c){
     var x=pr.X(c.lon), y=pr.Y(c.lat), cor=c.cor||'var(--ok)';
-    svg += '<g transform="translate('+x.toFixed(1)+','+y.toFixed(1)+')">'+
+    var escolhido = op.escolhido && op.escolhido===c.id;
+    svg += '<g class="carro-mapa'+(escolhido?' on':'')+'" '+
+      (c.id?'data-vivo="'+String(c.id).replace(/[^\w-]/g,'')+'" ':'')+
+      'transform="translate('+x.toFixed(1)+','+y.toFixed(1)+')" '+
+      'role="button" tabindex="0" aria-label="'+
+      String(c.rotulo||'carro').replace(/[&<>"]/g,'')+'">'+
+      '<circle r="26" fill="transparent"/>'+
+      (escolhido?'<circle r="21" fill="none" stroke="'+cor+'" stroke-width="2" '+
+        'opacity=".85"/>':'')+
       '<circle r="16" fill="'+cor+'" opacity=".16"><animate attributeName="r" '+
       'values="12;20;12" dur="2.6s" repeatCount="indefinite"/></circle>'+
       '<g transform="rotate('+(c.ang||0).toFixed(0)+')">'+
@@ -1412,7 +1470,7 @@ var LIM = {gapKm:3, kmMax:500, precisaoMax:50, velMax:180, divLitros:3};
 
 var S = {ecra:'entrar', eu:null, carro:null, turno:null, turnos:[],
          gps:{estado:'desligado', precisao:null, vel:0, porque:null, autoriz:null}, bateria:null,
-         foto:null, r:{}, aviso:null, simular:false};
+         foto:null, r:{}, aviso:null, simular:false, verTurno:null};
 var vigia=null, tic=null, cronoSim=null, ultima=null, vista={}, primeiroTiro=null;
 var salvo=null;
 var medida={W:400,H:620};
@@ -1885,11 +1943,23 @@ function pintar(){
   }
 
   else if(S.ecra==='resumo'){
-    var t4=S.turnos[0], c=contas(t4);
+    /* O mesmo ecrã serve para o turno que o condutor acabou de fechar
+       e para qualquer um que ele queira rever na lista dele. */
+    var t4 = S.verTurno
+      ? S.turnos.filter(function(x){ return x.id===S.verTurno; })[0] || S.turnos[0]
+      : S.turnos[0];
+    if(!t4){ S.ecra='carro'; return pintar(); }
+    var c=contas(t4);
     var mau=c.v.filter(function(x){ return !x.ok; }).length;
-    h='<h1>Turno terminado</h1>'+
+    h='<h1>'+(S.verTurno?dt(t4.inicio):'Turno terminado')+'</h1>'+
       '<p class="sub">'+esc(t4.matricula)+' · '+hh(t4.inicio)+'–'+hh(t4.fim)+' · '+
       nf((t4.fim-t4.inicio)/36e5,1)+' horas</p>'+
+      ((t4.rasto||[]).length>3
+        ? '<div class="mapinha">'+desenharMapa({pts:t4.rasto, W:400, H:220, pad:18,
+            minSpan:0.006, abast:(t4.abast||[]).map(function(a){
+              return {lat:a.lat, lon:a.lon, posto:a.posto}; }),
+            rotulo:'O caminho que fez neste turno'})+'</div>'
+        : '')+
       '<div class="cartao '+(mau?'aviso':'bom')+'"><h2>'+
       (mau?mau+' ponto'+(mau>1?'s':'')+' a explicar ao patrão':'Está tudo certo')+'</h2>'+
       '<p class="p-nota" style="margin-top:5px">'+
@@ -1903,23 +1973,27 @@ function pintar(){
     if(c.dif>0) h+='<div class="cartao mau"><h2>Por explicar</h2>'+
       '<div class="num" style="font-size:28px;font-weight:500;color:var(--crit);'+
       'margin-top:4px">'+nf(c.dif)+' CVE</div></div>';
-    b='<button class="bt pri" data-f="ir-carro">Novo turno</button>'+
-      '<button class="lig" data-f="ir-meus">Os meus turnos</button>';
+    b = S.verTurno
+      ? '<button class="bt pri" data-f="ir-meus">Voltar aos meus turnos</button>'
+      : '<button class="bt pri" data-f="ir-carro">Novo turno</button>'+
+        '<button class="lig" data-f="ir-meus">Os meus turnos</button>';
   }
 
   else if(S.ecra==='meus'){
     h='<h1>Os meus turnos</h1>';
+    h+='<p class="sub">Toque num turno para o rever com o mapa.</p>';
     h+= S.turnos.length ? S.turnos.map(function(t){
         var c2=contas(t), mau=c2.v.filter(function(x){return !x.ok;}).length;
-        return '<div class="cartao"><div style="display:flex;gap:10px;align-items:center">'+
+        return '<button class="turno-lin" data-ver="'+esc(t.id)+'">'+
           '<span><span style="font-weight:600">'+nf(t.kmFim-t.kmInicio)+' km · '+
           esc(t.matricula)+'</span><br><span class="s" style="font-size:12.5px;'+
           'color:var(--muted)">'+dt(t.inicio)+' · '+hh(t.inicio)+'–'+hh(t.fim)+' · '+
           nf(t.totalCve)+' CVE</span></span>'+
-          '<span style="margin-left:auto;font-size:11px;font-weight:700;padding:3px 8px;'+
-          'border-radius:6px;background:'+(mau?'var(--warn-wash)':'var(--ok-wash)')+
-          ';color:'+(mau?'var(--warn)':'var(--ok)')+'">'+
-          (mau?mau+' a ver':'tudo bem')+'</span></div></div>'; }).join('')
+          '<span class="selo" style="background:'+
+          (mau?'var(--warn-wash)':'var(--ok-wash)')+';color:'+
+          (mau?'var(--warn)':'var(--ok)')+'">'+
+          (mau?mau+' a ver':'tudo bem')+'</span>'+
+          '<span class="seta">›</span></button>'; }).join('')
       : '<div class="cartao"><div class="vazio">Ainda não terminou nenhum turno.</div></div>';
     b='<button class="bt pri" data-f="ir-carro">Abrir turno</button>'+
       '<button class="lig" data-f="sair">Sair</button>';
@@ -1959,12 +2033,13 @@ document.addEventListener('change', function(e){
 });
 
 document.addEventListener('click', function(e){
-  var b=e.target.closest('[data-f],[data-carro],[data-posto]');
+  var b=e.target.closest('[data-f],[data-carro],[data-posto],[data-ver]');
   if(!b) return;
   var d=b.dataset;
   if(d.carro){ S.carro=FROTA.carros.filter(function(c){ return c.id===d.carro; })[0];
     S.foto=null; S.r={km:S.carro.km}; S.ecra='km-inicio'; pintar(); return; }
   if(d.posto!=null){ S.r.posto=d.posto; pintar(); return; }
+  if(d.ver){ S.verTurno=d.ver; S.ecra='resumo'; pintar(); return; }
 
   var f=d.f;
   if(f==='entrar'){
@@ -1986,7 +2061,7 @@ document.addEventListener('click', function(e){
     Nuvem.sair();
     S.eu=null; S.r={}; guardar(); S.ecra='entrar'; pintar(); }
   if(f==='ir-carro'){ S.foto=null; S.r={}; S.ecra='carro'; pintar(); }
-  if(f==='ir-meus'){ S.ecra='meus'; pintar(); }
+  if(f==='ir-meus'){ S.verTurno=null; S.ecra='meus'; pintar(); }
   if(f==='ir-gps'){ S.simular=false; ligarGps(); S.ecra='gps'; pintar(); }
   if(f==='pedir-gps'){ ligarGps(); pintar(); }
   if(f==='comecar') comecar(false);
@@ -2128,7 +2203,8 @@ var DONO={email:'patrao@exemplo.cv', codigo:'9999', nome:'Dona Fátima'};
 var POSTOS=MAPA_PRAIA.postos;
 
 var S={ ecra:'entrar', voltarPara:null, frota:null, turnos:[], sessao:false,
-        sel:null, r:{}, aviso:null, replay:null, vivos:[] };
+        sel:null, r:{}, aviso:null, replay:null, vivos:[], cartao:null,
+        filtro:null };
 var tic=null, cronoReplay=null;
 
 /* ─── utilitários ────────────────────────────────────────── */
@@ -2196,12 +2272,24 @@ function consumo(t){
 
 function avaliar(t){
   var v=[], al=[];
+  /* Um turno a decorrer não se julga pelas contas do fecho: ainda não
+     há quilometragem final nem foto de saída, e chamar-lhe alerta
+     seria acusar o condutor de não ter feito o que ainda não chegou
+     a hora de fazer. O que já dá para verificar — o combustível, o
+     sinal, o carro ter andado fora de turno — verifica-se na mesma. */
+  var aberto = !t.fim;
   var kmQ=(t.kmFim||0)-t.kmInicio, kmG=t.kmGps!=null?t.kmGps:kmRasto(t.rasto);
   var temRasto=(t.rasto||[]).length>5 || t.kmGps!=null;
 
-  v.push({ok:!!t.fotos, t1:'Fotografou o conta-quilómetros',
-    t2:nf(t.kmInicio)+' → '+nf(t.kmFim), vl:nf(kmQ)+' km'});
-  if(!t.fotos) al.push({c:'A11',n:'AVISO',d:'Turno sem foto do conta-quilómetros'});
+  if(aberto){
+    v.push({ok:true, t1:'Turno a decorrer',
+      t2:'começou às '+hh(t.inicio)+' com o quadrante nos '+nf(t.kmInicio),
+      vl:nf(kmG,1)+' km'});
+  } else {
+    v.push({ok:!!t.fotos, t1:'Fotografou o conta-quilómetros',
+      t2:nf(t.kmInicio)+' → '+nf(t.kmFim), vl:nf(kmQ)+' km'});
+    if(!t.fotos) al.push({c:'A11',n:'AVISO',d:'Turno sem foto do conta-quilómetros'});
+  }
 
   if(t.gap>LIM.gapKm){
     v.push({ok:false, t1:'O carro não andou fora do turno',
@@ -2211,7 +2299,7 @@ function avaliar(t){
   } else v.push({ok:true, t1:'O carro não andou fora do turno',
       t2:'o conta-quilómetros continua onde ficou', vl:'bate'});
 
-  if(temRasto){
+  if(temRasto && !aberto){
     var d=kmQ>0?(kmQ-kmG)/kmQ*100:0;
     var critico=kmG>kmQ*1.10||d>=LIM.divCritica, aviso=!critico&&Math.abs(d)>=LIM.divAviso;
     v.push({ok:!critico&&!aviso, t1:'O GPS bate com o conta-quilómetros',
@@ -2225,8 +2313,20 @@ function avaliar(t){
       t2:'maior interrupção', vl:nf(falha/60)+' min'});
     if(falha>LIM.semSinalS) al.push({c:'A03',n:'AVISO',
       d:'Sem sinal de GPS durante '+nf(falha/60)+' minutos'});
-  } else { v.push({ok:false, t1:'Percurso gravado', t2:'o GPS não esteve ligado', vl:'—'});
-    al.push({c:'A03',n:'AVISO',d:'Turno sem percurso gravado'}); }
+  } else if(temRasto){
+    /* a decorrer só se pode olhar para os buracos de sinal */
+    var falhaV=t.semSinalS!=null?t.semSinalS:maiorFalha(t.rasto);
+    v.push({ok:falhaV<=LIM.semSinalS, t1:'O sinal não teve buracos',
+      t2:'maior interrupção até agora', vl:nf(falhaV/60)+' min'});
+    if(falhaV>LIM.semSinalS) al.push({c:'A03',n:'AVISO',
+      d:'Sem sinal de GPS durante '+nf(falhaV/60)+' minutos'});
+  } else if(!aberto){
+    v.push({ok:false, t1:'Percurso gravado', t2:'o GPS não esteve ligado', vl:'—'});
+    al.push({c:'A03',n:'AVISO',d:'Turno sem percurso gravado'});
+  } else {
+    v.push({ok:false, t1:'Percurso a ser gravado',
+      t2:'ainda não chegou sinal deste telemóvel', vl:'—'});
+  }
 
   (t.abast||[]).forEach(function(a){
     v.push({ok:!!a.temFoto, t1:'Talão fotografado',
@@ -2267,7 +2367,7 @@ function avaliar(t){
         ' CVE mas o talão dá '+nf(noTalao)+' CVE', dif:a.valor-noTalao});
     }
   });
-  var cons=consumo(t);
+  var cons=aberto?null:consumo(t);
   if(cons!=null){
     var mau=cons>14, meio=!mau&&cons>11.5;
     v.push({ok:!mau&&!meio, t1:'O gasto por 100 km faz sentido',
@@ -2460,15 +2560,92 @@ function mapaTurno(t, ate, altura, op){
 function mapaFrota(){
   var activos=emTurno();
   var carros=activos.map(function(t){
-    var u=t.rasto[t.rasto.length-1], a=t.rasto[Math.max(0,t.rasto.length-4)];
-    return {lat:u[0], lon:u[1], rotulo:t.matricula,
+    var r=t.rasto||[], u=r[r.length-1]||[14.9195,-23.5087],
+        a=r[Math.max(0,r.length-4)]||u;
+    return {id:t.id, lat:u[0], lon:u[1], rotulo:t.matricula,
       ang:Math.atan2((u[1]-a[1])*Math.cos(u[0]*Math.PI/180), u[0]-a[0])*180/Math.PI,
       cor: porResolver(t).length?'var(--warn)':'var(--ok)'}; });
   return desenharMapa({
     pts:[], carros:carros, W:460, H:330, pad:30, minSpan:0.02,
+    escolhido: S.cartao,
     centro: carros.length?null:[14.9195,-23.5087],
     aviso: carros.length?null:'nenhum carro em turno neste momento',
-    rotulo:'Onde estão os carros agora'});
+    rotulo:'Onde estão os carros agora. Toque num carro para o ver.'});
+}
+
+/* ─── o cartão do carro ───────────────────────────────────
+   Quem toca num carro no mapa quer saber daquele carro, e quer saber
+   já: há quanto tempo anda, quantos quilómetros, se abasteceu ou
+   não, quem o leva. Tudo o que está aqui dentro leva a algum lado —
+   a matrícula à ficha do carro, o nome à ficha do condutor, o
+   abastecimento ao turno. */
+function cartaoDoCarro(t){
+  var r=t.rasto||[], u=r[r.length-1];
+  var onde=u?bairroDe(u[0],u[1]):null;
+  var km=kmDoTurno(t), horas=(Date.now()-t.inicio)/36e5;
+  var abast=t.abast||[];
+  var litros=abast.reduce(function(s,a){ return s+a.valor/(t.precoLitro||145); },0);
+  var carro=carroDe(t.carroId);
+  var vel=u&&u[4]!=null?u[4]:0;
+  var parado = u && (Date.now()-(t.momento||u[2]))>300000;
+  var alertas=porResolver(t);
+
+  var linha=function(bom, t1, t2, vl, extra){
+    return '<div class="vf"><span class="mk '+(bom?'s':'n')+'">'+(bom?'✓':'!')+
+      '</span><span style="flex:1"><span class="t1">'+t1+'</span><br>'+
+      '<span class="t2">'+t2+'</span></span><span class="vl">'+vl+'</span></div>'; };
+
+  var h='<div class="cartao carro-cx">'+
+    '<div class="carro-topo">'+
+      '<div><button class="lig forte" data-carro-lig="'+t.carroId+'">'+
+        '<span class="ponto"></span>'+esc(t.matricula)+'</button>'+
+        (carro?'<span class="s"> · '+esc(carro.marca||'')+' '+
+          esc(carro.modelo||'')+'</span>':'')+
+        '<br><button class="lig" data-cond-nome="'+esc(t.condutor)+'">'+
+        esc(t.condutor)+'</button></div>'+
+      '<button class="fechar" data-f="fechar-cartao" aria-label="Fechar">×</button>'+
+    '</div>'+
+    '<p class="p-nota carro-onde">'+(onde?'<b>'+esc(onde)+'</b>':'a localizar')+
+      (parado?' · <span style="color:var(--warn)">parado há '+
+        nf((Date.now()-(t.momento||u[2]))/60000)+' min</span>'
+        : ' · '+nf(vel)+' km/h')+
+      (t.bateria!=null?' · bateria '+t.bateria+'%':'')+
+      (u&&u[3]!=null?' · GPS '+nf(u[3])+' m':'')+'</p>'+
+    '<div class="tiles tres">'+
+      '<div><b class="num">'+hms((Date.now()-t.inicio)/1000)+'</b>'+
+        '<span>em turno</span></div>'+
+      '<div><b class="num">'+nf(km,1)+'</b><span>km andados</span></div>'+
+      '<div><b class="num">'+nf(t.totalCve||0)+'</b><span>CVE gastos</span></div>'+
+    '</div>';
+
+  if(abast.length){
+    h+=abast.map(function(a){
+      return '<button class="item fino" data-turno="'+t.id+'">'+
+        '<span><span class="p">Abasteceu '+nf(a.valor)+' CVE</span><br>'+
+        '<span class="s">'+hh(a.hora)+' · '+esc(a.posto||'posto')+' · '+
+        nf(a.valor/(t.precoLitro||145),2)+' litros</span></span>'+
+        '<span class="seta">›</span></button>'; }).join('');
+  } else {
+    h+='<div class="vf"><span class="mk n">○</span><span style="flex:1">'+
+      '<span class="t1">Ainda não abasteceu neste turno</span><br>'+
+      '<span class="t2">'+(horas>4?'já leva '+nf(horas,1)+' horas de turno'
+        :'começou há '+nf(horas,1)+' horas')+'</span></span></div>';
+  }
+
+  h+='<p class="p-nota" style="margin-top:9px">Começou às '+hh(t.inicio)+
+    ' com o quadrante nos '+nf(t.kmInicio)+' km'+
+    (litros?' · '+nf(litros,2)+' litros até agora':'')+'.</p>';
+
+  if(alertas.length)
+    h+='<button class="item alerta-cx" data-turno="'+t.id+'">'+
+      '<span><span class="p">'+alertas.length+
+      (alertas.length===1?' coisa para ver':' coisas para ver')+'</span><br>'+
+      '<span class="s">'+esc(alertas[0].d)+'</span></span>'+
+      '<span class="seta">›</span></button>';
+
+  h+='<button class="bt sec" data-turno="'+t.id+'" style="margin-top:10px">'+
+    'Ver o turno todo, com o mapa</button></div>';
+  return h;
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -2526,28 +2703,39 @@ function pintar(){
         (nVivos===1?' carro':' carros')+' em turno neste momento'
         :'Nenhum carro em turno')+'</p>'+
       mapaFrota();
+    var escolhido = S.cartao ? turnoVivo(S.cartao) : null;
+    if(escolhido) h+=cartaoDoCarro(escolhido);
+    else if(nVivos) h+='<p class="dica">Toque num carro no mapa para ver '+
+      'tudo o que se passa nele.</p>';
     vivos.forEach(function(t){
       var kmv=kmDoTurno(t), u=(t.rasto||[])[(t.rasto||[]).length-1];
       var onde=u?bairroDe(u[0],u[1]):null;
-      h+='<button class="item" data-turno="'+t.id+'">'+
+      if(S.cartao===t.id) return;      /* já está aberto aqui em cima */
+      h+='<button class="item" data-vivo="'+t.id+'">'+
         '<span><span class="p"><span class="ponto"></span>'+esc(t.matricula)+' · '+
         esc(t.condutor)+'</span><br><span class="s">'+(onde?esc(onde)+' · ':'')+
         'desde as '+hh(t.inicio)+' · '+nf(kmv,1)+' km · '+
         hms((Date.now()-t.inicio)/1000)+'</span></span>'+
         '<span class="seta">›</span></button>'; });
-    h+='<div class="tiles">'+
-      '<div><b class="num">'+nf(km)+'</b><span>km '+(hoje.length?'hoje':'nos últimos dias')+
-      '</span></div>'+
-      '<div><b class="num">'+nf(cve)+'</b><span>CVE em combustível</span></div>'+
-      '<div><b class="num">'+base.length+'</b><span>turnos</span></div>'+
-      '<div class="'+(porExplicar>0?'mau':'bom')+'"><b class="num">'+nf(porExplicar)+
-      '</b><span>CVE por explicar</span></div></div>';
+    h+='<div class="tiles clic">'+
+      '<div data-tile="contas"><b class="num">'+nf(km)+'</b><span>km '+
+      (hoje.length?'hoje':'nos últimos dias')+'</span></div>'+
+      '<div data-tile="contas"><b class="num">'+nf(cve)+
+      '</b><span>CVE em combustível</span></div>'+
+      '<div data-tile="turnos"><b class="num">'+base.length+
+      '</b><span>turnos</span></div>'+
+      '<div data-tile="alertas" class="'+(porExplicar>0?'mau':'bom')+
+      '"><b class="num">'+nf(porExplicar)+'</b><span>CVE por explicar</span>'+
+      '</div></div>';
     if(nAl) h+='<button class="item" data-f="ir-alertas" style="border-color:var(--crit)">'+
       '<span><span class="p" style="color:var(--crit)">'+nAl+' '+
       (nAl===1?'coisa':'coisas')+' para ver</span><br><span class="s">'+
       'toque para resolver uma a uma</span></span><span class="seta">›</span></button>';
     h+='<h3>Últimos turnos</h3>'+
-      S.turnos.slice(0,5).map(itemTurno).join('');
+      S.turnos.slice(0,5).map(itemTurno).join('')+
+      (S.turnos.length>5
+        ? '<button class="lig" data-tile="turnos" style="margin-top:4px">'+
+          'Ver os '+S.turnos.length+' turnos ›</button>' : '');
   }
 
   /* ── viaturas ───────────────────────────────────────── */
@@ -2606,8 +2794,10 @@ function pintar(){
         '<p class="p-nota" style="margin-top:8px">Mesmo carro, mesmas ruas: se um gasta '+
         'muito mais do que outro, a diferença não é do carro.</p></div>';
     h+='<h3>Turnos deste carro</h3>'+
-      (ts.length?ts.slice(0,20).map(itemTurno).join('')
-        :'<div class="cartao"><div class="vazio">Sem turnos.</div></div>');
+      (ts.length?ts.slice(0,8).map(itemTurno).join('')
+        :'<div class="cartao"><div class="vazio">Sem turnos.</div></div>')+
+      (ts.length>8 ? '<button class="lig" data-turnos-de="'+c.id+'">Ver os '+
+        ts.length+' turnos deste carro ›</button>' : '');
     h+='<div class="par" style="margin-top:6px">'+
       '<button class="bt sec pq" data-f="editar-carro">Editar</button>'+
       '<button class="bt perigo pq" data-f="parar-carro">'+
@@ -2692,8 +2882,10 @@ function pintar(){
             '" style="padding:0;font-family:var(--mono)">'+esc(car.matricula)+
             '</button></span><span class="v">'+nf(cc.l100,2)+' l/100 · '+cc.n+
             ' turnos</span></div>'; }).join('')+'</div></div>';
-    h+='<h3>Turnos</h3>'+(ts2.length?ts2.slice(0,20).map(itemTurno).join('')
-      :'<div class="cartao"><div class="vazio">Sem turnos.</div></div>');
+    h+='<h3>Turnos</h3>'+(ts2.length?ts2.slice(0,8).map(itemTurno).join('')
+      :'<div class="cartao"><div class="vazio">Sem turnos.</div></div>')+
+      (ts2.length>8 ? '<button class="lig" data-turnos-cond="'+esc(m.nome)+
+        '">Ver os '+ts2.length+' turnos deste condutor ›</button>' : '');
     h+='<div class="par" style="margin-top:6px">'+
       '<button class="bt sec pq" data-f="editar-cond">Editar</button>'+
       '<button class="bt perigo pq" data-f="parar-cond">'+
@@ -2789,11 +2981,19 @@ function pintar(){
       '<div><b class="num">'+nf(t.totalCve)+'</b><span>CVE em combustível</span></div>'+
       '<div><b class="num">'+hms(dur/1000)+'</b><span>tempo</span></div></div>';
     if((t.abast||[]).length)
-      h+='<div class="cartao"><h2>Abastecimentos</h2><div class="linhas" '+
-        'style="margin-top:4px">'+t.abast.map(function(a){
-          return '<div><span class="k">'+hh(a.hora)+' · '+esc(a.posto||'posto')+'</span>'+
-            '<span class="v">'+nf(a.valor)+' CVE · '+nf(a.valor/t.precoLitro,2)+
-            ' l</span></div>'; }).join('')+'</div></div>';
+      h+='<div class="cartao"><h2>Abastecimentos</h2>'+
+        '<p class="p-nota" style="margin:2px 0 8px">Toque para ver onde o carro '+
+        'estava a essa hora.</p>'+t.abast.map(function(a,ia){
+          var prova=esteveNoPosto(t,a);
+          return '<button class="item fino" data-abast="'+ia+'">'+
+            '<span><span class="p">'+nf(a.valor)+' CVE · '+
+            nf(a.valor/t.precoLitro,2)+' litros</span><br><span class="s">'+
+            hh(a.hora)+' · '+esc(a.posto||'posto')+
+            (prova ? (prova.esteve
+              ? ' · a '+nf(prova.metros)+' m da bomba'
+              : ' · <b style="color:var(--crit)">o carro nunca lá esteve</b>')
+              : '')+'</span></span><span class="seta">›</span></button>'; }).join('')+
+        '</div>';
     if(!aoVivo){
       h+='<h3>As contas</h3>'+vfLinhas(av.v);
       var d=dinheiroDe(t);
@@ -2805,6 +3005,50 @@ function pintar(){
   }
 
   /* ── contas ─────────────────────────────────────────── */
+  /* ── todos os turnos ─────────────────────────────────── */
+  /* Faltava. A lista do mapa mostra cinco; quando o patrão quer
+     procurar um turno de há duas semanas, ou ver tudo o que um carro
+     fez em Setembro, é aqui. Chega-se cá de todo o lado: do número
+     no resumo, da linha do mês nas contas, da ficha do carro e da
+     ficha do condutor. */
+  else if(S.ecra==='turnos'){
+    var fl=S.filtro||{};
+    var lista=S.turnos.filter(function(t){
+      if(!t.fim) return false;
+      if(fl.carro && t.carroId!==fl.carro) return false;
+      if(fl.condutor && t.condutor!==fl.condutor) return false;
+      if(fl.mes){ var dd=new Date(t.inicio);
+        if(dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')!==fl.mes)
+          return false; }
+      if(fl.so==='problemas' && !porResolver(t).length) return false;
+      return true; });
+
+    var nome='Todos os turnos';
+    if(fl.mes) nome='Turnos de '+mesDe(new Date(fl.mes+'-02').getTime());
+    if(fl.carro){ var cf=carroDe(fl.carro); nome='Turnos do '+(cf?cf.matricula:'carro'); }
+    if(fl.condutor) nome='Turnos de '+fl.condutor;
+    if(fl.so==='problemas') nome='Turnos a investigar';
+
+    var kmT=lista.reduce(function(s,t){ return s+((t.kmFim||0)-t.kmInicio); },0);
+    var cveT=lista.reduce(function(s,t){ return s+(t.totalCve||0); },0);
+    var difT=lista.reduce(function(s,t){ return s+dinheiroDe(t); },0);
+
+    h='<h1>'+esc(nome)+'</h1><p class="sub">'+lista.length+
+      (lista.length===1?' turno':' turnos')+'</p>';
+    if(fl.mes||fl.carro||fl.condutor||fl.so)
+      h+='<button class="lig" data-f="sem-filtro" style="margin-bottom:9px">'+
+        '× ver todos os turnos</button>';
+    h+='<div class="tiles clic">'+
+      '<div><b class="num">'+nf(kmT)+'</b><span>km</span></div>'+
+      '<div><b class="num">'+nf(cveT)+'</b><span>CVE</span></div>'+
+      '<div data-f="so-problemas" class="'+(difT>0?'mau':'bom')+'">'+
+      '<b class="num">'+nf(difT)+'</b><span>por explicar</span></div></div>';
+    h+= lista.length ? lista.map(itemTurno).join('')
+      : '<div class="cartao"><div class="vazio">Nenhum turno com estas contas.</div></div>';
+    /* este é um ecrã de topo: a barra de baixo fica — quem entra aqui
+       pelo resumo tem de poder sair para qualquer outro lado */
+  }
+
   else if(S.ecra==='contas'){
     var meses={};
     S.turnos.filter(function(t){ return t.fim; }).forEach(function(t){
@@ -2814,17 +3058,23 @@ function pintar(){
       meses[k].n++; meses[k].dif+=dinheiroDe(t); });
     var ks=Object.keys(meses).sort().reverse();
     h='<h1>Contas</h1><p class="sub">O que a frota andou e o que custou.</p>';
-    h+= ks.length ? '<div class="scroll"><table><thead><tr><th>Mês</th>'+
-      '<th style="text-align:right">Turnos</th><th style="text-align:right">Km</th>'+
-      '<th style="text-align:right">Combustível</th>'+
-      '<th style="text-align:right">Por km</th>'+
-      '<th style="text-align:right">Por explicar</th></tr></thead><tbody>'+
-      ks.map(function(k){ var m=meses[k];
-        return '<tr><td>'+mesDe(m.ms)+'</td><td class="n">'+m.n+'</td>'+
-          '<td class="n">'+nf(m.km)+'</td><td class="n">'+nf(m.cve)+'</td>'+
-          '<td class="n">'+nf(m.km?m.cve/m.km:0,2)+'</td>'+
-          '<td class="n"'+(m.dif?' style="color:var(--crit);font-weight:700"':'')+'>'+
-          nf(m.dif)+'</td></tr>'; }).join('')+'</tbody></table></div>'
+    /* Isto era uma tabela de seis colunas. Num telemóvel ficava mais
+       larga do que o ecrã, e a coluna que mais interessa — o que está
+       por explicar — era a última, a que o patrão nunca via sem
+       arrastar para o lado. Passa a ser um cartão por mês, que cabe. */
+    h+= ks.length ? ks.map(function(k){ var m=meses[k];
+        return '<button class="item mes" data-mes="'+k+'">'+
+          '<span style="flex:1">'+
+          '<span class="p">'+mesDe(m.ms)+'</span>'+
+          '<span class="mes-nums">'+
+            '<b>'+m.n+'</b><i>turnos</i>'+
+            '<b>'+nf(m.km)+'</b><i>km</i>'+
+            '<b>'+nf(m.cve)+'</b><i>CVE</i>'+
+            '<b>'+nf(m.km?m.cve/m.km:0,2)+'</b><i>por km</i>'+
+          '</span>'+
+          (m.dif ? '<span class="mes-mau">'+nf(m.dif)+' CVE por explicar</span>' :
+                   '<span class="mes-bom">tudo explicado</span>')+
+          '</span><span class="seta">›</span></button>'; }).join('')
       : '<div class="cartao"><div class="vazio">Ainda não há contas.</div></div>';
 
     h+='<h3>Por viatura</h3><div class="cartao"><div class="linhas">'+
@@ -2902,9 +3152,29 @@ document.addEventListener('input', function(e){
 
 document.addEventListener('click', function(e){
   var b=e.target.closest('[data-f],[data-tab],[data-turno],[data-carro],[data-cond],'+
-    '[data-res],[data-carro-lig],[data-cond-nome],#voltar');
+    '[data-res],[data-carro-lig],[data-cond-nome],[data-vivo],[data-posto-mapa],'+
+    '[data-tile],[data-mes],[data-turnos-de],[data-turnos-cond],[data-abast],'+
+    '#voltar');
   if(!b) return;
   var d=b.dataset;
+
+  /* tocar num carro do mapa abre o cartão dele, ali mesmo; tocar
+     outra vez fecha. Não tira ninguém do ecrã onde está. */
+  if(d.vivo){
+    S.cartao = (S.cartao===d.vivo) ? null : d.vivo;
+    if(S.ecra!=='mapa') ir('mapa'); else pintar();
+    return; }
+  if(d.postoMapa){ S.aviso={t:'Posto de combustível', d:d.postoMapa};
+    pintar(); setTimeout(function(){ S.aviso=null; pintar(); }, 3200); return; }
+  if(d.tile){
+    if(d.tile==='turnos') S.filtro=null;
+    if(d.tile==='alertas'){ ir('alertas', null, {ecra:S.ecra, sel:S.sel}); return; }
+    ir(d.tile, null, {ecra:S.ecra, sel:S.sel}); return; }
+  if(d.mes){ S.filtro={mes:d.mes}; ir('turnos', null, {ecra:S.ecra, sel:S.sel}); return; }
+  if(d.turnosDe){ S.filtro={carro:d.turnosDe};
+    ir('turnos', null, {ecra:S.ecra, sel:S.sel}); return; }
+  if(d.turnosCond){ S.filtro={condutor:d.turnosCond};
+    ir('turnos', null, {ecra:S.ecra, sel:S.sel}); return; }
 
   if(b.id==='voltar'){ var v=S.voltarPara; ir(v.ecra, v.sel, v.voltar||null); return; }
   if(d.tab){ ir(d.tab, null, null); return; }
@@ -2915,6 +3185,16 @@ document.addEventListener('click', function(e){
   if(d.condNome){
     var m=S.frota.condutores.filter(function(x){ return x.nome===d.condNome; })[0];
     if(m) ir('condutor', m.id, {ecra:S.ecra, sel:S.sel});
+    return; }
+  if(d.abast!==undefined){
+    /* levar o filme do percurso até ao momento do abastecimento */
+    var tv=turnoVivo(S.sel)||S.turnos.filter(function(x){return x.id===S.sel;})[0];
+    if(tv){ var aa=(tv.abast||[])[+d.abast], rr=tv.rasto||[];
+      if(aa&&rr.length){
+        var mp=0;
+        for(var iq=0;iq<rr.length;iq++) if(rr[iq][2]<=aa.hora) mp=iq;
+        if(cronoReplay){ clearInterval(cronoReplay); cronoReplay=null; }
+        S.replay=Math.max(2,mp+1); pintar(); } }
     return; }
   if(d.res){
     var t=S.turnos.filter(function(x){ return x.id===d.t; })[0];
@@ -2935,6 +3215,12 @@ document.addEventListener('click', function(e){
       S.sessao=true; S.aviso=null; Nuvem.local('dono-sessao', true); ir('mapa');
     });
   }
+  if(f==='fechar-cartao'){ S.cartao=null; pintar(); return; }
+  if(f==='sem-filtro'){ S.filtro=null; pintar(); return; }
+  if(f==='so-problemas'){
+    S.filtro=S.filtro||{};
+    S.filtro.so = S.filtro.so==='problemas' ? null : 'problemas';
+    pintar(); return; }
   if(f==='ir-alertas') ir('alertas');
   if(f==='novo-carro') ir('editar-carro', null, {ecra:'viaturas'});
   if(f==='editar-carro') ir('editar-carro', S.sel, {ecra:'carro', sel:S.sel});
@@ -3035,6 +3321,7 @@ Nuvem.aoMudar(function(){
   if(d.frota) S.frota=d.frota;
   S.turnos=d.turnos||[];
   S.vivos=d.vivos||[];
+  if(S.cartao && !turnoVivo(S.cartao)) S.cartao=null;
   if(S.ecra!=='entrar') pintar(); else pintarTopo();
 });
 Nuvem.arrancar({

@@ -76,7 +76,7 @@ ok('ABRIR TURNO atravessa o servidor',
    await ate(async()=>(await patrao.textContent('#ecra')).includes('em turno neste momento')),
    'entre dois navegadores diferentes');
 
-const aoVivo = patrao.locator('[data-turno]', { hasText:'desde as' }).first();
+const aoVivo = patrao.locator('[data-vivo]', { hasText:'desde as' }).first();
 const kmDo=async()=>{ const t=await aoVivo.textContent().catch(()=>'');
   const m=(t||'').match(/([\d,.]+) km/); return m?parseFloat(m[1].replace(',','.')):0; };
 await ate(async()=>(await kmDo())>0);
@@ -84,7 +84,10 @@ const km1=await kmDo();
 ok('O CARRO A ANDAR atravessa o servidor',
    await ate(async()=>(await kmDo())>km1+0.05, 30), km1+' km → '+(await kmDo())+' km');
 
-await aoVivo.click(); await patrao.waitForTimeout(1000);
+/* tocar no carro abre o cartão com tudo à vista; o turno
+   completo, com o mapa, abre-se a partir dele */
+await aoVivo.click(); await patrao.waitForTimeout(900);
+await patrao.locator('.carro-cx .bt.sec').click(); await patrao.waitForTimeout(900);
 ok('o patrão vê o percurso no mapa da Praia', await patrao.isVisible('.mapa'));
 
 /* ── ABASTECER ───────────────────────────────────────────── */

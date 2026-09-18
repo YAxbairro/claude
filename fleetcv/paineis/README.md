@@ -107,9 +107,13 @@ Os painéis ficam com uma cópia do mapa lá dentro entre as marcas
     node teste_junto.mjs        # 16 verificações ao ficheiro junto
     node teste_tempo_real.mjs   # 15 verificações com os dois painéis
                                 #  abertos ao mesmo tempo
-    node teste_servidor.mjs     # 15 verificações contra o servidor a
-                                #  correr, com dois navegadores separados
-                                #  (arrancar o servidor primeiro)
+    node teste_servidor.mjs     # 15 verificações contra um servidor que
+                                #  o próprio teste arranca, com dois
+                                #  navegadores separados
+    node teste_clicavel.mjs     # 23 verificações: toca em cada coisa que
+                                #  devia levar a algum lado, e confirma
+                                #  que leva. A última varre o ecrã à
+                                #  procura de botões sem destino
 
 Precisa do Playwright (`npm i playwright`) e do Chromium.
 `_moldura.html` só serve a um dos testes: imita a janela em que o

@@ -200,7 +200,11 @@ function desenharMapa(op){
     (MAPA_PRAIA.postos||[]).forEach(function(p){
       var x=pr.X(p.lon), y=pr.Y(p.lat);
       if(x<-14||x>W+14||y<-14||y>H+14) return;
-      svg += '<g transform="translate('+x.toFixed(1)+','+y.toFixed(1)+')">'+
+      svg += '<g class="posto-mapa" data-posto-mapa="'+
+        String(p.nome).replace(/[&<>"]/g,'')+'" role="button" tabindex="0" '+
+        'transform="translate('+x.toFixed(1)+','+y.toFixed(1)+')">'+
+        '<title>'+String(p.nome).replace(/[&<>]/g,'')+'</title>'+
+        '<circle r="15" fill="transparent"/>'+
         '<circle r="6" fill="var(--warn-wash)" stroke="var(--warn)" stroke-width="1.2" '+
         'opacity=".9"/><path d="M-1.6 -2.6h3.2v5.2h-3.2z" fill="var(--warn)"/></g>'; });
 
@@ -269,10 +273,22 @@ function desenharMapa(op){
         String(op.rotuloCarro).replace(/[&<>]/g,'')+'</text>':'')+'</g>';
   }
 
-  /* os outros carros da frota */
+  /* Os carros da frota. Cada um é um botão: quem toca num carro
+     quer saber daquele carro, e não há motivo para o obrigar a
+     procurá-lo depois numa lista por baixo do mapa. O círculo
+     transparente por trás é o que se toca — a seta sozinha era
+     pequena de mais para um dedo. */
   (op.carros||[]).forEach(function(c){
     var x=pr.X(c.lon), y=pr.Y(c.lat), cor=c.cor||'var(--ok)';
-    svg += '<g transform="translate('+x.toFixed(1)+','+y.toFixed(1)+')">'+
+    var escolhido = op.escolhido && op.escolhido===c.id;
+    svg += '<g class="carro-mapa'+(escolhido?' on':'')+'" '+
+      (c.id?'data-vivo="'+String(c.id).replace(/[^\w-]/g,'')+'" ':'')+
+      'transform="translate('+x.toFixed(1)+','+y.toFixed(1)+')" '+
+      'role="button" tabindex="0" aria-label="'+
+      String(c.rotulo||'carro').replace(/[&<>"]/g,'')+'">'+
+      '<circle r="26" fill="transparent"/>'+
+      (escolhido?'<circle r="21" fill="none" stroke="'+cor+'" stroke-width="2" '+
+        'opacity=".85"/>':'')+
       '<circle r="16" fill="'+cor+'" opacity=".16"><animate attributeName="r" '+
       'values="12;20;12" dur="2.6s" repeatCount="indefinite"/></circle>'+
       '<g transform="rotate('+(c.ang||0).toFixed(0)+')">'+

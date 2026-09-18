@@ -61,7 +61,14 @@ ok('apanhou o talão inflacionado', fim.includes('Por explicar'));
 await p.screenshot({path:'pc-resumo.png'});
 
 await p.click('[data-f="ir-meus"]'); await p.waitForTimeout(400);
-ok('os meus turnos', (await p.locator('.cartao').count())>0);
+ok('os meus turnos', (await p.locator('[data-ver]').count())>0);
+/* o condutor também tem de poder rever um turno antigo, com o mapa */
+await p.locator('[data-ver]').first().click(); await p.waitForTimeout(700);
+ok('o turno antigo abre com o mapa',
+   await p.isVisible('.mapinha') && /km andados|Quilometragem/.test(await txt()));
+ok('e dá para voltar', await p.isVisible('[data-f="ir-meus"]'));
+await p.screenshot({path:'pc-meu-turno.png'});
+await p.click('[data-f="ir-meus"]'); await p.waitForTimeout(400);
 await p.reload(); await p.waitForTimeout(700);
 ok('sobrevive a recarregar', (await txt()).length>30);
 
