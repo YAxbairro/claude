@@ -777,3 +777,20 @@ registadas com o motivo, porque o motivo é mais importante do que a correcção
 **Também foi preciso decidir, e ficou assim:** só contam para "tempo sem sinal" as falhas
 acima de 5 minutos (a amostragem normal nunca lá chega); um intervalo que começa logo a
 seguir a um ponto com bateria ≤5% não conta nem penaliza, porque a bateria prova a causa.
+
+### v0.3 — os painéis com o mapa verdadeiro
+
+Pôr a Praia a sério dentro dos painéis abriu uma prova que na v0.2 era impossível, e
+fechou um buraco que ninguém tinha visto.
+
+| O que mudou | Porquê |
+|---|---|
+| **R24 / A14 passa a ser verificável** | A regra "o carro tinha de estar no posto à hora do talão" existia desde a v0.1, mas não havia coordenadas de postos verdadeiros — só uma lista inventada. Com os 11 postos do OpenStreetMap, o painel compara o posto do talão com o percurso: se o GPS nunca pôs o carro a menos de 150 m, é crítico; se passou lá mas não parou os 120 s, é aviso |
+| **A17 conta-se pelos litros do talão, não pelo valor escrito** | O valor em CVE é o que o condutor diz; o talão é o que aconteceu. Contar o gasto aos 100 km pelo valor escrito fazia um talão inflacionado disparar dois alertas pelo mesmo facto — o do talão e o do consumo — e o patrão via o mesmo desvio contado duas vezes |
+| **O percurso grava-se de 8 em 8 segundos e quando o ecrã se apaga** | Estava só em memória até ao fim do turno. Um telemóvel que morre às 14h levava consigo a manhã inteira, e o que sobrava era a palavra do condutor — exactamente o que isto existe para substituir |
+| **O mapa não usa mapas de internet** | Os telemóveis dos condutores pagam os dados e muitas vezes não têm rede. A costa, as ruas, os bairros e os postos vão dentro do ficheiro; o mapa aparece igual sem rede nenhuma |
+
+**Também foi preciso decidir, e ficou assim:** quando o GPS falha, a aplicação tem de
+dizer *qual* das três coisas falhou — a página está numa moldura e o telemóvel nem chega
+a perguntar, o condutor não autorizou, ou ainda não apanhou satélites. Um "sem GPS" sem
+explicação deixa o condutor preso no ecrã e o turno por abrir.
