@@ -1,12 +1,29 @@
-# Os dois painéis
+# Os painéis
 
-Dois ficheiros, dois links. Abrem no telemóvel ou no computador, sem
-instalar nada e sem servidor.
+Abrem no telemóvel ou no computador, sem instalar nada e sem servidor.
+
+**`fleetcv.html` é o que se dá às pessoas.** Pergunta à entrada se quem
+abriu é condutor ou proprietário, guarda a resposta e leva-o direito ao
+painel certo. O botão `⇄` no cabeçalho volta a perguntar.
 
 | Ficheiro | Para quem | O que faz |
 |---|---|---|
+| **`fleetcv.html`** | **toda a gente** | **os dois painéis num link só, com o ecrã de escolha** |
 | `painel_condutor.html` | o condutor | entra, escolhe o carro, marca os km, liga o GPS, vê o mapa a andar, abastece, fecha o turno |
 | `painel_dono.html` | o proprietário | frota ao vivo, viaturas, condutores, alertas, turnos com o percurso, contas |
+
+Os dois painéis separados continuam a funcionar sozinhos e é neles que
+se trabalha. O `fleetcv.html` é construído a partir deles:
+
+    cd fleetcv/paineis && python3 juntar.py
+
+O `juntar.py` resolve as três coisas que impediam dois programas de
+viver no mesmo ficheiro: as folhas de estilo passam a valer só dentro de
+`body.condutor` ou `body.dono` (os dois usam os mesmos nomes de classe
+com medidas diferentes), cada painel passa de "corre já" a "uma função
+que se chama" — por isso só um é que apanha os cliques — e o mapa da
+Praia vai uma vez só. Se algo que devia ser igual nos dois deixar de o
+ser, o script recusa-se a juntar e diz o quê.
 
 Entradas de exemplo: condutor `antonio@exemplo.cv` / `1234`;
 proprietário `patrao@exemplo.cv` / `9999`.
@@ -38,6 +55,7 @@ Os painéis ficam com uma cópia do mapa lá dentro entre as marcas
     cd fleetcv/paineis
     node teste_condutor.mjs     # 31 verificações
     node teste_dono.mjs         # 44 verificações
+    node teste_junto.mjs        # 16 verificações ao ficheiro junto
 
 Precisa do Playwright (`npm i playwright`) e do Chromium.
 `_moldura.html` só serve a um dos testes: imita a janela em que o
