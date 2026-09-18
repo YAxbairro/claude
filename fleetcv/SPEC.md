@@ -814,3 +814,22 @@ minutos deixa de contar como "a decorrer" — o telemóvel morreu ou ficou sem r
 mapa não pode continuar a mostrar um carro parado como se estivesse a trabalhar. E sem
 ligação nenhuma tudo continua a funcionar com o que está guardado no próprio telemóvel:
 o condutor não pode ficar à porta de um cliente à espera de rede.
+
+### v0.5 — o servidor
+
+Os dois motores anteriores serviam para experimentar, mas ambos exigiam que quem abre a
+aplicação tivesse conta nalgum sítio — e um taxista na Praia tem um telemóvel, não uma
+conta. O servidor resolve isso, e ao resolvê-lo trouxe a primeira coisa deste projecto
+que é mesmo verificada em vez de acordada.
+
+| O que mudou | Porquê |
+|---|---|
+| **As regras de escrita passam a ser aplicadas, não pedidas** | "O condutor só escreve o turno dele" era boa vontade: num telemóvel, quem soubesse mexer escrevia o que quisesse — a frota, o turno de outro, um turno fechado. Agora o servidor recusa: um condutor escreve o turno dele, a posição dele e o percurso dele, e mais nada |
+| **Um turno fechado não se volta a escrever** | Sem isto, um condutor podia reabrir o turno de ontem e corrigir os km depois de o patrão ter visto o alerta. A prova tem de ficar quieta |
+| **Um condutor só pode ter um turno ao vivo** | Um telemóvel que morre a meio deixa cá um turno marcado como "a andar agora". Quando o mesmo condutor abre outro, o antigo sai — senão o patrão via o mesmo homem em dois carros ao mesmo tempo. Ao fim de uma hora sem notícias, sai de qualquer maneira: o percurso e o turno ficam gravados, só a marca de "está a andar" é que cai |
+| **Seis enganos no código travam aquele e-mail por quinze minutos** | Um código de quatro dígitos adivinha-se em dez mil tentativas. Com o travão, não |
+
+**Também foi preciso decidir, e ficou assim:** o código continua a ser de quatro dígitos e
+guardado tal como é, porque o condutor escreve-o ao volante e o patrão precisa de o poder
+ver para lho dizer ao telefone. É uma escolha, não um descuido — e obriga a que isto viva
+atrás de https, senão o código viaja à vista de quem estiver na mesma rede.

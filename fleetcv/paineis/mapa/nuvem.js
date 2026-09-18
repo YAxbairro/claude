@@ -36,7 +36,7 @@ var CAUDA       = 160;     /* pontos que viajam com a posição, para o
 var PARTE_MAX   = 800;     /* pontos por pedaço de rasto gravado         */
 var TECTO_VIVO  = 40000;   /* se a nuvem se queixar, abranda até aqui    */
 
-var loja=null, quem=null, estado='a-ligar', ritmo=RITMO_VIVO;
+var loja=null, quem=null, estado='a-ligar', ritmo=RITMO_VIVO, opGuardado={};
 var ouvintes=[], subs=[], cacheRasto={};
 var D = { frota:null, turnos:[], vivos:[] };
 
@@ -53,6 +53,101 @@ var D = { frota:null, turnos:[], vivos:[] };
 
    O resto do ficheiro não sabe qual delas está a ser usada.
    ════════════════════════════════════════════════════════ */
+
+/* ─── a loja do servidor ─── */
+/* A melhor das três: o condutor abre um endereço no telemóvel dele,
+   entra com o e-mail e o código que o patrão lhe deu, e pronto. Não
+   precisa de conta em lado nenhum.
+
+   O servidor manda as novidades por uma linha que fica aberta, por
+   isso não se anda aqui a perguntar de dois em dois segundos se
+   mudou alguma coisa. E é lá que se verifica quem pode escrever o
+   quê — aqui num telemóvel isso era só boa vontade. */
+function lojaDoServidor(){
+  var espelho={}, ouve={}, fonte=null, eu=null;
+  var tocar=function(c){
+    (ouve[c]||[]).forEach(function(f){ try{ f(); }catch(e){} }); };
+  var guardar=function(c,id,d){
+    espelho[c]=espelho[c]||{};
+    if(d===null) delete espelho[c][id]; else espelho[c][id]=d;
+    tocar(c); };
+
+  var pedir=function(rota, corpo){
+    return fetch(rota, corpo
+      ? {method:'POST', headers:{'content-type':'application/json'},
+         body:JSON.stringify(corpo), credentials:'same-origin'}
+      : {credentials:'same-origin'})
+      .then(function(r){ return r.json().then(function(j){
+        if(!r.ok) throw Object.assign(new Error(j.erro||('HTTP '+r.status)),
+          {code: r.status===429?'resource_exhausted':'invalid_argument',
+           porque:j.erro});
+        return j; }); });
+  };
+
+  return {
+    longe:true, servidor:true,
+    entrar:function(email, codigo){
+      return pedir('/api/entrar', {email:email, codigo:codigo})
+        .then(function(j){ eu=j; return j; }); },
+    sair:function(){ return pedir('/api/sair', {}).then(function(){ eu=null; }); },
+    eu:function(){ return eu; },
+
+    /* traz tudo de uma vez e depois fica à escuta */
+    comecar:function(){
+      return pedir('/api/eu').then(function(j){
+        eu = j.papel ? j : null;
+        if(!eu) return false;
+        return pedir('/api/tudo').then(function(t){
+          espelho.frota={};
+          ['config','carros','condutores','exemplos'].forEach(function(k){
+            if(t.frota[k]) espelho.frota[k]=t.frota[k]; });
+          espelho.turnos={}; (t.turnos||[]).forEach(function(x){
+            espelho.turnos[x.id]=x.d; });
+          espelho.vivo={}; (t.vivo||[]).forEach(function(x){
+            espelho.vivo[x.id]=x.d; });
+          Object.keys(espelho).forEach(tocar);
+          try{
+            fonte=new EventSource('/api/eventos');
+            fonte.onmessage=function(m){
+              try{ var x=JSON.parse(m.data); guardar(x.c, x.id, x.d); }catch(e){} };
+          }catch(e){}
+          return true;
+        });
+      }).catch(function(){ return false; });
+    },
+
+    ler:function(c,id){
+      return Promise.resolve((espelho[c]||{})[id] || null); },
+    por:function(c,id,v){
+      guardar(c,id,v);                        /* mostra já, confirma depois */
+      return pedir('/api/doc', {c:c, id:id, d:v}); },
+    tirar:function(c,id){
+      guardar(c,id,null);
+      return pedir('/api/apagar', {c:c, id:id}); },
+    verDoc:function(c,id,fn){
+      (ouve[c]=ouve[c]||[]).push(function(){ fn((espelho[c]||{})[id]||null); });
+      setTimeout(function(){ fn((espelho[c]||{})[id]||null); },0);
+      return function(){}; },
+    verColeccao:function(c,fn,err,ordem,quantos){
+      var dar=function(){
+        var v=Object.keys(espelho[c]||{}).map(function(k){ return espelho[c][k]; });
+        if(ordem) v.sort(function(a,b){ return (b[ordem]||0)-(a[ordem]||0); });
+        fn(quantos?v.slice(0,quantos):v); };
+      (ouve[c]=ouve[c]||[]).push(dar);
+      setTimeout(dar,0);
+      return function(){}; },
+    ondeCampo:function(c,campo,valor){
+      if(c==='rastos')
+        return pedir('/api/rasto/'+encodeURIComponent(valor)).then(function(j){
+          return (j.pts&&j.pts.length)?[{turno:valor, parte:0, pts:j.pts}]:[]; });
+      return Promise.resolve(Object.keys(espelho[c]||{})
+        .map(function(k){ return espelho[c][k]; })
+        .filter(function(x){ return x[campo]===valor; })); },
+    /* a frota vem já semeada do servidor; os turnos de exemplo
+       são o patrão que os traz, e só ele os pode escrever */
+    licenca:function(){ return Promise.resolve(!!(eu&&eu.papel==='dono')); }
+  };
+}
 
 /* ─── a loja de longe ─── */
 function lojaDeLonge(db){
@@ -139,6 +234,8 @@ function lojaDePerto(){
 }
 
 /* ─── a frota de estreia ────────────────────────────────── */
+var DONO_EXEMPLO={email:'patrao@exemplo.cv', codigo:'9999', nome:'Dona Fátima'};
+
 /* Os dois painéis precisam da mesma, com os mesmos números, senão o
    condutor escolhia um carro que o patrão não tem. Fica aqui, uma
    vez. Assim que o patrão mexer na frota dele, é a dele que manda. */
@@ -178,8 +275,22 @@ function local(chave, valor){
 /* ─── arrancar ──────────────────────────────────────────── */
 /* op.frotaNova()  · a frota de estreia, se ainda não houver nenhuma
    op.exemplos(f)  · turnos de exemplo, para não abrir um ecrã vazio   */
+/* Só há servidor quando a página vem de um. Aberta como ficheiro, ou
+   publicada no Claude, não há — e passa-se aos outros motores. */
+function haServidor(){
+  if(typeof fetch!=='function') return Promise.resolve(false);
+  if(!/^https?:$/.test(location.protocol)) return Promise.resolve(false);
+  var corta=new Promise(function(ok){ setTimeout(function(){ ok(false); }, 4000); });
+  return Promise.race([
+    fetch('/api/ping', {credentials:'same-origin'})
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(j){ return !!(j&&j.fleetcv); })
+      .catch(function(){ return false; }),
+    corta ]);
+}
+
 function arrancar(op){
-  op=op||{};
+  op=op||{}; opGuardado=op;
   D.frota  = local('frota')  || frotaNova();
   D.turnos = local('turnos') || [];
   avisar();
@@ -194,7 +305,19 @@ function arrancar(op){
     return semear(op).then(escutar).then(function(){
       estado = loja.longe ? 'ligada' : 'perto'; avisar(); });
   };
-  pedido.then(seguir).catch(function(){
+  /* Primeiro pergunta-se se há servidor. Havendo, é ele — é o único
+     dos três em que o condutor entra com o código do patrão e não
+     precisa de conta em mais lado nenhum. */
+  haServidor().then(function(sim){
+    if(!sim) return pedido.then(seguir);
+    var s=lojaDoServidor();
+    loja=s;
+    return s.comecar().then(function(entrou){
+      estado = entrou ? 'servidor' : 'servidor-por-entrar';
+      if(!entrou){ avisar(); return; }
+      return semear(op).then(escutar).then(avisar);
+    });
+  }).catch(function(){
     try{ seguir(null); }catch(e){ estado='sozinha'; avisar(); } });
 }
 
@@ -459,6 +582,40 @@ return {
   apagarTurno:apagarTurno,
   rastoDe:rastoDe,
   local:local,
-  frotaNova:frotaNova
+  frotaNova:frotaNova,
+  /* Entrar. Com servidor é ele que confere o código e devolve quem é —
+     e só ele conhece os códigos todos. Sem servidor, confere-se com a
+     lista da frota, como até aqui. */
+  temServidor:function(){ return !!(loja&&loja.servidor); },
+  entrar:function(email, codigo){
+    var e=String(email||'').trim().toLowerCase(), c=String(codigo||'').trim();
+    if(loja&&loja.servidor)
+      return loja.entrar(e,c).then(function(j){
+        return loja.comecar().then(function(){
+          return semear(opGuardado).then(escutar).then(function(){
+            estado='servidor'; avisar();
+            return {papel:j.papel, id:j.id, nome:j.nome}; }); });
+      }).catch(function(x){
+        return {erro: x.porque || 'Não foi possível entrar.'}; });
+    return Promise.resolve(entrarCaDentro(e,c));
+  },
+  sair:function(){
+    if(loja&&loja.servidor) return loja.sair().catch(function(){});
+    return Promise.resolve();
+  }
 };
+
+/* Sem servidor: a lista da frota é o que há. Serve para experimentar;
+   não é segurança nenhuma, e por isso o servidor existe. */
+function entrarCaDentro(email, codigo){
+  var f=D.frota||{};
+  var m=(f.condutores||[]).filter(function(x){
+    return String(x.email||'').toLowerCase()===email
+        && String(x.codigo||'')===codigo; })[0];
+  if(m&&m.estado!=='INACTIVO')
+    return {papel:'condutor', id:m.id, nome:m.nome};
+  if(email===DONO_EXEMPLO.email && codigo===DONO_EXEMPLO.codigo)
+    return {papel:'dono', id:'dono', nome:DONO_EXEMPLO.nome};
+  return {erro:'E-mail ou código errados.'};
+}
 })();

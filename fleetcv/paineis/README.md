@@ -41,13 +41,15 @@ em "actualizar":
     o condutor fecha        ──►  entra no histórico, já com as contas feitas
     o patrão mexe na frota  ──►  o telemóvel do condutor recebe a mudança
 
-A nuvem tem **dois motores, com a mesma porta**, e o resto do código não
-sabe qual está a ser usado:
+A nuvem tem **três motores, com a mesma porta**, e o resto do código não
+sabe qual está a ser usado. Escolhe-se o primeiro que estiver
+disponível:
 
 | Motor | Liga o quê | Quando é usado |
 |---|---|---|
-| de longe | telemóveis diferentes, em sítios diferentes | quando a base de dados partilhada está disponível |
-| de perto | separadores e janelas do mesmo aparelho | quando não está — e é o que torna isto testável |
+| **servidor** | telemóveis quaisquer, sem conta em lado nenhum | quando a página vem de um servidor FleetCV (ver `../servidor/`) — **é este o que serve para trabalhar** |
+| base partilhada | telemóveis com sessão iniciada na mesma organização | quando não há servidor e a página está publicada no Claude |
+| navegador | separadores e janelas do mesmo aparelho | quando não há nem uma coisa nem outra — e é o que torna isto testável sem publicar nada |
 
 Três cuidados mandam no desenho todo:
 
@@ -67,12 +69,11 @@ Sem nuvem e sem rede continua tudo a trabalhar com o que está guardado
 no próprio telemóvel, e sobe quando voltar — o condutor não pode ficar
 parado à porta de um cliente à espera de rede.
 
-**Uma limitação a saber:** para os painéis falarem entre telemóveis
-diferentes, a página publicada tem de declarar a base de dados
-partilhada, e isso torna-a interna à organização — quem a abre tem de
-ter sessão iniciada nessa organização. Para um piloto com os condutores
-a entrar com contas próprias, serve. Para o produto a sério, com
-condutores que só têm o telemóvel deles, é preciso um servidor.
+**Quando se quer isto a trabalhar a sério**, é o servidor: `../servidor/`.
+É o único dos três em que o condutor entra com o e-mail e o código que o
+patrão lhe deu, sem precisar de conta em mais lado nenhum — e o único
+onde as regras de quem pode escrever o quê são mesmo verificadas, em
+vez de dependerem da boa vontade do telemóvel.
 
 ## O mapa
 
@@ -106,6 +107,9 @@ Os painéis ficam com uma cópia do mapa lá dentro entre as marcas
     node teste_junto.mjs        # 16 verificações ao ficheiro junto
     node teste_tempo_real.mjs   # 15 verificações com os dois painéis
                                 #  abertos ao mesmo tempo
+    node teste_servidor.mjs     # 15 verificações contra o servidor a
+                                #  correr, com dois navegadores separados
+                                #  (arrancar o servidor primeiro)
 
 Precisa do Playwright (`npm i playwright`) e do Chromium.
 `_moldura.html` só serve a um dos testes: imita a janela em que o
