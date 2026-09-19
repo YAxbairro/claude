@@ -833,25 +833,43 @@ function lojaDoServidor(){
 }
 
 /* ─── a loja de longe ─── */
+/* CUIDADO, e foi caro: esta base de dados devolve os documentos
+   CONGELADOS. Está escrito no contrato dela — "delivered snapshots
+   and their data() are frozen". Quem tentar mudar um campo leva um
+   erro e pára a meio, calado.
+
+   Foi exactamente isso que aconteceu: o patrão editava uma viatura,
+   o código fazia carro.matricula = ... por cima de um objecto
+   congelado, rebentava, e nada era guardado nem havia mensagem
+   nenhuma. No servidor não se via, porque lá cada leitura devolve
+   objectos novos.
+
+   Por isso tudo o que sai daqui sai copiado. O resto da aplicação
+   trabalha com coisas suas, que pode mudar à vontade. */
+function _descongelar(o){
+  if(o==null) return o;
+  try{ return JSON.parse(JSON.stringify(o)); }catch(e){ return o; }
+}
+
 function lojaDeLonge(db){
   return {
     longe:true,
     ler:function(c,id){ return db.doc(c+'/'+id).get().then(function(s){
-      return s.exists?s.data():null; }); },
+      return s.exists?_descongelar(s.data()):null; }); },
     por:function(c,id,v){ return db.doc(c+'/'+id).set(v); },
     tirar:function(c,id){ return db.doc(c+'/'+id).delete(); },
     verDoc:function(c,id,fn,err){
       return db.doc(c+'/'+id).onSnapshot(function(s){
-        fn(s.exists?s.data():null); }, err); },
+        fn(s.exists?_descongelar(s.data()):null); }, err); },
     verColeccao:function(c,fn,err,ordem,quantos){
       var q=db.collection(c);
       if(ordem) q=q.orderBy(ordem,'desc');
       if(quantos) q=q.limit(quantos);
       return q.onSnapshot(function(s){
-        fn(s.docs.map(function(d){ return d.data(); })); }, err); },
+        fn(s.docs.map(function(d){ return _descongelar(d.data()); })); }, err); },
     ondeCampo:function(c,campo,valor){
       return db.collection(c).where(campo,'==',valor).get().then(function(s){
-        return s.docs.map(function(d){ return d.data(); }); }); },
+        return s.docs.map(function(d){ return _descongelar(d.data()); }); }); },
     licenca:function(c,id,ms){
       return db.doc(c+'/'+id).acquire({holder:'semeador', ttlMs:ms})
         .then(function(r){ return !!r.acquired; }); }
@@ -1374,61 +1392,20 @@ function maiorFalha(p){ var mx=0;
 function kmDoTurno(t){
   return t.kmGps!=null ? t.kmGps : kmRasto(t.rasto); }
 /* ─── a matrícula ─────────────────────────────────────────
-   Em Cabo Verde a chapa muda com a ilha e com a idade do carro:
-   ST-28-ED em Santiago, SV em São Vicente, SA em Santo Antão, e
-   nos mais recentes as duas letras da ilha vêm ao fim (28-ED-ST)
-   ou dá-se lugar às nacionais CVA, CVB, CVS.
-
-   Por isso não se recusa uma chapa só por não ter a forma que
-   conhecemos — quem tem o carro à frente sabe melhor do que nós, e
-   recusar uma chapa verdadeira na segunda-feira de manhã é pior do
-   que aceitar uma esquisita. Recusa-se o que é de certeza errado:
-   vazio, curto de mais, sem número, sem letra, ou repetido. O que
-   é só invulgar passa, com um aviso. */
-var ILHAS=['ST','SV','SA','SN','SL','BV','MA','FG','BR','CVA','CVB','CVS','CV'];
-
-function limparMatricula(t){
-  return String(t||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
-}
-function formatarMatricula(t){
-  var bruto=String(t||'').trim();
-  if(!limparMatricula(bruto)) return '';
-  /* Se a pessoa já separou os grupos, respeita-se o que ela escreveu:
-     a chapa é dela e ela está a olhar para ela. */
-  if(/[-\s.]/.test(bruto))
-    return bruto.toUpperCase().replace(/[\s._]+/g,'-')
-                .replace(/-+/g,'-').replace(/^-|-$/g,'');
-  /* Escrita de seguida, parte-se em grupos. Primeiro tira-se a sigla
-     da ilha quando ela vem ao fim, como nos carros mais recentes
-     (28EDST → 28-ED-ST); senão EDST ficava tudo colado. */
-  var s=limparMatricula(bruto), fim='';
-  var siglas=ILHAS.slice().sort(function(a,b){ return b.length-a.length; });
-  for(var i=0;i<siglas.length;i++){
-    var g=siglas[i];
-    if(s.length>g.length+1 && s.slice(-g.length)===g && s.indexOf(g)!==0){
-      fim=g; s=s.slice(0,-g.length); break; }
-  }
-  var bl=s.match(/\d+|[A-Z]+/g) || [s];
-  if(fim) bl.push(fim);
-  return bl.join('-');
-}
+   Escreve-se como está na chapa, e fica como foi escrita. Em Cabo
+   Verde a chapa muda com a ilha e com a idade do carro — ST-28-ED,
+   28-ED-ST, CVS-1234, SV, SA — e quem tem o carro à frente sabe
+   melhor do que esta aplicação qual é a forma certa. Por isso não
+   se corrige nem se recusa nada; o exemplo no campo é só para
+   mostrar o género. */
 function verMatricula(t, ignorar){
-  var s=limparMatricula(t);
-  if(!s) return {erro:'Escreva a matrícula. Sem ela não dá para saber de que carro '+
-    'são os turnos.'};
-  if(s.length<4) return {erro:'A matrícula parece curta de mais. Escreva-a toda, '+
-    'como está na chapa.'};
-  if(s.length>10) return {erro:'A matrícula parece comprida de mais.'};
-  if(!/[0-9]/.test(s)) return {erro:'Falta o número da matrícula.'};
-  if(!/[A-Z]/.test(s)) return {erro:'Faltam as letras da matrícula.'};
+  var s=String(t||'').trim();
+  if(!s) return {ok:''};
+  var igual=function(x){ return String(x||'').toUpperCase().replace(/[^A-Z0-9]/g,''); };
   var repetida=(S.frota.carros||[]).filter(function(c){
-    return c.id!==ignorar && limparMatricula(c.matricula)===s; })[0];
+    return c.id!==ignorar && igual(c.matricula)===igual(s) && igual(s); })[0];
   if(repetida) return {erro:'Já existe uma viatura com esta matrícula.'};
-  var conhecida = ILHAS.some(function(i){
-    return s.indexOf(i)===0 || s.lastIndexOf(i)===s.length-i.length; });
-  return {ok:formatarMatricula(s),
-    aviso: conhecida?null:'Esta chapa não começa nem acaba por uma das siglas '+
-      'habituais ('+ILHAS.slice(0,4).join(', ')+'…). Se está certa, siga em frente.'};
+  return {ok:s};
 }
 
 /* O aviso tanto pode ser uma frase solta como uma frase ligada a um
@@ -2070,11 +2047,11 @@ function pintar(){
       return S.r[id]!=null ? S.r[id] : (seVazio==null?'':seVazio); };
     h='<h1>'+(ec?'Editar viatura':'Nova viatura')+'</h1>'+caixaAviso()+
       '<label class="campo"><span class="lb">Matrícula</span>'+
-      '<input type="text" id="e-mat"'+marcado('e-mat')+' value="'+esc(cp('e-mat', ec?ec.matricula:''))+
+      '<input type="text" id="e-mat"'+marcado('e-mat')+' value="'+
+      esc(cp('e-mat', ec?ec.matricula:''))+
       '" placeholder="ST-28-ED" autocapitalize="characters" '+
-      'autocomplete="off" spellcheck="false"></label>'+
-      '<p class="p-nota" style="margin:-4px 0 2px">Obrigatória. Vale ST-28-ED, '+
-      '28-ED-ST, CVS-12-34 — a matrícula tal como está na chapa.</p>'+
+      'autocomplete="off" spellcheck="false"><span class="aj">Escreva-a como '+
+      'está na chapa. Fica tal e qual.</span></label>'+
       '<div class="par"><label class="campo"><span class="lb">Marca</span>'+
       '<input type="text" id="e-marca"'+marcado('e-marca')+' value="'+esc(cp('e-marca', ec?ec.marca:''))+
       '"></label>'+
@@ -2594,24 +2571,21 @@ document.addEventListener('click', function(e){
   if(f==='editar-carro'){ S.r={}; ir('editar-carro', S.sel, {ecra:'carro', sel:S.sel}); }
   if(f==='guardar-carro'){
     var v=function(id){ var n=el(id); return n?n.value:(S.r[id]||''); };
+    /* Só se recusa uma coisa: duas viaturas com a mesma matrícula,
+       porque depois ninguém sabe de quem são os turnos. Tudo o resto
+       aceita-se como vier — quem está a preencher sabe o que tem. */
     var mat=verMatricula(v('e-mat'), S.sel);
     if(mat.erro){ S.aviso={campo:'e-mat', d:mat.erro}; pintar(); return; }
-    var km=+v('e-km');
-    if(!(km>=0)){ S.aviso={campo:'e-km',
-      d:'Escreva quantos quilómetros o conta-quilómetros marca agora.'};
-      pintar(); return; }
-    var dep=+v('e-dep');
-    if(!(dep>0)){ S.aviso={campo:'e-dep',
-      d:'Escreva quantos litros leva o depósito. É o que diz se um abastecimento '+
-        'cabe no carro.'}; pintar(); return; }
-    var c=S.sel?carroDe(S.sel):null, novo=!c;
-    if(!c){ c={id:uid('c'), estado:'ACTIVO'}; S.frota.carros.push(c); }
-    if(!novo && km<c.km && !confirm('O conta-quilómetros vai para trás: de '+
+    var c=S.sel?carroDe(S.sel):null, eNovo=!c;
+    if(!c){ c={id:uid('c'), estado:'ACTIVO'}; S.frota.carros=S.frota.carros.concat([c]); }
+    var km=+v('e-km')||0, dep=+v('e-dep')||45;
+    if(!eNovo && km<c.km-1 && !confirm('O conta-quilómetros vai para trás: de '+
       nf(c.km)+' para '+nf(km)+' km. Tem a certeza?')) return;
-    c.matricula=mat.ok; c.marca=v('e-marca').trim(); c.modelo=v('e-modelo').trim();
+    c.matricula=mat.ok || ('Carro '+(S.frota.carros.length));
+    c.marca=v('e-marca').trim(); c.modelo=v('e-modelo').trim();
     c.km=km; c.deposito=dep;
     c.proxOleoKm=+v('e-oleo')||km+5000;
-    S.r={}; S.aviso=mat.aviso?{d:mat.aviso}:null;
+    S.r={}; S.aviso=null;
     guardar(); ir('carro', c.id, {ecra:'viaturas'});
   }
   if(f==='parar-carro'){
@@ -2637,22 +2611,23 @@ document.addEventListener('click', function(e){
     var g=function(id){ var n=el(id); return n?n.value:(S.r[id]||''); };
     var nome=g('e-nome').trim(), mail=g('e-email2').trim().toLowerCase();
     var cod=g('e-codigo').trim();
-    if(nome.length<2){ S.aviso={campo:'e-nome', d:'Escreva o nome do condutor.'};
-      pintar(); return; }
-    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)){
-      S.aviso={campo:'e-email2', d:'Escreva um email a sério. É com ele que o '+
-        'condutor entra na aplicação dele.'}; pintar(); return; }
-    if(!/^[0-9]{4,6}$/.test(cod)){ S.aviso={campo:'e-codigo',
-      d:'O código são 4 a 6 algarismos. É o que o condutor escreve ao entrar.'};
-      pintar(); return; }
+    /* O email e o código não são capricho: são a chave com que este
+       condutor entra. Sem eles não entra, e mais vale dizer já. */
+    if(!mail || !cod){
+      S.aviso={campo:mail?'e-codigo':'e-email2',
+        d:'Faltam o email e o código — é com eles que o condutor entra na '+
+          'aplicação dele.'}; pintar(); return; }
     var jaTem=(S.frota.condutores||[]).filter(function(x){
       return x.id!==S.sel && String(x.email||'').toLowerCase()===mail; })[0];
     if(jaTem){ S.aviso={campo:'e-email2',
-      d:'Já existe um condutor com este email ('+esc(jaTem.nome)+').'};
+      d:'Já existe um condutor com este email ('+jaTem.nome+'). Dois condutores '+
+        'com o mesmo email não dava para saber quem entrou.'};
       pintar(); return; }
     var m2=S.sel?S.frota.condutores.filter(function(x){return x.id===S.sel;})[0]:null;
     var antes=m2?m2.nome:null;
-    if(!m2){ m2={id:uid('m'), estado:'ACTIVO'}; S.frota.condutores.push(m2); }
+    if(!m2){ m2={id:uid('m'), estado:'ACTIVO'};
+      S.frota.condutores=S.frota.condutores.concat([m2]); }
+    if(!nome) nome='Condutor '+(S.frota.condutores.length);
     m2.nome=nome; m2.email=mail; m2.telefone=g('e-tel').trim();
     m2.codigo=cod;
     S.r={}; S.aviso=null;

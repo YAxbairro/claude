@@ -110,6 +110,10 @@ Os painéis ficam com uma cópia do mapa lá dentro entre as marcas
     node teste_servidor.mjs     # 15 verificações contra um servidor que
                                 #  o próprio teste arranca, com dois
                                 #  navegadores separados
+    node teste_claude.mjs       # 24 verificações contra um simulador da
+                                #  base de dados do Claude, que devolve
+                                #  os documentos CONGELADOS como a
+                                #  verdadeira (_db_falso.js)
     node teste_embrulho.mjs     # 9 verificações com a página embrulhada
                                 #  dentro do <body> de outro sítio, como
                                 #  o Claude a serve

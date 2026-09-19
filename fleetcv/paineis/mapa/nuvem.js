@@ -150,25 +150,43 @@ function lojaDoServidor(){
 }
 
 /* ─── a loja de longe ─── */
+/* CUIDADO, e foi caro: esta base de dados devolve os documentos
+   CONGELADOS. Está escrito no contrato dela — "delivered snapshots
+   and their data() are frozen". Quem tentar mudar um campo leva um
+   erro e pára a meio, calado.
+
+   Foi exactamente isso que aconteceu: o patrão editava uma viatura,
+   o código fazia carro.matricula = ... por cima de um objecto
+   congelado, rebentava, e nada era guardado nem havia mensagem
+   nenhuma. No servidor não se via, porque lá cada leitura devolve
+   objectos novos.
+
+   Por isso tudo o que sai daqui sai copiado. O resto da aplicação
+   trabalha com coisas suas, que pode mudar à vontade. */
+function _descongelar(o){
+  if(o==null) return o;
+  try{ return JSON.parse(JSON.stringify(o)); }catch(e){ return o; }
+}
+
 function lojaDeLonge(db){
   return {
     longe:true,
     ler:function(c,id){ return db.doc(c+'/'+id).get().then(function(s){
-      return s.exists?s.data():null; }); },
+      return s.exists?_descongelar(s.data()):null; }); },
     por:function(c,id,v){ return db.doc(c+'/'+id).set(v); },
     tirar:function(c,id){ return db.doc(c+'/'+id).delete(); },
     verDoc:function(c,id,fn,err){
       return db.doc(c+'/'+id).onSnapshot(function(s){
-        fn(s.exists?s.data():null); }, err); },
+        fn(s.exists?_descongelar(s.data()):null); }, err); },
     verColeccao:function(c,fn,err,ordem,quantos){
       var q=db.collection(c);
       if(ordem) q=q.orderBy(ordem,'desc');
       if(quantos) q=q.limit(quantos);
       return q.onSnapshot(function(s){
-        fn(s.docs.map(function(d){ return d.data(); })); }, err); },
+        fn(s.docs.map(function(d){ return _descongelar(d.data()); })); }, err); },
     ondeCampo:function(c,campo,valor){
       return db.collection(c).where(campo,'==',valor).get().then(function(s){
-        return s.docs.map(function(d){ return d.data(); }); }); },
+        return s.docs.map(function(d){ return _descongelar(d.data()); }); }); },
     licenca:function(c,id,ms){
       return db.doc(c+'/'+id).acquire({holder:'semeador', ttlMs:ms})
         .then(function(r){ return !!r.acquired; }); }

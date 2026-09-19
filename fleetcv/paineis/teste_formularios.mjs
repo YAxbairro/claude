@@ -63,35 +63,22 @@ await p.reload(); await p.waitForTimeout(3000);
 await p.click('[data-tab="viaturas"]'); await p.waitForTimeout(900);
 ok('e continua lá depois de recarregar', /ST-28-ED/.test(await txt()));
 
-/* ── a matrícula é obrigatória e verificada ─────────────── */
-const tentar = async (mat, espera) => {
-  await p.click('[data-f="novo-carro"]'); await p.waitForTimeout(600);
-  if(mat) await p.fill('#e-mat',mat);
-  await p.fill('#e-km','1000'); await p.fill('#e-dep','45');
-  await p.click('[data-f="guardar-carro"]'); await p.waitForTimeout(700);
-  const t=await txt();
-  const ficou = await p.isVisible('#e-mat');
+/* ── a matrícula escreve-se como se quer ────────────────
+   Não é obrigatória e não se corrige: cada ilha e cada idade de
+   carro tem a sua forma, e quem tem o carro à frente sabe melhor
+   do que esta aplicação. Só não pode haver duas iguais. */
+const tentar = async (mat) => {
   await p.click('[data-tab="viaturas"]'); await p.waitForTimeout(500);
-  return {ficou, t};
-};
-let r = await tentar('');
-ok('sem matrícula NÃO guarda', r.ficou && /Escreva a matrícula/.test(r.t));
-r = await tentar('AB');
-ok('matrícula curta de mais não passa', r.ficou && /curta/.test(r.t));
-r = await tentar('STEDXX');
-ok('matrícula sem número não passa', r.ficou && /número/.test(r.t));
-r = await tentar('ST-28-ED');
-ok('matrícula repetida não passa', r.ficou && /Já existe/.test(r.t));
+  await p.click('[data-f="novo-carro"]'); await p.waitForTimeout(600);
+  if(mat!=null) await p.fill('#e-mat',mat);
+  await p.fill('#e-km','1000'); await p.fill('#e-dep','45');
+  await p.click('[data-f="guardar-carro"]'); await p.waitForTimeout(1000);
+  return await txt(); };
 
-/* formas verdadeiras de Cabo Verde, todas aceites */
-for(const [mat, fica] of [['SV-14-AB','SV-14-AB'],['28-ED-ST','28-ED-ST'],
-                          ['CVS1234','CVS-1234'],['sa 09 tk','SA-09-TK']]){
-  await p.click('[data-f="novo-carro"]'); await p.waitForTimeout(500);
-  await p.fill('#e-mat',mat); await p.fill('#e-km','1000'); await p.fill('#e-dep','45');
-  await p.click('[data-f="guardar-carro"]'); await p.waitForTimeout(900);
-  ok('aceita '+mat, (await txt()).includes(fica), fica);
-  await p.click('[data-tab="viaturas"]'); await p.waitForTimeout(400);
-}
+for(const m of ['SV 14 AB','28-ED-ST','CVS1234','sa 09 tk','BV-01-XY'])
+  ok('fica tal como foi escrita: «'+m+'»', (await tentar(m)).includes(m), m);
+ok('sem matrícula guarda na mesma', /Carro \d/.test(await tentar('')));
+ok('duas iguais é que não', /Já existe/.test(await tentar('ST-28-ED')));
 
 /* ── condutor novo, também devagar ──────────────────────── */
 await p.click('[data-tab="condutores"]'); await p.waitForTimeout(600);
@@ -102,9 +89,10 @@ await p.click('#e-email2'); await p.type('#e-email2','maria@exemplo.cv',{delay:1
 await p.waitForTimeout(3000);
 ok('o condutor também não se apaga a meio',
    (await p.inputValue('#e-nome'))==='Maria Lopes');
-await p.fill('#e-codigo','12'); await p.click('[data-f="guardar-cond"]');
+await p.fill('#e-codigo',''); await p.click('[data-f="guardar-cond"]');
 await p.waitForTimeout(700);
-ok('código curto não passa', /4 a 6 algarismos/.test(await txt()));
+ok('sem código não passa — sem ele o condutor não entra',
+   /Faltam o email/.test(await txt()));
 await p.fill('#e-codigo','7788'); await p.click('[data-f="guardar-cond"]');
 await p.waitForTimeout(1200);
 ok('GUARDA o condutor', /Maria Lopes/.test(await txt()));
