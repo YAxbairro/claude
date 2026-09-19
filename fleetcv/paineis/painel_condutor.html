@@ -1047,11 +1047,18 @@ function escutar(){
   /* quem está a andar agora, com a posição ao vivo */
   subs.push(loja.verColeccao('vivo', function(lista){
     var agora=Date.now();
-    D.vivos=lista.filter(function(t){
-      /* um turno que não dá notícias há mais de 10 minutos já não
-         está ao vivo: o telemóvel morreu ou ficou sem rede */
-      return t && !t.fim && t.momento && agora-t.momento <= 600000;
-    }).map(function(t){ t.aoVivo=true; return t; });
+    /* Antes deitavam-se fora os turnos calados há mais de dez
+       minutos. Era pior do que parecia: um condutor que se esquece de
+       fechar, ou a quem morre a bateria, desaparecia do ecrã do
+       patrão — e o turno ficava aberto nos dados, invisível, sem
+       nunca entrar no histórico. Agora ficam todos, marcados com há
+       quanto tempo não dão notícias, e o patrão pode fechá-los. */
+    D.vivos=lista.filter(function(t){ return t && !t.fim && t.momento; })
+      .map(function(t){
+        t.aoVivo=true;
+        t.calado=Math.max(0, agora-t.momento);
+        t.aSerio=t.calado<=600000;      /* mesmo a andar agora */
+        return t; });
     avisar(); }, erro));
 
   return Promise.resolve();
@@ -1214,6 +1221,11 @@ return {
   fecharTurno:fecharTurno,
   guardarFrota:guardarFrota,
   guardarTurno:guardarTurno,
+  /* o patrão a fechar um turno que o condutor deixou aberto: tira-o
+     do mapa ao vivo sem lhe tocar no percurso */
+  fecharTurnoDeOutro:function(id){
+    if(!loja) return Promise.resolve();
+    return loja.tirar('vivo', id).catch(function(){}); },
   gravarTurnoNovo:gravarTurnoNovo,
   apagarTurno:apagarTurno,
   rastoDe:rastoDe,
@@ -1272,7 +1284,8 @@ var FROTA = { precoLitro:145, carros:[], condutores:[] };
 
 /* Os postos são os verdadeiros do OpenStreetMap (ver mapa_praia). */
 var POSTOS = MAPA_PRAIA.postos;
-var LIM = {gapKm:3, kmMax:500, precisaoMax:50, velMax:180, divLitros:3};
+var LIM = {gapKm:3, kmMax:500, gapAbsurdo:2000, precisaoMax:50, velMax:180,
+           divLitros:3};
 
 var S = {ecra:'entrar', eu:null, carro:null, turno:null, turnos:[],
          gps:{estado:'desligado', precisao:null, vel:0, porque:null, autoriz:null}, bateria:null,
@@ -1548,6 +1561,24 @@ function ajustarMapa(){
   var sv=cx.querySelector('.mapa');
   if(sv) sv.outerHTML=mapa(S.turno?S.turno.rasto:[], true);
 }
+/* A nuvem traz novidades a toda a hora. Cada uma repintava o ecrã, e
+   quem estivesse a escrever os quilómetros via o campo esvaziar-se
+   debaixo dos dedos. Agora a novidade espera pelo dedo sair. */
+var pinturaEmEspera=false;
+function aEscrever(){
+  var a=document.activeElement;
+  return !!(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));
+}
+function pintarSePuder(){
+  if(aEscrever()){ pinturaEmEspera=true; return; }
+  pintar();
+}
+document.addEventListener('focusout', function(){
+  setTimeout(function(){
+    if(pinturaEmEspera && !aEscrever()){ pinturaEmEspera=false; pintar(); }
+  }, 80);
+});
+
 function pintarTopo(){
   var p=[];
   if(S.ecra!=='entrar'){
@@ -1613,9 +1644,19 @@ function pintar(){
       '<p class="p-nota" style="margin-top:5px">O carro andou desde o último turno. '+
       'Fica registado. Se foi à oficina, diga ao patrão.</p></div>';
     if(gap<0) h+='<div class="cartao mau"><h2>Parece a menos</h2>'+
-      '<p class="p-nota" style="margin-top:5px">O conta-quilómetros não anda para trás.'+
-      '</p></div>';
-    b='<button class="bt pri" data-f="ir-gps"'+(gap<0?' disabled':'')+'>Continuar</button>'+
+      '<p class="p-nota" style="margin-top:5px">O conta-quilómetros não anda para trás. '+
+      'Confira o número: este carro ficou em '+nf(S.carro.km)+' km.</p></div>';
+    /* Um zero a mais e o carro fica com um conta-quilómetros errado
+       para sempre — e todos os turnos seguintes ficam errados com
+       ele. Mais de 2.000 km desde o último turno é quase de certeza
+       engano de dedo. */
+    var absurdo = gap>LIM.gapAbsurdo;
+    if(absurdo) h+='<div class="cartao mau"><h2>Este número parece um engano</h2>'+
+      '<p class="p-nota" style="margin-top:5px">São '+nf(gap)+' km desde o último '+
+      'turno — mais do que a volta a Santiago vinte vezes. Confira se não escapou '+
+      'um algarismo. O carro ficou em <b>'+nf(S.carro.km)+' km</b>.</p></div>';
+    b='<button class="bt pri" data-f="ir-gps"'+((gap<0||absurdo)?' disabled':'')+
+      '>Continuar</button>'+
       '<button class="lig" data-f="ir-carro">Trocar de carro</button>';
   }
 
@@ -1666,11 +1707,17 @@ function pintar(){
       '<span><i class="rec"></i>a gravar</span></div>'+
       '<div><b class="num">'+nf(t.totalCve)+'</b><span>CVE</span></div></div></div>';
     if(t.abast.length)
-      h+='<div class="cartao"><h2>Já abasteceu</h2>'+t.abast.map(function(a){
-        return '<div class="vf"><span class="mk s">✓</span><span><span class="t1">'+
+      h+='<div class="cartao"><h2>Já abasteceu</h2>'+t.abast.map(function(a,ia){
+        return '<div class="vf"><span class="mk s">✓</span>'+
+          '<span style="flex:1"><span class="t1">'+
           nf(a.valor)+' CVE · '+nf(a.valor/FROTA.precoLitro,2)+' litros</span><br>'+
-          '<span class="t2">'+hh(a.hora)+' · '+esc(a.posto)+'</span></span></div>';
-      }).join('')+'</div>';
+          '<span class="t2">'+hh(a.hora)+' · '+esc(a.posto)+'</span></span>'+
+          /* enganos acontecem, e um número errado aqui vira um alerta
+             no ecrã do patrão que ninguém sabe explicar */
+          '<button class="lig" data-apagar="'+ia+'" style="width:auto;padding:4px 8px;'+
+          'font-size:12px">Apagar</button></div>';
+      }).join('')+'<p class="p-nota" style="margin-top:8px">Meteu um valor errado? '+
+      'Apague e registe outra vez. Enquanto o turno não fechar, dá.</p></div>';
     if(S.simular) h+='<div class="cartao nota"><p class="p-nota"><b>A experimentar.</b> '+
       'O carro anda sozinho por ruas verdadeiras da Praia. Pode abastecer e terminar '+
       'na mesma.</p></div>';
@@ -1712,6 +1759,11 @@ function pintar(){
         '<p class="p-nota" style="margin-top:4px">O GPS põe-no a '+
         (dEsc<1000?dEsc+' metros':nf(dEsc/1000,1)+' km')+' de '+esc(esc2)+
         '. Pode guardar na mesma, mas o patrão vai ver a diferença.</p></div>';
+    if(lt > t2.deposito*1.05)
+      h+='<div class="cartao mau"><h2>Isso não cabe no depósito</h2>'+
+        '<p class="p-nota" style="margin-top:5px">'+nf(val)+' CVE dão '+nf(lt,1)+
+        ' litros, e o depósito deste carro leva '+nf(t2.deposito)+'. Confira o valor '+
+        '— se estiver certo, o patrão vai perguntar porquê.</p></div>';
     h+=caixaFoto('Fotografar o talão','ou a bomba, se o talão não der')+
       '<div class="ou">e</div>'+
       '<label class="campo"><span class="lb">Quanto pagou (CVE)</span>'+
@@ -1839,13 +1891,22 @@ document.addEventListener('change', function(e){
 });
 
 document.addEventListener('click', function(e){
-  var b=e.target.closest('[data-f],[data-carro],[data-posto],[data-ver]');
+  var b=e.target.closest('[data-f],[data-carro],[data-posto],[data-ver],[data-apagar]');
   if(!b) return;
   var d=b.dataset;
   if(d.carro){ S.carro=FROTA.carros.filter(function(c){ return c.id===d.carro; })[0];
     S.foto=null; S.r={km:S.carro.km}; S.ecra='km-inicio'; pintar(); return; }
   if(d.posto!=null){ S.r.posto=d.posto; pintar(); return; }
   if(d.ver){ S.verTurno=d.ver; S.ecra='resumo'; pintar(); return; }
+  if(d.apagar!=null && S.turno && !S.turno.fim){
+    var ia=+d.apagar, aa=S.turno.abast[ia];
+    if(!aa) return;
+    if(!confirm('Apagar o abastecimento de '+nf(aa.valor)+' CVE?')) return;
+    S.turno.abast.splice(ia,1);
+    S.turno.totalCve=S.turno.abast.reduce(function(s,x){ return s+x.valor; },0);
+    Nuvem.posicao(S.turno, {kmGps:kmRasto(S.turno.rasto), bateria:S.bateria,
+      onde:ondeEstou()}, true);
+    guardar(); pintar(); return; }
 
   var f=d.f;
   if(f==='entrar'){
@@ -1978,7 +2039,7 @@ Nuvem.aoMudar(function(){
   if(!arrancado && (FROTA.condutores.length || Nuvem.estado()!=='a-ligar')){
     arrancado=true; retomar();
   }
-  pintar();
+  pintarSePuder();
 });
 Nuvem.arrancar({});
 /* se a nuvem não responder em 8 segundos, segue-se com o que há */

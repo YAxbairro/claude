@@ -340,12 +340,13 @@ servidor.listen(PORTA, () => {
 });
 
 /* De hora a hora: fora as sessões caducadas, e fora os turnos ao vivo
-   que já não dão notícias há mais de uma hora. Um telemóvel que morre
-   a meio do turno deixa cá um; o percurso e o turno ficam gravados, é
-   só a marca de "está a andar agora" que sai. */
+   que já ninguém vai fechar. São dois dias, não uma hora: um condutor
+   que se esquece de fechar à sexta-feira tem de continuar a aparecer
+   no ecrã do patrão na segunda, senão o turno fica aberto para sempre
+   sem ninguém dar por ele. */
 setInterval(()=>{ try{
   bd.prepare('DELETE FROM sessoes WHERE expira<?').run(Date.now());
-  const limite = Date.now() - 3600*1000;
+  const limite = Date.now() - 48*3600*1000;
   for(const {id, d} of todos('vivo'))
     if(!d.momento || d.momento < limite){
       tirar('vivo', id); espalhar('vivo', id, null); }

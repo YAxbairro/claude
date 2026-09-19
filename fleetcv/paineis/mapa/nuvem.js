@@ -411,11 +411,18 @@ function escutar(){
   /* quem está a andar agora, com a posição ao vivo */
   subs.push(loja.verColeccao('vivo', function(lista){
     var agora=Date.now();
-    D.vivos=lista.filter(function(t){
-      /* um turno que não dá notícias há mais de 10 minutos já não
-         está ao vivo: o telemóvel morreu ou ficou sem rede */
-      return t && !t.fim && t.momento && agora-t.momento <= 600000;
-    }).map(function(t){ t.aoVivo=true; return t; });
+    /* Antes deitavam-se fora os turnos calados há mais de dez
+       minutos. Era pior do que parecia: um condutor que se esquece de
+       fechar, ou a quem morre a bateria, desaparecia do ecrã do
+       patrão — e o turno ficava aberto nos dados, invisível, sem
+       nunca entrar no histórico. Agora ficam todos, marcados com há
+       quanto tempo não dão notícias, e o patrão pode fechá-los. */
+    D.vivos=lista.filter(function(t){ return t && !t.fim && t.momento; })
+      .map(function(t){
+        t.aoVivo=true;
+        t.calado=Math.max(0, agora-t.momento);
+        t.aSerio=t.calado<=600000;      /* mesmo a andar agora */
+        return t; });
     avisar(); }, erro));
 
   return Promise.resolve();
@@ -578,6 +585,11 @@ return {
   fecharTurno:fecharTurno,
   guardarFrota:guardarFrota,
   guardarTurno:guardarTurno,
+  /* o patrão a fechar um turno que o condutor deixou aberto: tira-o
+     do mapa ao vivo sem lhe tocar no percurso */
+  fecharTurnoDeOutro:function(id){
+    if(!loja) return Promise.resolve();
+    return loja.tirar('vivo', id).catch(function(){}); },
   gravarTurnoNovo:gravarTurnoNovo,
   apagarTurno:apagarTurno,
   rastoDe:rastoDe,
