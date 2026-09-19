@@ -110,6 +110,9 @@ Os painéis ficam com uma cópia do mapa lá dentro entre as marcas
     node teste_servidor.mjs     # 15 verificações contra um servidor que
                                 #  o próprio teste arranca, com dois
                                 #  navegadores separados
+    node teste_embrulho.mjs     # 9 verificações com a página embrulhada
+                                #  dentro do <body> de outro sítio, como
+                                #  o Claude a serve
     node teste_clicavel.mjs     # 23 verificações: toca em cada coisa que
                                 #  devia levar a algum lado, e confirma
                                 #  que leva. A última varre o ecrã à

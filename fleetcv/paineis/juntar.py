@@ -168,6 +168,22 @@ PORTEIRO = '''
    volta a perguntar.                                              */
 (function(){
   "use strict";
+
+  /* ─── pôr as folhas de estilo a salvo ───────────────────
+     Quando esta página é servida por outro sítio — o Claude, por
+     exemplo — ela vem embrulhada dentro do <body> dele. Os nossos
+     <style> deixam de estar na cabeça do documento e passam a ser
+     filhos do corpo. E a primeira coisa que este porteiro faz é
+     trocar o corpo inteiro por outro ecrã, o que apagava as folhas
+     de estilo com ele: ficava tudo sem desenho nenhum, letras
+     soltas e ícones do tamanho do ecrã.
+     Por isso, antes de mexer no corpo, sobem para a cabeça. */
+  (function salvarEstilos(){
+    var cx=document.body; if(!cx) return;
+    var soltos=cx.querySelectorAll('style, link[rel="stylesheet"], title, meta');
+    for(var i=0;i<soltos.length;i++) document.head.appendChild(soltos[i]);
+  })();
+
   var QUEM='fleetcv-quem';
   var sv=function(d){ return '<svg viewBox="0 0 24 24" fill="none" '+
     'stroke="currentColor" stroke-width="1.7" stroke-linecap="round" '+
