@@ -851,3 +851,28 @@ aparece tudo dele ali mesmo.
 **Também foi preciso decidir, e ficou assim:** nenhum botão pode existir sem destino. O
 teste varre o ecrã no fim e falha se encontrar um — foi assim que se apanhou o ecrã novo
 a esconder a barra de navegação inteira.
+
+### v0.7 — as fotografias chegavam a lado nenhum
+
+Três dias antes do piloto, medi uma coisa que nunca tinha medido: o tamanho de uma
+fotografia. Uma foto de quadrante, já encolhida, pesa 142 kB. Um documento não leva mais
+de 256 kB. Um turno com foto de início, de fim e um talão são 426 kB — **o documento era
+recusado inteiro e o turno nunca chegava ao patrão**, em silêncio, porque o erro era
+engolido. E mesmo que chegasse, o painel do proprietário nunca mostrava fotografia
+nenhuma: tinha uma linha a dizer "Talão fotografado ✓" e mais nada.
+
+Ou seja: o sistema que existe para substituir a palavra do condutor por prova estava a
+perder a prova no caminho, e a pedir ao patrão que acreditasse num visto.
+
+| O que mudou | Porquê |
+|---|---|
+| **Cada fotografia é um documento seu** | O turno leva só a marca de que ela existe. Deixa de haver tecto por número de fotos, e uma foto que falhe não leva o turno com ela |
+| **O proprietário vê as fotografias** | Em grade, legendadas com o que são e a que horas, e em grande com um toque. Sem isto o produto não faz o que promete |
+| **As fotos encolhem até caber** | 620 px no lado maior e a qualidade baixa por degraus até ficar abaixo de 110 kB. O que interessa é ler os números do quadrante ou do talão, e os dados são pagos pelo condutor |
+| **O que falha fica em fila e tenta outra vez** | Na Praia há sítios sem rede. Antes, uma escrita falhada era deitada fora sem uma palavra: o turno fechava no telemóvel e nunca chegava ao patrão. A fila sobrevive a fechar a aplicação |
+| **O condutor vê quantas coisas faltam enviar** | Antes fechava o turno, lia "terminado", e podia nunca ter saído dali |
+
+**Também foi preciso decidir, e ficou assim:** enquanto conduz, pede-se ao telemóvel para
+não adormecer, e onde ele não deixa fica um aviso — se o ecrã apaga, o navegador deixa de
+gravar o caminho, e depois o GPS não bate com o quadrante e parece desvio quando foi só o
+bolso. É o maior risco deste sistema e é humano, não técnico.

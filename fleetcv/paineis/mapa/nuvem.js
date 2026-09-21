@@ -311,6 +311,7 @@ function arrancar(op){
   op=op||{}; opGuardado=op;
   D.frota  = local('frota')  || frotaNova();
   D.turnos = local('turnos') || [];
+  fila     = local('fila')   || [];
   avisar();
   var pedido;
   try{ pedido = (window.claude && claude.use) ? claude.use('db')
@@ -321,7 +322,7 @@ function arrancar(op){
     if(x){ try{ if(claude.use) claude.use('user').then(function(u){ quem=u; }); }
            catch(e){} }
     return semear(op).then(escutar).then(function(){
-      estado = loja.longe ? 'ligada' : 'perto'; avisar(); });
+      estado = loja.longe ? 'ligada' : 'perto'; avisar(); retomarFila(); });
   };
   /* Primeiro pergunta-se se há servidor. Havendo, é ele — é o único
      dos três em que o condutor entra com o código do patrão e não
@@ -333,7 +334,7 @@ function arrancar(op){
     return s.comecar().then(function(entrou){
       estado = entrou ? 'servidor' : 'servidor-por-entrar';
       if(!entrou){ avisar(); return; }
-      return semear(op).then(escutar).then(avisar);
+      return semear(op).then(escutar).then(function(){ avisar(); retomarFila(); });
     });
   }).catch(function(){
     try{ seguir(null); }catch(e){ estado='sozinha'; avisar(); } });
@@ -449,9 +450,87 @@ function escutar(){
 /* ════════════════════════════════════════════════════════
    ESCREVER
    ════════════════════════════════════════════════════════ */
+/* O que vai dentro do documento do turno.
+   Fora ficam o rasto (milhares de pontos) e as FOTOGRAFIAS. Uma
+   fotografia de quadrante, já encolhida, pesa uns 140 kB; um
+   documento não leva mais de 256 kB. Três fotos num turno e o
+   documento era recusado inteiro — o turno não chegava ao patrão e
+   ninguém dava por nada, porque o erro era engolido.
+   Agora cada foto é um documento seu e o turno leva só a marca de
+   que ela existe. */
 function semRasto(t){
-  var c={}; for(var k in t) if(k!=='rasto'&&k!=='todos') c[k]=t[k];
+  var c={}, fora={rasto:1, todos:1, fotoInicio:1, fotoFim:1};
+  for(var k in t) if(!fora[k]) c[k]=t[k];
+  c.temFotoInicio=!!t.fotoInicio; c.temFotoFim=!!t.fotoFim;
+  c.abast=(t.abast||[]).map(function(a){
+    var b={}; for(var j in a) if(j!=='foto') b[j]=a[j];
+    b.temFoto=!!(a.foto||a.temFoto); return b; });
   return c;
+}
+
+/* ─── as fotografias ─────────────────────────────────────
+   Cada uma no seu documento, com o nome do turno lá dentro para se
+   saber de quem é. Lêem-se só quando alguém as quer ver. */
+function guardarFoto(chave, turno, dados){
+  if(!loja||!dados) return Promise.resolve();
+  if(dados.length>250000) return Promise.resolve();
+  return naFila('fotos', chave, {chave:chave, turno:turno, dados:dados,
+                                 quando:Date.now()});
+}
+function fotoDe(chave){
+  if(!loja) return Promise.resolve(null);
+  return loja.ler('fotos', chave).then(function(d){ return d?d.dados:null; })
+    .catch(function(){ return null; });
+}
+function fotosDoTurno(id){
+  if(!loja) return Promise.resolve({});
+  return loja.ondeCampo('fotos','turno',id).then(function(v){
+    var r={}; (v||[]).forEach(function(x){ if(x&&x.dados) r[x.chave]=x.dados; });
+    return r; }).catch(function(){ return {}; });
+}
+
+/* ─── a fila de espera ───────────────────────────────────
+   Na Praia há sítios sem rede, e um condutor não pode ficar à porta
+   de um cliente à espera de sinal. Antes, uma escrita que falhava
+   era deitada fora sem uma palavra: o turno fechava no telemóvel e
+   nunca chegava ao patrão. Agora fica em fila, tenta outra vez, e
+   quem está a ver sabe quantas coisas estão por enviar. */
+var fila=[], aTentar=false, relogioFila=null;
+
+function naFila(c, id, d){
+  /* uma escrita nova ao mesmo sítio substitui a antiga: o que conta
+     é o estado final, não o caminho até lá */
+  fila = fila.filter(function(x){ return !(x.c===c && x.id===id); });
+  fila.push({c:c, id:id, d:d, tentativas:0});
+  guardarFila(); avisar();
+  if(!relogioFila) relogioFila=setInterval(esvaziarFila, 12000);
+  return esvaziarFila();
+}
+function guardarFila(){
+  /* a fila sobrevive a fechar a aplicação: o telemóvel pode ficar
+     sem bateria antes de haver rede */
+  try{ local('fila', fila.slice(0,60)); }catch(e){}
+}
+function esvaziarFila(){
+  if(!loja || aTentar || !fila.length) return Promise.resolve();
+  aTentar=true;
+  var x=fila[0];
+  return loja.por(x.c, x.id, x.d).then(function(){
+    fila.shift(); guardarFila(); aTentar=false; avisar();
+    if(fila.length) return esvaziarFila();
+  }).catch(function(e){
+    aTentar=false; x.tentativas++;
+    /* um pedido mal formado nunca passa, por muito que se insista */
+    if((e && e.code==='invalid_argument') || x.tentativas>40){
+      fila.shift(); guardarFila(); }
+    avisar();
+  });
+}
+function porEnviar(){ return fila.length; }
+function retomarFila(){
+  if(!fila.length) return;
+  if(!relogioFila) relogioFila=setInterval(esvaziarFila, 12000);
+  esvaziarFila();
 }
 
 function gravarTurnoNovo(t){
@@ -470,7 +549,7 @@ function gravarRasto(id, pts){
     partes.push(pts.slice(i, i+PARTE_MAX));
   return partes.reduce(function(p, pedaco, n){
     return p.then(function(){
-      return loja.por('rastos', id+'_'+n, {turno:id, parte:n, pts:pedaco});
+      return naFila('rastos', id+'_'+n, {turno:id, parte:n, pts:pedaco});
     });
   }, Promise.resolve()).catch(function(){});
 }
@@ -536,7 +615,7 @@ var relogioRasto=null;
 
 function abrirTurno(t){
   if(!loja) return Promise.resolve();
-  return loja.por('turnos', t.id, semRasto(t)).catch(function(){});
+  return naFila('turnos', t.id, semRasto(t));
 }
 
 function guardandoRasto(dar){
@@ -554,7 +633,15 @@ function fecharTurno(t){
   if(!loja) return Promise.resolve();
   cacheRasto[t.id]=(t.rasto||[]).slice();
   return gravarRasto(t.id, t.rasto)
-    .then(function(){ return loja.por('turnos', t.id, semRasto(t)); })
+    .then(function(){
+      /* as fotos são a prova: cada uma vai no seu sítio */
+      var ps=[];
+      if(t.fotoInicio) ps.push(guardarFoto(t.id+'_inicio', t.id, t.fotoInicio));
+      if(t.fotoFim)    ps.push(guardarFoto(t.id+'_fim',    t.id, t.fotoFim));
+      (t.abast||[]).forEach(function(a,i){
+        if(a.foto) ps.push(guardarFoto(t.id+'_ab'+i, t.id, a.foto)); });
+      return Promise.all(ps); })
+    .then(function(){ return naFila('turnos', t.id, semRasto(t)); })
     .then(function(){ return loja.tirar('vivo', t.id); })
     .catch(function(){});
 }
@@ -581,7 +668,7 @@ function guardarFrota(f){
 }
 function guardarTurno(t){
   if(!loja) return Promise.resolve();
-  return loja.por('turnos', t.id, semRasto(t)).catch(function(){});
+  return naFila('turnos', t.id, semRasto(t));
 }
 function apagarTurno(id){
   if(!loja) return Promise.resolve();
@@ -611,6 +698,10 @@ return {
   gravarTurnoNovo:gravarTurnoNovo,
   apagarTurno:apagarTurno,
   rastoDe:rastoDe,
+  fotoDe:fotoDe,
+  fotosDoTurno:fotosDoTurno,
+  porEnviar:porEnviar,
+  tentarAgora:esvaziarFila,
   local:local,
   frotaNova:frotaNova,
   /* Entrar. Com servidor é ele que confere o código e devolve quem é —

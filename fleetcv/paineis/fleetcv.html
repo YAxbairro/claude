@@ -300,6 +300,19 @@ body.dono .tiles span{font-size:10px; color:var(--muted); text-transform:upperca
 body.dono .tiles .mau b{color:var(--crit)}
 body.dono .tiles .bom b{color:var(--ok)}
 body.dono input.erro{border-color:var(--crit); background:var(--crit-wash)}
+body.dono .fotos{display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:9px}
+body.dono .foto-q{display:block; width:100%; padding:0; border:1px solid var(--line);
+  border-radius:11px; overflow:hidden; background:var(--surface2); cursor:pointer;
+  text-align:left; font-family:var(--sans)}
+body.dono .foto-q:hover{border-color:var(--accent)}
+body.dono .foto-q img{display:block; width:100%; height:110px; object-fit:cover}
+body.dono .foto-q span{display:block; padding:7px 9px; font-size:11.5px; color:var(--muted);
+  line-height:1.35}
+body.dono .lupa{position:fixed; inset:0; z-index:50; background:rgba(0,0,0,.88);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:14px; padding:18px; cursor:zoom-out}
+body.dono .lupa img{max-width:100%; max-height:82vh; object-fit:contain; border-radius:8px}
+body.dono .lupa-x{color:#fff; font-size:14px; font-weight:600}
 body.dono .item.zumbi{border-color:color-mix(in srgb,var(--warn) 45%,transparent);
   background:var(--warn-wash)}
 body.dono .parado{display:inline-block; width:7px; height:7px; border-radius:50%;
@@ -1146,6 +1159,7 @@ function arrancar(op){
   op=op||{}; opGuardado=op;
   D.frota  = local('frota')  || frotaNova();
   D.turnos = local('turnos') || [];
+  fila     = local('fila')   || [];
   avisar();
   var pedido;
   try{ pedido = (window.claude && claude.use) ? claude.use('db')
@@ -1156,7 +1170,7 @@ function arrancar(op){
     if(x){ try{ if(claude.use) claude.use('user').then(function(u){ quem=u; }); }
            catch(e){} }
     return semear(op).then(escutar).then(function(){
-      estado = loja.longe ? 'ligada' : 'perto'; avisar(); });
+      estado = loja.longe ? 'ligada' : 'perto'; avisar(); retomarFila(); });
   };
   /* Primeiro pergunta-se se há servidor. Havendo, é ele — é o único
      dos três em que o condutor entra com o código do patrão e não
@@ -1168,7 +1182,7 @@ function arrancar(op){
     return s.comecar().then(function(entrou){
       estado = entrou ? 'servidor' : 'servidor-por-entrar';
       if(!entrou){ avisar(); return; }
-      return semear(op).then(escutar).then(avisar);
+      return semear(op).then(escutar).then(function(){ avisar(); retomarFila(); });
     });
   }).catch(function(){
     try{ seguir(null); }catch(e){ estado='sozinha'; avisar(); } });
@@ -1284,9 +1298,87 @@ function escutar(){
 /* ════════════════════════════════════════════════════════
    ESCREVER
    ════════════════════════════════════════════════════════ */
+/* O que vai dentro do documento do turno.
+   Fora ficam o rasto (milhares de pontos) e as FOTOGRAFIAS. Uma
+   fotografia de quadrante, já encolhida, pesa uns 140 kB; um
+   documento não leva mais de 256 kB. Três fotos num turno e o
+   documento era recusado inteiro — o turno não chegava ao patrão e
+   ninguém dava por nada, porque o erro era engolido.
+   Agora cada foto é um documento seu e o turno leva só a marca de
+   que ela existe. */
 function semRasto(t){
-  var c={}; for(var k in t) if(k!=='rasto'&&k!=='todos') c[k]=t[k];
+  var c={}, fora={rasto:1, todos:1, fotoInicio:1, fotoFim:1};
+  for(var k in t) if(!fora[k]) c[k]=t[k];
+  c.temFotoInicio=!!t.fotoInicio; c.temFotoFim=!!t.fotoFim;
+  c.abast=(t.abast||[]).map(function(a){
+    var b={}; for(var j in a) if(j!=='foto') b[j]=a[j];
+    b.temFoto=!!(a.foto||a.temFoto); return b; });
   return c;
+}
+
+/* ─── as fotografias ─────────────────────────────────────
+   Cada uma no seu documento, com o nome do turno lá dentro para se
+   saber de quem é. Lêem-se só quando alguém as quer ver. */
+function guardarFoto(chave, turno, dados){
+  if(!loja||!dados) return Promise.resolve();
+  if(dados.length>250000) return Promise.resolve();
+  return naFila('fotos', chave, {chave:chave, turno:turno, dados:dados,
+                                 quando:Date.now()});
+}
+function fotoDe(chave){
+  if(!loja) return Promise.resolve(null);
+  return loja.ler('fotos', chave).then(function(d){ return d?d.dados:null; })
+    .catch(function(){ return null; });
+}
+function fotosDoTurno(id){
+  if(!loja) return Promise.resolve({});
+  return loja.ondeCampo('fotos','turno',id).then(function(v){
+    var r={}; (v||[]).forEach(function(x){ if(x&&x.dados) r[x.chave]=x.dados; });
+    return r; }).catch(function(){ return {}; });
+}
+
+/* ─── a fila de espera ───────────────────────────────────
+   Na Praia há sítios sem rede, e um condutor não pode ficar à porta
+   de um cliente à espera de sinal. Antes, uma escrita que falhava
+   era deitada fora sem uma palavra: o turno fechava no telemóvel e
+   nunca chegava ao patrão. Agora fica em fila, tenta outra vez, e
+   quem está a ver sabe quantas coisas estão por enviar. */
+var fila=[], aTentar=false, relogioFila=null;
+
+function naFila(c, id, d){
+  /* uma escrita nova ao mesmo sítio substitui a antiga: o que conta
+     é o estado final, não o caminho até lá */
+  fila = fila.filter(function(x){ return !(x.c===c && x.id===id); });
+  fila.push({c:c, id:id, d:d, tentativas:0});
+  guardarFila(); avisar();
+  if(!relogioFila) relogioFila=setInterval(esvaziarFila, 12000);
+  return esvaziarFila();
+}
+function guardarFila(){
+  /* a fila sobrevive a fechar a aplicação: o telemóvel pode ficar
+     sem bateria antes de haver rede */
+  try{ local('fila', fila.slice(0,60)); }catch(e){}
+}
+function esvaziarFila(){
+  if(!loja || aTentar || !fila.length) return Promise.resolve();
+  aTentar=true;
+  var x=fila[0];
+  return loja.por(x.c, x.id, x.d).then(function(){
+    fila.shift(); guardarFila(); aTentar=false; avisar();
+    if(fila.length) return esvaziarFila();
+  }).catch(function(e){
+    aTentar=false; x.tentativas++;
+    /* um pedido mal formado nunca passa, por muito que se insista */
+    if((e && e.code==='invalid_argument') || x.tentativas>40){
+      fila.shift(); guardarFila(); }
+    avisar();
+  });
+}
+function porEnviar(){ return fila.length; }
+function retomarFila(){
+  if(!fila.length) return;
+  if(!relogioFila) relogioFila=setInterval(esvaziarFila, 12000);
+  esvaziarFila();
 }
 
 function gravarTurnoNovo(t){
@@ -1305,7 +1397,7 @@ function gravarRasto(id, pts){
     partes.push(pts.slice(i, i+PARTE_MAX));
   return partes.reduce(function(p, pedaco, n){
     return p.then(function(){
-      return loja.por('rastos', id+'_'+n, {turno:id, parte:n, pts:pedaco});
+      return naFila('rastos', id+'_'+n, {turno:id, parte:n, pts:pedaco});
     });
   }, Promise.resolve()).catch(function(){});
 }
@@ -1371,7 +1463,7 @@ var relogioRasto=null;
 
 function abrirTurno(t){
   if(!loja) return Promise.resolve();
-  return loja.por('turnos', t.id, semRasto(t)).catch(function(){});
+  return naFila('turnos', t.id, semRasto(t));
 }
 
 function guardandoRasto(dar){
@@ -1389,7 +1481,15 @@ function fecharTurno(t){
   if(!loja) return Promise.resolve();
   cacheRasto[t.id]=(t.rasto||[]).slice();
   return gravarRasto(t.id, t.rasto)
-    .then(function(){ return loja.por('turnos', t.id, semRasto(t)); })
+    .then(function(){
+      /* as fotos são a prova: cada uma vai no seu sítio */
+      var ps=[];
+      if(t.fotoInicio) ps.push(guardarFoto(t.id+'_inicio', t.id, t.fotoInicio));
+      if(t.fotoFim)    ps.push(guardarFoto(t.id+'_fim',    t.id, t.fotoFim));
+      (t.abast||[]).forEach(function(a,i){
+        if(a.foto) ps.push(guardarFoto(t.id+'_ab'+i, t.id, a.foto)); });
+      return Promise.all(ps); })
+    .then(function(){ return naFila('turnos', t.id, semRasto(t)); })
     .then(function(){ return loja.tirar('vivo', t.id); })
     .catch(function(){});
 }
@@ -1416,7 +1516,7 @@ function guardarFrota(f){
 }
 function guardarTurno(t){
   if(!loja) return Promise.resolve();
-  return loja.por('turnos', t.id, semRasto(t)).catch(function(){});
+  return naFila('turnos', t.id, semRasto(t));
 }
 function apagarTurno(id){
   if(!loja) return Promise.resolve();
@@ -1446,6 +1546,10 @@ return {
   gravarTurnoNovo:gravarTurnoNovo,
   apagarTurno:apagarTurno,
   rastoDe:rastoDe,
+  fotoDe:fotoDe,
+  fotosDoTurno:fotosDoTurno,
+  porEnviar:porEnviar,
+  tentarAgora:esvaziarFila,
   local:local,
   frotaNova:frotaNova,
   /* Entrar. Com servidor é ele que confere o código e devolve quem é —
@@ -1506,7 +1610,8 @@ var LIM = {gapKm:3, kmMax:500, gapAbsurdo:2000, precisaoMax:50, velMax:180,
 
 var S = {ecra:'entrar', eu:null, carro:null, turno:null, turnos:[],
          gps:{estado:'desligado', precisao:null, vel:0, porque:null, autoriz:null}, bateria:null,
-         foto:null, r:{}, aviso:null, simular:false, verTurno:null};
+         foto:null, r:{}, aviso:null, simular:false, verTurno:null,
+         avisoEcraVisto:!!Nuvem.local('aviso-ecra')};
 var vigia=null, tic=null, cronoSim=null, ultima=null, vista={}, primeiroTiro=null;
 var salvo=null;
 var medida={W:400,H:620};
@@ -1680,14 +1785,34 @@ function simular(){
 }
 
 /* ─── foto ───────────────────────────────────────────────── */
-function lerFoto(f,cb){ var fr=new FileReader();
-  fr.onload=function(){ var im=new Image();
-    im.onload=function(){ var k=Math.min(1,520/Math.max(im.width,im.height));
-      var cv=document.createElement('canvas');
-      cv.width=Math.round(im.width*k); cv.height=Math.round(im.height*k);
-      cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
-      try{ cb(cv.toDataURL('image/jpeg',0.6)); }catch(e){ cb(fr.result); } };
-    im.onerror=function(){ cb(fr.result); }; im.src=fr.result; };
+/* A fotografia tem de chegar ao patrão e tem de caber. Uma foto de
+   telemóvel são uns megabytes; encolhe-se, e se mesmo assim ficar
+   pesada baixa-se a qualidade até caber — o que importa é ler os
+   números do quadrante ou do talão, não a beleza da imagem. E os
+   dados são pagos pelo condutor. */
+var FOTO_MAX=110000;
+function lerFoto(f,cb){
+  var fr=new FileReader();
+  fr.onload=function(){
+    var im=new Image();
+    im.onload=function(){
+      try{
+        var k=Math.min(1, 620/Math.max(im.width,im.height));
+        var cv=document.createElement('canvas');
+        cv.width=Math.round(im.width*k); cv.height=Math.round(im.height*k);
+        cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
+        var q=0.62, d=cv.toDataURL('image/jpeg',q);
+        while(d.length>FOTO_MAX && q>0.28){ q-=0.1; d=cv.toDataURL('image/jpeg',q); }
+        if(d.length>FOTO_MAX){
+          var cv2=document.createElement('canvas');
+          cv2.width=Math.round(cv.width*0.7); cv2.height=Math.round(cv.height*0.7);
+          cv2.getContext('2d').drawImage(cv,0,0,cv2.width,cv2.height);
+          d=cv2.toDataURL('image/jpeg',0.5);
+        }
+        cb(d);
+      }catch(e){ cb(fr.result); } };
+    im.onerror=function(){ cb(fr.result); };
+    im.src=fr.result; };
   fr.readAsDataURL(f); }
 
 /* ─── contas do turno ────────────────────────────────────── */
@@ -1810,6 +1935,12 @@ function pintarTopo(){
     if(!/^(servidor|ligada|a-ligar)$/.test(Nuvem.estado()))
       p.push('<span class="pill" title="Sem ligação: o turno fica guardado '+
         'aqui e sobe quando houver rede">sem ligação</span>');
+    /* Um condutor tem de saber se o que fez já chegou ao patrão.
+       Sem isto fechava o turno, via "terminado", e podia nunca ter
+       saído do telemóvel. */
+    var pe=Nuvem.porEnviar();
+    if(pe) p.push('<span class="pill morta" title="Ainda por enviar. Sobe '+
+      'sozinho assim que houver rede.">'+pe+' por enviar</span>');
   }
   el('dir').innerHTML=p.join('');
 }
@@ -1935,6 +2066,17 @@ function pintar(){
           'font-size:12px">Apagar</button></div>';
       }).join('')+'<p class="p-nota" style="margin-top:8px">Meteu um valor errado? '+
       'Apague e registe outra vez. Enquanto o turno não fechar, dá.</p></div>';
+    /* O maior risco deste sistema é humano e é simples: o condutor
+       mete o telemóvel no bolso, o ecrã apaga-se, e o navegador
+       deixa de gravar o caminho. Depois o GPS não bate com o
+       quadrante e parece desvio quando foi só o bolso. Vale mais
+       dizer-lho uma vez do que descobrir no fim do dia. */
+    if(!S.simular && !S.avisoEcraVisto)
+      h+='<div class="cartao nota"><p class="p-nota"><b>Deixe o ecrã aceso.</b> '+
+        'Se o telemóvel adormecer, o caminho deixa de ser gravado e os '+
+        'quilómetros não vão bater no fim. Ponha-o no suporte, com carregador. '+
+        '<button class="lig" data-f="percebi" style="width:auto;padding:2px 6px;'+
+        'font-size:12.5px">Percebi</button></p></div>';
     if(S.simular) h+='<div class="cartao nota"><p class="p-nota"><b>A experimentar.</b> '+
       'O carro anda sozinho por ruas verdadeiras da Praia. Pode abastecer e terminar '+
       'na mesma.</p></div>';
@@ -2034,6 +2176,14 @@ function pintar(){
             minSpan:0.006, abast:(t4.abast||[]).map(function(a){
               return {lat:a.lat, lon:a.lon, posto:a.posto}; }),
             rotulo:'O caminho que fez neste turno'})+'</div>'
+        : '')+
+      (Nuvem.porEnviar()
+        ? '<div class="cartao aviso"><h2>Ainda a enviar</h2>'+
+          '<p class="p-nota" style="margin-top:4px">Faltam '+Nuvem.porEnviar()+
+          ' coisas por subir para o patrão. Vai sozinho assim que houver rede — '+
+          'pode fechar a aplicação, não se perde. '+
+          '<button class="lig" data-f="tentar-enviar" style="width:auto;'+
+          'padding:2px 6px;font-size:12.5px">Tentar agora</button></p></div>'
         : '')+
       '<div class="cartao '+(mau?'aviso':'bom')+'"><h2>'+
       (mau?mau+' ponto'+(mau>1?'s':'')+' a explicar ao patrão':'Está tudo certo')+'</h2>'+
@@ -2145,6 +2295,9 @@ document.addEventListener('click', function(e){
     Nuvem.sair();
     S.eu=null; S.r={}; guardar(); S.ecra='entrar'; pintar(); }
   if(f==='ir-carro'){ S.foto=null; S.r={}; S.ecra='carro'; pintar(); }
+  if(f==='tentar-enviar'){ Nuvem.tentarAgora(); pintar(); return; }
+  if(f==='percebi'){ S.avisoEcraVisto=true;
+    Nuvem.local('aviso-ecra', true); pintar(); return; }
   if(f==='ir-meus'){ S.verTurno=null; S.ecra='meus'; pintar(); }
   if(f==='ir-gps'){ S.simular=false; ligarGps(); S.ecra='gps'; pintar(); }
   if(f==='pedir-gps'){ ligarGps(); pintar(); }
@@ -2169,6 +2322,21 @@ document.addEventListener('click', function(e){
   if(f==='terminar') terminar();
 });
 
+/* Alguns telemóveis deixam pedir para o ecrã não adormecer. Onde
+   der, pede-se; onde não der, fica o aviso acima. */
+var trava=null;
+function segurarEcra(){
+  try{
+    if(navigator.wakeLock && navigator.wakeLock.request && !trava)
+      navigator.wakeLock.request('screen').then(function(t){
+        trava=t; t.addEventListener('release', function(){ trava=null; });
+      }).catch(function(){});
+  }catch(e){}
+}
+function largarEcra(){ try{ if(trava){ trava.release(); trava=null; } }catch(e){} }
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState==='visible' && S.turno && !S.turno.fim) segurarEcra(); });
+
 function comecar(sim){
   S.simular=!!sim;
   S.turno={ id:'t'+Date.now(), inicio:Date.now(), fim:null,
@@ -2183,6 +2351,7 @@ function comecar(sim){
   if(!tic) tic=setInterval(function(){ if(S.ecra==='volante') pintar(); }, 1000);
   if(!salvo) salvo=setInterval(guardar, 8000);
   /* o patrão passa a ver este turno no mapa dele a partir de agora */
+  segurarEcra();
   Nuvem.abrirTurno(S.turno);
   Nuvem.guardandoRasto(function(){ return S.turno; });
   Nuvem.posicao(S.turno, {onde:ondeEstou()}, true);
@@ -2210,6 +2379,7 @@ function terminar(){
   S.carro.km=kmF;
   S.turnos.unshift(t); S.turno=null; S.foto=null; S.r={}; S.simular=false;
   /* sobe o turno inteiro, com o rasto, e sai do mapa ao vivo */
+  largarEcra();
   Nuvem.fecharTurno(t);
   if(S.carro) Nuvem.guardarFrota(FROTA);
   guardar(); S.ecra='resumo'; pintar();
@@ -2288,7 +2458,7 @@ var POSTOS=MAPA_PRAIA.postos;
 
 var S={ ecra:'entrar', voltarPara:null, frota:null, turnos:[], sessao:false,
         sel:null, r:{}, aviso:null, replay:null, vivos:[], cartao:null,
-        filtro:null, codigoNovo:'' };
+        filtro:null, codigoNovo:'', lupa:null };
 var tic=null, cronoReplay=null;
 
 /* ─── utilitários ────────────────────────────────────────── */
@@ -2641,6 +2811,25 @@ function emTurno(){ return S.vivos||[]; }
    por inteiro a cada novidade que chega, e o percurso que se foi
    buscar perdia-se com eles. */
 var rastos={}, aBuscar={};
+/* As fotografias são a prova. Sem as poder ver, o patrão está outra
+   vez a acreditar na palavra do condutor — que é o que isto veio
+   substituir. Vão-se buscar quando ele abre o turno. */
+var fotos={}, aBuscarFoto={};
+function fotosDo(t){
+  if(fotos[t.id]) return fotos[t.id];
+  if(!aBuscarFoto[t.id]){
+    aBuscarFoto[t.id]=true;
+    Nuvem.fotosDoTurno(t.id).then(function(f){
+      fotos[t.id]=f||{};
+      if(S.ecra==='turno' && S.sel===t.id) pintar(); });
+  }
+  return null;
+}
+function quadroFoto(src, rot){
+  return '<button class="foto-q" data-foto="'+esc(src)+'">'+
+    '<img src="'+src+'" alt="'+esc(rot)+'" loading="lazy">'+
+    '<span>'+esc(rot)+'</span></button>';
+}
 function percursoDe(t){
   if(rastos[t.id]) return rastos[t.id];
   if(!aBuscar[t.id]){
@@ -3163,6 +3352,37 @@ function pintar(){
       '<div><b class="num">'+nf(kmDoTurno(t),1)+'</b><span>km pelo GPS</span></div>'+
       '<div><b class="num">'+nf(t.totalCve)+'</b><span>CVE em combustível</span></div>'+
       '<div><b class="num">'+hms(dur/1000)+'</b><span>tempo</span></div></div>';
+    /* as fotografias, em grande, antes das contas */
+    var fs=fotosDo(t)||{};
+    var quadros=[];
+    if(fs[t.id+'_inicio']) quadros.push(quadroFoto(fs[t.id+'_inicio'],
+      'Quadrante ao começar · '+nf(t.kmInicio)+' km'));
+    (t.abast||[]).forEach(function(a,ia){
+      if(fs[t.id+'_ab'+ia]) quadros.push(quadroFoto(fs[t.id+'_ab'+ia],
+        'Talão · '+nf(a.valor)+' CVE · '+hh(a.hora))); });
+    if(fs[t.id+'_fim']) quadros.push(quadroFoto(fs[t.id+'_fim'],
+      'Quadrante ao acabar · '+nf(t.kmFim)+' km'));
+    if(quadros.length)
+      h+='<div class="cartao"><h2>As fotografias</h2>'+
+        '<p class="p-nota" style="margin:2px 0 9px">Toque para ver em grande.</p>'+
+        '<div class="fotos">'+quadros.join('')+'</div></div>';
+    else if(t.exemplo)
+      h+='<div class="cartao nota"><h2>Turno de exemplo</h2>'+
+        '<p class="p-nota" style="margin-top:4px">Os turnos de estreia não têm '+
+        'fotografias — servem só para mostrar como fica. Os turnos verdadeiros '+
+        'trazem o quadrante e os talões.</p></div>';
+    else if(!aoVivo && (t.temFotoInicio||t.temFotoFim||
+        (t.abast||[]).some(function(a){ return a.temFoto; })))
+      h+='<div class="cartao"><h2>As fotografias</h2>'+
+        '<p class="p-nota" style="margin-top:4px">'+
+        (aBuscarFoto[t.id]&&!fotos[t.id] ? 'a ir buscar…'
+          : 'O condutor tirou fotografias mas ainda não chegaram aqui — '+
+            'o telemóvel dele deve estar sem rede.')+'</p></div>';
+    else if(!aoVivo)
+      h+='<div class="cartao aviso"><h2>Sem fotografias</h2>'+
+        '<p class="p-nota" style="margin-top:4px">Este turno não tem foto do '+
+        'conta-quilómetros nem do talão. Fica só a palavra do condutor.</p></div>';
+
     if((t.abast||[]).length)
       h+='<div class="cartao"><h2>Abastecimentos</h2>'+
         '<p class="p-nota" style="margin:2px 0 8px">Toque para ver onde o carro '+
@@ -3314,6 +3534,9 @@ function pintar(){
       '<p class="p-nota" id="copiado"></p>';
   }
 
+  if(S.lupa) h+='<div class="lupa" data-f="fechar-lupa">'+
+    '<img src="'+S.lupa+'" alt="fotografia em grande">'+
+    '<span class="lupa-x">× fechar</span></div>';
   el('ecra').innerHTML=h;
   el('nav').parentNode.hidden = !b;
   el('voltar').hidden = !S.voltarPara;
@@ -3373,6 +3596,7 @@ document.addEventListener('click', function(e){
   var b=e.target.closest('[data-f],[data-tab],[data-turno],[data-carro],[data-cond],'+
     '[data-res],[data-carro-lig],[data-cond-nome],[data-vivo],[data-posto-mapa],'+
     '[data-tile],[data-mes],[data-turnos-de],[data-turnos-cond],[data-abast],'+
+    '[data-foto],'+
     '#voltar');
   if(!b) return;
   var d=b.dataset;
@@ -3385,6 +3609,8 @@ document.addEventListener('click', function(e){
     return; }
   if(d.postoMapa){ S.aviso={t:'Posto de combustível', d:d.postoMapa};
     pintar(); setTimeout(function(){ S.aviso=null; pintar(); }, 3200); return; }
+  if(d.foto){
+    S.lupa = S.lupa===d.foto ? null : d.foto; pintar(); return; }
   if(d.tile){
     if(d.tile==='turnos') S.filtro=null;
     if(d.tile==='alertas'){ ir('alertas', null, {ecra:S.ecra, sel:S.sel}); return; }
@@ -3434,6 +3660,7 @@ document.addEventListener('click', function(e){
       S.sessao=true; S.aviso=null; Nuvem.local('dono-sessao', true); ir('mapa');
     });
   }
+  if(f==='fechar-lupa'){ S.lupa=null; pintar(); return; }
   if(f==='fechar-cartao'){ S.cartao=null; pintar(); return; }
   if(f==='guardar-defs'){
     var vd=function(id){ var n=el(id); return n?n.value:(S.r[id]||''); };
