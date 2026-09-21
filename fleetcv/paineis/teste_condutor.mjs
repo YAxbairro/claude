@@ -98,8 +98,17 @@ await fr.fill('#i-email','jorge@exemplo.cv'); await fr.fill('#i-cod','2345');
 await fr.click('[data-f="entrar"]'); await q2.waitForTimeout(300);
 await fr.locator('[data-carro]').first().click(); await q2.waitForTimeout(300);
 await fr.click('[data-f="ir-gps"]'); await q2.waitForTimeout(2500);
-ok('dentro de moldura manda abrir em separador',
-   (await fr.textContent('#ecra')).includes('separador'));
+/* Dentro do Claude o GPS não funciona e não há botão que resolva —
+   a página é sempre mostrada dentro de uma moldura. Mandar o
+   condutor procurar um botão que não existe é pior do que dizer-lhe
+   a verdade e deixá-lo começar sem GPS. */
+const fm = await fr.textContent('#ecra');
+ok('dentro de moldura diz a verdade sobre o GPS',
+   /não deixa pedir a localização/.test(fm) && !/separador/.test(fm));
+ok('e diz que se pode trabalhar na mesma',
+   /pode abrir turno|conta-quilómetros/.test(fm));
+ok('e o botão grande passa a ser começar sem GPS',
+   (await fr.textContent('#accoes')).includes('Começar sem GPS'));
 
 /* ─── experimentar sem conduzir: anda por ruas verdadeiras ── */
 const ctx4 = await b.newContext({ viewport:{width:390,height:840}, isMobile:true,

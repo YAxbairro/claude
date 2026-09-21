@@ -16,6 +16,9 @@ trabalha. Mais nada.
 
 Não usa biblioteca nenhuma. Só o que já vem dentro do Node.
 
+**Para o piloto a sério, veja [INSTALAR.md](INSTALAR.md)** — passo a
+passo, escrito para quem não é do ramo, com o Render.
+
 ## Pôr a trabalhar
 
 Precisa do Node 22 ou mais recente (https://nodejs.org).
@@ -31,9 +34,9 @@ Para pôr a sua conta em vez da de exemplo, **antes da primeira vez**:
     FLEETCV_DONO_EMAIL=eu@aminhaempresa.cv \
     FLEETCV_DONO_CODIGO=4721 ./arrancar.sh
 
-Com Docker:
+Com Docker, a partir da raiz do repositório:
 
-    docker build -t fleetcv .
+    docker build -f fleetcv/servidor/Dockerfile -t fleetcv .
     docker run -p 8080:8080 -v fleetcv-dados:/dados fleetcv
 
 | O que se pode mudar | Por omissão |
@@ -43,6 +46,23 @@ Com Docker:
 | `FLEETCV_APP` | `fleetcv.html` ao lado do servidor |
 | `FLEETCV_DONO_EMAIL` | `patrao@exemplo.cv` |
 | `FLEETCV_DONO_CODIGO` | `9999` |
+
+## Porque é que isto não pode viver dentro do Claude
+
+Há uma parede, e não se contorna:
+
+| | GPS | Dados partilhados |
+|---|---|---|
+| A aplicação dentro da janela do Claude | ✗ | ✓ |
+| O Claude a servir a página sozinha | ✓ | ✗ |
+
+Dentro da janela, o telemóvel não deixa a página pedir a localização —
+é regra do telemóvel, não definição que se mude. Servida sozinha, o
+Claude não lhe dá a base de dados partilhada (está escrito no contrato
+dela: `use()` devolve nulo).
+
+Nunca as duas ao mesmo tempo. Por isso a versão do Claude serve para
+mostrar e experimentar, e o piloto a sério corre aqui.
 
 ## O que só um servidor consegue fazer
 

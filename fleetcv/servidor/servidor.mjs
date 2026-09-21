@@ -34,7 +34,14 @@ import { fileURLToPath } from 'node:url';
 const AQUI    = path.dirname(fileURLToPath(import.meta.url));
 const PORTA   = Number(process.env.PORT || process.env.FLEETCV_PORTA || 8080);
 const FICHEIRO= process.env.FLEETCV_DADOS  || path.join(AQUI, 'dados.db');
-const APP     = process.env.FLEETCV_APP    || path.join(AQUI, 'fleetcv.html');
+/* A aplicação pode estar ao lado do servidor ou na pasta dos painéis,
+   conforme de onde isto foi instalado. Procura-se nos dois sítios em
+   vez de obrigar quem instala a saber a diferença. */
+const APP = process.env.FLEETCV_APP || [
+  path.join(AQUI, 'fleetcv.html'),
+  path.join(AQUI, '..', 'paineis', 'fleetcv.html'),
+].find(f => { try{ return fs.statSync(f).isFile(); }catch(e){ return false; } })
+  || path.join(AQUI, 'fleetcv.html');
 const SESSAO_H= 720;                       /* a sessão dura 30 dias      */
 const MAX_ERRO= 6;                         /* tentativas antes de travar */
 const TRAVA_MS= 15*60*1000;
@@ -200,6 +207,14 @@ const servidor = http.createServer(async (pedido, resposta) => {
   try{
     /* ── a aplicação ── */
     if(pedido.method==='GET' && (rota==='/' || rota==='/index.html')){
+      if(!fs.existsSync(APP)){
+        resposta.writeHead(500, {'content-type':'text/html; charset=utf-8'});
+        return resposta.end('<meta charset=utf-8><body style="font:16px sans-serif;'+
+          'padding:24px"><h2>Falta a aplicação</h2><p>O servidor está a trabalhar, '+
+          'mas não encontrou o ficheiro <code>fleetcv.html</code>.</p>'+
+          '<p>Procurou em:<br><code>'+APP+'</code></p>'+
+          '<p>Ponha-o ao lado do servidor, ou diga onde está com '+
+          '<code>FLEETCV_APP</code>.</p>'); }
       const html = fs.readFileSync(APP);
       resposta.writeHead(200, {'content-type':'text/html; charset=utf-8',
         'content-length':html.length, 'cache-control':'no-cache'});
@@ -329,6 +344,7 @@ function biscoito(token, seguro){
 
 servidor.listen(PORTA, () => {
   console.log('FleetCV a trabalhar em http://localhost:'+PORTA);
+  console.log('aplicação: ' + APP + (fs.existsSync(APP)?'':'  ← NÃO ENCONTRADA'));
   console.log('dados em ' + FICHEIRO);
   semearFrota();
   const d=donoDaFrota();

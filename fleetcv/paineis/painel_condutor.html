@@ -1513,10 +1513,16 @@ function falhouGps(e){
         'demora; à janela ou na rua apanha em segundos.'; }
   } else if(e.code===1){
     S.gps.estado='recusado';
+    /* Dentro do Claude o GPS não funciona, e não há botão nenhum que
+       resolva: a página é sempre mostrada dentro de uma moldura e o
+       telemóvel não deixa pedir localização de lá. Mandar o condutor
+       procurar um botão que não existe é pior do que dizer a verdade. */
     S.gps.porque = moldura
-      ? 'Esta página está dentro de uma janela do Claude e o telemóvel não deixa pedir '+
-        'a localização daqui. Abra o mesmo link num separador só dele — no canto da '+
-        'janela há o botão de abrir — e a localização passa a funcionar.'
+      ? 'O telemóvel não deixa pedir a localização a uma página mostrada dentro '+
+        'do Claude, e não há como contornar isso aqui. Esta versão serve para '+
+        'experimentar: pode abrir turno, fotografar o quadrante, abastecer e '+
+        'fechar — só o caminho no mapa é que não fica gravado. Para gravar o '+
+        'caminho, a aplicação tem de estar instalada num endereço seu.'
       : (S.gps.autoriz==='denied'
         ? 'A localização está bloqueada para este site. No navegador: cadeado ao lado '+
           'do endereço → Localização → Permitir, e recarregue a página.'
@@ -1770,6 +1776,10 @@ function pintar(){
     h='<div class="passo">Passo 2 de 3</div><h1>Quantos km marca?</h1>'+
       '<p class="sub">'+esc(S.carro.matricula)+' · fotografe o conta-quilómetros, '+
       'ou escreva o número.</p>'+
+      (S.gps.estado==='recusado'||S.gps.estado==='indisponivel'
+        ? '<div class="cartao aviso"><p class="p-nota"><b>Sem GPS, a fotografia é '+
+          'a única prova.</b> Fotografe o quadrante, mesmo que escreva o número '+
+          'à mão.</p></div>' : '')+
       caixaFoto('Fotografar o conta-quilómetros','abre a câmara do telemóvel')+
       '<div class="ou">ou</div>'+
       '<label class="campo"><span class="lb">Escrever à mão</span>'+
@@ -1812,20 +1822,23 @@ function pintar(){
       (S.gps.precisao||'—')+' metros de precisão.</p></div>';
     else if(e==='recusado'||e==='indisponivel')
       h+='<div class="cartao aviso"><h2>'+(emMoldura()&&e==='recusado'
-        ?'Abra o link num separador':'O telemóvel não deu a localização')+'</h2>'+
+        ?'Aqui o GPS não funciona':'O telemóvel não deu a localização')+'</h2>'+
         '<p class="p-nota" style="margin-top:4px">'+esc(S.gps.porque||'')+'</p>'+
-        '<p class="p-nota" style="margin-top:7px">Pode começar na mesma — os '+
-        'quilómetros contam pelo conta-quilómetros. Só não fica o caminho gravado.'+
-        '</p></div>';
+        '<p class="p-nota" style="margin-top:7px">Pode começar na mesma: os '+
+        'quilómetros contam pelo conta-quilómetros e as fotografias contam na '+
+        'mesma. <b>Fotografe sempre o quadrante</b> — sem GPS, é a foto que '+
+        'segura as contas.</p></div>';
     else if(e==='a-procurar') h+='<div class="cartao"><h2>A procurar sinal</h2>'+
       '<p class="p-nota" style="margin-top:4px">'+esc(S.gps.porque||
       'Dentro de um edifício pode demorar. Encoste-se a uma janela.')+'</p></div>';
     else if(e==='sem-sinal') h+='<div class="cartao aviso"><h2>Sem sinal</h2>'+
       '<p class="p-nota" style="margin-top:4px">'+esc(S.gps.porque||'')+'</p></div>';
     b = (e==='ligado' ? '<button class="bt pri" data-f="comecar">Começar turno</button>'
-      : '<button class="bt pri" data-f="pedir-gps">'+(e==='recusado'
-          ?'Tentar outra vez':'Ligar o GPS')+'</button>'+
-        '<button class="lig" data-f="comecar">Começar sem GPS</button>')+
+      : ((emMoldura()&&e==='recusado')
+          ? '<button class="bt pri" data-f="comecar">Começar sem GPS</button>'
+          : '<button class="bt pri" data-f="pedir-gps">'+(e==='recusado'
+              ?'Tentar outra vez':'Ligar o GPS')+'</button>'+
+            '<button class="lig" data-f="comecar">Começar sem GPS</button>'))+
       '<button class="lig" data-f="comecar-sim">Experimentar sem conduzir</button>';
   }
 

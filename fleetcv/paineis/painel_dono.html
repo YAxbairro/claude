@@ -1609,7 +1609,9 @@ function avaliar(t){
     if(falhaV>LIM.semSinalS) al.push({c:'A03',n:'AVISO',
       d:'Sem sinal de GPS durante '+nf(falhaV/60)+' minutos'});
   } else if(!aberto){
-    v.push({ok:false, t1:'Percurso gravado', t2:'o GPS não esteve ligado', vl:'—'});
+    v.push({ok:false, t1:'Percurso gravado',
+      t2:'o GPS não esteve ligado — as contas ficam pelo quadrante e pelas fotos',
+      vl:'—'});
     al.push({c:'A03',n:'AVISO',d:'Turno sem percurso gravado'});
   } else {
     v.push({ok:false, t1:'Percurso a ser gravado',

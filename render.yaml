@@ -1,0 +1,37 @@
+# ════════════════════════════════════════════════════════════
+# INSTALAR O FLEETCV NO RENDER
+#
+# O Render lê este ficheiro sozinho. Ver fleetcv/servidor/INSTALAR.md
+# para os passos, escritos para quem não é do ramo.
+#
+# O disco é a parte que não se pode poupar: é onde ficam os turnos,
+# os percursos e as fotografias. Sem ele, cada vez que o servidor
+# reiniciasse perdia-se tudo.
+# ════════════════════════════════════════════════════════════
+services:
+  - type: web
+    name: fleetcv
+    runtime: node
+    plan: starter          # o plano gratuito não guarda disco: perde tudo
+    region: frankfurt      # o mais perto de Cabo Verde
+    rootDir: fleetcv/servidor
+    buildCommand: "echo sem nada para instalar"
+    startCommand: "node servidor.mjs"
+    healthCheckPath: /api/ping
+    disk:
+      name: dados
+      mountPath: /dados
+      sizeGB: 1
+    envVars:
+      - key: FLEETCV_DADOS
+        value: /dados/dados.db
+      - key: FLEETCV_APP
+        value: ../paineis/fleetcv.html
+      - key: NODE_NO_WARNINGS
+        value: "1"
+      # Trocar estes dois ANTES de instalar. Depois de a base de dados
+      # existir, mudar aqui já não muda a conta que lá está.
+      - key: FLEETCV_DONO_EMAIL
+        sync: false
+      - key: FLEETCV_DONO_CODIGO
+        sync: false
