@@ -690,6 +690,176 @@ var D = { frota:null, turnos:[], vivos:[] };
    O resto do ficheiro não sabe qual delas está a ser usada.
    ════════════════════════════════════════════════════════ */
 
+/* ─── a loja do Supabase ─── */
+/* A melhor de todas, e a que fica a custo nenhum: a página é um
+   ficheiro parado (no Vercel, por exemplo) e fala directamente com
+   a base de dados. Não há servidor para manter nem para pagar.
+
+   Duas coisas que só assim se conseguem:
+
+   · a página abre no topo do browser, sem moldura nenhuma, e por
+     isso o telemóvel DÁ a localização. É o que falta na versão do
+     Claude e não há maneira de contornar lá dentro.
+
+   · as regras de quem pode escrever o quê vivem dentro da própria
+     base de dados. Não é o telemóvel a portar-se bem: é a base a
+     recusar. Nem o condutor mais esperto mexe na frota ou reabre um
+     turno já fechado. */
+function lojaDoSupabase(sb){
+  var espelho={}, ouve={}, eu=null, canal=null, semRede=false;
+  var tocar=function(c){
+    (ouve[c]||[]).forEach(function(f){ try{ f(); }catch(e){} }); };
+
+  /* Uma cópia da frota e de quem eu sou, aqui no telemóvel.
+     Na Praia há sítios sem rede. Se o condutor abre a aplicação num
+     deles, sem isto ficava preso no ecrã de entrada — e o turno dele
+     nunca acontecia. Com isto, escolhe o carro e começa a trabalhar;
+     o que escrever fica em fila e sobe quando houver rede.
+     Serve só para desenhar os ecrãs: escrever continua a ser a base
+     de dados a decidir, e uma cópia falsificada aqui não compra
+     nada a ninguém. */
+  var COPIA='fleetcv-supa-copia';
+  var guardarCopia=function(){
+    try{ localStorage.setItem(COPIA, JSON.stringify(
+      {eu:eu, frota:espelho.frota||{}, quando:Date.now()})); }catch(e){} };
+  var lerCopia=function(){
+    try{ return JSON.parse(localStorage.getItem(COPIA)||'null'); }
+    catch(e){ return null; } };
+  var pousar=function(c,id,d){
+    espelho[c]=espelho[c]||{};
+    if(d===null) delete espelho[c][id]; else espelho[c][id]=d;
+    tocar(c); };
+
+  var erroDe=function(e){
+    if(!e) return null;
+    var c='invalid_argument';
+    if(/rate|429|too many/i.test(e.message||'')) c='resource_exhausted';
+    if(/fetch|network|timeout/i.test(e.message||'')) c='unavailable';
+    return Object.assign(new Error(e.message||'erro'), {code:c, porque:e.message}); };
+
+  return {
+    longe:true, supabase:true,
+    semRede:function(){ return semRede; },
+
+    entrar:function(email, codigo){
+      return sb.rpc('entrar', {p_email:email, p_codigo:codigo})
+        .then(function(r){
+          if(r.error) throw erroDe(r.error);
+          if(r.data && r.data.erro) throw Object.assign(new Error(r.data.erro),
+            {code:'invalid_argument', porque:r.data.erro});
+          eu=r.data; return r.data; }); },
+    sair:function(){
+      try{ localStorage.removeItem(COPIA); }catch(e){}
+      return sb.rpc('sair').then(function(){ eu=null; }); },
+    eu:function(){ return eu; },
+
+    /* traz tudo de uma vez e depois fica à escuta */
+    comecar:function(){
+      return sb.from('perfis').select('papel,quem,nome').maybeSingle()
+        .then(function(r){
+          eu = (r && r.data) ? {papel:r.data.papel, id:r.data.quem, nome:r.data.nome}
+                             : null;
+          if(!eu) return false;
+          /* Em duas perguntas, e não numa, de propósito.
+             A frota são quatro documentos que quase nunca mudam, e os
+             turnos são milhares. Numa pergunta só, ordenada pela data,
+             bastavam 600 turnos mais recentes para empurrar a frota
+             para fora da lista — e o condutor abria a aplicação sem
+             carro nenhum para escolher.
+             As fotos e os percursos ficam de fora das duas: são
+             pesados e só se vão buscar quando alguém os quer ver. */
+          return Promise.all([
+            sb.from('docs').select('coleccao,id,corpo')
+              .in('coleccao',['frota','vivo']),
+            sb.from('docs').select('coleccao,id,corpo')
+              .eq('coleccao','turnos')
+              .order('quando',{ascending:false}).limit(600)
+          ]).then(function(rs){
+              var t=rs[0], u=rs[1];
+              if(t.error) throw erroDe(t.error);
+              if(u.error) throw erroDe(u.error);
+              espelho={};
+              (t.data||[]).concat(u.data||[]).forEach(function(x){
+                pousar(x.coleccao, x.id, x.corpo); });
+              Object.keys(espelho).forEach(tocar);
+              /* Pede-se só o que interessa, e por colecção. Sem isto,
+                 cada fotografia de 50 kB que um condutor tira ia parar
+                 ao telemóvel de toda a gente, sem ninguém a querer ver
+                 — e aqui os dados pagam-se. */
+              try{
+                var chegou=function(m){
+                  var l=m.new||m.old||{};
+                  if(l.coleccao==='fotos'||l.coleccao==='rastos') return;
+                  pousar(l.coleccao, l.id,
+                         m.eventType==='DELETE'?null:(m.new||{}).corpo); };
+                canal = sb.channel('fleetcv');
+                ['frota','turnos','vivo'].forEach(function(c){
+                  canal.on('postgres_changes',
+                    {event:'*', schema:'public', table:'docs',
+                     filter:'coleccao=eq.'+c}, chegou); });
+                canal.subscribe();
+              }catch(e){}
+              semRede=false; guardarCopia();
+              return true; }); })
+        /* Sem rede, mas com uma cópia de quem eu sou e da frota: vai-se
+           na mesma. É o contrário do que parece prudente — mas mandar o
+           condutor para o ecrã de entrada quando ele só quer começar a
+           trabalhar é que era perder o turno. */
+        .catch(function(){
+          var c=lerCopia();
+          if(!c || !c.eu) return false;
+          eu=c.eu; espelho={frota:c.frota||{}};
+          Object.keys(espelho).forEach(tocar);
+          semRede=true;
+          return true; }); },
+
+    ler:function(c,id){
+      var m=(espelho[c]||{})[id];
+      if(m) return Promise.resolve(m);
+      return sb.from('docs').select('corpo').eq('coleccao',c).eq('id',id)
+        .maybeSingle().then(function(r){ return (r&&r.data)?r.data.corpo:null; })
+        .catch(function(){ return null; }); },
+
+    por:function(c,id,v){
+      pousar(c,id,v);                       /* mostra já, confirma depois */
+      if(c==='frota') guardarCopia();
+      return sb.from('docs').upsert({coleccao:c, id:id, corpo:v,
+                                     quando:new Date().toISOString()},
+                                    {onConflict:'coleccao,id'})
+        .then(function(r){ if(r.error) throw erroDe(r.error); }); },
+
+    tirar:function(c,id){
+      pousar(c,id,null);
+      return sb.from('docs').delete().eq('coleccao',c).eq('id',id)
+        .then(function(r){ if(r.error) throw erroDe(r.error); }); },
+
+    verDoc:function(c,id,fn){
+      (ouve[c]=ouve[c]||[]).push(function(){ fn((espelho[c]||{})[id]||null); });
+      setTimeout(function(){ fn((espelho[c]||{})[id]||null); },0);
+      return function(){}; },
+
+    verColeccao:function(c,fn,err,ordem,quantos){
+      var dar=function(){
+        var v=Object.keys(espelho[c]||{}).map(function(k){ return espelho[c][k]; });
+        if(ordem) v.sort(function(a,b){ return (b[ordem]||0)-(a[ordem]||0); });
+        fn(quantos?v.slice(0,quantos):v); };
+      (ouve[c]=ouve[c]||[]).push(dar);
+      setTimeout(dar,0);
+      return function(){}; },
+
+    ondeCampo:function(c,campo,valor){
+      /* o percurso e as fotos vivem fora do espelho */
+      return sb.from('docs').select('corpo').eq('coleccao',c)
+        .eq('corpo->>'+campo, valor)
+        .then(function(r){
+          if(r.error) return [];
+          return (r.data||[]).map(function(x){ return x.corpo; }); })
+        .catch(function(){ return []; }); },
+
+    licenca:function(){ return Promise.resolve(!!(eu&&eu.papel==='dono')); }
+  };
+}
+
 /* ─── a loja do servidor ─── */
 /* A melhor das três: o condutor abre um endereço no telemóvel dele,
    entra com o e-mail e o código que o patrão lhe deu, e pronto. Não
@@ -929,6 +1099,27 @@ function local(chave, valor){
 /* ─── arrancar ──────────────────────────────────────────── */
 /* op.frotaNova()  · a frota de estreia, se ainda não houver nenhuma
    op.exemplos(f)  · turnos de exemplo, para não abrir um ecrã vazio   */
+/* Há Supabase quando alguém deixou as duas chaves ao lado da página
+   (ver fleetcv-config.js). É o melhor dos quatro: página no topo do
+   browser — logo, GPS a funcionar — e regras dentro da própria base
+   de dados. */
+function ligarSupabase(){
+  var c = window.FLEETCV_CONFIG;
+  if(!c || !c.supabaseUrl || !c.supabaseChave) return Promise.resolve(null);
+  if(!window.supabase || !window.supabase.createClient) return Promise.resolve(null);
+  try{
+    var sb = window.supabase.createClient(c.supabaseUrl, c.supabaseChave, {
+      auth:{ persistSession:true, autoRefreshToken:true } });
+    /* Cada telemóvel entra sem conta nenhuma; quem ele é diz-se
+       depois, com o email e o código que o patrão deu. */
+    return sb.auth.getSession().then(function(s){
+      if(s && s.data && s.data.session) return sb;
+      return sb.auth.signInAnonymously().then(function(r){
+        return (r && r.error) ? null : sb; });
+    }).catch(function(){ return null; });
+  }catch(e){ return Promise.resolve(null); }
+}
+
 /* Só há servidor quando a página vem de um. Aberta como ficheiro, ou
    publicada no Claude, não há — e passa-se aos outros motores. */
 function haServidor(){
@@ -960,10 +1151,25 @@ function arrancar(op){
     return semear(op).then(escutar).then(function(){
       estado = loja.longe ? 'ligada' : 'perto'; avisar(); retomarFila(); });
   };
-  /* Primeiro pergunta-se se há servidor. Havendo, é ele — é o único
-     dos três em que o condutor entra com o código do patrão e não
-     precisa de conta em mais lado nenhum. */
-  haServidor().then(function(sim){
+  /* A ordem é a da qualidade: Supabase, servidor próprio, base do
+     Claude, e por fim só este aparelho. Fica o primeiro que houver. */
+  ligarSupabase().then(function(sb){
+    if(sb){
+      var ls=lojaDoSupabase(sb); loja=ls;
+      return ls.comecar().then(function(entrou){
+        estado = !entrou ? 'supabase-por-entrar'
+               : ls.semRede() ? 'supabase-sem-rede' : 'supabase';
+        if(!entrou){ avisar(); return; }
+        return semear(op).then(escutar).then(function(){
+          avisar(); retomarFila(); });
+      });
+    }
+    return seguirSemSupabase();
+  }).catch(function(){
+    try{ seguir(null); }catch(e){ estado='sozinha'; avisar(); } });
+
+  function seguirSemSupabase(){
+  return haServidor().then(function(sim){
     if(!sim) return pedido.then(seguir);
     var s=lojaDoServidor();
     loja=s;
@@ -972,8 +1178,8 @@ function arrancar(op){
       if(!entrou){ avisar(); return; }
       return semear(op).then(escutar).then(function(){ avisar(); retomarFila(); });
     });
-  }).catch(function(){
-    try{ seguir(null); }catch(e){ estado='sozinha'; avisar(); } });
+  });
+  }
 }
 
 /* ─── a primeira vez: pôr lá a frota ────────────────────── */
@@ -1343,9 +1549,17 @@ return {
   /* Entrar. Com servidor é ele que confere o código e devolve quem é —
      e só ele conhece os códigos todos. Sem servidor, confere-se com a
      lista da frota, como até aqui. */
-  temServidor:function(){ return !!(loja&&loja.servidor); },
+  temServidor:function(){ return !!(loja&&(loja.servidor||loja.supabase)); },
   entrar:function(email, codigo){
     var e=String(email||'').trim().toLowerCase(), c=String(codigo||'').trim();
+    if(loja&&loja.supabase)
+      return loja.entrar(e,c).then(function(j){
+        return loja.comecar().then(function(){
+          return semear(opGuardado).then(escutar).then(function(){
+            estado='supabase'; avisar();
+            return {papel:j.papel, id:j.id, nome:j.nome}; }); });
+      }).catch(function(x){
+        return {erro: x.porque || 'Não foi possível entrar.'}; });
     if(loja&&loja.servidor)
       return loja.entrar(e,c).then(function(j){
         return loja.comecar().then(function(){
@@ -1357,7 +1571,8 @@ return {
     return Promise.resolve(entrarCaDentro(e,c));
   },
   sair:function(){
-    if(loja&&loja.servidor) return loja.sair().catch(function(){});
+    if(loja&&(loja.servidor||loja.supabase))
+      return loja.sair().catch(function(){});
     return Promise.resolve();
   }
 };
@@ -1726,7 +1941,7 @@ function pintarTopo(){
     if(S.bateria!=null) p.push('<span class="pill">'+S.bateria+'%</span>');
     /* se não houver ligação, o patrão não está a ver nada disto — e o
        condutor tem de o saber, senão julga que já entregou o turno */
-    if(!/^(servidor|ligada|a-ligar)$/.test(Nuvem.estado()))
+    if(!/^(supabase|servidor|ligada|a-ligar)$/.test(Nuvem.estado()))
       p.push('<span class="pill" title="Sem ligação: o turno fica guardado '+
         'aqui e sobe quando houver rede">sem ligação</span>');
     /* Um condutor tem de saber se o que fez já chegou ao patrão.

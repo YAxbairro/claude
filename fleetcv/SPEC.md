@@ -876,3 +876,43 @@ perder a prova no caminho, e a pedir ao patrão que acreditasse num visto.
 não adormecer, e onde ele não deixa fica um aviso — se o ecrã apaga, o navegador deixa de
 gravar o caminho, e depois o GPS não bate com o quadrante e parece desvio quando foi só o
 bolso. É o maior risco deste sistema e é humano, não técnico.
+
+### v0.8 — o sítio onde o GPS funciona
+
+O piloto ia arrancar com o GPS desligado. Não por defeito nosso: o Claude mostra a
+aplicação dentro de uma moldura, e um telemóvel recusa dar a localização a páginas em
+moldura. A mesma parede tem o outro lado — fora da moldura, a base de dados partilhada do
+Claude deixa de existir. **Uma coisa ou a outra, nunca as duas.** E este produto precisa
+das duas: sem GPS não há prova, sem base partilhada o patrão não vê nada.
+
+A saída foi deixar de depender das duas coisas do Claude ao mesmo tempo: a página passa a
+viver num endereço próprio (Vercel) e a base de dados no Supabase.
+
+| O que mudou | Porquê |
+|---|---|
+| **Um quarto motor na nuvem: o Supabase** | Mesma porta que os outros três — `ler/por/tirar/verDoc/verColeccao/ondeCampo`. Nenhum dos dois painéis soube que mudou alguma coisa. Foi esta arquitectura, decidida na v0.4, que fez a mudança custar um ficheiro em vez de uma reescrita |
+| **As regras passaram para dentro da base de dados** | Até aqui, "o condutor só escreve o turno dele" era boa vontade do telemóvel: quem soubesse mexer escrevia o que quisesse. Agora é o Postgres que recusa, e não há telemóvel que o convença. Um turno fechado não se volta a escrever — senão corrigiam-se os quilómetros depois de o patrão ter visto o alerta |
+| **Cinco enganos no código e a porta fecha-se** | Um código de quatro algarismos adivinha-se em dez mil tentativas, e uma máquina faz isso num minuto. A trava é por e-mail e dura um quarto de hora. Quem se engana a escrever nunca dá por ela |
+| **O canal ao vivo pede só o que interessa** | Sem crivo, cada fotografia de 50 kB que um condutor tira ia parar ao telemóvel de toda a gente, sem ninguém a querer ver. Aqui os dados pagam-se ao minuto |
+| **O `juntar.py` escreve também o `site/index.html`** | E o `montar.py` passou a funcionar a partir do repositório, não só da bancada — o comando que o README mandava correr não corria |
+| **A frota deixou de poder ser empurrada para fora pelos turnos** | Ia tudo na mesma pergunta, ordenado pela data, com um tecto de 600. A frota são quatro documentos antigos; os turnos são milhares e mais recentes. Ao fim de uns meses, o condutor abria a aplicação sem carro nenhum para escolher — e nunca teríamos percebido porquê |
+| **Abrir a aplicação num sítio sem rede deixou de prender o condutor** | O telemóvel guarda uma cópia da frota e de quem ele é. Sem isso, ficava no ecrã de entrada e o turno não chegava a acontecer — que é a mesma perda de prova que a fila de envio já tinha resolvido a meio do turno, mas no princípio. A cópia serve só para desenhar os ecrãs: escrever continua a ser a base de dados a decidir |
+| **Os dois painéis sabiam reconhecer «servidor» e «ligada», mas não «supabase»** | O condutor via «sem ligação» o turno inteiro, com a ligação perfeita — e o aviso existe justamente para ele saber quando o patrão *não* está a ver. Um aviso que está sempre aceso deixa de ser um aviso |
+
+**E o erro que quase foi para o piloto.** Escrevi um simulador do Supabase
+(`_supa_falso.js`) que aplica as mesmas regras do `esquema.sql`, e ele apanhou dois
+enganos: um meu, no próprio simulador, e um teste que passava por causa da frota de
+estreia e não do condutor que devia estar a testar — um teste que passa pela razão errada
+é pior do que não ter teste nenhum.
+
+Mas o simulador não podia apanhar o que se seguiu, e só se viu ao correr o esquema num
+Postgres verdadeiro (`supabase/provar.sh`): **nenhuma escrita passava**. Nem a do
+proprietário. As regras do percurso e das fotografias precisavam de ir ver a tabela `docs`
+a partir de uma regra que estava em cima da própria tabela `docs`, e o Postgres recusa-se
+— *infinite recursion detected in policy*. Em JavaScript aquilo é uma chamada como outra
+qualquer, e o simulador dizia que estava tudo bem.
+
+A lição fica: **um imitador prova que eu percebi as regras; não prova que elas
+funcionam.** As regras são o produto — são elas que separam isto de uma aplicação de
+apontamentos — e passaram a ter provas suas, num Postgres a sério, dezanove, com o
+esquema carregado duas vezes para garantir que se pode voltar a correr.

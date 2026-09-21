@@ -41,15 +41,22 @@ em "actualizar":
     o condutor fecha        ──►  entra no histórico, já com as contas feitas
     o patrão mexe na frota  ──►  o telemóvel do condutor recebe a mudança
 
-A nuvem tem **três motores, com a mesma porta**, e o resto do código não
-sabe qual está a ser usado. Escolhe-se o primeiro que estiver
+A nuvem tem **quatro motores, com a mesma porta**, e o resto do código
+não sabe qual está a ser usado. Escolhe-se o primeiro que estiver
 disponível:
 
 | Motor | Liga o quê | Quando é usado |
 |---|---|---|
-| **servidor** | telemóveis quaisquer, sem conta em lado nenhum | quando a página vem de um servidor FleetCV (ver `../servidor/`) — **é este o que serve para trabalhar** |
-| base partilhada | telemóveis com sessão iniciada na mesma organização | quando não há servidor e a página está publicada no Claude |
-| navegador | separadores e janelas do mesmo aparelho | quando não há nem uma coisa nem outra — e é o que torna isto testável sem publicar nada |
+| **Supabase** | telemóveis quaisquer, sem conta em lado nenhum | quando existe um `fleetcv-config.js` com as chaves — **é este o que serve para trabalhar** (ver `../site/INSTALAR.md`) |
+| servidor | o mesmo, com um servidor nosso | quando a página vem de um servidor FleetCV (ver `../servidor/`) |
+| base partilhada | telemóveis com sessão iniciada na mesma organização | quando não há nem um nem outro e a página está publicada no Claude |
+| navegador | separadores e janelas do mesmo aparelho | quando não há mais nada — e é o que torna isto testável sem publicar nada |
+
+O Supabase é o primeiro da fila por duas razões. Uma é o GPS: a página
+fica num endereço próprio, fora da moldura do Claude, e o telemóvel
+volta a dar a localização. A outra é que as regras — o condutor só
+escreve o turno dele, um turno fechado não se volta a mexer — passam a
+estar **dentro da base de dados**, onde nenhum telemóvel lhes chega.
 
 Três cuidados mandam no desenho todo:
 
@@ -92,9 +99,10 @@ do próprio ficheiro.
     mapa/montar.py         mete os dois dentro dos painéis
     mapa/baixar_locais.py  vai buscar os nomes dos bairros ao OSM
 
-Depois de mexer em qualquer um dos dois ficheiros do mapa:
+Depois de mexer em qualquer um dos dois ficheiros do mapa — ou na
+nuvem — basta voltar a juntar, que o `juntar.py` monta primeiro:
 
-    cd fleetcv/paineis && python3 mapa/montar.py painel_condutor.html painel_dono.html
+    cd fleetcv/paineis && python3 juntar.py
 
 Os painéis ficam com uma cópia do mapa lá dentro entre as marcas
 `/*<<<MAPA*/` e `/*MAPA>>>*/`. Nunca se edita essa cópia à mão.
@@ -102,7 +110,7 @@ Os painéis ficam com uma cópia do mapa lá dentro entre as marcas
 ## Testar
 
     cd fleetcv/paineis
-    node teste_condutor.mjs     # 31 verificações
+    node teste_condutor.mjs     # 35 verificações
     node teste_dono.mjs         # 44 verificações
     node teste_junto.mjs        # 16 verificações ao ficheiro junto
     node teste_tempo_real.mjs   # 15 verificações com os dois painéis
@@ -123,6 +131,18 @@ Os painéis ficam com uma cópia do mapa lá dentro entre as marcas
                                 #  devia levar a algum lado, e confirma
                                 #  que leva. A última varre o ecrã à
                                 #  procura de botões sem destino
+    node teste_formularios.mjs  # 18 verificações: escrever num campo e
+                                #  ver se o que se escreveu fica lá
+    node teste_supabase.mjs     # 25 verificações contra um simulador do
+                                #  Supabase (_supa_falso.js). Prova o
+                                #  caminho todo: entrar, o tempo real, uma
+                                #  frota com 800 turnos guardados, e abrir
+                                #  a aplicação num sítio sem rede
+
+As regras da base de dados — quem pode escrever o quê — provam-se noutro
+sítio, num Postgres a sério:
+
+    cd fleetcv/supabase && ./provar.sh   # 19 regras
 
 Precisa do Playwright (`npm i playwright`) e do Chromium.
 `_moldura.html` só serve a um dos testes: imita a janela em que o

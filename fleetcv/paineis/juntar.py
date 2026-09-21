@@ -17,13 +17,15 @@ Como é que dois programas cabem no mesmo ficheiro sem se estorvarem:
     relógios e o ecrã são sempre de um só.
   · O mapa da Praia — vai uma vez só, e serve os dois.
 """
-import io, re, sys, subprocess
+import io, os, re, sys, subprocess
 
 # Os painéis levam lá dentro uma cópia do mapa e da nuvem. Se um
 # desses módulos mudou e os painéis não foram montados, juntava-se
 # aqui uma versão velha sem dar erro nenhum — por isso monta-se
 # sempre primeiro.
-subprocess.run([sys.executable, 'montar.py'], check=True)
+MONTAR = ('montar.py' if os.path.isfile('montar.py')
+          else os.path.join('mapa', 'montar.py'))
+subprocess.run([sys.executable, MONTAR], check=True)
 
 COND, DONO = 'painel_condutor.html', 'painel_dono.html'
 SAIDA = 'fleetcv.html'
@@ -246,6 +248,14 @@ saida = u'''<meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 
+<!-- As duas linhas abaixo só fazem alguma coisa quando esta página
+     está instalada num endereço próprio, com o Supabase por trás.
+     No Claude não existem e a aplicação passa aos outros motores
+     sem dar erro nenhum: repare no "onerror". -->
+<script src="./fleetcv-config.js" onerror="void 0"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"
+        onerror="void 0"></script>
+
 <style>
 /* ── o que é igual nos dois painéis: cores, letra, base ── */
 %(comum)s
@@ -296,3 +306,11 @@ saida = u'''<meta charset="utf-8">
 io.open(SAIDA, 'w', encoding='utf-8').write(saida)
 print('%-22s %6d bytes  (condutor %d + dono %d + mapa %d)'
       % (SAIDA, len(saida.encode('utf-8')), len(soC), len(soD), len(mapa)))
+
+# A mesma página, pronta para o Vercel. É o mesmo ficheiro: o que
+# muda é só o fleetcv-config.js que fica ao lado dela lá.
+SITE = os.path.join('..', 'site')
+if os.path.isdir(SITE):
+    io.open(os.path.join(SITE, 'index.html'), 'w', encoding='utf-8').write(saida)
+    print('%-22s %6d bytes  (a mesma, para o Vercel)'
+          % (os.path.join(SITE, 'index.html'), len(saida.encode('utf-8'))))
