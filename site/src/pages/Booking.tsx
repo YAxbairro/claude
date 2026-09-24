@@ -76,8 +76,12 @@ export default function Booking() {
     supabase
       .from("services")
       .select("*")
-      .maybeSingle()
-      .then(({ data }) => setService(data as Service | null));
+      .eq("active", true)
+      .order("created_at", { ascending: true })
+      .then(({ data, error }) => {
+        if (error) console.error("[services]", error.message);
+        setService((data?.[0] as Service) ?? null);
+      });
   }, []);
 
   const price =

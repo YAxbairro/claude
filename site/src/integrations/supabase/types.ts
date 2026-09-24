@@ -14,9 +14,10 @@ export type AppointmentStatus = "pending" | "confirmed" | "cancelled";
 
 export type PaymentStatus = "pending" | "paid" | "failed";
 
-/** Tabela `services` — preços das consultorias. */
+/** Tabela `services` — preços das consultorias. Uma linha por serviço activo. */
 export interface Service {
   id: string;
+  active: boolean;
   price_15_minutes: number;
   price_30_minutes: number;
   created_at?: string;

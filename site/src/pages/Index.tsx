@@ -76,11 +76,17 @@ export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
+    // A tabela tem uma linha por serviço activo; ficamos com o mais antigo,
+    // que é o que o site original apresenta.
     supabase
       .from("services")
       .select("*")
-      .maybeSingle()
-      .then(({ data }) => setService(data as Service | null));
+      .eq("active", true)
+      .order("created_at", { ascending: true })
+      .then(({ data, error }) => {
+        if (error) console.error("[services]", error.message);
+        setService((data?.[0] as Service) ?? null);
+      });
   }, []);
 
   return (
