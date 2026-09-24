@@ -262,6 +262,13 @@ revoke execute on function public.semear(text,text)
 -- entrar tem de estar aberto: é a porta.
 grant  execute on function public.entrar(text,text) to anon, authenticated;
 grant  execute on function public.sair() to anon, authenticated;
+-- Estas três são de uso interno das regras. Mesmo não deixando ver
+-- nada de ninguém (devolvem sempre o que é de quem pergunta), não têm
+-- de estar abertas a quem ainda nem entrou. Outra vez o "from public":
+-- sem ele o grant a seguir não fecha nada.
+revoke execute on function public.meu_papel()     from public, anon;
+revoke execute on function public.meu_id()        from public, anon;
+revoke execute on function public.turno_meu(text) from public, anon;
 grant  execute on function public.meu_papel() to authenticated;
 grant  execute on function public.meu_id() to authenticated;
 grant  execute on function public.turno_meu(text) to authenticated;

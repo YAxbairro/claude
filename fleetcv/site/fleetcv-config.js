@@ -1,22 +1,19 @@
 /* ════════════════════════════════════════════════════════════
-   AS SUAS DUAS CHAVES
+   AS DUAS CHAVES DESTA FROTA
 
-   Troque os dois valores abaixo pelos do seu projecto Supabase e
-   guarde. É a única coisa que tem de editar à mão em todo o FleetCV.
+   Projecto Supabase: fleetcv  ·  região eu-west-1 (Irlanda, a mais
+   perto de Cabo Verde das que há).
 
-   Onde os encontrar:
-     Supabase → o seu projecto → Project Settings → API
-       · Project URL        →  supabaseUrl
-       · anon / public key  →  supabaseChave
-
-   A chave "anon" é para andar à vista — é com ela que o telemóvel do
-   condutor fala com a base de dados. Quem manda são as regras que
-   estão dentro da base (ver supabase/esquema.sql), não esta chave.
+   A chave "publishable" é para andar à vista — é com ela que o
+   telemóvel do condutor fala com a base de dados. Quem manda são as
+   regras que estão dentro da base (ver supabase/esquema.sql), não
+   esta chave. Se algum dia um telemóvel se perder, troca-se esta
+   chave no Supabase e mais nada.
 
    A OUTRA chave, a "service_role", nunca ponha aqui nem em lado
    nenhum que vá para a internet. Essa abre tudo.
    ════════════════════════════════════════════════════════════ */
 window.FLEETCV_CONFIG = {
-  supabaseUrl:   'https://XXXXXXXXXXXX.supabase.co',
-  supabaseChave: 'COLE-AQUI-A-CHAVE-ANON'
+  supabaseUrl:   'https://jhjtjjyplihabowxkfhs.supabase.co',
+  supabaseChave: 'sb_publishable_wYOl-KJg755TF38iEkq5jA_1K6f1N_R'
 };
