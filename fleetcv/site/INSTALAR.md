@@ -28,89 +28,64 @@ Escreva-as num papel, vai precisar delas já a seguir:
 
 ---
 
-## Parte 1 · A base de dados (Supabase)
+## Parte 1 · A base de dados (Supabase) — **JÁ ESTÁ FEITA**
 
-É onde ficam guardados os turnos, os quilómetros e os abastecimentos.
-Gratuito, e o que o senhor vai usar cabe folgadamente no plano livre.
+Não precisa de fazer nada aqui, tirando **um botão** (ponto 3).
 
-1. Vá a **supabase.com** e carregue em *Start your project*. Entre com
-   a conta Google, é mais rápido.
+| | |
+|---|---|
+| Projecto | `fleetcv`, região **eu-west-1** (Irlanda, a mais perto de Cabo Verde) |
+| Endereço | `https://jhjtjjyplihabowxkfhs.supabase.co` |
+| Esquema | aplicado — tabelas, funções e as 4 regras em `docs` |
+| Tempo real | ligado na tabela `docs` |
+| A sua conta | `yanickdrs@gmail.com` · código **761662** |
 
-2. **New project.** Dê-lhe um nome (`fleetcv`), invente uma palavra-passe
-   para a base de dados — guarde-a, mas não vai precisar dela no dia a
-   dia — e em *Region* escolha **West EU (Ireland)** ou **eu-west-1**.
-   É a mais perto de Cabo Verde das que há; a diferença sente-se.
+**O código 761662 foi gerado ao acaso.** Troque-o quando quiser — é uma
+linha no SQL Editor:
 
-3. Espere um ou dois minutos enquanto ele monta o projecto.
+```sql
+update docs
+   set corpo = jsonb_set(corpo, '{codigo}', '"o-seu-codigo-novo"')
+ where coleccao='frota' and id='dono';
+```
 
-4. No menu da esquerda, **SQL Editor** → *New query*.
+### 3 · O botão que falta ligar
 
-5. Abra o ficheiro `supabase/esquema.sql` deste repositório, copie-o
-   **todo**, cole na caixa e carregue em **Run**.
+No Supabase: **Authentication** → **Sign In / Providers** → procure
+**Anonymous Sign-Ins** → ligue → **Save**.
 
-   Deve aparecer *Success. No rows returned*. É isso mesmo — este passo
-   não devolve nada, só monta as tabelas e as regras. As linhas a
-   amarelo que dizem *does not exist, skipping* são normais: é o
-   ficheiro a arrumar o que ainda não existia.
-
-   Se voltar a correr este mesmo ficheiro um dia, não estraga nada —
-   está feito para isso, e é assim que se actualizam as regras.
-
-6. Ainda no SQL Editor, apague o que lá está e corra esta única linha,
-   **com o seu e-mail e o seu código**:
-
-   ```sql
-   select semear('o-seu-email@exemplo.com', '4729');
-   ```
-
-   Responde `Pronto. Entre com ...`. Se disser *Já estava semeada*, é
-   porque já tinha corrido — não faz mal nenhum, nada se estragou.
-
-7. **Project Settings** (a roda dentada) → **API**. Deixe esta página
-   aberta, é daqui que saem os dois valores da parte seguinte:
-
-   - **Project URL** — parecido com `https://abcdefgh.supabase.co`
-   - **anon public** — uma chave comprida que começa por `eyJ...`
-
-> **Sobre as chaves:** a chave `anon` é para andar à vista — é com ela
-> que o telemóvel do condutor fala com a base. Quem manda são as regras
-> que ficaram gravadas dentro da base no passo 5. A outra chave, a
-> `service_role`, **nunca** a ponha em lado nenhum que vá para a
-> internet: essa abre tudo.
-
----
+É isto que deixa o condutor abrir a aplicação sem criar conta nenhuma,
+que é a ideia toda. Enquanto estiver desligado, ninguém entra — nem o
+senhor.
 
 ## Parte 2 · A página (Vercel)
 
-1. Ponha as suas duas chaves no ficheiro `fleetcv/site/fleetcv-config.js`.
+As chaves já estão postas no `fleetcv/site/fleetcv-config.js` e enviadas
+para o GitHub. Falta só criar o projecto.
 
-   **Pelo GitHub, sem instalar nada:** abra o ficheiro no site do
-   GitHub, carregue no lápis (*Edit this file*), troque os dois valores,
-   e em baixo carregue em *Commit changes*.
+1. Em **vercel.com** → **Add New** → **Project**.
 
-   ```js
-   window.FLEETCV_CONFIG = {
-     supabaseUrl:   'https://abcdefgh.supabase.co',
-     supabaseChave: 'eyJ...'
-   };
-   ```
+2. Escolha o repositório **`YAxbairro/claude`**.
 
-   É a única coisa que se edita à mão em todo o FleetCV. Daqui para a
-   frente, sempre que mudar este ficheiro o Vercel volta a publicar
-   sozinho.
-
-2. Vá a **vercel.com**, entre com a conta do GitHub e carregue em
-   **Add New → Project**.
-
-3. Escolha este repositório. Em **Root Directory** carregue em *Edit* e
-   aponte para **`fleetcv/site`**. É o passo que as pessoas se esquecem
-   — sem ele o Vercel publica a pasta errada.
+3. **Root Directory** → *Edit* → **`fleetcv/site`**.
+   É o passo que toda a gente se esquece. Sem ele o Vercel publica a
+   pasta errada.
 
 4. *Framework Preset*: **Other**. Não mexa em mais nada.
 
-5. **Deploy.** Um minuto depois tem o endereço.
+5. **Deploy.**
 
----
+6. **Atenção ao ramo.** O ramo principal deste repositório é outro
+   (`claude/ai-real-estate-videos-Djiji`), e o FleetCV vive em
+   **`claude/eager-turing-11lp6h`**. Depois de publicar, vá a
+   **Settings** → **Git** → **Production Branch**, ponha
+   `claude/eager-turing-11lp6h`, guarde, e em **Deployments** carregue
+   em **Redeploy**.
+
+   Sem isto o Vercel publica o ramo errado e a página não aparece.
+
+Daqui para a frente, sempre que alguma coisa mudar nesse ramo o Vercel
+volta a publicar sozinho.
 
 ## Parte 3 · Experimentar
 
