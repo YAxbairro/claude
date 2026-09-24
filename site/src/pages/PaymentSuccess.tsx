@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import {
+  APPOINTMENT_PUBLIC_COLUMNS,
   type Appointment,
-  CONTACT_PREFERENCE_LABELS,
   SERVICE_LABELS,
 } from "@/integrations/supabase/types";
 import { formatDate, formatEuro } from "@/lib/utils";
@@ -51,7 +51,7 @@ export default function PaymentSuccess() {
 
         const { data } = await supabase
           .from("appointments")
-          .select("*")
+          .select(APPOINTMENT_PUBLIC_COLUMNS)
           .eq("id", appointmentId)
           .maybeSingle();
 
@@ -111,15 +111,6 @@ export default function PaymentSuccess() {
                 <Row
                   label="Data e Hora"
                   value={`${formatDate(appointment.scheduled_date)} às ${appointment.scheduled_time}`}
-                />
-                <Row
-                  label="Nome"
-                  value={`${appointment.client_name} ${appointment.client_surname}`}
-                />
-                <Row label="Email" value={appointment.client_email} />
-                <Row
-                  label="Contacto"
-                  value={CONTACT_PREFERENCE_LABELS[appointment.contact_preference]}
                 />
                 <div className="flex justify-between border-t border-border pt-3 text-base font-semibold">
                   <span>Total pago</span>

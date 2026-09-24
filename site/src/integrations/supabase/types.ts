@@ -61,3 +61,11 @@ export const SERVICE_LABELS: Record<ServiceType, string> = {
   "15_minutes": "15 minutos",
   "30_minutes": "30 minutos",
 };
+
+/**
+ * Colunas de `appointments` legíveis sem sessão iniciada. Pedir `*` falha:
+ * as colunas com dados pessoais do cliente não são acessíveis ao papel
+ * anónimo, e o Postgres rejeita a consulta inteira por causa delas.
+ */
+export const APPOINTMENT_PUBLIC_COLUMNS =
+  "id, service_type, scheduled_date, scheduled_time, amount, status, payment_status, created_at";

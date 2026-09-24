@@ -174,3 +174,25 @@ $$;
 
 revoke execute on function check_is_admin(uuid) from anon;
 grant execute on function check_is_admin(uuid) to authenticated;
+
+-- ------------------------- leitura anónima sem expor dados pessoais
+-- O site precisa de ler marcações sem sessão iniciada, para saber que horas
+-- estão ocupadas e para mostrar o resumo na página de pagamento. Mas as
+-- marcações contêm nome, email e telefone de clientes reais.
+--
+-- A política autoriza a leitura; as permissões de coluna decidem o que é
+-- legível. Consultas com `select *` passam a falhar para o papel anónimo,
+-- por isso o cliente pede as colunas explicitamente
+-- (ver APPOINTMENT_PUBLIC_COLUMNS em src/integrations/supabase/types.ts).
+
+create policy "leitura publica das colunas de agendamento"
+  on appointments for select
+  to anon
+  using (true);
+
+revoke select on appointments from anon;
+
+grant select (
+  id, service_type, scheduled_date, scheduled_time,
+  amount, status, payment_status, created_at
+) on appointments to anon;

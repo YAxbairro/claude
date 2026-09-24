@@ -165,9 +165,14 @@ export default function Booking() {
         return;
       }
 
-      const { data, error } = await supabase
+      // O id é gerado aqui em vez de ser lido de volta: reler a linha exigiria
+      // permissão de leitura sobre dados pessoais que o visitante não tem.
+      const appointmentId = crypto.randomUUID();
+
+      const { error } = await supabase
         .from("appointments")
         .insert({
+          id: appointmentId,
           client_name: clientName.trim(),
           client_surname: clientSurname.trim(),
           client_email: clientEmail.trim(),
@@ -181,18 +186,18 @@ export default function Booking() {
           amount: price ?? 0,
           status: "pending",
           payment_status: "pending",
-        })
-        .select()
-        .single();
+        });
 
       if (error) {
-        // Corrida entre dois clientes a reservar o mesmo horário.
+        // Corrida entre dois clientes a reservar o mesmo horário: o índice
+        // único da base de dados é o que decide, não a verificação anterior.
+        console.error("[appointments]", error.message);
         toast.error("Este horário acabou de ser reservado. Por favor, escolha outro.");
         setLoading(false);
         return;
       }
 
-      navigate(`/payment?appointment=${data.id}`);
+      navigate(`/payment?appointment=${appointmentId}`);
     } catch {
       toast.error("Erro ao criar agendamento");
     } finally {

@@ -6,7 +6,11 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { type Appointment, SERVICE_LABELS } from "@/integrations/supabase/types";
+import {
+  APPOINTMENT_PUBLIC_COLUMNS,
+  type Appointment,
+  SERVICE_LABELS,
+} from "@/integrations/supabase/types";
 import { formatDate, formatEuro } from "@/lib/utils";
 
 /** Minutos até a marcação não paga ser libertada. */
@@ -30,7 +34,7 @@ export default function Payment() {
 
     supabase
       .from("appointments")
-      .select("*")
+      .select(APPOINTMENT_PUBLIC_COLUMNS)
       .eq("id", appointmentId)
       .maybeSingle()
       .then(({ data }) => {
@@ -136,10 +140,6 @@ export default function Payment() {
                 <Row
                   label="Data e Hora"
                   value={`${formatDate(appointment.scheduled_date)} às ${appointment.scheduled_time}`}
-                />
-                <Row
-                  label="Cliente"
-                  value={`${appointment.client_name} ${appointment.client_surname}`}
                 />
                 <div className="flex justify-between border-t border-border pt-3 text-lg font-bold">
                   <span>Total</span>
