@@ -3,3 +3,8 @@ dist
 .env
 .env.local
 .vercel
+
+# O .gitignore da raiz do repositório ignora `lib/` (artefactos de build Python).
+# Essa regra apanhava também src/lib/, que é código nosso — daí a excepção.
+!src/lib/
+!src/lib/**
