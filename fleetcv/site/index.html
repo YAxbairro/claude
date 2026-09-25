@@ -885,7 +885,14 @@ function maiorBuraco(rasto){
 var Nuvem = (function(){
 "use strict";
 
-var RITMO_VIVO  = 4000;    /* de quanto em quanto tempo sobe a posição   */
+/* Com o carro a andar, o patrão tem de o ver andar: de quatro em quatro
+   segundos o ponteiro dava saltos e parecia tudo atrasado. A segundo e
+   meio já parece o que é. Mas um táxi passa metade do dia parado à
+   espera de passageiro, e repetir a mesma posição de segundo e meio em
+   segundo e meio era queimar os dados do condutor para dizer que nada
+   mudou — por isso, parado, abranda sozinho. */
+var RITMO_VIVO  = 1500;    /* com o carro a andar                        */
+var RITMO_PARADO= 12000;   /* parado, ninguém precisa de saber tão vezes  */
 var RITMO_RASTO = 45000;   /* de quanto em quanto tempo se grava o rasto */
 var CAUDA       = 160;     /* pontos que viajam com a posição, para o
                               patrão ver logo o rabicho do carro         */
@@ -1634,6 +1641,7 @@ function rastoDe(id){
 /* Chamada a cada ponto de GPS, mas só sobe de 4 em 4 segundos e só se
    o carro mexeu. É este travão que faz caber um dia de trabalho. */
 var pendente=null, relogioVivo=null, ultimaSubida=0, aEscrever=false;
+var ondeUltima=null, mexeu=true;
 
 function posicao(t, extra, jaa){
   if(!t||!t.id) return;
@@ -1653,18 +1661,26 @@ function posicao(t, extra, jaa){
     rasto:(t.rasto||[]).slice(-CAUDA),
     momento: Date.now()
   };
-  if(!relogioVivo) relogioVivo=setInterval(subir, 1000);
+  /* andou mais de uns quatro metros, ou vai com velocidade? então é
+     um carro a mexer-se e vale a pena contá-lo já */
+  mexeu = !ondeUltima || pendente.lat==null
+       || Math.abs(pendente.lat-ondeUltima[0])>0.00004
+       || Math.abs(pendente.lon-ondeUltima[1])>0.00004
+       || (pendente.vel||0) > 3;
+  if(!relogioVivo) relogioVivo=setInterval(subir, 500);
   subir(jaa);
 }
 
 function subir(jaa){
   if(!loja||!pendente||aEscrever) return;
   var agora=Date.now();
-  if(!jaa && agora-ultimaSubida < ritmo) return;
+  var espera = mexeu ? ritmo : Math.max(ritmo, RITMO_PARADO);
+  if(!jaa && agora-ultimaSubida < espera) return;
   var p=pendente; pendente=null; ultimaSubida=agora; aEscrever=true;
+  if(p.lat!=null) ondeUltima=[p.lat, p.lon];
   loja.por('vivo', p.id, p).then(function(){
     aEscrever=false;
-    if(ritmo>RITMO_VIVO) ritmo=Math.max(RITMO_VIVO, ritmo-4000);
+    if(ritmo>RITMO_VIVO) ritmo=Math.max(RITMO_VIVO, ritmo-2000);
   }).catch(function(e){
     aEscrever=false;
     /* a nuvem queixou-se do ritmo: abrandar em vez de insistir */
@@ -1832,10 +1848,10 @@ var LIM = {gapKm:3, kmMax:500, gapAbsurdo:2000, precisaoMax:50, velMax:180,
            divLitros:3};
 
 var S = {ecra:'entrar', eu:null, carro:null, turno:null, turnos:[],
-         gps:{estado:'desligado', precisao:null, vel:0, porque:null, autoriz:null}, bateria:null,
+         gps:{estado:'desligado', precisao:null, vel:0, velAlvo:0, porque:null, autoriz:null}, bateria:null,
          foto:null, r:{}, aviso:null, simular:false, verTurno:null,
          avisoEcraVisto:!!Nuvem.local('aviso-ecra')};
-var vigia=null, tic=null, cronoSim=null, ultima=null, vista={}, primeiroTiro=null;
+var vigia=null, tic=null, pulso=null, cronoSim=null, ultima=null, vista={}, primeiroTiro=null;
 var salvo=null;
 var medida={W:400,H:620};
 
@@ -1910,7 +1926,13 @@ function ligarGps(){
     pintar(); return; }
   if(vigia!=null) return;
   S.gps.estado='a-procurar'; S.gps.porque=null; verAutorizacao(); pintar();
-  var op={enableHighAccuracy:true, maximumAge:4000, timeout:30000};
+  /* O maximumAge é o que separa isto do Waze. Com 4000, estávamos a
+     dizer ao telemóvel "uma posição de há quatro segundos serve" — e
+     ele obedecia, devolvendo a mesma leitura vezes sem conta. O
+     ponteiro andava sempre atrás do carro e a velocidade chegava
+     tarde. A zero, ele é obrigado a ir buscar uma nova, e um Android
+     dá cerca de uma por segundo. */
+  var op={enableHighAccuracy:true, maximumAge:0, timeout:30000};
   /* um primeiro tiro rápido e grosseiro, para não ficar parado em
      "a procurar" enquanto o GPS fino não acerta */
   try{ navigator.geolocation.getCurrentPosition(aceitarGps, falhouGps,
@@ -1927,8 +1949,16 @@ function aceitarGps(pos){
   var c=pos.coords, antes=S.gps.estado;
   if(primeiroTiro){ clearTimeout(primeiroTiro); primeiroTiro=null; }
   S.gps.estado='ligado'; S.gps.porque=null; S.gps.precisao=Math.round(c.accuracy);
-  var kmh = c.speed!=null&&c.speed>=0 ? c.speed*3.6 : calcVel(pos);
-  S.gps.vel = S.gps.vel*0.55 + kmh*0.45;
+  /* O telemóvel mede a velocidade pelo desvio do sinal dos satélites,
+     não pela distância entre dois pontos, e entrega-a já limpa. Alisá-la
+     outra vez, como se fazia aqui, era só atrasá-la — e era por isso que
+     o número parecia estar sempre a chegar tarde. Agora usa-se como vem.
+     A conta à mão, de ponto a ponto, essa salta muito; só essa é alisada,
+     e só serve para telemóveis que não dão a velocidade. */
+  var doTelemovel = c.speed!=null && c.speed>=0;
+  var kmh = doTelemovel ? c.speed*3.6 : calcVel(pos);
+  S.gps.velAlvo = doTelemovel ? kmh
+                : (S.gps.velAlvo||0)*0.35 + kmh*0.65;
   if(S.turno&&!S.turno.fim&&c.accuracy<=120)
     S.turno.rasto.push([+c.latitude.toFixed(6), +c.longitude.toFixed(6),
       pos.timestamp, Math.round(c.accuracy), Math.round(kmh)]);
@@ -2004,7 +2034,7 @@ function simular(){
       var vel=(n%23<3)?0:(20+Math.round(rnd()*30));   /* semáforos e paragens */
       S.turno.rasto.push([+p[0].toFixed(6), +p[1].toFixed(6),
         S.turno.inicio+n*4000, 8, vel]);
-      S.gps.vel=vel; S.ultimaPos=[p[0],p[1]]; n++;
+      S.gps.velAlvo=vel; S.ultimaPos=[p[0],p[1]]; n++;
     }
     S.gps.estado='ligado'; S.gps.precisao=8;
     Nuvem.posicao(S.turno, {kmGps:kmRasto(S.turno.rasto), bateria:S.bateria,
@@ -2097,15 +2127,33 @@ function mapa(rasto, seguir){
       return {lat:a.lat, lon:a.lon, posto:a.posto}; }),
     rotulo:'O caminho do carro no mapa da Praia'});
 }
+/* Entre uma leitura e a seguinte o ecrã ficava parado. Isto faz o
+   número e o arco perseguirem a última leitura dez vezes por segundo,
+   mexendo só esses dois pedaços do ecrã — redesenhar o mapa inteiro a
+   este ritmo punha um telemóvel barato de joelhos. */
+function pulsarVel(){
+  var alvo=S.gps.velAlvo||0;
+  S.gps.vel += (alvo - S.gps.vel)*0.28;
+  if(Math.abs(alvo-S.gps.vel)<0.25) S.gps.vel=alvo;
+  var n=el('v-num'); if(n) n.textContent=Math.round(S.gps.vel);
+  var a=el('v-arco');
+  if(a){
+    var C=Math.PI*22, f=Math.max(0,Math.min(S.gps.vel/120,1));
+    a.setAttribute('stroke-dashoffset',(C*(1-f)).toFixed(1));
+    a.setAttribute('stroke', S.gps.vel>90?'var(--crit)'
+      :(S.gps.vel>70?'var(--warn)':'var(--accent)'));
+  }
+}
 function arco(v){
   var f=Math.max(0,Math.min(v/120,1)), C=Math.PI*22;
   var cor=v>90?'var(--crit)':(v>70?'var(--warn)':'var(--accent)');
   return '<svg class="arco" viewBox="0 0 52 30" aria-hidden="true">'+
     '<path d="M4 26 A22 22 0 0 1 48 26" fill="none" stroke="var(--line)" '+
     'stroke-width="4.5" stroke-linecap="round" opacity=".5"/>'+
-    '<path d="M4 26 A22 22 0 0 1 48 26" fill="none" stroke="'+cor+'" stroke-width="4.5" '+
-    'stroke-linecap="round" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+
-    (C*(1-f)).toFixed(1)+'" style="transition:stroke-dashoffset .35s ease"/></svg>';
+    '<path id="v-arco" d="M4 26 A22 22 0 0 1 48 26" fill="none" stroke="'+cor+'" '+
+    'stroke-width="4.5" stroke-linecap="round" stroke-dasharray="'+C.toFixed(1)+'" '+
+    'stroke-dashoffset="'+(C*(1-f)).toFixed(1)+
+    '" style="transition:stroke-dashoffset .12s linear, stroke .3s"/></svg>';
 }
 function caixaFoto(t,d){
   return S.foto
@@ -2282,7 +2330,7 @@ function pintar(){
     var ondeAgora=S.ultimaPos||(t.rasto.length?t.rasto[t.rasto.length-1]:null);
     var bairro=ondeAgora?bairroDe(ondeAgora[0],ondeAgora[1]):null;
     h='<div class="volante">'+mapa(t.rasto,true)+
-      '<div class="hud"><div class="vel"><span class="n num">'+
+      '<div class="hud"><div class="vel"><span class="n num" id="v-num">'+
       Math.round(S.gps.vel)+'</span><span class="u">KM/H</span>'+arco(S.gps.vel)+'</div>'+
       (bairro?'<div class="onde">'+esc(bairro)+'</div>':'')+'</div>'+
       '<div class="baixo">'+
@@ -2585,6 +2633,7 @@ function comecar(sim){
   S.foto=null; S.r={};
   if(sim){ desligarGps(); simular(); } else ligarGps();
   if(!tic) tic=setInterval(function(){ if(S.ecra==='volante') pintar(); }, 1000);
+  if(!pulso) pulso=setInterval(function(){ if(S.ecra==='volante') pulsarVel(); }, 100);
   if(!salvo) salvo=setInterval(guardar, 8000);
   /* o patrão passa a ver este turno no mapa dele a partir de agora */
   segurarEcra();
@@ -2611,6 +2660,7 @@ function terminar(){
     a.prova=provaDoPosto(t.rasto, a.posto, LIM.raioPosto); });
   desligarGps();
   if(tic){ clearInterval(tic); tic=null; }
+  if(pulso){ clearInterval(pulso); pulso=null; }
   if(salvo){ clearInterval(salvo); salvo=null; }
   S.carro.km=kmF;
   S.turnos.unshift(t); S.turno=null; S.foto=null; S.r={}; S.simular=false;
@@ -2642,6 +2692,7 @@ function retomar(){
     S.ecra='volante';
     if(S.simular) simular(); else ligarGps();
     if(!tic) tic=setInterval(function(){ if(S.ecra==='volante') pintar(); },1000);
+    if(!pulso) pulso=setInterval(function(){ if(S.ecra==='volante') pulsarVel(); },100);
     if(!salvo) salvo=setInterval(guardar, 8000);
     Nuvem.guardandoRasto(function(){ return S.turno; });
   } else if(S.eu && S.ecra==='entrar') S.ecra='carro';

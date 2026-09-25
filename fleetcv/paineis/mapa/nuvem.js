@@ -29,7 +29,14 @@
 var Nuvem = (function(){
 "use strict";
 
-var RITMO_VIVO  = 4000;    /* de quanto em quanto tempo sobe a posição   */
+/* Com o carro a andar, o patrão tem de o ver andar: de quatro em quatro
+   segundos o ponteiro dava saltos e parecia tudo atrasado. A segundo e
+   meio já parece o que é. Mas um táxi passa metade do dia parado à
+   espera de passageiro, e repetir a mesma posição de segundo e meio em
+   segundo e meio era queimar os dados do condutor para dizer que nada
+   mudou — por isso, parado, abranda sozinho. */
+var RITMO_VIVO  = 1500;    /* com o carro a andar                        */
+var RITMO_PARADO= 12000;   /* parado, ninguém precisa de saber tão vezes  */
 var RITMO_RASTO = 45000;   /* de quanto em quanto tempo se grava o rasto */
 var CAUDA       = 160;     /* pontos que viajam com a posição, para o
                               patrão ver logo o rabicho do carro         */
@@ -778,6 +785,7 @@ function rastoDe(id){
 /* Chamada a cada ponto de GPS, mas só sobe de 4 em 4 segundos e só se
    o carro mexeu. É este travão que faz caber um dia de trabalho. */
 var pendente=null, relogioVivo=null, ultimaSubida=0, aEscrever=false;
+var ondeUltima=null, mexeu=true;
 
 function posicao(t, extra, jaa){
   if(!t||!t.id) return;
@@ -797,18 +805,26 @@ function posicao(t, extra, jaa){
     rasto:(t.rasto||[]).slice(-CAUDA),
     momento: Date.now()
   };
-  if(!relogioVivo) relogioVivo=setInterval(subir, 1000);
+  /* andou mais de uns quatro metros, ou vai com velocidade? então é
+     um carro a mexer-se e vale a pena contá-lo já */
+  mexeu = !ondeUltima || pendente.lat==null
+       || Math.abs(pendente.lat-ondeUltima[0])>0.00004
+       || Math.abs(pendente.lon-ondeUltima[1])>0.00004
+       || (pendente.vel||0) > 3;
+  if(!relogioVivo) relogioVivo=setInterval(subir, 500);
   subir(jaa);
 }
 
 function subir(jaa){
   if(!loja||!pendente||aEscrever) return;
   var agora=Date.now();
-  if(!jaa && agora-ultimaSubida < ritmo) return;
+  var espera = mexeu ? ritmo : Math.max(ritmo, RITMO_PARADO);
+  if(!jaa && agora-ultimaSubida < espera) return;
   var p=pendente; pendente=null; ultimaSubida=agora; aEscrever=true;
+  if(p.lat!=null) ondeUltima=[p.lat, p.lon];
   loja.por('vivo', p.id, p).then(function(){
     aEscrever=false;
-    if(ritmo>RITMO_VIVO) ritmo=Math.max(RITMO_VIVO, ritmo-4000);
+    if(ritmo>RITMO_VIVO) ritmo=Math.max(RITMO_VIVO, ritmo-2000);
   }).catch(function(e){
     aEscrever=false;
     /* a nuvem queixou-se do ritmo: abrandar em vez de insistir */
