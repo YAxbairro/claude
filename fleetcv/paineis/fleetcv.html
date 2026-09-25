@@ -2431,9 +2431,15 @@ function pintar(){
       '<input type="number" inputmode="numeric" id="i-cod" value="'+esc(S.r.cod||'')+
       '" placeholder="0000"></label>';
     if(S.aviso) h+='<div class="cartao mau"><p class="p-nota">'+esc(S.aviso)+'</p></div>';
-    h+='<div class="cartao nota"><p class="p-nota"><b>Para experimentar:</b><br>'+
-      'antonio@exemplo.cv · 1234<br>jorge@exemplo.cv · 2345<br>'+
-      'nuno@exemplo.cv · 3456</p></div>';
+    /* os códigos de exemplo só servem aberto como ficheiro; no site a
+       sério não existem, e um condutor a sério ficava baralhado */
+    if(!(Nuvem.temServidor && Nuvem.temServidor()))
+      h+='<div class="cartao nota"><p class="p-nota"><b>Para experimentar:</b><br>'+
+        'antonio@exemplo.cv · 1234<br>jorge@exemplo.cv · 2345<br>'+
+        'nuno@exemplo.cv · 3456</p></div>';
+    else
+      h+='<p class="p-nota" style="margin-top:4px">Não tem código? Peça-o ao patrão '+
+        '— ele manda-lho pelo WhatsApp.</p>';
     b='<button class="bt pri" data-f="entrar">Entrar</button>';
   }
 
