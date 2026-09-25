@@ -1,0 +1,460 @@
+<title>FleetCV</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --ground:#EDF0F0; --surface:#FFFFFF; --surface2:#F4F7F7;
+  --line:#D5DCDC; --line2:#E7ECEC;
+  --ink:#0F1618; --muted:#5C6A6C;
+  --accent:#0B7F8E; --accent-ink:#FFFFFF; --accent-wash:#E3F1F3;
+  --ok:#3E7B22; --ok-wash:#EAF2E4;
+  --warn:#A86A05; --warn-wash:#F8EEDC;
+  --crit:#B02E20; --crit-wash:#F8E6E3;
+  --sombra:0 1px 2px rgba(15,22,24,.06), 0 10px 28px -20px rgba(15,22,24,.45);
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --display:'Archivo',var(--sans);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --ground:#0B1011; --surface:#141A1B; --surface2:#1A2122;
+  --line:#293233; --line2:#212929;
+  --ink:#E3E9E8; --muted:#8A9897;
+  --accent:#3FC0CE; --accent-ink:#06191C; --accent-wash:#122E32;
+  --ok:#77C34B; --ok-wash:#17280F;
+  --warn:#DCA43C; --warn-wash:#2E2310;
+  --crit:#E4776A; --crit-wash:#331714;
+  --sombra:0 1px 2px rgba(0,0,0,.45), 0 10px 28px -20px rgba(0,0,0,.9);
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0B1011; --surface:#141A1B; --surface2:#1A2122;
+  --line:#293233; --line2:#212929;
+  --ink:#E3E9E8; --muted:#8A9897;
+  --accent:#3FC0CE; --accent-ink:#06191C; --accent-wash:#122E32;
+  --ok:#77C34B; --ok-wash:#17280F;
+  --warn:#DCA43C; --warn-wash:#2E2310;
+  --crit:#E4776A; --crit-wash:#331714;
+  --sombra:0 1px 2px rgba(0,0,0,.45), 0 10px 28px -20px rgba(0,0,0,.9);
+}
+
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--sans); font-size:16px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.env{ max-width:1080px; margin:0 auto; padding-inline:20px; }
+h1,h2,h3{ font-family:var(--display); font-weight:700; text-wrap:balance;
+  letter-spacing:-.018em; margin:0; }
+p{ margin:0; }
+a{ color:inherit; }
+.num{ font-family:var(--mono); font-variant-numeric:tabular-nums; }
+
+/* ── cabeçalho ───────────────────────────────────────────── */
+.topo{ position:sticky; top:env(safe-area-inset-top,0px); z-index:9;
+  background:color-mix(in srgb, var(--ground) 88%, transparent);
+  backdrop-filter:blur(10px); border-bottom:1px solid var(--line2); }
+.topo .env{ display:flex; align-items:center; gap:14px;
+  padding-block:13px; }
+.marca{ font-family:var(--display); font-weight:700; font-size:18px;
+  letter-spacing:-.02em; display:flex; align-items:center; gap:8px; }
+.pt{ width:8px; height:8px; border-radius:50%; background:var(--accent);
+  box-shadow:0 0 0 3px var(--accent-wash); }
+.topo nav{ margin-left:auto; display:flex; align-items:center; gap:22px;
+  font-size:14.5px; color:var(--muted); }
+.topo nav a{ text-decoration:none; }
+.topo nav a:hover{ color:var(--ink); }
+@media (max-width:640px){ .topo nav .esconde{ display:none; } }
+
+/* ── botões ──────────────────────────────────────────────── */
+.bt{ display:inline-flex; align-items:center; justify-content:center;
+  gap:8px; padding:12px 20px; border-radius:11px; font:inherit;
+  font-weight:600; font-size:15px; text-decoration:none; cursor:pointer;
+  border:1px solid transparent; white-space:nowrap; }
+.bt.pri{ background:var(--accent); color:var(--accent-ink); }
+.bt.pri:hover{ filter:brightness(1.08); }
+.bt.sec{ background:var(--surface); color:var(--ink);
+  border-color:var(--line); }
+.bt.sec:hover{ border-color:var(--accent); color:var(--accent); }
+.bt:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+/* ── herói ───────────────────────────────────────────────── */
+.heroi{ padding-block:56px 44px; }
+.heroi .env{ display:grid; gap:40px; grid-template-columns:1fr; }
+@media (min-width:900px){
+  .heroi .env{ grid-template-columns:1.05fr .95fr; align-items:center; gap:56px; }
+}
+.selo{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px;
+  font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--accent); background:var(--accent-wash);
+  padding:5px 11px; border-radius:99px; margin-bottom:18px; }
+.heroi h1{ font-size:clamp(34px,6.2vw,52px); line-height:1.08; }
+.heroi h1 em{ font-style:normal; color:var(--accent); }
+.heroi .sub{ margin-top:18px; font-size:17.5px; color:var(--muted);
+  max-width:34em; }
+.accoes{ margin-top:28px; display:flex; flex-wrap:wrap; gap:11px; }
+.pe-heroi{ margin-top:16px; font-size:13.5px; color:var(--muted); }
+
+/* ── a ficha do turno ────────────────────────────────────── */
+.ficha{ background:var(--surface); border:1px solid var(--line);
+  border-radius:16px; box-shadow:var(--sombra); overflow:hidden; }
+.ficha .cab{ padding:14px 18px; border-bottom:1px solid var(--line2);
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.chapa{ font-family:var(--mono); font-weight:600; font-size:13.5px;
+  letter-spacing:.04em; background:var(--surface2); color:var(--ink);
+  border:1px solid var(--line); border-radius:6px; padding:3px 8px; }
+.cab .qm{ font-size:14px; font-weight:600; }
+.cab .qd{ font-size:12.5px; color:var(--muted); margin-left:auto; }
+.linhas{ padding:6px 18px 4px; }
+.lh{ display:flex; align-items:baseline; gap:12px; padding:11px 0;
+  border-bottom:1px solid var(--line2); font-size:14.5px; }
+.lh:last-child{ border-bottom:0; }
+.lh .r{ color:var(--muted); }
+.lh .v{ margin-left:auto; font-family:var(--mono); font-weight:500;
+  font-variant-numeric:tabular-nums; }
+.lh .nota{ display:block; font-size:12.5px; color:var(--muted);
+  font-family:var(--sans); font-weight:400; margin-top:2px; text-align:right; }
+.alerta{ margin:4px 14px 14px; background:var(--crit-wash);
+  border:1px solid color-mix(in srgb, var(--crit) 28%, transparent);
+  border-radius:11px; padding:13px 15px; display:flex;
+  align-items:center; gap:13px; }
+.alerta .n{ font-family:var(--mono); font-weight:600; font-size:23px;
+  color:var(--crit); font-variant-numeric:tabular-nums; }
+.alerta .t{ font-size:13.5px; color:var(--ink); line-height:1.4; }
+.alerta .t b{ color:var(--crit); }
+
+/* ── secções ─────────────────────────────────────────────── */
+section{ padding-block:52px; }
+section.risca{ border-top:1px solid var(--line2); }
+.cabec{ max-width:36em; margin-bottom:34px; }
+.cabec h2{ font-size:clamp(25px,3.6vw,33px); line-height:1.15; }
+.cabec p{ margin-top:12px; color:var(--muted); font-size:16.5px; }
+.olho{ font-size:12.5px; font-weight:600; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--accent); margin-bottom:10px; }
+
+.passos{ display:grid; gap:18px; grid-template-columns:1fr; counter-reset:p; }
+@media (min-width:760px){ .passos{ grid-template-columns:repeat(3,1fr); } }
+.passo{ background:var(--surface); border:1px solid var(--line);
+  border-radius:14px; padding:22px; }
+.passo .n{ counter-increment:p; font-family:var(--mono); font-size:12.5px;
+  font-weight:600; color:var(--accent); letter-spacing:.08em; }
+.passo .n::before{ content:counter(p,decimal-leading-zero); }
+.passo h3{ font-size:17.5px; margin:9px 0 8px; }
+.passo p{ font-size:14.5px; color:var(--muted); }
+
+.provas{ display:grid; gap:18px; grid-template-columns:1fr; }
+@media (min-width:760px){ .provas{ grid-template-columns:repeat(3,1fr); } }
+.prova{ background:var(--surface); border:1px solid var(--line);
+  border-radius:14px; padding:22px; }
+.prova .ic{ width:38px; height:38px; border-radius:10px;
+  background:var(--accent-wash); color:var(--accent);
+  display:grid; place-items:center; margin-bottom:14px; }
+.prova .ic svg{ width:20px; height:20px; }
+.prova h3{ font-size:17px; margin-bottom:7px; }
+.prova p{ font-size:14.5px; color:var(--muted); }
+
+/* ── planos ──────────────────────────────────────────────── */
+.planos{ display:grid; gap:18px; grid-template-columns:1fr; }
+@media (min-width:820px){ .planos{ grid-template-columns:repeat(3,1fr);
+  align-items:start; } }
+.plano{ background:var(--surface); border:1px solid var(--line);
+  border-radius:16px; padding:24px; display:flex; flex-direction:column;
+  gap:14px; }
+.plano.destaque{ border-color:var(--accent); box-shadow:var(--sombra); }
+.plano .nm{ font-family:var(--display); font-weight:700; font-size:18px; }
+.plano .fita{ align-self:flex-start; font-size:11.5px; font-weight:600;
+  letter-spacing:.07em; text-transform:uppercase; color:var(--accent-ink);
+  background:var(--accent); padding:3px 9px; border-radius:99px; }
+.preco{ display:flex; align-items:baseline; gap:6px; }
+.preco .v{ font-family:var(--mono); font-weight:600; font-size:31px;
+  letter-spacing:-.02em; }
+.preco .u{ font-size:13.5px; color:var(--muted); }
+.plano ul{ list-style:none; margin:0; padding:0; display:grid; gap:9px;
+  font-size:14.5px; }
+.plano li{ display:flex; gap:9px; align-items:flex-start; }
+.plano li svg{ width:16px; height:16px; flex:0 0 auto; margin-top:3px;
+  color:var(--ok); }
+.plano .bt{ margin-top:auto; }
+.nota-preco{ margin-top:20px; font-size:13.5px; color:var(--muted);
+  max-width:44em; }
+
+/* ── perguntas ───────────────────────────────────────────── */
+.perg{ display:grid; gap:0; max-width:46em; }
+.perg details{ border-bottom:1px solid var(--line2); }
+.perg summary{ cursor:pointer; padding:17px 0; font-weight:600;
+  font-size:16px; list-style:none; display:flex; align-items:center;
+  gap:12px; }
+.perg summary::-webkit-details-marker{ display:none; }
+.perg summary::after{ content:'+'; margin-left:auto; color:var(--accent);
+  font-family:var(--mono); font-size:19px; line-height:1; }
+.perg details[open] summary::after{ content:'\2013'; }
+.perg summary:focus-visible{ outline:2px solid var(--accent);
+  outline-offset:3px; border-radius:4px; }
+.perg .resp{ padding:0 0 18px; color:var(--muted); font-size:15px;
+  max-width:42em; }
+
+/* ── fecho ───────────────────────────────────────────────── */
+.fecho{ background:var(--surface); border:1px solid var(--line);
+  border-radius:18px; padding:clamp(26px,5vw,44px); text-align:center; }
+.fecho h2{ font-size:clamp(24px,3.4vw,31px); }
+.fecho p{ margin:12px auto 0; color:var(--muted); max-width:38em; }
+.fecho .accoes{ justify-content:center; }
+
+footer{ border-top:1px solid var(--line2); padding-block:28px 40px;
+  color:var(--muted); font-size:13.5px; }
+footer .env{ display:flex; flex-wrap:wrap; gap:10px 22px;
+  align-items:center; }
+footer .dir{ margin-left:auto; }
+</style>
+
+<header class="topo">
+  <div class="env">
+    <span class="marca"><span class="pt"></span>FleetCV</span>
+    <nav>
+      <a href="#como" class="esconde">Como funciona</a>
+      <a href="#planos">Preços</a>
+      <a class="bt pri" href="https://fleetcv-up1b.vercel.app">Experimentar</a>
+    </nav>
+  </div>
+</header>
+
+<div class="heroi">
+  <div class="env">
+    <div>
+      <span class="selo"><span class="pt"></span>Praia · Cabo Verde</span>
+      <h1>O condutor diz.<br>O carro <em>prova</em>.</h1>
+      <p class="sub">Controlo de frota para táxis. Vê por onde o carro andou,
+        quantos quilómetros fez e quanto gastou mesmo em combustível — sem
+        instalar rastreador, só com o telemóvel do condutor.</p>
+      <div class="accoes">
+        <a class="bt pri" href="https://fleetcv-up1b.vercel.app">Experimentar sem conta</a>
+        <a class="bt sec" href="#como">Ver como funciona</a>
+      </div>
+      <p class="pe-heroi">Um carro é grátis, para sempre. Sem cartão, sem instalação.</p>
+    </div>
+
+    <div class="ficha">
+      <div class="cab">
+        <span class="chapa">ST-28-ED</span>
+        <span class="qm">António Semedo</span>
+        <span class="qd">quinta · 14h20 — 22h05</span>
+      </div>
+      <div class="linhas">
+        <div class="lh"><span class="r">Declarou em combustível</span>
+          <span class="v">2.000 CVE</span></div>
+        <div class="lh"><span class="r">Percurso medido por GPS</span>
+          <span class="v">84,3 km</span></div>
+        <div class="lh"><span class="r">Quadrante, início e fim</span>
+          <span class="v">120 384 → 120 469<span class="nota">85 km · bate com o GPS</span></span></div>
+        <div class="lh"><span class="r">Consumo esperado do carro</span>
+          <span class="v">7,1 litros<span class="nota">a 145 CVE/litro = 1.030 CVE</span></span></div>
+      </div>
+      <div class="alerta">
+        <span class="n">970</span>
+        <span class="t"><b>CVE por explicar.</b> O carro andou o que ele disse.
+          O combustível é que não bate.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="risca" id="como">
+  <div class="env">
+    <div class="cabec">
+      <p class="olho">Como funciona</p>
+      <h2>O condutor não precisa de conta nenhuma</h2>
+      <p>Dá-lhe um e-mail e um código. Ele abre o link no telemóvel dele e
+        está a trabalhar. Não instala nada, não se inscreve em lado nenhum.</p>
+    </div>
+    <div class="passos">
+      <div class="passo">
+        <span class="n"></span>
+        <h3>Abre o turno</h3>
+        <p>Escolhe o carro e fotografa o quadrante. A hora e o lugar ficam
+          registados nesse momento, não à noite de memória.</p>
+      </div>
+      <div class="passo">
+        <span class="n"></span>
+        <h3>Conduz</h3>
+        <p>O telemóvel grava o caminho. No seu ecrã, o carro anda pelo mapa da
+          Praia ao vivo — Achada Santo António, Palmarejo, Plateau, rua a rua.</p>
+      </div>
+      <div class="passo">
+        <span class="n"></span>
+        <h3>Fecha o dia</h3>
+        <p>Fotografa o talão ao abastecer e o quadrante ao terminar. As contas
+          fazem-se sozinhas e chegam-lhe feitas.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="risca">
+  <div class="env">
+    <div class="cabec">
+      <p class="olho">O que fica provado</p>
+      <h2>Três coisas que deixam de ser conversa</h2>
+    </div>
+    <div class="provas">
+      <div class="prova">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"
+          aria-hidden="true"><path d="M9 20l-5.4 2.2V6.3L9 4m0 16 6-2.3M9 20V4m6 13.7 5.4 2.1V3.6L15 5.7m0 12V5.7M9 4l6 1.7"/></svg></span>
+        <h3>Por onde andou</h3>
+        <p>O percurso desenhado no mapa da Praia. Dá para ver se parou mesmo na
+          bomba onde diz que parou, e a que distância dela ficou.</p>
+      </div>
+      <div class="prova">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"
+          aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 12l4-2.5M7.5 16.5A6 6 0 0 1 12 6"/></svg></span>
+        <h3>Quantos quilómetros</h3>
+        <p>Medidos pelo GPS e conferidos com a fotografia do quadrante. Quando
+          os dois não batem, aparece no seu ecrã — não passa despercebido.</p>
+      </div>
+      <div class="prova">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"
+          aria-hidden="true"><path d="M6 3v18l2-1.3 2 1.3 2-1.3 2 1.3 2-1.3 2 1.3V3l-2 1.3-2-1.3-2 1.3-2-1.3-2 1.3z"/><path d="M9.5 9h5M9.5 13h5"/></svg></span>
+        <h3>Quanto gastou</h3>
+        <p>O talão fotografado, os litros que cabem no depósito, e o consumo que
+          aquele carro devia ter feito nos quilómetros que fez.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="risca" id="planos">
+  <div class="env">
+    <div class="cabec">
+      <p class="olho">Preços</p>
+      <h2>Paga-se por carro, não por pessoa</h2>
+      <p>O condutor não tem conta, por isso não faz sentido cobrar por ele.
+        Cresce quando a sua frota crescer.</p>
+    </div>
+    <div class="planos">
+      <div class="plano">
+        <span class="nm">Um carro</span>
+        <div class="preco"><span class="v">Grátis</span></div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            O produto inteiro, sem cortes</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            Um carro e um condutor</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            Para sempre, não é demonstração</li>
+        </ul>
+        <a class="bt sec" href="https://fleetcv-up1b.vercel.app">Começar</a>
+      </div>
+
+      <div class="plano destaque">
+        <span class="fita">Para a maioria</span>
+        <span class="nm">Frota</span>
+        <div class="preco"><span class="v num">500</span>
+          <span class="u">CVE por carro / mês</span></div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            De 2 a 10 carros</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            Condutores sem limite</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            Contas do mês, carro a carro</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            Paga-se por Vinti4 ou transferência</li>
+        </ul>
+        <a class="bt pri" href="https://fleetcv-up1b.vercel.app">Experimentar primeiro</a>
+      </div>
+
+      <div class="plano">
+        <span class="nm">Frota grande</span>
+        <div class="preco"><span class="v">Falado</span></div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            Mais de 10 carros</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            Desconto por volume</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            Acompanhamento na estreia</li>
+        </ul>
+        <a class="bt sec" href="#falar">Falar connosco</a>
+      </div>
+    </div>
+    <p class="nota-preco">Preço de arranque para os primeiros clientes da Praia.
+      Um carro que gasta 20.000 CVE de combustível por mês costuma ter uma parte
+      que não bate certo — se o FleetCV lhe mostrar 1.000 desses, já se pagou
+      duas vezes.</p>
+  </div>
+</section>
+
+<section class="risca">
+  <div class="env">
+    <div class="cabec">
+      <p class="olho">Perguntas</p>
+      <h2>O que toda a gente pergunta primeiro</h2>
+    </div>
+    <div class="perg">
+      <details open>
+        <summary>Preciso de instalar rastreador no carro?</summary>
+        <p class="resp">Não. Nem rastreador, nem oficina, nem fios. O que grava
+          o caminho é o telemóvel que o condutor já tem no bolso.</p>
+      </details>
+      <details>
+        <summary>O condutor tem de criar conta?</summary>
+        <p class="resp">Não. Você cria a ficha dele e dá-lhe um e-mail e um
+          código. Ele abre o link, escreve os dois, e está a trabalhar. Não se
+          inscreve em nada nem instala nada.</p>
+      </details>
+      <details>
+        <summary>E se ele ficar sem rede?</summary>
+        <p class="resp">O telemóvel guarda tudo e envia sozinho quando houver
+          rede outra vez. O turno não se perde. Pode até abrir o turno já sem
+          rede — só chega ao seu ecrã mais tarde.</p>
+      </details>
+      <details>
+        <summary>E se ele desligar o GPS ou meter o telemóvel no bolso?</summary>
+        <p class="resp">Vê-se. O turno fica marcado como sem sinal nesse
+          período, e os quilómetros do GPS deixam de bater com a fotografia do
+          quadrante no fim. É essa diferença que aparece no seu ecrã.</p>
+      </details>
+      <details>
+        <summary>Funciona fora da Praia?</summary>
+        <p class="resp">Funciona em qualquer lado — o GPS é o mesmo. O mapa com
+          ruas e nomes de bairros é o da Praia, por enquanto. Noutras ilhas vê o
+          percurso, mas ainda sem os nomes dos sítios.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="falar">
+  <div class="env">
+    <div class="fecho">
+      <h2>Experimente com um carro, esta semana</h2>
+      <p>Não precisa de conta nem de cartão para ver como é. Abra, carregue em
+        «só quero experimentar», e ande com o telemóvel na mão durante uma
+        viagem.</p>
+      <div class="accoes">
+        <a class="bt pri" href="https://fleetcv-up1b.vercel.app">Abrir o FleetCV</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="env">
+    <span class="marca" style="font-size:15px"><span class="pt"></span>FleetCV</span>
+    <span>Praia, Cabo Verde</span>
+    <span class="dir">Feito para quem vive de táxis.</span>
+  </div>
+</footer>
