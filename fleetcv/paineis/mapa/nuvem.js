@@ -522,6 +522,13 @@ function local(chave, valor){
    browser — logo, GPS a funcionar — e regras dentro da própria base
    de dados. */
 function ligarSupabase(){
+  /* Quem carregou em "só quero experimentar" não fala com a base de
+     dados de ninguém. Nem se liga: fica com uma frota de mentira
+     guardada no próprio telemóvel, e sai de lá quando quiser. É a
+     diferença entre deixar alguém ver o produto e deixar alguém mexer
+     na frota de um taxista que está a trabalhar. */
+  try{ if(localStorage.getItem('fleetcv-ensaio')) return Promise.resolve(null); }
+  catch(e){}
   var c = window.FLEETCV_CONFIG;
   if(!c || !c.supabaseUrl || !c.supabaseChave) return Promise.resolve(null);
   if(!window.supabase || !window.supabase.createClient) return Promise.resolve(null);
@@ -540,7 +547,11 @@ function ligarSupabase(){
 
 /* Só há servidor quando a página vem de um. Aberta como ficheiro, ou
    publicada no Claude, não há — e passa-se aos outros motores. */
+function noEnsaio(){
+  try{ return !!localStorage.getItem('fleetcv-ensaio'); }catch(e){ return false; }
+}
 function haServidor(){
+  if(noEnsaio()) return Promise.resolve(false);
   if(typeof fetch!=='function') return Promise.resolve(false);
   if(!/^https?:$/.test(location.protocol)) return Promise.resolve(false);
   var corta=new Promise(function(ok){ setTimeout(function(){ ok(false); }, 4000); });
@@ -559,7 +570,7 @@ function arrancar(op){
   fila     = local('fila')   || [];
   avisar();
   var pedido;
-  try{ pedido = (window.claude && claude.use) ? claude.use('db')
+  try{ pedido = (!noEnsaio() && window.claude && claude.use) ? claude.use('db')
                                               : Promise.resolve(null); }
   catch(e){ pedido = Promise.resolve(null); }
   var seguir=function(x){
@@ -949,6 +960,7 @@ return {
   arrancar:arrancar,
   aoMudar:function(f){ ouvintes.push(f); },
   estado:function(){ return estado; },
+  ensaio:noEnsaio,
   dados:function(){ return D; },
   podeEscrever:function(){
     if(!quem||!quem.can) return null;

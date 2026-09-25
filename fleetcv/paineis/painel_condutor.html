@@ -1158,6 +1158,13 @@ function local(chave, valor){
    browser — logo, GPS a funcionar — e regras dentro da própria base
    de dados. */
 function ligarSupabase(){
+  /* Quem carregou em "só quero experimentar" não fala com a base de
+     dados de ninguém. Nem se liga: fica com uma frota de mentira
+     guardada no próprio telemóvel, e sai de lá quando quiser. É a
+     diferença entre deixar alguém ver o produto e deixar alguém mexer
+     na frota de um taxista que está a trabalhar. */
+  try{ if(localStorage.getItem('fleetcv-ensaio')) return Promise.resolve(null); }
+  catch(e){}
   var c = window.FLEETCV_CONFIG;
   if(!c || !c.supabaseUrl || !c.supabaseChave) return Promise.resolve(null);
   if(!window.supabase || !window.supabase.createClient) return Promise.resolve(null);
@@ -1176,7 +1183,11 @@ function ligarSupabase(){
 
 /* Só há servidor quando a página vem de um. Aberta como ficheiro, ou
    publicada no Claude, não há — e passa-se aos outros motores. */
+function noEnsaio(){
+  try{ return !!localStorage.getItem('fleetcv-ensaio'); }catch(e){ return false; }
+}
 function haServidor(){
+  if(noEnsaio()) return Promise.resolve(false);
   if(typeof fetch!=='function') return Promise.resolve(false);
   if(!/^https?:$/.test(location.protocol)) return Promise.resolve(false);
   var corta=new Promise(function(ok){ setTimeout(function(){ ok(false); }, 4000); });
@@ -1195,7 +1206,7 @@ function arrancar(op){
   fila     = local('fila')   || [];
   avisar();
   var pedido;
-  try{ pedido = (window.claude && claude.use) ? claude.use('db')
+  try{ pedido = (!noEnsaio() && window.claude && claude.use) ? claude.use('db')
                                               : Promise.resolve(null); }
   catch(e){ pedido = Promise.resolve(null); }
   var seguir=function(x){
@@ -1585,6 +1596,7 @@ return {
   arrancar:arrancar,
   aoMudar:function(f){ ouvintes.push(f); },
   estado:function(){ return estado; },
+  ensaio:noEnsaio,
   dados:function(){ return D; },
   podeEscrever:function(){
     if(!quem||!quem.can) return null;
@@ -2523,6 +2535,13 @@ function retomar(){
     if(!salvo) salvo=setInterval(guardar, 8000);
     Nuvem.guardandoRasto(function(){ return S.turno; });
   } else if(S.eu && S.ecra==='entrar') S.ecra='carro';
+  /* No ensaio não se pede e-mail nem código a ninguém: quem carregou em
+     "só quero experimentar" quer VER, não quer preencher formulários.
+     Entra-se como o primeiro condutor da frota de mentira. */
+  if(!S.eu && Nuvem.ensaio && Nuvem.ensaio()){
+    var q=(FROTA.condutores||[])[0];
+    if(q){ S.eu=q; S.ecra='carro'; guardar(); }
+  }
 }
 
 Nuvem.aoMudar(function(){
@@ -2536,6 +2555,13 @@ Nuvem.aoMudar(function(){
                             return x.id===S.eu.id; })[0] || S.eu;
     if(S.carro) S.carro = FROTA.carros.filter(function(x){
                             return x.id===S.carro.id; })[0] || S.carro;
+  }
+  /* No ensaio entra-se sozinho — mas só quando a frota chegar. O
+     retomar() corre uma vez só, e pode correr antes disso. */
+  if(!S.eu && FROTA.condutores.length && Nuvem.ensaio && Nuvem.ensaio()){
+    S.eu=FROTA.condutores[0];
+    if(S.ecra==='entrar') S.ecra='carro';
+    guardar();
   }
   if(!arrancado && (FROTA.condutores.length || Nuvem.estado()!=='a-ligar')){
     arrancado=true; retomar();
