@@ -1,0 +1,27 @@
+name: FleetCV · tempo real
+
+# A prova do canal ao vivo contra a base verdadeira. A máquina do Claude
+# não deixa passar WebSockets, por isso corre aqui. Cria duas frotas de
+# prova e apaga-as no fim; não usa segredo nenhum (a chave do Supabase é
+# a pública, a mesma que vai na página).
+on:
+  push:
+    paths:
+      - 'fleetcv/paineis/prova_tempo_real.mjs'
+      - '.github/workflows/fleetcv-tempo-real.yml'
+  workflow_dispatch:
+
+jobs:
+  prova:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: fleetcv/paineis
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm i --no-save @supabase/supabase-js@2
+      - run: node prova_tempo_real.mjs
