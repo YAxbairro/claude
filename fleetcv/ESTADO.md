@@ -27,6 +27,16 @@ Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
   condutor entra e anda → o patrão vê os quilómetros subirem → turno
   fecha → apagar a conta sem deixar lixo. 19 de 19.
 
+- **O canal ao vivo (WebSocket), provado de fora** — numa máquina do
+  GitHub (`paineis/prova_tempo_real.mjs`, corre sozinho em
+  `.github/workflows/fleetcv-tempo-real.yml`): 10 de 10 posições
+  chegaram ao patrão da frota, **atraso típico 0,6 s**, com a
+  velocidade dentro; o patrão de outra frota recebeu **zero**.
+  Atenção: no plano gratuito do Supabase houve pedidos presos 3–20 s
+  na camada de entrada (a base em si nunca passou de 0,3 s). Com
+  clientes pagantes, passar ao plano Pro (25 USD/mês): máquina própria
+  e o projecto deixa de adormecer.
+
 ## Como se publica (o nó de antes está desatado)
 
 O Vercel aceita publicar a partir de um repositório público do GitHub
