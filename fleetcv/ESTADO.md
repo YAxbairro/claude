@@ -1,4 +1,4 @@
-# Onde isto está, em 25 de Setembro de 2026
+# Onde isto está, em 25 de Setembro de 2026 (fim do dia)
 
 Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
 
@@ -6,53 +6,71 @@ Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
 
 | | |
 |---|---|
-| **Site** | https://fleetcv-up1b.vercel.app |
+| **Página principal** | https://fleetcv.vercel.app — com Criar conta, Entrar, Experimentar, preços e WhatsApp |
+| **A aplicação** | https://fleetcv.vercel.app/app (o mesmo em `fleetcv-up1b.vercel.app`) |
 | **Base de dados** | Supabase, projecto `fleetcv`, `jhjtjjyplihabowxkfhs`, eu-west-1 |
-| **Código** | `Afroberd/fleetcv` (privado) — é daqui que o Vercel publica |
-| **Histórico e spec** | `YAxbairro/claude`, ramo `claude/eager-turing-11lp6h` |
-| **Conta do proprietário** | `yanickdrs@gmail.com` — o código foi dado em privado, não está em ficheiro nenhum |
+| **Código** | `YAxbairro/claude`, ramo `claude/eager-turing-11lp6h` — é daqui que se publica |
+| **Frota fundadora** | `f1`, de `yanickdrs@gmail.com`, sem prazo. O código foi dado em privado |
 
-O GPS funciona, a entrada anónima está ligada, as regras da base estão
-aplicadas e provadas. Um turno verdadeiro já correu de ponta a ponta:
-29,6 km gravados por GPS e um abastecimento de 2.000 CVE.
+- **Várias frotas.** Qualquer proprietário cria conta pela página
+  principal e fica com a sua frota, fechada pela própria base de dados.
+  30 dias de experiência; cobra-se à mão e marca-se o plano no SQL
+  Editor (ver `site/INSTALAR.md`).
+- **O condutor** recebe o acesso pelo WhatsApp (a aplicação escreve a
+  mensagem) e entra com e-mail e código. Não vê a conta do patrão nem
+  os códigos dos colegas — antes via, e entrava como qualquer um deles.
+- **O proprietário** muda o e-mail e o código na aplicação, e pode
+  apagar a conta. O código dele guarda-se baralhado (bcrypt) a partir
+  da primeira vez que o mudar.
+- **Provado ao vivo**, no site e na base verdadeiros
+  (`paineis/prova_ao_vivo.mjs`): criar conta → carro → condutor → o
+  condutor entra e anda → o patrão vê os quilómetros subirem → turno
+  fecha → apagar a conta sem deixar lixo. 19 de 19.
 
-## O nó que ficou por desatar
+## Como se publica (o nó de antes está desatado)
 
-O Vercel publica a partir de `Afroberd/fleetcv`. A sessão em que isto foi
-feito só tinha acesso a `YAxbairro/fleetcv` (entretanto apagado), e não
-conseguia anexar o outro por choque de nomes. Resultado: quem estiver
-nessa sessão não consegue fazer chegar melhorias ao site.
+O Vercel aceita publicar a partir de um repositório público do GitHub
+mesmo sem estar ligado a ele: `create_deployment` com `gitSource` a
+apontar para `YAxbairro/claude` e `rootDirectory: fleetcv/site`. Não
+precisa do `Afroberd/fleetcv`, nem de trocar de conta, nem de enviar
+ficheiros. Os passos estão em `site/INSTALAR.md`.
 
-**A saída é uma linha:** abrir uma sessão nova com `Afroberd/fleetcv`
-como repositório. A partir daí é enviar, e o Vercel publica sozinho em
-dois minutos.
+## Provas
 
-Caminhos que se experimentaram e não servem, para ninguém os repetir:
+| | |
+|---|---|
+| `supabase/provar.sh` | 61 regras + 9 da passagem de uma base antiga, num Postgres a sério. As provas foram postas à prova estragando as regras de propósito |
+| `paineis/teste_contas.mjs` | 40 — o caminho de um cliente novo, do criar conta ao apagar |
+| `paineis/teste_supabase.mjs` | 25 — as regras vistas pela aplicação, a trava, sem rede |
+| o resto dos `teste_*.mjs` | condutor 35, dono 44, junto 16, clicável 23, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9 |
 
-- **Ligar o Vercel ao `YAxbairro/fleetcv`** — o Vercel está ligado ao
-  GitHub pela conta *Afroberd* e o seletor de contas não mostra contas
-  pessoais de terceiros. O «Add GitHub Scope» só junta organizações.
-- **Criar projectos no Vercel pela API** — 403, o conector é só de leitura
-  para isso. Publicar num projecto que já existe, esse é permitido.
-- **Enviar os ficheiros pela API** — permitido, e o `upload_file` funciona;
-  mas o `index.html` tem 268 kB e não cabe numa chamada.
-- **O CLI do Vercel** — precisa de uma chave que a sessão não tem.
+Os testes que usam o servidor próprio (`teste_clicavel`,
+`teste_formularios`, `teste_servidor`) esperam correr numa pasta com
+`servidor/` ao lado e `servidor/fleetcv.html`.
 
 ## O que falta fazer
 
-1. **Ligar as melhorias ao site** — sessão nova com `Afroberd/fleetcv`.
-2. **Dar ao proprietário como mudar o próprio código** dentro da
-   aplicação. Hoje só se muda por SQL, e é a palavra-passe dele.
+1. **Entrar com o Google.** Ainda não está feito. Primeiro o Yanick
+   tem de criar um cliente OAuth na Google Cloud e colá-lo no Supabase
+   (Authentication → Providers → Google), uns dez minutos do lado dele.
+   Só depois se liga na aplicação, porque sem isso não há como o
+   provar. Até lá, entra-se com e-mail e código.
+2. **Pagamentos automáticos.** A Stripe não trabalha com Cabo Verde;
+   Vinti4 por API pede contrato com o banco (SISP). Até lá, à mão.
 3. **Vigiar no piloto:** o ecrã que apaga (o navegador pára de gravar o
    caminho), e o projecto gratuito do Supabase que adormece ao fim de
    uns sete dias sem uso.
 4. **Quando crescer:** as fotografias saem da tabela para o armazenamento
-   do Supabase, e o tempo real tem tecto no plano gratuito por volta dos
-   cinco condutores.
+   do Supabase, e o tempo real tem tecto no plano gratuito (200 ligações
+   ao mesmo tempo, que dá umas dezenas de frotas).
 
 ## Uma regra aprendida à força
 
 Códigos e palavras-passe não entram em ficheiro nenhum que vá para o
 GitHub. Aconteceu duas vezes no mesmo dia — no guia de instalação e nos
 ficheiros de prova. O que resolve é trocar a senha, não apagar o
-histórico.
+histórico. O condutor de teste "PROVA (apagar)", cujo código ficou num
+ficheiro antigo, foi desactivado na frota `f1`.
+
+A cópia da base antes da passagem para várias frotas ficou só na
+máquina da sessão (tem códigos), não no repositório.

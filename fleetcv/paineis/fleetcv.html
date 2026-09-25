@@ -287,7 +287,7 @@ body.dono .campo .aj{display:block; font-size:12px; color:var(--muted); margin-t
 body.dono input{width:100%; padding:12px 13px; border-radius:10px; border:1px solid var(--line);
   background:var(--surface); color:var(--ink); font-family:var(--mono); font-size:17px;
   font-weight:500; -moz-appearance:textfield}
-body.dono input[type=text]{font-family:var(--sans); font-size:15.5px}
+body.dono input[type=text], body.dono input[type=email]{font-family:var(--sans); font-size:15.5px}
 body.dono input::-webkit-outer-spin-button, body.dono input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 body.dono input:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
 body.dono .item{display:flex; gap:11px; align-items:center; width:100%; text-align:left;
@@ -3844,7 +3844,7 @@ function pintar(){
         '<p class="p-nota" style="margin:4px 0 10px">Vai o endereço da aplicação, '+
         'o e-mail e o código. Ele abre no telemóvel e entra.</p>' : '')+
       '<div class="par">'+
-      '<a class="bt pri pq" id="mandar-zap" href="'+esc(zap)+'" target="_blank" '+
+      '<a class="bt pri pq" id="mandar-zap" style="flex:2" href="'+esc(zap)+'" target="_blank" '+
       'rel="noopener">Mandar pelo WhatsApp</a>'+
       '<button class="bt sec pq" data-f="copiar-acesso">Copiar</button></div>'+
       '<p class="p-nota" id="acesso-copiado" style="margin-top:6px"></p></div>'+

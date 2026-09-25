@@ -892,7 +892,7 @@ function pintar(){
         '<p class="p-nota" style="margin:4px 0 10px">Vai o endereço da aplicação, '+
         'o e-mail e o código. Ele abre no telemóvel e entra.</p>' : '')+
       '<div class="par">'+
-      '<a class="bt pri pq" id="mandar-zap" href="'+esc(zap)+'" target="_blank" '+
+      '<a class="bt pri pq" id="mandar-zap" style="flex:2" href="'+esc(zap)+'" target="_blank" '+
       'rel="noopener">Mandar pelo WhatsApp</a>'+
       '<button class="bt sec pq" data-f="copiar-acesso">Copiar</button></div>'+
       '<p class="p-nota" id="acesso-copiado" style="margin-top:6px"></p></div>'+
