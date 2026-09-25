@@ -38,10 +38,16 @@ Não precisa de fazer nada aqui, tirando **um botão** (ponto 3).
 | Endereço | `https://jhjtjjyplihabowxkfhs.supabase.co` |
 | Esquema | aplicado — tabelas, funções e as 4 regras em `docs` |
 | Tempo real | ligado na tabela `docs` |
-| A sua conta | `yanickdrs@gmail.com` · código **761662** |
+| A sua conta | `yanickdrs@gmail.com` · o código foi-lhe dado em privado |
 
-**O código 761662 foi gerado ao acaso.** Troque-o quando quiser — é uma
-linha no SQL Editor:
+**O código nunca se escreve aqui.** Já cometi esse erro uma vez: pus o
+código do proprietário neste guia, e este guia vive num repositório
+público do GitHub — ou seja, a palavra-passe da frota ficou à vista de
+quem passasse. Trocou-se o código e a regra ficou: **códigos e senhas
+não entram em ficheiro nenhum que vá para o GitHub.** Dizem-se à pessoa
+e mais nada.
+
+Trocar o seu código é uma linha no SQL Editor:
 
 ```sql
 update docs
