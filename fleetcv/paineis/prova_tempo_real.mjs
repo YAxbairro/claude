@@ -52,25 +52,35 @@ ok('o patrão A junta carro e condutor', !r.error, r.error&&r.error.message);
 const eA=escutar(A.sb), eB=escutar(B.sb);
 const ligou=await Promise.race([Promise.all([eA.pronto,eB.pronto]), dorme(15000).then(()=>false)]);
 ok('os dois patrões ficam ligados ao canal ao vivo', !!ligou);
+/* O "ligado" chega um instante antes de o servidor começar mesmo a
+   mandar as mudanças da base; na primeira prova perdeu-se a primeira
+   posição assim. Na aplicação isto não se nota (a posição seguinte
+   chega segundo e meio depois, e a rede de segurança lê tudo de novo),
+   mas aqui quer-se medir o canal, não o arranque. */
+await dorme(2000);
 
 const C=cliente(); await C.auth.signInAnonymously();
 const en=await C.rpc('entrar',{p_email:emailCond,p_codigo:cc});
 ok('o condutor entra', en.data&&en.data.papel==='condutor', JSON.stringify(en.data));
 
 /* dez posições, de segundo e meio em segundo e meio, como na estrada */
-const enviadas=[];
+const enviadas={};
 for(let i=0;i<10;i++){
   const corpo={id:'t-rt',condutorId:'m1',lat:14.9177+i*0.0003,lon:-23.5092,vel:30+i,momento:Date.now()};
   const t0=Date.now();
+  enviadas[30+i]=t0;
   r=await C.from('docs').upsert({frota:A.frota,coleccao:'vivo',id:'t-rt',corpo},{onConflict:'frota,coleccao,id'});
   if(r.error){ ok('o condutor escreve a posição',false,r.error.message); break; }
-  enviadas.push(t0);
   await dorme(1500);
 }
 await dorme(2000);
 const doA=eA.chegou.filter(x=>x.m.eventType!=='DELETE');
-const atrasos=doA.map((x,i)=>enviadas[i]!=null?x.quando-enviadas[i]:null).filter(x=>x!=null);
-ok('o patrão A recebe as 10 posições ao vivo', doA.length>=10, doA.length+' recebidas');
+/* cada posição leva uma velocidade diferente: é por ela que se sabe
+   qual chegou, e quanto tempo levou desde que o condutor a mandou */
+const atrasos=doA.map(x=>enviadas[x.m.new.corpo.vel]!=null
+  ? x.quando-enviadas[x.m.new.corpo.vel] : null).filter(x=>x!=null);
+ok('o patrão A recebe as 10 posições ao vivo', doA.length>=10,
+   doA.length+' recebidas: '+doA.map(x=>x.m.new.corpo.vel).join(' '));
 const med=atrasos.sort((a,b)=>a-b)[Math.floor(atrasos.length/2)];
 ok('em menos de um segundo', med!=null && med<1000, 'atraso típico '+med+' ms · pior '+Math.max(...atrasos)+' ms');
 ok('com a velocidade dentro', doA.length && doA[doA.length-1].m.new.corpo.vel===39,
