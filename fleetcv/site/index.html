@@ -934,6 +934,7 @@ var D = { frota:null, turnos:[], vivos:[] };
      turno já fechado. */
 function lojaDoSupabase(sb){
   var espelho={}, ouve={}, eu=null, canal=null, semRede=false;
+  var canalVivo=false, relogioRede=null, ultimaLeitura=0, aLer=false;
   var tocar=function(c){
     (ouve[c]||[]).forEach(function(f){ try{ f(); }catch(e){} }); };
 
@@ -964,9 +965,66 @@ function lojaDoSupabase(sb){
     if(/fetch|network|timeout/i.test(e.message||'')) c='unavailable';
     return Object.assign(new Error(e.message||'erro'), {code:c, porque:e.message}); };
 
+  /* Traz tudo de uma vez. Em duas perguntas, e não numa, de propósito:
+     a frota são quatro documentos que quase nunca mudam, e os turnos
+     são milhares. Numa pergunta só, ordenada pela data, bastavam 600
+     turnos mais recentes para empurrar a frota para fora da lista — e
+     o condutor abria a aplicação sem carro nenhum para escolher.
+     As fotos e os percursos ficam de fora: são pesados e só se vão
+     buscar quando alguém os quer ver. */
+  function trazer(doZero){
+    if(aLer) return Promise.resolve(false);
+    aLer=true;
+    return Promise.all([
+      sb.from('docs').select('coleccao,id,corpo').in('coleccao',['frota','vivo']),
+      sb.from('docs').select('coleccao,id,corpo').eq('coleccao','turnos')
+        .order('quando',{ascending:false}).limit(600)
+    ]).then(function(rs){
+      aLer=false;
+      var t=rs[0], u=rs[1];
+      if(t.error) throw erroDe(t.error);
+      if(u.error) throw erroDe(u.error);
+      /* A frota e os turnos ao vivo vêm inteiros e substituem o que cá
+         estava: é assim que um carro que já fechou o turno desaparece
+         do mapa mesmo que se tenha perdido o aviso do fecho. Os turnos
+         antigos só se juntam, nunca se apagam. */
+      if(doZero) espelho={};
+      espelho.frota={}; espelho.vivo={};
+      (t.data||[]).forEach(function(x){ (espelho[x.coleccao]=espelho[x.coleccao]||{})[x.id]=x.corpo; });
+      (u.data||[]).forEach(function(x){ (espelho.turnos=espelho.turnos||{})[x.id]=x.corpo; });
+      ultimaLeitura=Date.now();
+      Object.keys(espelho).forEach(tocar);
+      return true;
+    }).catch(function(e){ aLer=false; throw e; });
+  }
+
+  /* A rede de segurança. O tempo real vive de um WebSocket, e um
+     WebSocket cai: rede fraca, um wi-fi de café que bloqueia, o
+     telemóvel a mudar de antena. Sem isto, o ecrã do patrão ficava
+     congelado para sempre e ninguém dava por nada — que é pior do que
+     dizer "não sei", porque ele acredita no que está a ver.
+     Com o canal de pé, confere-se de minuto a minuto por desencargo;
+     com ele em baixo, de oito em oito segundos, e aí o tempo real
+     passa a ser quase-real em vez de nenhum. */
+  function vigiarRede(){
+    if(relogioRede) return;
+    var conferir=function(){
+      try{ if(typeof document!=='undefined' && document.hidden) return; }catch(e){}
+      var cada = canalVivo ? 60000 : 8000;
+      if(Date.now()-ultimaLeitura < cada) return;
+      trazer(false).catch(function(){});
+    };
+    relogioRede=setInterval(conferir, 4000);
+    /* voltar ao telemóvel depois de um tempo fora é o momento em que
+       mais falta faz estar actualizado */
+    try{ document.addEventListener('visibilitychange', function(){
+      if(!document.hidden) trazer(false).catch(function(){}); }); }catch(e){}
+  }
+
   return {
     longe:true, supabase:true,
     semRede:function(){ return semRede; },
+    canalVivo:function(){ return canalVivo; },
 
     entrar:function(email, codigo){
       return sb.rpc('entrar', {p_email:email, p_codigo:codigo})
@@ -995,20 +1053,7 @@ function lojaDoSupabase(sb){
              carro nenhum para escolher.
              As fotos e os percursos ficam de fora das duas: são
              pesados e só se vão buscar quando alguém os quer ver. */
-          return Promise.all([
-            sb.from('docs').select('coleccao,id,corpo')
-              .in('coleccao',['frota','vivo']),
-            sb.from('docs').select('coleccao,id,corpo')
-              .eq('coleccao','turnos')
-              .order('quando',{ascending:false}).limit(600)
-          ]).then(function(rs){
-              var t=rs[0], u=rs[1];
-              if(t.error) throw erroDe(t.error);
-              if(u.error) throw erroDe(u.error);
-              espelho={};
-              (t.data||[]).concat(u.data||[]).forEach(function(x){
-                pousar(x.coleccao, x.id, x.corpo); });
-              Object.keys(espelho).forEach(tocar);
+          return trazer(true).then(function(){
               /* Pede-se só o que interessa, e por colecção. Sem isto,
                  cada fotografia de 50 kB que um condutor tira ia parar
                  ao telemóvel de toda a gente, sem ninguém a querer ver
@@ -1024,9 +1069,11 @@ function lojaDoSupabase(sb){
                   canal.on('postgres_changes',
                     {event:'*', schema:'public', table:'docs',
                      filter:'coleccao=eq.'+c}, chegou); });
-                canal.subscribe();
+                canal.subscribe(function(estadoCanal){
+                  canalVivo = (estadoCanal==='SUBSCRIBED'); });
               }catch(e){}
               semRede=false; guardarCopia();
+              vigiarRede();
               return true; }); })
         /* Sem rede, mas com uma cópia de quem eu sou e da frota: vai-se
            na mesma. É o contrário do que parece prudente — mas mandar o
