@@ -50,8 +50,16 @@ h3{font-family:var(--display); font-size:13px; margin:0; letter-spacing:.02em;
 .topo{flex:none; background:var(--surface); border-bottom:1px solid var(--line);
   padding:10px 16px; padding-top:calc(10px + env(safe-area-inset-top,0px));
   display:flex; gap:10px; align-items:center}
-.voltar{background:none; border:none; cursor:pointer; font-size:19px; line-height:1;
-  padding:0 2px; color:var(--accent)}
+.voltar{flex:none; display:flex; align-items:center; gap:4px; height:31px;
+  padding:0 11px 0 8px; margin-right:9px; border-radius:9px;
+  border:1px solid var(--line); background:var(--surface2); color:var(--ink);
+  font:600 13.5px var(--sans); cursor:pointer}
+.voltar b{font-size:20px; line-height:1; font-weight:500; color:var(--accent);
+  margin-top:-2px}
+.voltar:hover{border-color:var(--accent)}
+.voltar[hidden]{display:none}
+.voltar:not([hidden]) + .marca span:not(.pt){display:none}
+@media (max-width:430px){ .voltar:not([hidden]) + .marca{display:none} }
 .marca{font-family:var(--display); font-weight:700; font-size:15px; display:flex;
   gap:7px; align-items:center}
 .marca .pt{width:9px; height:9px; border-radius:50%; background:var(--accent)}
@@ -244,7 +252,7 @@ td.n{font-family:var(--mono); text-align:right; white-space:nowrap}
 </style>
 
 <div class="topo">
-  <button class="voltar" id="voltar" hidden>‹</button>
+  <button class="voltar" id="voltar" hidden><b aria-hidden="true">‹</b>Voltar</button>
   <div class="marca"><span class="pt"></span>FleetCV<span style="font-weight:400;
     font-size:12px;color:var(--muted)" id="sub-marca"></span></div>
   <div class="dir" id="dir"></div>
@@ -3116,7 +3124,9 @@ function pintar(){
     '<span class="lupa-x">× fechar</span></div>';
   el('ecra').innerHTML=h;
   el('nav').parentNode.hidden = !b;
-  el('voltar').hidden = !S.voltarPara;
+  var pv=paraOndeVolta();
+  el('voltar').hidden = !(pv && !pv.fechar);
+  armarVoltar();
   el('sub-marca').textContent = S.sessao&&S.frota ? ' · '+S.frota.nome : '';
   pintarNav(); pintarTopo();
 }
@@ -3157,6 +3167,51 @@ function ir(ecra, sel, voltar){
   pintar();
   var m=document.querySelector('main'); if(m) m.scrollTop=0;
 }
+/* ─── voltar ──────────────────────────────────────────────
+   Cada ecrã sabe para onde se volta dele. O mesmo caminho serve o
+   botão "‹ Voltar" do cabeçalho e o botão de voltar do próprio
+   telemóvel — que antes fechava a aplicação de uma vez, e o patrão
+   ficava fora a meio de ver um turno. */
+function paraOndeVolta(){
+  if(S.lupa) return {fechar:'lupa'};
+  if(S.voltarPara) return {ir:S.voltarPara};
+  if(!S.sessao){
+    if(S.ecra==='criar') return {ir:{ecra:'entrar'}};
+    /* do ecrã de entrar volta-se à escolha entre condutor e patrão */
+    if(S.ecra==='entrar' && document.getElementById('trocar')) return {porta:true};
+    return null; }
+  if(S.ecra!=='mapa') return {ir:{ecra:'mapa'}};
+  if(S.cartao) return {fechar:'cartao'};
+  return null;
+}
+function voltar(){
+  var v=paraOndeVolta();
+  if(!v) return false;
+  if(v.fechar==='lupa'){ S.lupa=null; pintar(); }
+  else if(v.fechar==='cartao'){ S.cartao=null; pintar(); }
+  else if(v.porta){ var t=document.getElementById('trocar'); if(t) t.click(); }
+  else { S.aviso=null; ir(v.ir.ecra, v.ir.sel, v.ir.voltar||null); }
+  return true;
+}
+/* O botão do telemóvel anda pelo histórico do navegador. Enquanto
+   houver para onde voltar, fica lá uma marca nossa por cima; carregar
+   em voltar tira-a, e em vez de sair da página volta-se um ecrã. No
+   ecrã de partida não há marca, e aí o botão sai, como é costume. */
+var guardaVoltar=false, ignorarVolta=false;
+function armarVoltar(){
+  var ha=!!paraOndeVolta();
+  try{
+    if(ha && !guardaVoltar){ history.pushState({fleetcv:'voltar'}, ''); guardaVoltar=true; }
+    else if(!ha && guardaVoltar){ guardaVoltar=false; ignorarVolta=true; history.back(); }
+  }catch(e){}
+}
+window.addEventListener('popstate', function(){
+  if(ignorarVolta){ ignorarVolta=false; return; }
+  if(!guardaVoltar) return;
+  guardaVoltar=false;
+  voltar();
+  armarVoltar();
+});
 function pararReplay(){ if(cronoReplay){ clearInterval(cronoReplay); cronoReplay=null; } }
 
 document.addEventListener('input', function(e){
@@ -3198,7 +3253,7 @@ document.addEventListener('click', function(e){
   if(d.turnosCond){ S.filtro={condutor:d.turnosCond};
     ir('turnos', null, {ecra:S.ecra, sel:S.sel}); return; }
 
-  if(b.id==='voltar'){ var v=S.voltarPara; ir(v.ecra, v.sel, v.voltar||null); return; }
+  if(b.id==='voltar'){ voltar(); return; }
   if(d.tab){ ir(d.tab, null, null); return; }
   if(d.turno){ ir('turno', d.turno, {ecra:S.ecra, sel:S.sel}); return; }
   if(d.carro){ ir('carro', d.carro, {ecra:S.ecra, sel:S.sel}); return; }

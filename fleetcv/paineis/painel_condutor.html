@@ -171,9 +171,20 @@ input:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
 .vf .vl{font-family:var(--mono); font-size:13px; white-space:nowrap; color:var(--muted)}
 .vazio{text-align:center; padding:24px; color:var(--muted); font-size:13.5px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+.voltar{flex:none; display:flex; align-items:center; gap:4px; height:31px;
+  padding:0 11px 0 8px; margin-right:9px; border-radius:9px;
+  border:1px solid var(--line); background:var(--surface2); color:var(--ink);
+  font:600 13.5px var(--sans); cursor:pointer}
+.voltar b{font-size:20px; line-height:1; font-weight:500; color:var(--accent);
+  margin-top:-2px}
+.voltar:hover{border-color:var(--accent)}
+.voltar[hidden]{display:none}
+.voltar:not([hidden]) + .marca span:not(.pt){display:none}
+@media (max-width:430px){ .voltar:not([hidden]) + .marca{display:none} }
 </style>
 
 <div class="topo">
+  <button class="voltar" id="voltar" hidden><b aria-hidden="true">‹</b>Voltar</button>
   <div class="marca"><span class="pt"></span>FleetCV<span style="font-weight:400;
     font-size:12px;color:var(--muted)"> · condutor</span></div>
   <div class="dir" id="dir"></div>
@@ -2222,7 +2233,8 @@ function pintar(){
         '<span><span class="mat">'+esc(c.matricula)+'</span><br>'+
         '<span class="s">'+esc(c.marca+' '+c.modelo)+' · depósito de '+c.deposito+' l</span>'+
         '</span><span class="d">'+nf(c.km)+'<small>km</small></span></button>'; }).join('');
-    b='<button class="lig" data-f="sair">Sair</button>';
+    b=(S.turnos.length?'<button class="lig" data-f="ir-meus">Os meus turnos</button>':'')+
+      '<button class="lig" data-f="sair">Sair</button>';
   }
 
   else if(S.ecra==='km-inicio'){
@@ -2482,9 +2494,61 @@ function pintar(){
   el('ecra').className = S.ecra==='volante' ? 'col cheia' : 'col';
   el('ecra').innerHTML=h;
   el('accoes').innerHTML=b;
+  var pv=paraOndeVolta();
+  el('voltar').hidden = !(pv && pv!=='ficar');
+  armarVoltar();
   pintarTopo();
   if(S.ecra==='volante') ajustarMapa();
 }
+
+/* ─── voltar ──────────────────────────────────────────────
+   Cada ecrã sabe de onde se veio. O "‹ Voltar" do cabeçalho e o botão
+   de voltar do telemóvel fazem o mesmo. Com o turno aberto, ao volante,
+   o botão do telemóvel NÃO sai da aplicação: sair era o GPS parar de
+   gravar a meio do caminho, sem o condutor dar por isso. */
+function paraOndeVolta(){
+  switch(S.ecra){
+    case 'entrar':
+      return (document.getElementById('trocar') && !(Nuvem.ensaio&&Nuvem.ensaio()))
+        ? 'porta' : null;
+    case 'km-inicio': return 'carro';
+    case 'gps':       return 'km-inicio';
+    case 'abastecer':
+    case 'km-fim':    return 'volante';
+    case 'volante':   return 'ficar';
+    case 'resumo':    return S.verTurno ? 'meus' : 'carro';
+    case 'meus':      return (S.turno && !S.turno.fim) ? 'volante' : 'carro';
+  }
+  return null;
+}
+function voltar(){
+  var v=paraOndeVolta();
+  if(!v || v==='ficar') return;
+  if(v==='porta'){ var t=document.getElementById('trocar'); if(t) t.click(); return; }
+  /* voltar do GPS aos km não apaga os km que já escreveu; o resto
+     limpa o que estava a meio, como os botões de cada ecrã */
+  if(v!=='km-inicio'){ S.foto=null; S.r={}; }
+  if(v==='meus'||v==='carro') S.verTurno=null;
+  S.aviso=null; S.ecra=v; pintar();
+  var m=document.querySelector('main'); if(m) m.scrollTop=0;
+}
+var guardaVoltar=false, ignorarVolta=false;
+function armarVoltar(){
+  var ha=!!paraOndeVolta();
+  try{
+    if(ha && !guardaVoltar){ history.pushState({fleetcv:'voltar'}, ''); guardaVoltar=true; }
+    else if(!ha && guardaVoltar){ guardaVoltar=false; ignorarVolta=true; history.back(); }
+  }catch(e){}
+}
+window.addEventListener('popstate', function(){
+  if(ignorarVolta){ ignorarVolta=false; return; }
+  if(!guardaVoltar) return;
+  guardaVoltar=false;
+  voltar();
+  armarVoltar();
+});
+document.addEventListener('click', function(e){
+  if(e.target.closest && e.target.closest('#voltar')) voltar(); });
 
 /* ═══ ACÇÕES ═════════════════════════════════════════════ */
 document.addEventListener('visibilitychange', function(){

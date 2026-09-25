@@ -425,7 +425,8 @@ function pintar(){
         '<span><span class="mat">'+esc(c.matricula)+'</span><br>'+
         '<span class="s">'+esc(c.marca+' '+c.modelo)+' · depósito de '+c.deposito+' l</span>'+
         '</span><span class="d">'+nf(c.km)+'<small>km</small></span></button>'; }).join('');
-    b='<button class="lig" data-f="sair">Sair</button>';
+    b=(S.turnos.length?'<button class="lig" data-f="ir-meus">Os meus turnos</button>':'')+
+      '<button class="lig" data-f="sair">Sair</button>';
   }
 
   else if(S.ecra==='km-inicio'){
@@ -685,9 +686,61 @@ function pintar(){
   el('ecra').className = S.ecra==='volante' ? 'col cheia' : 'col';
   el('ecra').innerHTML=h;
   el('accoes').innerHTML=b;
+  var pv=paraOndeVolta();
+  el('voltar').hidden = !(pv && pv!=='ficar');
+  armarVoltar();
   pintarTopo();
   if(S.ecra==='volante') ajustarMapa();
 }
+
+/* ─── voltar ──────────────────────────────────────────────
+   Cada ecrã sabe de onde se veio. O "‹ Voltar" do cabeçalho e o botão
+   de voltar do telemóvel fazem o mesmo. Com o turno aberto, ao volante,
+   o botão do telemóvel NÃO sai da aplicação: sair era o GPS parar de
+   gravar a meio do caminho, sem o condutor dar por isso. */
+function paraOndeVolta(){
+  switch(S.ecra){
+    case 'entrar':
+      return (document.getElementById('trocar') && !(Nuvem.ensaio&&Nuvem.ensaio()))
+        ? 'porta' : null;
+    case 'km-inicio': return 'carro';
+    case 'gps':       return 'km-inicio';
+    case 'abastecer':
+    case 'km-fim':    return 'volante';
+    case 'volante':   return 'ficar';
+    case 'resumo':    return S.verTurno ? 'meus' : 'carro';
+    case 'meus':      return (S.turno && !S.turno.fim) ? 'volante' : 'carro';
+  }
+  return null;
+}
+function voltar(){
+  var v=paraOndeVolta();
+  if(!v || v==='ficar') return;
+  if(v==='porta'){ var t=document.getElementById('trocar'); if(t) t.click(); return; }
+  /* voltar do GPS aos km não apaga os km que já escreveu; o resto
+     limpa o que estava a meio, como os botões de cada ecrã */
+  if(v!=='km-inicio'){ S.foto=null; S.r={}; }
+  if(v==='meus'||v==='carro') S.verTurno=null;
+  S.aviso=null; S.ecra=v; pintar();
+  var m=document.querySelector('main'); if(m) m.scrollTop=0;
+}
+var guardaVoltar=false, ignorarVolta=false;
+function armarVoltar(){
+  var ha=!!paraOndeVolta();
+  try{
+    if(ha && !guardaVoltar){ history.pushState({fleetcv:'voltar'}, ''); guardaVoltar=true; }
+    else if(!ha && guardaVoltar){ guardaVoltar=false; ignorarVolta=true; history.back(); }
+  }catch(e){}
+}
+window.addEventListener('popstate', function(){
+  if(ignorarVolta){ ignorarVolta=false; return; }
+  if(!guardaVoltar) return;
+  guardaVoltar=false;
+  voltar();
+  armarVoltar();
+});
+document.addEventListener('click', function(e){
+  if(e.target.closest && e.target.closest('#voltar')) voltar(); });
 
 /* ═══ ACÇÕES ═════════════════════════════════════════════ */
 document.addEventListener('visibilitychange', function(){

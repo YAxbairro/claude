@@ -1249,7 +1249,9 @@ function pintar(){
     '<span class="lupa-x">× fechar</span></div>';
   el('ecra').innerHTML=h;
   el('nav').parentNode.hidden = !b;
-  el('voltar').hidden = !S.voltarPara;
+  var pv=paraOndeVolta();
+  el('voltar').hidden = !(pv && !pv.fechar);
+  armarVoltar();
   el('sub-marca').textContent = S.sessao&&S.frota ? ' · '+S.frota.nome : '';
   pintarNav(); pintarTopo();
 }
@@ -1290,6 +1292,51 @@ function ir(ecra, sel, voltar){
   pintar();
   var m=document.querySelector('main'); if(m) m.scrollTop=0;
 }
+/* ─── voltar ──────────────────────────────────────────────
+   Cada ecrã sabe para onde se volta dele. O mesmo caminho serve o
+   botão "‹ Voltar" do cabeçalho e o botão de voltar do próprio
+   telemóvel — que antes fechava a aplicação de uma vez, e o patrão
+   ficava fora a meio de ver um turno. */
+function paraOndeVolta(){
+  if(S.lupa) return {fechar:'lupa'};
+  if(S.voltarPara) return {ir:S.voltarPara};
+  if(!S.sessao){
+    if(S.ecra==='criar') return {ir:{ecra:'entrar'}};
+    /* do ecrã de entrar volta-se à escolha entre condutor e patrão */
+    if(S.ecra==='entrar' && document.getElementById('trocar')) return {porta:true};
+    return null; }
+  if(S.ecra!=='mapa') return {ir:{ecra:'mapa'}};
+  if(S.cartao) return {fechar:'cartao'};
+  return null;
+}
+function voltar(){
+  var v=paraOndeVolta();
+  if(!v) return false;
+  if(v.fechar==='lupa'){ S.lupa=null; pintar(); }
+  else if(v.fechar==='cartao'){ S.cartao=null; pintar(); }
+  else if(v.porta){ var t=document.getElementById('trocar'); if(t) t.click(); }
+  else { S.aviso=null; ir(v.ir.ecra, v.ir.sel, v.ir.voltar||null); }
+  return true;
+}
+/* O botão do telemóvel anda pelo histórico do navegador. Enquanto
+   houver para onde voltar, fica lá uma marca nossa por cima; carregar
+   em voltar tira-a, e em vez de sair da página volta-se um ecrã. No
+   ecrã de partida não há marca, e aí o botão sai, como é costume. */
+var guardaVoltar=false, ignorarVolta=false;
+function armarVoltar(){
+  var ha=!!paraOndeVolta();
+  try{
+    if(ha && !guardaVoltar){ history.pushState({fleetcv:'voltar'}, ''); guardaVoltar=true; }
+    else if(!ha && guardaVoltar){ guardaVoltar=false; ignorarVolta=true; history.back(); }
+  }catch(e){}
+}
+window.addEventListener('popstate', function(){
+  if(ignorarVolta){ ignorarVolta=false; return; }
+  if(!guardaVoltar) return;
+  guardaVoltar=false;
+  voltar();
+  armarVoltar();
+});
 function pararReplay(){ if(cronoReplay){ clearInterval(cronoReplay); cronoReplay=null; } }
 
 document.addEventListener('input', function(e){
@@ -1331,7 +1378,7 @@ document.addEventListener('click', function(e){
   if(d.turnosCond){ S.filtro={condutor:d.turnosCond};
     ir('turnos', null, {ecra:S.ecra, sel:S.sel}); return; }
 
-  if(b.id==='voltar'){ var v=S.voltarPara; ir(v.ecra, v.sel, v.voltar||null); return; }
+  if(b.id==='voltar'){ voltar(); return; }
   if(d.tab){ ir(d.tab, null, null); return; }
   if(d.turno){ ir('turno', d.turno, {ecra:S.ecra, sel:S.sel}); return; }
   if(d.carro){ ir('carro', d.carro, {ecra:S.ecra, sel:S.sel}); return; }
