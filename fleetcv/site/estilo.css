@@ -1,0 +1,388 @@
+/* comum */
+:root{
+  --ground:#EDF0F0; --surface:#FFFFFF; --surface2:#F4F7F7; --line:#D5DCDC; --line2:#E7ECEC;
+  --ink:#0F1618; --muted:#5C6A6C;
+  --accent:#0B7F8E; --accent-ink:#FFFFFF; --accent-wash:#E3F1F3;
+  --ok:#3E7B22; --ok-wash:#EAF2E4;
+  --warn:#A86A05; --warn-wash:#F8EEDC;
+  --crit:#B02E20; --crit-wash:#F8E6E3;
+  --terra:#EEF2F1; --rua:#A4B2B0; --rua2:#CCD6D4; --costa:#7BA3A8;
+  --sombra:0 1px 2px rgba(15,22,24,.06), 0 10px 28px -20px rgba(15,22,24,.45);
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --display:'Archivo',var(--sans);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0B1011; --surface:#141A1B; --surface2:#1A2122; --line:#293233; --line2:#212929;
+  --ink:#E3E9E8; --muted:#8A9897;
+  --accent:#3FC0CE; --accent-ink:#06191C; --accent-wash:#122E32;
+  --ok:#77C34B; --ok-wash:#17280F; --warn:#DCA43C; --warn-wash:#2E2310;
+  --crit:#E4776A; --crit-wash:#331714;
+  --terra:#0D1314; --rua:#47585A; --rua2:#263132; --costa:#42636A;
+  --sombra:0 1px 2px rgba(0,0,0,.45), 0 10px 28px -20px rgba(0,0,0,.9);
+}}
+:root[data-theme="dark"]{
+  --ground:#0B1011; --surface:#141A1B; --surface2:#1A2122; --line:#293233; --line2:#212929;
+  --ink:#E3E9E8; --muted:#8A9897;
+  --accent:#3FC0CE; --accent-ink:#06191C; --accent-wash:#122E32;
+  --ok:#77C34B; --ok-wash:#17280F; --warn:#DCA43C; --warn-wash:#2E2310;
+  --crit:#E4776A; --crit-wash:#331714;
+  --terra:#0D1314; --rua:#47585A; --rua2:#263132; --costa:#42636A;
+  --sombra:0 1px 2px rgba(0,0,0,.45), 0 10px 28px -20px rgba(0,0,0,.9);
+}
+html,body{height:100%}
+body{margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
+  font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  display:flex; flex-direction:column; overflow:hidden}
+/* escolha */
+body.escolher{justify-content:center; align-items:center; overflow:auto; padding:28px 18px}
+.escolha-cx{width:100%; max-width:410px; display:flex; flex-direction:column; gap:12px}
+.escolha-cx .marca{font-family:var(--display); font-weight:700; font-size:27px;
+  letter-spacing:-.025em; display:flex; gap:11px; align-items:center}
+.escolha-cx .marca .pt{width:11px; height:11px; border-radius:50%;
+  background:var(--accent)}
+.escolha-cx>p{margin:3px 0 14px 22px; color:var(--muted); font-size:14.5px}
+.porta{display:flex; align-items:center; gap:15px; width:100%; text-align:left;
+  padding:18px 17px; border-radius:16px; border:1px solid var(--line);
+  background:var(--surface); box-shadow:var(--sombra); cursor:pointer;
+  font-family:var(--sans); color:var(--ink);
+  transition:border-color .15s ease, transform .12s ease}
+.porta:hover{border-color:var(--accent)}
+.porta:active{transform:scale(.988)}
+.porta:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.porta .ic{flex:none; width:48px; height:48px; border-radius:14px; display:grid;
+  place-items:center; background:var(--accent-wash); color:var(--accent)}
+.porta .ic svg{width:25px; height:25px; display:block}
+.porta .t{font-family:var(--display); font-size:17px; font-weight:700;
+  letter-spacing:-.012em; display:block}
+.porta .d{display:block; margin-top:3px; font-size:13.5px; color:var(--muted);
+  line-height:1.42}
+.porta .seta{margin-left:auto; color:var(--line); font-size:24px; font-weight:300;
+  line-height:1}
+.porta:hover .seta{color:var(--accent)}
+.escolha-cx .pe{margin:12px 2px 0; font-size:12.5px; color:var(--muted);
+  line-height:1.55}
+.escolha-cx .pe b{font-weight:600; color:var(--ink)}
+.trocar{flex:none; width:31px; height:31px; margin-left:7px; border-radius:9px;
+  border:1px solid var(--line); background:var(--surface2); color:var(--muted);
+  font-size:14px; cursor:pointer; display:grid; place-items:center;
+  font-family:var(--sans)}
+.trocar:hover{border-color:var(--accent); color:var(--accent)}
+/* só no condutor */
+body.condutor *{box-sizing:border-box}
+body.condutor button{font:inherit; color:inherit}
+body.condutor .num{font-family:var(--mono); font-variant-numeric:tabular-nums}
+body.condutor h1{font-family:var(--display); font-size:23px; margin:0; letter-spacing:-.025em}
+body.condutor h2{font-family:var(--display); font-size:15px; margin:0; letter-spacing:-.01em}
+body.condutor .topo{flex:none; background:var(--surface); border-bottom:1px solid var(--line);
+  padding:10px 16px; padding-top:calc(10px + env(safe-area-inset-top,0px));
+  display:flex; gap:9px; align-items:center}
+body.condutor .marca{font-family:var(--display); font-weight:700; font-size:15px; display:flex;
+  gap:7px; align-items:center}
+body.condutor .marca .pt{width:9px; height:9px; border-radius:50%; background:var(--accent)}
+body.condutor .topo .dir{margin-left:auto; display:flex; gap:6px}
+body.condutor .pill{font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px;
+  background:var(--surface2); color:var(--muted); border:1px solid var(--line2)}
+body.condutor .pill.viva{background:var(--ok-wash); color:var(--ok); border-color:transparent}
+body.condutor .pill.morta{background:var(--crit-wash); color:var(--crit); border-color:transparent}
+body.condutor main{flex:1; overflow-y:auto}
+body.condutor .col{max-width:560px; margin:0 auto; padding:16px; display:flex; flex-direction:column; gap:13px}
+body.condutor .col.cheia{height:100%}
+body.condutor .passo{font-size:11.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--accent)}
+body.condutor .sub{margin:0; font-size:14px; color:var(--muted)}
+body.condutor .rodape{flex:none; background:var(--surface); border-top:1px solid var(--line);
+  padding:11px 16px calc(13px + env(safe-area-inset-bottom,0px))}
+body.condutor .rodape .col{padding:0; gap:8px; max-width:560px}
+body.condutor .bt{display:block; width:100%; border:none; border-radius:12px; padding:16px;
+  font-family:var(--display); font-weight:600; font-size:16.5px; cursor:pointer}
+body.condutor .bt.pri{background:var(--accent); color:var(--accent-ink)}
+body.condutor .bt.sec{background:var(--surface2); color:var(--ink); border:1px solid var(--line)}
+body.condutor .bt.perigo{background:var(--crit); color:#fff}
+body.condutor .bt:disabled{opacity:.4}
+body.condutor .par{display:flex; gap:8px}
+body.condutor .par>*{flex:1}
+body.condutor .lig{background:none; border:none; color:var(--accent); font-weight:600; font-size:13.5px;
+  cursor:pointer; padding:8px; text-decoration:underline; text-underline-offset:3px;
+  width:100%}
+body.condutor .cartao{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px}
+body.condutor .cartao.bom{background:var(--ok-wash); border-color:color-mix(in srgb,var(--ok) 30%,transparent)}
+body.condutor .cartao.aviso{background:var(--warn-wash); border-color:color-mix(in srgb,var(--warn) 30%,transparent)}
+body.condutor .cartao.mau{background:var(--crit-wash); border-color:color-mix(in srgb,var(--crit) 30%,transparent)}
+body.condutor .cartao.nota{background:var(--accent-wash); border-color:color-mix(in srgb,var(--accent) 30%,transparent)}
+body.condutor .p-nota{font-size:12.5px; color:var(--muted); line-height:1.55; margin:0}
+body.condutor .p-nota b{color:var(--ink)}
+body.condutor .campo{display:block}
+body.condutor .campo .lb{display:block; font-size:11.5px; font-weight:700; letter-spacing:.07em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:6px}
+body.condutor .campo .aj{display:block; font-size:12.5px; color:var(--muted); margin-top:6px}
+body.condutor input{width:100%; padding:14px; border-radius:11px; border:1px solid var(--line);
+  background:var(--surface); color:var(--ink); font-family:var(--mono); font-size:19px;
+  font-weight:500; -moz-appearance:textfield}
+body.condutor input[type=text]{font-family:var(--sans); font-size:16px}
+body.condutor input::-webkit-outer-spin-button, body.condutor input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+body.condutor input:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+body.condutor .escolha{display:flex; gap:12px; align-items:center; width:100%; text-align:left;
+  background:var(--surface); border:1px solid var(--line); border-radius:12px;
+  padding:14px; cursor:pointer}
+body.condutor .escolha:hover{border-color:var(--accent)}
+body.condutor .escolha.on{border-color:var(--accent); background:var(--accent-wash)}
+body.condutor .escolha .mat{font-family:var(--mono); font-weight:600; font-size:17px}
+body.condutor .escolha .s{font-size:12.5px; color:var(--muted)}
+body.condutor .escolha .d{margin-left:auto; text-align:right; font-family:var(--mono); font-size:14px}
+body.condutor .escolha .d small{display:block; font-family:var(--sans); font-size:11px; color:var(--muted)}
+body.condutor .foto{position:relative; display:block; border:2px dashed var(--line); border-radius:12px;
+  padding:26px 14px; text-align:center; background:var(--surface2); cursor:pointer}
+body.condutor .foto.feita{border-style:solid; border-color:var(--ok); padding:0; overflow:hidden}
+body.condutor .foto img{width:100%; display:block; max-height:230px; object-fit:cover}
+body.condutor .foto input{position:absolute; inset:0; opacity:0; width:100%; height:100%}
+body.condutor .foto .ic{font-size:30px}
+body.condutor .foto .t{font-weight:600; margin-top:8px; font-size:15px}
+body.condutor .foto .t2{font-size:12.5px; color:var(--muted); margin-top:3px}
+body.condutor .foto .re{position:absolute; right:8px; bottom:8px; background:rgba(0,0,0,.72); color:#fff;
+  font-size:11.5px; font-weight:600; padding:5px 10px; border-radius:7px}
+body.condutor .ou{text-align:center; font-size:12px; font-weight:700; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--muted); margin:-2px 0}
+body.condutor /* volante */
+.mapinha{position:relative; height:200px; border-radius:14px; overflow:hidden;
+  border:1px solid var(--line); background:var(--surface2)}
+body.condutor .turno-lin{display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+  padding:14px 15px; border-radius:14px; border:1px solid var(--line);
+  background:var(--surface); box-shadow:var(--sombra); cursor:pointer;
+  font-family:var(--sans); color:var(--ink)}
+body.condutor .turno-lin:hover{border-color:var(--accent)}
+body.condutor .turno-lin .selo{margin-left:auto; font-size:11px; font-weight:700;
+  padding:3px 8px; border-radius:6px; white-space:nowrap}
+body.condutor .turno-lin .seta{color:var(--muted); font-size:19px}
+body.condutor .volante{position:relative; flex:1; min-height:320px; border-radius:16px; overflow:hidden;
+  border:1px solid var(--line); background:var(--surface2); box-shadow:var(--sombra)}
+body.condutor .mapa{position:absolute; inset:0; width:100%; height:100%; display:block}
+body.condutor .hud{position:absolute; top:0; left:0; right:0; padding:14px 16px 0; display:flex;
+  align-items:flex-start; justify-content:space-between; pointer-events:none}
+body.condutor .vel{display:flex; align-items:baseline; gap:7px; padding:8px 14px 7px; border-radius:13px;
+  background:color-mix(in srgb,var(--surface) 84%,transparent); backdrop-filter:blur(9px);
+  border:1px solid var(--line2)}
+body.condutor .vel .n{font-family:var(--mono); font-size:46px; font-weight:600; line-height:1;
+  letter-spacing:-.05em}
+body.condutor .vel .u{font-size:11.5px; font-weight:700; color:var(--muted); letter-spacing:.07em}
+body.condutor .arco{width:46px; height:27px; margin-left:2px; align-self:center}
+body.condutor .onde{padding:7px 13px; border-radius:11px; font-size:13px; font-weight:600;
+  letter-spacing:.01em; background:color-mix(in srgb,var(--surface) 84%,transparent);
+  backdrop-filter:blur(9px); border:1px solid var(--line2); color:var(--muted)}
+body.condutor .baixo{position:absolute; left:0; right:0; bottom:0; display:grid;
+  grid-template-columns:repeat(3,1fr);
+  background:color-mix(in srgb,var(--surface) 90%,transparent); backdrop-filter:blur(9px);
+  border-top:1px solid var(--line2)}
+body.condutor .baixo>div{padding:10px 6px; text-align:center}
+body.condutor .baixo>div+div{border-left:1px solid var(--line2)}
+body.condutor .baixo b{display:block; font-family:var(--mono); font-size:19px; font-weight:500}
+body.condutor .baixo span{font-size:10px; color:var(--muted); text-transform:uppercase;
+  letter-spacing:.06em; font-weight:700}
+body.condutor .rec{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--crit);
+  margin-right:5px; vertical-align:middle; animation:pulsa-condutor 2s ease-in-out infinite}
+@keyframes pulsa-condutor{0%,100%{opacity:1}50%{opacity:.2}}
+body.condutor .vf{display:flex; gap:11px; padding:11px 0; border-bottom:1px solid var(--line2);
+  align-items:flex-start}
+body.condutor .vf:last-child{border-bottom:none}
+body.condutor .vf .mk{flex:none; width:21px; height:21px; border-radius:50%; display:grid;
+  place-items:center; font-size:12px; font-weight:700; margin-top:1px}
+body.condutor .vf .mk.s{background:var(--ok-wash); color:var(--ok)}
+body.condutor .vf .mk.n{background:var(--crit-wash); color:var(--crit)}
+body.condutor .vf .t1{font-size:13.5px; font-weight:600}
+body.condutor .vf .t2{font-size:12px; color:var(--muted)}
+body.condutor .vf .vl{font-family:var(--mono); font-size:13px; white-space:nowrap; color:var(--muted)}
+body.condutor .vazio{text-align:center; padding:24px; color:var(--muted); font-size:13.5px}
+@media (prefers-reduced-motion:reduce){body.condutor *{animation:none!important}}
+/* só no patrão */
+body.dono *{box-sizing:border-box}
+body.dono button{font:inherit; color:inherit}
+body.dono .num{font-family:var(--mono); font-variant-numeric:tabular-nums}
+body.dono h1{font-family:var(--display); font-size:22px; margin:0; letter-spacing:-.025em}
+body.dono h2{font-family:var(--display); font-size:15.5px; margin:0; letter-spacing:-.01em}
+body.dono h3{font-family:var(--display); font-size:13px; margin:0; letter-spacing:.02em;
+  text-transform:uppercase; color:var(--muted)}
+body.dono .topo{flex:none; background:var(--surface); border-bottom:1px solid var(--line);
+  padding:10px 16px; padding-top:calc(10px + env(safe-area-inset-top,0px));
+  display:flex; gap:10px; align-items:center}
+body.dono .voltar{background:none; border:none; cursor:pointer; font-size:19px; line-height:1;
+  padding:0 2px; color:var(--accent)}
+body.dono .marca{font-family:var(--display); font-weight:700; font-size:15px; display:flex;
+  gap:7px; align-items:center}
+body.dono .marca .pt{width:9px; height:9px; border-radius:50%; background:var(--accent)}
+body.dono .topo .dir{margin-left:auto; display:flex; gap:6px; align-items:center}
+body.dono .pill{font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px;
+  background:var(--surface2); color:var(--muted); border:1px solid var(--line2)}
+body.dono .pill.viva{background:var(--ok-wash); color:var(--ok); border-color:transparent}
+body.dono main{flex:1; overflow-y:auto}
+body.dono .col{max-width:640px; margin:0 auto; padding:16px; display:flex; flex-direction:column;
+  gap:12px}
+body.dono .sub{margin:0; font-size:13.5px; color:var(--muted)}
+body.dono .nav{flex:none; background:var(--surface); border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom,0px)}
+body.dono .nav .in{max-width:640px; margin:0 auto; display:flex}
+body.dono .nav button{flex:1; border:none; background:none; padding:9px 3px 8px; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:3px; color:var(--muted);
+  font-size:10px; font-weight:600; position:relative}
+body.dono .nav button[aria-current="page"]{color:var(--accent)}
+body.dono .nav .ic{font-size:18px; line-height:1}
+body.dono .nav .bolha{position:absolute; top:4px; left:calc(50% + 6px); min-width:16px; height:16px;
+  border-radius:9px; background:var(--crit); color:#fff; font-size:10px; font-weight:700;
+  display:grid; place-items:center; padding:0 4px}
+body.dono .cartao{background:var(--surface); border:1px solid var(--line); border-radius:12px;
+  padding:14px}
+body.dono .cartao.bom{background:var(--ok-wash); border-color:color-mix(in srgb,var(--ok) 30%,transparent)}
+body.dono .cartao.aviso{background:var(--warn-wash); border-color:color-mix(in srgb,var(--warn) 30%,transparent)}
+body.dono .cartao.mau{background:var(--crit-wash); border-color:color-mix(in srgb,var(--crit) 30%,transparent)}
+body.dono .cartao.nota{background:var(--accent-wash); border-color:color-mix(in srgb,var(--accent) 30%,transparent)}
+body.dono .p-nota{font-size:12.5px; color:var(--muted); line-height:1.55; margin:0}
+body.dono .p-nota b{color:var(--ink)}
+body.dono .bt{display:block; width:100%; border:none; border-radius:11px; padding:14px;
+  font-family:var(--display); font-weight:600; font-size:15.5px; cursor:pointer}
+body.dono .bt.pri{background:var(--accent); color:var(--accent-ink)}
+body.dono .bt.sec{background:var(--surface2); color:var(--ink); border:1px solid var(--line)}
+body.dono .bt.perigo{background:var(--crit-wash); color:var(--crit);
+  border:1px solid color-mix(in srgb,var(--crit) 30%,transparent)}
+body.dono .bt.pq{padding:10px; font-size:13.5px}
+body.dono .bt:disabled{opacity:.4}
+body.dono .par{display:flex; gap:8px}
+body.dono .par>*{flex:1}
+body.dono a.bt{display:flex; align-items:center; justify-content:center; text-decoration:none}
+body.dono .passos .passo{display:flex; align-items:center; gap:10px; padding:9px 0;
+  border-top:1px solid var(--line)}
+body.dono .passos .passo .n{width:26px; height:26px; border-radius:50%; flex:none;
+  display:grid; place-items:center; font:600 13px var(--mono);
+  background:var(--accent-wash); color:var(--accent)}
+body.dono .passos .passo.feito .n{background:var(--accent); color:var(--accent-ink)}
+body.dono .passos .passo.feito b{text-decoration:line-through; color:var(--muted)}
+body.dono .passos .passo .s{font-size:12.5px; color:var(--muted)}
+body.dono .passos .passo .bt{width:auto; padding:8px 14px; margin:0}
+body.dono .lig{background:none; border:none; color:var(--accent); font-weight:600; font-size:13.5px;
+  cursor:pointer; padding:7px 0; text-decoration:underline; text-underline-offset:3px}
+body.dono .campo{display:block}
+body.dono .campo .lb{display:block; font-size:11px; font-weight:700; letter-spacing:.07em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:5px}
+body.dono .campo .aj{display:block; font-size:12px; color:var(--muted); margin-top:5px}
+body.dono input{width:100%; padding:12px 13px; border-radius:10px; border:1px solid var(--line);
+  background:var(--surface); color:var(--ink); font-family:var(--mono); font-size:17px;
+  font-weight:500; -moz-appearance:textfield}
+body.dono input[type=text]{font-family:var(--sans); font-size:15.5px}
+body.dono input::-webkit-outer-spin-button, body.dono input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+body.dono input:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+body.dono .item{display:flex; gap:11px; align-items:center; width:100%; text-align:left;
+  background:var(--surface); border:1px solid var(--line); border-radius:11px;
+  padding:12px 13px; cursor:pointer}
+body.dono .item:hover{border-color:var(--accent)}
+body.dono .item .p{font-weight:600; font-size:14.5px}
+body.dono .item .s{font-size:12.5px; color:var(--muted)}
+body.dono .item .d{margin-left:auto; text-align:right}
+body.dono .item .seta{margin-left:auto; color:var(--muted); font-size:17px}
+body.dono .selo{font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:6px;
+  white-space:nowrap; display:inline-block}
+body.dono .selo.s{background:var(--ok-wash); color:var(--ok)}
+body.dono .selo.n{background:var(--warn-wash); color:var(--warn)}
+body.dono .selo.c{background:var(--crit-wash); color:var(--crit)}
+body.dono .selo.i{background:var(--surface2); color:var(--muted)}
+body.dono .selo.vivo{background:var(--ok-wash); color:var(--ok)}
+body.dono .ponto{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--ok);
+  margin-right:5px; vertical-align:middle; animation:pulsa-dono 2s ease-in-out infinite}
+@keyframes pulsa-dono{0%,100%{opacity:1}50%{opacity:.25}}
+body.dono .tiles{display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line2);
+  border:1px solid var(--line2); border-radius:12px; overflow:hidden}
+body.dono .tiles>div{background:var(--surface); padding:12px 13px}
+body.dono .tiles b{display:block; font-family:var(--mono); font-size:22px; font-weight:500;
+  letter-spacing:-.02em; line-height:1.15}
+body.dono .tiles span{font-size:10px; color:var(--muted); text-transform:uppercase;
+  letter-spacing:.06em; font-weight:700}
+body.dono .tiles .mau b{color:var(--crit)}
+body.dono .tiles .bom b{color:var(--ok)}
+body.dono input.erro{border-color:var(--crit); background:var(--crit-wash)}
+body.dono .fotos{display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:9px}
+body.dono .foto-q{display:block; width:100%; padding:0; border:1px solid var(--line);
+  border-radius:11px; overflow:hidden; background:var(--surface2); cursor:pointer;
+  text-align:left; font-family:var(--sans)}
+body.dono .foto-q:hover{border-color:var(--accent)}
+body.dono .foto-q img{display:block; width:100%; height:110px; object-fit:cover}
+body.dono .foto-q span{display:block; padding:7px 9px; font-size:11.5px; color:var(--muted);
+  line-height:1.35}
+body.dono .lupa{position:fixed; inset:0; z-index:50; background:rgba(0,0,0,.88);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:14px; padding:18px; cursor:zoom-out}
+body.dono .lupa img{max-width:100%; max-height:82vh; object-fit:contain; border-radius:8px}
+body.dono .lupa-x{color:#fff; font-size:14px; font-weight:600}
+body.dono .item.zumbi{border-color:color-mix(in srgb,var(--warn) 45%,transparent);
+  background:var(--warn-wash)}
+body.dono .parado{display:inline-block; width:7px; height:7px; border-radius:50%;
+  background:var(--warn); margin-right:5px; vertical-align:middle}
+body.dono .carro-mapa, body.dono .posto-mapa{cursor:pointer}
+body.dono .item.mes{align-items:flex-start; padding:13px 14px}
+body.dono .mes-nums{display:grid; grid-template-columns:repeat(4,auto); gap:1px 16px;
+  margin-top:7px; justify-content:start}
+body.dono .mes-nums b{font-family:var(--mono); font-size:16px; font-weight:500;
+  grid-row:1; text-align:left}
+body.dono .mes-nums i{font-style:normal; font-size:10.5px; color:var(--muted); grid-row:2;
+  text-transform:uppercase; letter-spacing:.05em; font-weight:700}
+body.dono .mes-mau{display:block; margin-top:9px; font-size:12.5px; font-weight:600;
+  color:var(--crit)}
+body.dono .mes-bom{display:block; margin-top:9px; font-size:12.5px; color:var(--ok)}
+body.dono .carro-mapa:focus-visible, body.dono .posto-mapa:focus-visible{outline:2px solid var(--accent)}
+body.dono .carro-cx{padding-top:13px; border-color:var(--accent); animation:entra-dono .18s ease}
+@keyframes entra-dono{from{opacity:0; transform:translateY(-5px)}to{opacity:1}}
+body.dono .carro-topo{display:flex; align-items:flex-start; gap:10px; margin-bottom:3px}
+body.dono .carro-topo>div{flex:1; line-height:1.45}
+body.dono .carro-topo .s{font-size:12.5px; color:var(--muted)}
+body.dono .lig.forte{font-family:var(--mono); font-weight:600; font-size:15.5px}
+body.dono .fechar{flex:none; width:29px; height:29px; border-radius:9px; border:1px solid var(--line);
+  background:var(--surface2); color:var(--muted); font-size:17px; line-height:1;
+  cursor:pointer; display:grid; place-items:center}
+body.dono .fechar:hover{border-color:var(--crit); color:var(--crit)}
+body.dono .carro-onde{margin:2px 0 11px}
+body.dono .tiles.tres{grid-template-columns:repeat(3,1fr); margin:0 0 10px}
+body.dono .tiles.tres>div{padding:9px 6px}
+body.dono .tiles.tres b{font-size:17px}
+body.dono .tiles.clic>div[data-tile]{cursor:pointer}
+body.dono .tiles.clic>div[data-tile]:hover{background:var(--surface2)}
+body.dono .item.fino{padding:9px 12px; margin-top:6px}
+body.dono .item.alerta-cx{margin-top:8px; border-color:var(--crit)}
+body.dono .item.alerta-cx .p{color:var(--crit)}
+body.dono .dica{margin:9px 2px 0; font-size:12.5px; color:var(--muted); text-align:center}
+body.dono .mapa{width:100%; display:block; border-radius:12px; background:var(--surface2);
+  border:1px solid var(--line)}
+body.dono .mapa-grande{height:auto}
+body.dono .replay{display:flex; gap:8px; align-items:center; margin-top:9px}
+body.dono .replay .barra{flex:1; height:5px; border-radius:3px; background:var(--line2);
+  overflow:hidden}
+body.dono .replay .barra span{display:block; height:100%; background:var(--accent); border-radius:3px}
+body.dono .replay .t{font-family:var(--mono); font-size:12px; color:var(--muted); min-width:44px;
+  text-align:right}
+body.dono .vf{display:flex; gap:11px; padding:11px 0; border-bottom:1px solid var(--line2);
+  align-items:flex-start}
+body.dono .vf:last-child{border-bottom:none}
+body.dono .vf .mk{flex:none; width:21px; height:21px; border-radius:50%; display:grid;
+  place-items:center; font-size:12px; font-weight:700; margin-top:1px}
+body.dono .vf .mk.s{background:var(--ok-wash); color:var(--ok)}
+body.dono .vf .mk.n{background:var(--crit-wash); color:var(--crit)}
+body.dono .vf .t1{font-size:13.5px; font-weight:600}
+body.dono .vf .t2{font-size:12px; color:var(--muted)}
+body.dono .vf .vl{font-family:var(--mono); font-size:13px; white-space:nowrap; color:var(--muted)}
+body.dono .linhas{display:flex; flex-direction:column}
+body.dono .linhas>div{display:flex; gap:10px; padding:9px 0; border-bottom:1px solid var(--line2);
+  font-size:13.5px; align-items:baseline}
+body.dono .linhas>div:last-child{border-bottom:none}
+body.dono .linhas .k{color:var(--muted); font-size:12.5px}
+body.dono .linhas .v{margin-left:auto; font-family:var(--mono); font-weight:500}
+body.dono .barra-mini{height:6px; border-radius:3px; background:var(--line2); overflow:hidden;
+  margin-top:6px}
+body.dono .barra-mini span{display:block; height:100%; border-radius:3px}
+body.dono .scroll{overflow-x:auto; border:1px solid var(--line); border-radius:11px;
+  background:var(--surface)}
+body.dono table{border-collapse:collapse; width:100%; min-width:440px; font-size:13.5px}
+body.dono th{text-align:left; font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--muted); font-weight:700; padding:9px 12px; background:var(--surface2);
+  border-bottom:1px solid var(--line); white-space:nowrap}
+body.dono td{padding:9px 12px; border-bottom:1px solid var(--line2)}
+body.dono tbody tr:last-child td{border-bottom:none}
+body.dono tbody tr{cursor:pointer}
+body.dono tbody tr:hover td{background:var(--surface2)}
+body.dono td.n{font-family:var(--mono); text-align:right; white-space:nowrap}
+body.dono .vazio{text-align:center; padding:24px; color:var(--muted); font-size:13.5px}
+@media (prefers-reduced-motion:reduce){body.dono *{animation:none!important}}

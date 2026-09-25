@@ -283,6 +283,27 @@ PORTEIRO = '''
   var guardado=null, ensaio=null;
   try{ guardado=localStorage.getItem(QUEM); ensaio=localStorage.getItem(DEMO); }
   catch(e){}
+  /* A porta pode vir escolhida no endereço. É assim que o link que o
+     patrão manda ao condutor (…#condutor) abre logo no ecrã de entrar
+     dele, e que os botões da página principal levam cada um ao seu
+     sítio (#dono, #criar, #experimentar). Lê-se uma vez e apaga-se,
+     para um recarregar não voltar a mandar no que o telemóvel já
+     escolheu. */
+  var pedido=String(location.hash||'').replace(/^#/,'');
+  try{
+    if(pedido==='condutor'||pedido==='dono'||pedido==='criar'){
+      localStorage.removeItem(DEMO); ensaio=null;
+      guardado = pedido==='criar' ? 'dono' : pedido;
+      localStorage.setItem(QUEM, guardado);
+      if(pedido==='criar') localStorage.setItem('fleetcv-quero-criar','1');
+    }
+    if(pedido==='experimentar'){
+      localStorage.removeItem(QUEM); localStorage.setItem(DEMO,'1');
+      guardado=null; ensaio='1';
+    }
+  }catch(e){}
+  if(pedido) try{ history.replaceState(null,'',location.pathname+location.search); }
+             catch(e){}
   if(guardado==='condutor'||guardado==='dono') arrancar(guardado);
   else if(ensaio) escolherPapelDoEnsaio();
   else perguntar();
@@ -356,10 +377,66 @@ io.open(SAIDA, 'w', encoding='utf-8').write(saida)
 print('%-22s %6d bytes  (condutor %d + dono %d + mapa %d)'
       % (SAIDA, len(saida.encode('utf-8')), len(soC), len(soD), len(mapa)))
 
-# A mesma página, pronta para o Vercel. É o mesmo ficheiro: o que
-# muda é só o fleetcv-config.js que fica ao lado dela lá.
+# ── e a mesma coisa aos bocados, para o Vercel ───────────────────
+#
+# O ficheiro único continua a existir: é o que se abre com dois cliques
+# e é contra ele que os testes correm. Mas para PUBLICAR ele é mau: 270
+# kB numa peça só, que o telemóvel tem de trazer inteira de cada vez
+# que se muda uma vírgula.
+#
+# Aos bocados, cada peça é guardada à parte pelo navegador. O mapa da
+# Praia são 113 kB que praticamente nunca mudam; mexer no painel do
+# patrão passa a custar 80 kB em vez de 270.
+#
+# No site, a página principal fica em / e a aplicação em /app. A ordem
+# das etiquetas é que manda: os navegadores correm os <script> pela
+# ordem em que aparecem, e o porteiro tem de ser o último.
+PEDACOS = [
+    ('estilo.css',  lambda: u'/* comum */\n%s\n/* escolha */\n%s\n'
+                            u'/* só no condutor */\n%s\n'
+                            u'/* só no patrão */\n%s\n'
+                            % (comumC, CHOOSER_CSS.strip(), soC, soD)),
+    ('mapa.js',     lambda: mapa.strip()),
+    ('condutor.js', lambda: funcao(progC, 'appCondutor')),
+    ('dono.js',     lambda: funcao(progD, 'appDono')),
+    ('porteiro.js', lambda: (PORTEIRO % {
+        'corpoC': json.dumps(com_trocar(corpoC)),
+        'corpoD': json.dumps(com_trocar(corpoD))}).strip()),
+]
+
+CASCA = u"""<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0B7F8E">
+<title>FleetCV</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="./estilo.css?v=%(v)s">
+
+<script src="./fleetcv-config.js" onerror="void 0"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"
+        onerror="void 0"></script>
+
+<body>
+<script src="./mapa.js?v=%(v)s"></script>
+<script src="./condutor.js?v=%(v)s"></script>
+<script src="./dono.js?v=%(v)s"></script>
+<script src="./porteiro.js?v=%(v)s"></script>
+"""
+
 SITE = os.path.join('..', 'site')
-if os.path.isdir(SITE):
-    io.open(os.path.join(SITE, 'index.html'), 'w', encoding='utf-8').write(saida)
-    print('%-22s %6d bytes  (a mesma, para o Vercel)'
-          % (os.path.join(SITE, 'index.html'), len(saida.encode('utf-8'))))
+if os.path.isfile(os.path.join(SITE, 'vercel.json')):
+    import hashlib
+    feitos = [(nome, faz()) for nome, faz in PEDACOS]
+    # a versão muda quando muda alguma peça: o navegador guarda as peças
+    # à vontade e, no dia em que mudam, vai buscar as novas
+    v = hashlib.sha1(u''.join(c for _, c in feitos).encode('utf-8')).hexdigest()[:10]
+    casca = CASCA % {'v': v}
+    io.open(os.path.join(SITE, 'app.html'), 'w', encoding='utf-8').write(casca)
+    print('%-22s %6d bytes  (a casca da aplicação, em /app)'
+          % (os.path.join(SITE, 'app.html'), len(casca.encode('utf-8'))))
+    for nome, corpo in feitos:
+        io.open(os.path.join(SITE, nome), 'w', encoding='utf-8').write(corpo)
+        print('%-22s %6d bytes' % (os.path.join(SITE, nome),
+                                   len(corpo.encode('utf-8'))))

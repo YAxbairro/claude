@@ -66,6 +66,18 @@ SAIDA="$CASA/saida.txt"
 psql -h "$CASA" -p "$PORTA" -U postgres -q -f "$AQUI/provas.sql" > "$SAIDA" 2>&1
 grep -E '·' "$SAIDA" | sed -E 's/^(psql:[^ ]* )?NOTICE: +//'
 
+# Uma base da versão de uma frota só, com dados e telemóveis já
+# dentro, a receber a versão nova por cima. É o que vai acontecer à
+# base que está no ar — e tem de acontecer sem ninguém dar por isso.
+echo
+echo "── a passagem de uma base antiga para a nova ──"
+psql -h "$CASA" -p "$PORTA" -U postgres -q -c 'create database passagem' >/dev/null 2>&1
+Q="psql -h $CASA -p $PORTA -U postgres -q -d passagem"
+$Q -v ON_ERROR_STOP=1 -f "$AQUI/_auth_falso.sql" >/dev/null 2>&1 \
+  || { echo "Falhou a preparar a base da passagem."; exit 2; }
+$Q -f "$AQUI/provas_passagem.sql" >> "$SAIDA" 2>&1
+grep -E '^P[0-9]+ ·' "$SAIDA" | sed -E 's/^(psql:[^ ]* )?NOTICE: +//'
+
 MAL=$(grep -c '(MAL)' "$SAIDA" || true)
 echo
 if [ "$MAL" -gt 0 ]; then

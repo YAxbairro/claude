@@ -115,9 +115,14 @@ ok('e entra no histórico do patrão',
    await ate(async()=>(await txt()).includes('3.200')));
 
 /* ── AS REGRAS: é isto que só a base de dados consegue ──── */
+/* Com a MESMA sessão do painel do condutor — com uma sessão vazia a
+   base recusava tudo por não saber quem era, e a prova passava sem
+   provar nada. */
 const tentar = async (pag, corpo) => pag.evaluate(async(c)=>{
-  const sb=window.supabase.createClient('','');
-  const r=await sb.from('docs').upsert(c);
+  const sb=window.supabase.createClient('https://x.supabase.co','k',
+    {auth:{storageKey:'fleetcv-sb-condutor'}});
+  await sb.auth.getSession();
+  const r=await sb.from('docs').upsert(c, {onConflict:'frota,coleccao,id'});
   return (r.error&&r.error.message)||'DEIXOU PASSAR'; }, corpo);
 
 ok('um condutor não mexe na frota',
@@ -128,12 +133,12 @@ ok('nem escreve o turno de outro condutor',
      corpo:{id:'x9',condutorId:'m1',inicio:1}}))!=='DEIXOU PASSAR');
 /* o turno que a Maria acabou de fechar, tal como está na base */
 const fechado = await co.evaluate(()=>{
-  const ses=localStorage.getItem('sb-sessao');
+  const ses=localStorage.getItem('fleetcv-sb-condutor');
   const pf=JSON.parse(localStorage.getItem('sb:perfil:'+ses)||'null');
   let melhor=null;
   for(let i=0;i<localStorage.length;i++){
     const k=localStorage.key(i);
-    if(!k||k.indexOf('sb:docs:turnos:')!==0) continue;
+    if(!k||!pf||k.indexOf('sb:d|'+pf.frota+'|turnos|')!==0) continue;
     const c=JSON.parse(localStorage.getItem(k)||'null');
     if(!c||!c.fim||!pf||c.condutorId!==pf.quem) continue;
     if(!melhor||c.fim>melhor.fim) melhor=c; }
@@ -178,24 +183,30 @@ ok('e nem o código certo abre enquanto está de castigo',
    simula-se um ano de trabalho. */
 const ctx3=await b.newContext({viewport:{width:390,height:840}});
 await ctx3.addInitScript(()=>{
+  /* só na primeira vez: o addInitScript corre em cada página */
+  if(localStorage.getItem('sb:frotas')) return;
   const P='sb:', velho=new Date(Date.now()-365*864e5).toISOString();
   const pr=(k,v)=>localStorage.setItem(P+k, JSON.stringify(v));
-  pr('docs:frota:dono',{email:'patrao@exemplo.cv',codigo:'9999',nome:'Proprietário'});
-  pr('docs:frota:config',{nome:'Táxis Praia, Lda',precoLitro:145});
-  pr('docs:frota:carros',{lista:[{id:'c1',matricula:'ST-28-ED',marca:'Toyota',
-    modelo:'Corolla',ano:2015,deposito:50,km:120000,estado:'ACTIVO',
-    proxOleoKm:125000}]});
-  pr('docs:frota:condutores',{lista:[{id:'m1',nome:'António Semedo',
-    email:'antonio@exemplo.cv',codigo:'1234',estado:'ACTIVO'}]});
-  ['dono','config','carros','condutores'].forEach(k=>
-    localStorage.setItem(P+'quando:frota:'+k, JSON.stringify(velho)));
+  pr('frotas',{f1:{id:'f1',nome:'Táxis Praia, Lda',plano:'fundador',ate:null}});
+  /* uma matrícula que a semente do imitador não tem: se ela aparecer,
+     é porque a frota velha foi mesmo lida */
+  const cs=[{id:'m1',nome:'António Semedo',email:'antonio@exemplo.cv',
+             codigo:'1234',estado:'ACTIVO'}];
+  const doc={dono:{email:'patrao@exemplo.cv',codigo:'9999',nome:'Proprietário'},
+    config:{nome:'Táxis Praia, Lda',precoLitro:145},
+    carros:{lista:[{id:'c1',matricula:'ST-99-VL',marca:'Toyota',
+      modelo:'Corolla',ano:2015,deposito:50,km:120000,estado:'ACTIVO',
+      proxOleoKm:125000}]},
+    condutores:{lista:cs},
+    equipa:{lista:cs.map(x=>({id:x.id,nome:x.nome,estado:x.estado}))}};
+  for(const k in doc){ pr('d|f1|frota|'+k, doc[k]); pr('q|f1|frota|'+k, velho); }
   /* 800 turnos, todos mais recentes do que a frota */
   for(let i=0;i<800;i++){
     const q=new Date(Date.now()-(800-i)*36e5).toISOString();
-    pr('docs:turnos:t'+i, {id:'t'+i, condutorId:'m1', carroId:'c1',
-      matricula:'ST-28-ED', condutor:'António Semedo',
+    pr('d|f1|turnos|t'+i, {id:'t'+i, condutorId:'m1', carroId:'c1',
+      matricula:'ST-99-VL', condutor:'António Semedo',
       inicio:Date.parse(q), fim:Date.parse(q)+3e6, kmGps:40, abast:[]});
-    localStorage.setItem(P+'quando:turnos:t'+i, JSON.stringify(q)); }
+    pr('q|f1|turnos|t'+i, q); }
 });
 const ve=await ctx3.newPage();
 ve.on('pageerror',e=>err.push('frota velha: '+e.message));
@@ -206,8 +217,8 @@ await ve.fill('#i-email','antonio@exemplo.cv'); await ve.fill('#i-cod','1234');
 await ve.click('[data-f="entrar"]'); await ve.waitForTimeout(2500);
 const tv=await ve.textContent('#ecra');
 ok('com 800 turnos guardados, o condutor continua a ver os carros',
-   tv.includes('ST-28-ED'),
-   tv.includes('ST-28-ED')?'':'ecrã: '+tv.slice(0,90).replace(/\s+/g,' '));
+   tv.includes('ST-99-VL'),
+   tv.includes('ST-99-VL')?'':'ecrã: '+tv.slice(0,90).replace(/\s+/g,' '));
 
 /* ── ABRIR A APLICAÇÃO NUM SÍTIO SEM REDE ─────────────────── */
 /* Na Praia há sítios sem rede. Se o condutor abre a aplicação num
@@ -219,7 +230,7 @@ const guardado=await ve.evaluate(()=>({
   copia:   localStorage.getItem('fleetcv-supa-copia'),
   condutor:localStorage.getItem('fleetcv-condutor'),
   quem:    localStorage.getItem('fleetcv-quem'),
-  sessao:  localStorage.getItem('sb-sessao') }));
+  sessao:  localStorage.getItem('fleetcv-sb-condutor') }));
 const cp=guardado.copia?JSON.parse(guardado.copia):null;
 ok('o telemóvel guardou a frota e quem é',
    !!(cp && cp.eu && cp.frota && Object.keys(cp.frota).length>=3),
@@ -233,7 +244,7 @@ await ctx4.addInitScript(([g])=>{
   for(const k of ['copia','condutor','quem'])
     if(g[k]) localStorage.setItem(
       k==='copia'?'fleetcv-supa-copia':'fleetcv-'+k, g[k]);
-  if(g.sessao) localStorage.setItem('sb-sessao', g.sessao);
+  if(g.sessao) localStorage.setItem('fleetcv-sb-condutor', g.sessao);
   /* ...e a base de dados sem dar sinal, como num sítio sem cobertura */
   const esperar=setInterval(()=>{
     if(!window.supabase||!window.supabase.createClient) return;
@@ -255,7 +266,7 @@ await sr.click('[data-quem="condutor"]').catch(()=>{});
 await sr.waitForTimeout(1500);
 const tsr=await sr.textContent('#ecra');
 ok('sem rede, o condutor continua a ver os carros',
-   /Que carro vai levar/.test(tsr) && /ST-28-ED/.test(tsr),
+   /Que carro vai levar/.test(tsr) && /ST-99-VL/.test(tsr),
    await sr.evaluate(()=>Nuvem.estado()));
 /* o selo vive no cabeçalho, não no ecrã */
 const topo=await sr.textContent('#dir').catch(()=>'');

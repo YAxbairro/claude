@@ -1,10 +1,21 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
+  "redirects": [
+    { "source": "/inicio", "destination": "/", "permanent": false }
+  ],
   "headers": [
     {
       "source": "/fleetcv-config.js",
       "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+    },
+    {
+      "source": "/(mapa|condutor|dono|porteiro).js",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/estilo.css",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
     },
     {
       "source": "/(.*)",

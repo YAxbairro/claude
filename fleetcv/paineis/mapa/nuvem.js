@@ -109,6 +109,15 @@ function lojaDoSupabase(sb){
     if(/fetch|network|timeout/i.test(e.message||'')) c='unavailable';
     return Object.assign(new Error(e.message||'erro'), {code:c, porque:e.message}); };
 
+  /* O condutor não lê a lista dos condutores — leva os códigos de
+     todos, e com eles entrava como qualquer colega. Lê a 'equipa', que
+     a base faz sozinha com os nomes e mais nada. Aqui dentro ela passa
+     a chamar-se 'condutores', e o resto da aplicação nem sabe. O patrão
+     lê a verdadeira e ignora a outra. */
+  var comoSeChama=function(c, id){
+    if(c!=='frota' || id!=='equipa') return id;
+    return (eu && eu.papel==='dono') ? null : 'condutores'; };
+
   /* Traz tudo de uma vez. Em duas perguntas, e não numa, de propósito:
      a frota são quatro documentos que quase nunca mudam, e os turnos
      são milhares. Numa pergunta só, ordenada pela data, bastavam 600
@@ -134,7 +143,9 @@ function lojaDoSupabase(sb){
          antigos só se juntam, nunca se apagam. */
       if(doZero) espelho={};
       espelho.frota={}; espelho.vivo={};
-      (t.data||[]).forEach(function(x){ (espelho[x.coleccao]=espelho[x.coleccao]||{})[x.id]=x.corpo; });
+      (t.data||[]).forEach(function(x){
+        var id=comoSeChama(x.coleccao, x.id); if(!id) return;
+        (espelho[x.coleccao]=espelho[x.coleccao]||{})[id]=x.corpo; });
       (u.data||[]).forEach(function(x){ (espelho.turnos=espelho.turnos||{})[x.id]=x.corpo; });
       ultimaLeitura=Date.now();
       Object.keys(espelho).forEach(tocar);
@@ -177,6 +188,40 @@ function lojaDoSupabase(sb){
           if(r.data && r.data.erro) throw Object.assign(new Error(r.data.erro),
             {code:'invalid_argument', porque:r.data.erro});
           eu=r.data; return r.data; }); },
+    /* criar conta: uma frota nova, e já lá dentro como dono */
+    criarConta:function(d){
+      return sb.rpc('criar_frota', {p_nome:d.nome, p_frota_nome:d.frota,
+                                    p_email:d.email, p_codigo:d.codigo})
+        .then(function(r){
+          if(r.error) throw erroDe(r.error);
+          if(r.data && r.data.erro) throw Object.assign(new Error(r.data.erro),
+            {code:'invalid_argument', porque:r.data.erro});
+          eu=r.data; return r.data; }); },
+    mudarAcesso:function(actual, email, novo){
+      return sb.rpc('mudar_acesso', {p_codigo_actual:actual,
+                                     p_email_novo:email||'', p_codigo_novo:novo||''})
+        .then(function(r){
+          if(r.error) throw erroDe(r.error);
+          return r.data||{erro:'Não foi possível mudar.'}; }); },
+    apagarConta:function(codigo){
+      return sb.rpc('apagar_frota', {p_codigo:codigo}).then(function(r){
+        if(r.error) throw erroDe(r.error);
+        if(r.data && r.data.ok){ eu=null;
+          try{ localStorage.removeItem(COPIA); }catch(e){} }
+        return r.data||{erro:'Não foi possível apagar.'}; }); },
+    emailLivre:function(email){
+      return sb.rpc('email_livre', {p_email:email}).then(function(r){
+        return (r && !r.error) ? r.data : null; }); },
+    /* o plano e até quando vai a experiência */
+    minhaFrota:function(){
+      return sb.from('frotas').select('id,nome,plano,ate,criada').maybeSingle()
+        .then(function(r){
+          var f=(r && !r.error && r.data) ? r.data : null;
+          /* o e-mail com que o patrão entra está na conta dele, que só
+             ele lê */
+          var d=(espelho.frota||{}).dono;
+          if(f && d){ f.email=d.email; f.nomeDono=d.nome; }
+          return f; }); },
     sair:function(){
       try{ localStorage.removeItem(COPIA); }catch(e){}
       return sb.rpc('sair').then(function(){ eu=null; }); },
@@ -184,10 +229,11 @@ function lojaDoSupabase(sb){
 
     /* traz tudo de uma vez e depois fica à escuta */
     comecar:function(){
-      return sb.from('perfis').select('papel,quem,nome').maybeSingle()
+      return sb.from('perfis').select('papel,quem,nome,frota').maybeSingle()
         .then(function(r){
-          eu = (r && r.data) ? {papel:r.data.papel, id:r.data.quem, nome:r.data.nome}
-                             : null;
+          if(r && r.error) throw erroDe(r.error);
+          eu = (r && r.data) ? {papel:r.data.papel, id:r.data.quem, nome:r.data.nome,
+                                frota:r.data.frota} : null;
           if(!eu) return false;
           /* Em duas perguntas, e não numa, de propósito.
              A frota são quatro documentos que quase nunca mudam, e os
@@ -204,10 +250,16 @@ function lojaDoSupabase(sb){
                  — e aqui os dados pagam-se. */
               try{
                 var chegou=function(m){
-                  var l=m.new||m.old||{};
+                  var apagou=m.eventType==='DELETE';
+                  var l=(apagou?m.old:m.new)||{};
                   if(l.coleccao==='fotos'||l.coleccao==='rastos') return;
-                  pousar(l.coleccao, l.id,
-                         m.eventType==='DELETE'?null:(m.new||{}).corpo); };
+                  /* Os apagamentos são a excepção às regras de ler: o
+                     Supabase manda-os a toda a gente, só com a chave. Sem
+                     isto, um condutor "m1" de outra frota a fechar o
+                     turno tirava do mapa o nosso "m1". */
+                  if(l.frota && eu && eu.frota && l.frota!==eu.frota) return;
+                  var id=comoSeChama(l.coleccao, l.id); if(!id) return;
+                  pousar(l.coleccao, id, apagou?null:l.corpo); };
                 canal = sb.channel('fleetcv');
                 ['frota','turnos','vivo'].forEach(function(c){
                   canal.on('postgres_changes',
@@ -241,9 +293,11 @@ function lojaDoSupabase(sb){
     por:function(c,id,v){
       pousar(c,id,v);                       /* mostra já, confirma depois */
       if(c==='frota') guardarCopia();
-      return sb.from('docs').upsert({coleccao:c, id:id, corpo:v,
-                                     quando:new Date().toISOString()},
-                                    {onConflict:'coleccao,id'})
+      var linha={coleccao:c, id:id, corpo:v, quando:new Date().toISOString()};
+      /* A base põe a frota de quem escreve se ela faltar; mandá-la é só
+         dizer o mesmo às claras. Se não for a nossa, é recusada. */
+      if(eu && eu.frota) linha.frota=eu.frota;
+      return sb.from('docs').upsert(linha, {onConflict:'frota,coleccao,id'})
         .then(function(r){ if(r.error) throw erroDe(r.error); }); },
 
     tirar:function(c,id){
@@ -521,7 +575,7 @@ function local(chave, valor){
    (ver fleetcv-config.js). É o melhor dos quatro: página no topo do
    browser — logo, GPS a funcionar — e regras dentro da própria base
    de dados. */
-function ligarSupabase(){
+function ligarSupabase(papel){
   /* Quem carregou em "só quero experimentar" não fala com a base de
      dados de ninguém. Nem se liga: fica com uma frota de mentira
      guardada no próprio telemóvel, e sai de lá quando quiser. É a
@@ -533,8 +587,22 @@ function ligarSupabase(){
   if(!c || !c.supabaseUrl || !c.supabaseChave) return Promise.resolve(null);
   if(!window.supabase || !window.supabase.createClient) return Promise.resolve(null);
   try{
+    /* Uma sessão por painel. Com uma só, o patrão que abrisse o painel
+       do condutor noutro separador para mostrar a alguém passava a ser
+       condutor nos dois — e o dele deixava de conseguir escrever. Assim
+       cada painel é como um telemóvel à parte, mesmo no mesmo aparelho. */
+    var ref=String(c.supabaseUrl).replace(/^https?:\/\//,'').split('.')[0];
+    var chave='fleetcv-sb-'+(papel||'app');
+    try{
+      /* quem já tinha entrado antes disto não tem de entrar outra vez:
+         a sessão antiga passa para o primeiro painel que abrir */
+      var velha='sb-'+ref+'-auth-token';
+      if(!localStorage.getItem(chave) && localStorage.getItem(velha)){
+        localStorage.setItem(chave, localStorage.getItem(velha));
+        localStorage.removeItem(velha); }
+    }catch(e){}
     var sb = window.supabase.createClient(c.supabaseUrl, c.supabaseChave, {
-      auth:{ persistSession:true, autoRefreshToken:true } });
+      auth:{ persistSession:true, autoRefreshToken:true, storageKey:chave } });
     /* Cada telemóvel entra sem conta nenhuma; quem ele é diz-se
        depois, com o email e o código que o patrão deu. */
     return sb.auth.getSession().then(function(s){
@@ -563,9 +631,20 @@ function haServidor(){
     corta ]);
 }
 
+/* Com a base de dados à vista, começa-se de mãos vazias: a frota de
+   exemplo é para quem experimenta, e aparecer um segundo com os carros
+   da "Táxis Praia" a quem acabou de criar a sua própria frota era
+   confuso. Sem base (aberto como ficheiro, ou no ensaio), fica a de
+   exemplo, que é o que se quer ver. */
+function frotaVazia(){ return {nome:'', precoLitro:145, carros:[], condutores:[]}; }
+function vaiHaverSupabase(){
+  var c=window.FLEETCV_CONFIG;
+  return !noEnsaio() && !!(c && c.supabaseUrl && c.supabaseChave);
+}
+
 function arrancar(op){
   op=op||{}; opGuardado=op;
-  D.frota  = local('frota')  || frotaNova();
+  D.frota  = local('frota')  || (vaiHaverSupabase() ? frotaVazia() : frotaNova());
   D.turnos = local('turnos') || [];
   fila     = local('fila')   || [];
   avisar();
@@ -582,7 +661,7 @@ function arrancar(op){
   };
   /* A ordem é a da qualidade: Supabase, servidor próprio, base do
      Claude, e por fim só este aparelho. Fica o primeiro que houver. */
-  ligarSupabase().then(function(sb){
+  ligarSupabase(op.papel).then(function(sb){
     if(sb){
       var ls=lojaDoSupabase(sb); loja=ls;
       return ls.comecar().then(function(entrou){
@@ -1010,9 +1089,56 @@ return {
     return Promise.resolve(entrarCaDentro(e,c));
   },
   sair:function(){
-    if(loja&&(loja.servidor||loja.supabase))
+    if(loja&&(loja.servidor||loja.supabase)){
+      /* o que ficou guardado era desta conta; a próxima que entrar
+         neste telemóvel não tem de o ver, nem por um segundo */
+      try{ localStorage.removeItem('fleetcv-frota');
+           localStorage.removeItem('fleetcv-turnos'); }catch(e){}
+      D.frota=frotaVazia(); D.turnos=[]; D.vivos=[]; avisar();
       return loja.sair().catch(function(){});
+    }
     return Promise.resolve();
+  },
+  /* Criar conta de proprietário. Só há contas com o Supabase: sem ele
+     não há onde as guardar, e diz-se isso em vez de fingir. */
+  podeCriarConta:function(){ return !!(loja&&loja.supabase); },
+  criarConta:function(d){
+    if(!(loja&&loja.supabase))
+      return Promise.resolve({erro:'Para criar conta é preciso estar ligado à internet.'});
+    return loja.criarConta(d).then(function(j){
+      return loja.comecar().then(function(){
+        return semear(opGuardado).then(escutar).then(function(){
+          estado='supabase'; avisar();
+          return {papel:j.papel, id:j.id, nome:j.nome, frota:j.frota}; }); });
+    }).catch(function(x){
+      return {erro: x.porque || 'Não foi possível criar a conta.'}; });
+  },
+  mudarAcesso:function(actual, email, novo){
+    if(!(loja&&loja.supabase))
+      return Promise.resolve({erro:'Isto só se muda com a internet ligada.'});
+    return loja.mudarAcesso(actual, email, novo).catch(function(x){
+      return {erro: (x&&x.porque) || 'Não foi possível mudar.'}; });
+  },
+  apagarConta:function(codigo){
+    if(!(loja&&loja.supabase))
+      return Promise.resolve({erro:'Isto só se faz com a internet ligada.'});
+    return loja.apagarConta(codigo).then(function(r){
+      if(r && r.ok){
+        try{ localStorage.removeItem('fleetcv-frota');
+             localStorage.removeItem('fleetcv-turnos'); }catch(e){}
+        D.frota=frotaVazia(); D.turnos=[]; D.vivos=[];
+        estado='supabase-por-entrar'; avisar(); }
+      return r;
+    }).catch(function(x){ return {erro:(x&&x.porque)||'Não foi possível apagar.'}; });
+  },
+  /* true: pode usar · false: já está noutra frota · null: não se sabe */
+  emailLivre:function(email){
+    if(!(loja&&loja.supabase)) return Promise.resolve(true);
+    return loja.emailLivre(email).catch(function(){ return null; });
+  },
+  minhaFrota:function(){
+    if(!(loja&&loja.supabase)) return Promise.resolve(null);
+    return loja.minhaFrota().catch(function(){ return null; });
   }
 };
 

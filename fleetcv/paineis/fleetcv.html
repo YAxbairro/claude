@@ -268,6 +268,16 @@ body.dono .bt.pq{padding:10px; font-size:13.5px}
 body.dono .bt:disabled{opacity:.4}
 body.dono .par{display:flex; gap:8px}
 body.dono .par>*{flex:1}
+body.dono a.bt{display:flex; align-items:center; justify-content:center; text-decoration:none}
+body.dono .passos .passo{display:flex; align-items:center; gap:10px; padding:9px 0;
+  border-top:1px solid var(--line)}
+body.dono .passos .passo .n{width:26px; height:26px; border-radius:50%; flex:none;
+  display:grid; place-items:center; font:600 13px var(--mono);
+  background:var(--accent-wash); color:var(--accent)}
+body.dono .passos .passo.feito .n{background:var(--accent); color:var(--accent-ink)}
+body.dono .passos .passo.feito b{text-decoration:line-through; color:var(--muted)}
+body.dono .passos .passo .s{font-size:12.5px; color:var(--muted)}
+body.dono .passos .passo .bt{width:auto; padding:8px 14px; margin:0}
 body.dono .lig{background:none; border:none; color:var(--accent); font-weight:600; font-size:13.5px;
   cursor:pointer; padding:7px 0; text-decoration:underline; text-underline-offset:3px}
 body.dono .campo{display:block}
@@ -965,6 +975,15 @@ function lojaDoSupabase(sb){
     if(/fetch|network|timeout/i.test(e.message||'')) c='unavailable';
     return Object.assign(new Error(e.message||'erro'), {code:c, porque:e.message}); };
 
+  /* O condutor não lê a lista dos condutores — leva os códigos de
+     todos, e com eles entrava como qualquer colega. Lê a 'equipa', que
+     a base faz sozinha com os nomes e mais nada. Aqui dentro ela passa
+     a chamar-se 'condutores', e o resto da aplicação nem sabe. O patrão
+     lê a verdadeira e ignora a outra. */
+  var comoSeChama=function(c, id){
+    if(c!=='frota' || id!=='equipa') return id;
+    return (eu && eu.papel==='dono') ? null : 'condutores'; };
+
   /* Traz tudo de uma vez. Em duas perguntas, e não numa, de propósito:
      a frota são quatro documentos que quase nunca mudam, e os turnos
      são milhares. Numa pergunta só, ordenada pela data, bastavam 600
@@ -990,7 +1009,9 @@ function lojaDoSupabase(sb){
          antigos só se juntam, nunca se apagam. */
       if(doZero) espelho={};
       espelho.frota={}; espelho.vivo={};
-      (t.data||[]).forEach(function(x){ (espelho[x.coleccao]=espelho[x.coleccao]||{})[x.id]=x.corpo; });
+      (t.data||[]).forEach(function(x){
+        var id=comoSeChama(x.coleccao, x.id); if(!id) return;
+        (espelho[x.coleccao]=espelho[x.coleccao]||{})[id]=x.corpo; });
       (u.data||[]).forEach(function(x){ (espelho.turnos=espelho.turnos||{})[x.id]=x.corpo; });
       ultimaLeitura=Date.now();
       Object.keys(espelho).forEach(tocar);
@@ -1033,6 +1054,40 @@ function lojaDoSupabase(sb){
           if(r.data && r.data.erro) throw Object.assign(new Error(r.data.erro),
             {code:'invalid_argument', porque:r.data.erro});
           eu=r.data; return r.data; }); },
+    /* criar conta: uma frota nova, e já lá dentro como dono */
+    criarConta:function(d){
+      return sb.rpc('criar_frota', {p_nome:d.nome, p_frota_nome:d.frota,
+                                    p_email:d.email, p_codigo:d.codigo})
+        .then(function(r){
+          if(r.error) throw erroDe(r.error);
+          if(r.data && r.data.erro) throw Object.assign(new Error(r.data.erro),
+            {code:'invalid_argument', porque:r.data.erro});
+          eu=r.data; return r.data; }); },
+    mudarAcesso:function(actual, email, novo){
+      return sb.rpc('mudar_acesso', {p_codigo_actual:actual,
+                                     p_email_novo:email||'', p_codigo_novo:novo||''})
+        .then(function(r){
+          if(r.error) throw erroDe(r.error);
+          return r.data||{erro:'Não foi possível mudar.'}; }); },
+    apagarConta:function(codigo){
+      return sb.rpc('apagar_frota', {p_codigo:codigo}).then(function(r){
+        if(r.error) throw erroDe(r.error);
+        if(r.data && r.data.ok){ eu=null;
+          try{ localStorage.removeItem(COPIA); }catch(e){} }
+        return r.data||{erro:'Não foi possível apagar.'}; }); },
+    emailLivre:function(email){
+      return sb.rpc('email_livre', {p_email:email}).then(function(r){
+        return (r && !r.error) ? r.data : null; }); },
+    /* o plano e até quando vai a experiência */
+    minhaFrota:function(){
+      return sb.from('frotas').select('id,nome,plano,ate,criada').maybeSingle()
+        .then(function(r){
+          var f=(r && !r.error && r.data) ? r.data : null;
+          /* o e-mail com que o patrão entra está na conta dele, que só
+             ele lê */
+          var d=(espelho.frota||{}).dono;
+          if(f && d){ f.email=d.email; f.nomeDono=d.nome; }
+          return f; }); },
     sair:function(){
       try{ localStorage.removeItem(COPIA); }catch(e){}
       return sb.rpc('sair').then(function(){ eu=null; }); },
@@ -1040,10 +1095,11 @@ function lojaDoSupabase(sb){
 
     /* traz tudo de uma vez e depois fica à escuta */
     comecar:function(){
-      return sb.from('perfis').select('papel,quem,nome').maybeSingle()
+      return sb.from('perfis').select('papel,quem,nome,frota').maybeSingle()
         .then(function(r){
-          eu = (r && r.data) ? {papel:r.data.papel, id:r.data.quem, nome:r.data.nome}
-                             : null;
+          if(r && r.error) throw erroDe(r.error);
+          eu = (r && r.data) ? {papel:r.data.papel, id:r.data.quem, nome:r.data.nome,
+                                frota:r.data.frota} : null;
           if(!eu) return false;
           /* Em duas perguntas, e não numa, de propósito.
              A frota são quatro documentos que quase nunca mudam, e os
@@ -1060,10 +1116,16 @@ function lojaDoSupabase(sb){
                  — e aqui os dados pagam-se. */
               try{
                 var chegou=function(m){
-                  var l=m.new||m.old||{};
+                  var apagou=m.eventType==='DELETE';
+                  var l=(apagou?m.old:m.new)||{};
                   if(l.coleccao==='fotos'||l.coleccao==='rastos') return;
-                  pousar(l.coleccao, l.id,
-                         m.eventType==='DELETE'?null:(m.new||{}).corpo); };
+                  /* Os apagamentos são a excepção às regras de ler: o
+                     Supabase manda-os a toda a gente, só com a chave. Sem
+                     isto, um condutor "m1" de outra frota a fechar o
+                     turno tirava do mapa o nosso "m1". */
+                  if(l.frota && eu && eu.frota && l.frota!==eu.frota) return;
+                  var id=comoSeChama(l.coleccao, l.id); if(!id) return;
+                  pousar(l.coleccao, id, apagou?null:l.corpo); };
                 canal = sb.channel('fleetcv');
                 ['frota','turnos','vivo'].forEach(function(c){
                   canal.on('postgres_changes',
@@ -1097,9 +1159,11 @@ function lojaDoSupabase(sb){
     por:function(c,id,v){
       pousar(c,id,v);                       /* mostra já, confirma depois */
       if(c==='frota') guardarCopia();
-      return sb.from('docs').upsert({coleccao:c, id:id, corpo:v,
-                                     quando:new Date().toISOString()},
-                                    {onConflict:'coleccao,id'})
+      var linha={coleccao:c, id:id, corpo:v, quando:new Date().toISOString()};
+      /* A base põe a frota de quem escreve se ela faltar; mandá-la é só
+         dizer o mesmo às claras. Se não for a nossa, é recusada. */
+      if(eu && eu.frota) linha.frota=eu.frota;
+      return sb.from('docs').upsert(linha, {onConflict:'frota,coleccao,id'})
         .then(function(r){ if(r.error) throw erroDe(r.error); }); },
 
     tirar:function(c,id){
@@ -1377,7 +1441,7 @@ function local(chave, valor){
    (ver fleetcv-config.js). É o melhor dos quatro: página no topo do
    browser — logo, GPS a funcionar — e regras dentro da própria base
    de dados. */
-function ligarSupabase(){
+function ligarSupabase(papel){
   /* Quem carregou em "só quero experimentar" não fala com a base de
      dados de ninguém. Nem se liga: fica com uma frota de mentira
      guardada no próprio telemóvel, e sai de lá quando quiser. É a
@@ -1389,8 +1453,22 @@ function ligarSupabase(){
   if(!c || !c.supabaseUrl || !c.supabaseChave) return Promise.resolve(null);
   if(!window.supabase || !window.supabase.createClient) return Promise.resolve(null);
   try{
+    /* Uma sessão por painel. Com uma só, o patrão que abrisse o painel
+       do condutor noutro separador para mostrar a alguém passava a ser
+       condutor nos dois — e o dele deixava de conseguir escrever. Assim
+       cada painel é como um telemóvel à parte, mesmo no mesmo aparelho. */
+    var ref=String(c.supabaseUrl).replace(/^https?:\/\//,'').split('.')[0];
+    var chave='fleetcv-sb-'+(papel||'app');
+    try{
+      /* quem já tinha entrado antes disto não tem de entrar outra vez:
+         a sessão antiga passa para o primeiro painel que abrir */
+      var velha='sb-'+ref+'-auth-token';
+      if(!localStorage.getItem(chave) && localStorage.getItem(velha)){
+        localStorage.setItem(chave, localStorage.getItem(velha));
+        localStorage.removeItem(velha); }
+    }catch(e){}
     var sb = window.supabase.createClient(c.supabaseUrl, c.supabaseChave, {
-      auth:{ persistSession:true, autoRefreshToken:true } });
+      auth:{ persistSession:true, autoRefreshToken:true, storageKey:chave } });
     /* Cada telemóvel entra sem conta nenhuma; quem ele é diz-se
        depois, com o email e o código que o patrão deu. */
     return sb.auth.getSession().then(function(s){
@@ -1419,9 +1497,20 @@ function haServidor(){
     corta ]);
 }
 
+/* Com a base de dados à vista, começa-se de mãos vazias: a frota de
+   exemplo é para quem experimenta, e aparecer um segundo com os carros
+   da "Táxis Praia" a quem acabou de criar a sua própria frota era
+   confuso. Sem base (aberto como ficheiro, ou no ensaio), fica a de
+   exemplo, que é o que se quer ver. */
+function frotaVazia(){ return {nome:'', precoLitro:145, carros:[], condutores:[]}; }
+function vaiHaverSupabase(){
+  var c=window.FLEETCV_CONFIG;
+  return !noEnsaio() && !!(c && c.supabaseUrl && c.supabaseChave);
+}
+
 function arrancar(op){
   op=op||{}; opGuardado=op;
-  D.frota  = local('frota')  || frotaNova();
+  D.frota  = local('frota')  || (vaiHaverSupabase() ? frotaVazia() : frotaNova());
   D.turnos = local('turnos') || [];
   fila     = local('fila')   || [];
   avisar();
@@ -1438,7 +1527,7 @@ function arrancar(op){
   };
   /* A ordem é a da qualidade: Supabase, servidor próprio, base do
      Claude, e por fim só este aparelho. Fica o primeiro que houver. */
-  ligarSupabase().then(function(sb){
+  ligarSupabase(op.papel).then(function(sb){
     if(sb){
       var ls=lojaDoSupabase(sb); loja=ls;
       return ls.comecar().then(function(entrou){
@@ -1866,9 +1955,56 @@ return {
     return Promise.resolve(entrarCaDentro(e,c));
   },
   sair:function(){
-    if(loja&&(loja.servidor||loja.supabase))
+    if(loja&&(loja.servidor||loja.supabase)){
+      /* o que ficou guardado era desta conta; a próxima que entrar
+         neste telemóvel não tem de o ver, nem por um segundo */
+      try{ localStorage.removeItem('fleetcv-frota');
+           localStorage.removeItem('fleetcv-turnos'); }catch(e){}
+      D.frota=frotaVazia(); D.turnos=[]; D.vivos=[]; avisar();
       return loja.sair().catch(function(){});
+    }
     return Promise.resolve();
+  },
+  /* Criar conta de proprietário. Só há contas com o Supabase: sem ele
+     não há onde as guardar, e diz-se isso em vez de fingir. */
+  podeCriarConta:function(){ return !!(loja&&loja.supabase); },
+  criarConta:function(d){
+    if(!(loja&&loja.supabase))
+      return Promise.resolve({erro:'Para criar conta é preciso estar ligado à internet.'});
+    return loja.criarConta(d).then(function(j){
+      return loja.comecar().then(function(){
+        return semear(opGuardado).then(escutar).then(function(){
+          estado='supabase'; avisar();
+          return {papel:j.papel, id:j.id, nome:j.nome, frota:j.frota}; }); });
+    }).catch(function(x){
+      return {erro: x.porque || 'Não foi possível criar a conta.'}; });
+  },
+  mudarAcesso:function(actual, email, novo){
+    if(!(loja&&loja.supabase))
+      return Promise.resolve({erro:'Isto só se muda com a internet ligada.'});
+    return loja.mudarAcesso(actual, email, novo).catch(function(x){
+      return {erro: (x&&x.porque) || 'Não foi possível mudar.'}; });
+  },
+  apagarConta:function(codigo){
+    if(!(loja&&loja.supabase))
+      return Promise.resolve({erro:'Isto só se faz com a internet ligada.'});
+    return loja.apagarConta(codigo).then(function(r){
+      if(r && r.ok){
+        try{ localStorage.removeItem('fleetcv-frota');
+             localStorage.removeItem('fleetcv-turnos'); }catch(e){}
+        D.frota=frotaVazia(); D.turnos=[]; D.vivos=[];
+        estado='supabase-por-entrar'; avisar(); }
+      return r;
+    }).catch(function(x){ return {erro:(x&&x.porque)||'Não foi possível apagar.'}; });
+  },
+  /* true: pode usar · false: já está noutra frota · null: não se sabe */
+  emailLivre:function(email){
+    if(!(loja&&loja.supabase)) return Promise.resolve(true);
+    return loja.emailLivre(email).catch(function(){ return null; });
+  },
+  minhaFrota:function(){
+    if(!(loja&&loja.supabase)) return Promise.resolve(null);
+    return loja.minhaFrota().catch(function(){ return null; });
   }
 };
 
@@ -2783,12 +2919,28 @@ Nuvem.aoMudar(function(){
     if(S.ecra==='entrar') S.ecra='carro';
     guardar();
   }
-  if(!arrancado && (FROTA.condutores.length || Nuvem.estado()!=='a-ligar')){
+  /* O retomar procura o condutor na lista para lhe devolver o turno
+     aberto — por isso espera pela lista. Antes bastava a nuvem ter
+     respondido, e ela responde uns instantes ANTES de a lista chegar:
+     sem rede, o condutor caía no ecrã de entrar e o turno aberto
+     ficava para trás. Só não se espera quando não vem lista nenhuma
+     (ninguém entrou ainda); para o resto há os 8 segundos lá em baixo. */
+  var semLista=/por-entrar$/.test(Nuvem.estado());
+  if(!arrancado && (FROTA.condutores.length || semLista)){
     arrancado=true; retomar();
   }
+  /* O telemóvel lembrava-se de quem era, mas a base diz que não há
+     sessão (o patrão mudou-lhe o código, ou a sessão caducou). Sem
+     turno aberto, pede-se o código outra vez em vez de o deixar a
+     escolher carros que depois não consegue gravar. Com turno aberto
+     não se lhe tira o chão: o turno continua e sobe quando entrar. */
+  var est=Nuvem.estado();
+  if(S.eu && !S.turno && (est==='supabase-por-entrar'||est==='servidor-por-entrar')
+     && !(Nuvem.ensaio&&Nuvem.ensaio())){
+    S.eu=null; S.carro=null; S.ecra='entrar'; guardar(); }
   pintarSePuder();
 });
-Nuvem.arrancar({});
+Nuvem.arrancar({papel:"condutor"});
 /* se a nuvem não responder em 8 segundos, segue-se com o que há */
 setTimeout(function(){ if(!arrancado){ arrancado=true; retomar(); pintar(); } }, 8000);
 pintar();
@@ -2886,6 +3038,61 @@ function caixaAviso(){
 function marcado(id){
   return (S.aviso && typeof S.aviso==='object' && S.aviso.campo===id)
     ? ' class="erro"' : ''; }
+
+/* Uma frota acabada de criar está vazia, e um ecrã vazio não diz o
+   que fazer a seguir. Isto diz: três passos, e cada um leva lá. Some
+   sozinho quando já há carro e condutor. */
+function primeirosPassos(){
+  var f=S.frota||{carros:[],condutores:[]};
+  var temCarro=(f.carros||[]).length>0, temCond=(f.condutores||[]).length>0;
+  if(temCarro && temCond) return '';
+  var passo=function(feito, n, t, d, acc){
+    return '<div class="passo'+(feito?' feito':'')+'"><span class="n">'+
+      (feito?'\u2713':n)+'</span><span style="flex:1"><b>'+t+'</b><br>'+
+      '<span class="s">'+d+'</span></span>'+
+      (feito||!acc?'':'<button class="bt pri pq" data-f="'+acc+'">Juntar</button>')+'</div>'; };
+  return '<div class="cartao passos"><h2>Bem-vindo à sua frota</h2>'+
+    '<p class="p-nota" style="margin:4px 0 10px">Três passos e fica a ver os '+
+    'seus carros a andar.</p>'+
+    passo(temCarro,1,'Junte o primeiro carro','A matrícula e os quilómetros de hoje.',
+          'passo-carro')+
+    passo(temCond,2,'Junte um condutor','O nome, o e-mail e o telefone. '+
+          'O código é a aplicação que inventa.','passo-cond')+
+    passo(false,3,'Mande-lhe o acesso','Na ficha dele há um botão que manda '+
+          'tudo pelo WhatsApp: o endereço, o e-mail e o código.',null)+
+    '</div>';
+}
+
+/* Até quando vai a experiência. Só se mostra quando falta pouco — a
+   frota do fundador e os planos pagos não têm prazo. */
+function avisoDoPlano(){
+  var c=S.conta;
+  if(!c || c.plano!=='ensaio' || !c.ate) return '';
+  var dias=Math.ceil((new Date(c.ate).getTime()-Date.now())/864e5);
+  if(dias>7) return '';
+  return '<div class="cartao '+(dias<=0?'mau':'aviso')+'"><p class="p-nota">'+
+    (dias<=0 ? '<b>A experiência grátis acabou.</b> ' :
+     '<b>Faltam '+dias+(dias===1?' dia':' dias')+' de experiência grátis.</b> ')+
+    'Para continuar, fale connosco pelo WhatsApp: <b>+238 955 78 82</b>.'+
+    '</p></div>';
+}
+
+/* O texto que o patrão manda ao condutor, e o endereço que o abre já
+   no painel certo. */
+function acessoDe(m){
+  var app=location.origin+location.pathname.replace(/index\.html$/,'');
+  return 'Olá '+m.nome.split(' ')[0]+'! Os turnos passam a ser registados no '+
+    'FleetCV.\n\n1. Abra no telemóvel: '+app+'#condutor\n'+
+    '2. Entre com:\n   E-mail: '+m.email+'\n   Código: '+m.codigo+'\n\n'+
+    'Antes de cada turno: escolha o carro, fotografe o conta-quilómetros e '+
+    'carregue em Começar.';
+}
+function numeroWhats(t){
+  var d=String(t||'').replace(/\D/g,'');
+  if(!d) return '';
+  if(d.length===7) d='238'+d;              /* número de Cabo Verde sem indicativo */
+  return d;
+}
 
 function carroDe(id){ return S.frota.carros.filter(function(c){return c.id===id;})[0]; }
 function condutorDe(nome){
@@ -3381,12 +3588,53 @@ function pintar(){
       '<input type="text" id="i-email" value="'+esc(S.r.email||'')+
       '" placeholder="patrao@exemplo.cv"></label>'+
       '<label class="campo"><span class="lb">Código</span>'+
-      '<input type="number" inputmode="numeric" id="i-cod" value="'+esc(S.r.cod||'')+
-      '" placeholder="0000"></label>';
+      '<input type="password" id="i-cod" autocomplete="current-password" value="'+
+      esc(S.r.cod||'')+'" placeholder="o seu código"></label>';
     h+=caixaAviso();
-    h+='<div class="cartao nota"><p class="p-nota"><b>Para experimentar:</b><br>'+
-      'patrao@exemplo.cv · 9999</p></div>'+
-      '<button class="bt pri" data-f="entrar">Entrar</button>';
+    h+='<button class="bt pri" data-f="entrar">Entrar</button>';
+    /* Com a base de dados ligada, quem ainda não tem conta cria-a aqui.
+       Sem ela (aberto como ficheiro) não há onde guardar contas, e fica
+       o código de experimentar de sempre. */
+    h+= Nuvem.podeCriarConta && Nuvem.podeCriarConta()
+      ? '<div class="cartao nota" style="margin-top:14px"><p class="p-nota">'+
+        '<b>Ainda não tem conta?</b> Crie a sua frota em dois minutos. '+
+        'Os primeiros 30 dias são por nossa conta.</p>'+
+        '<button class="bt sec pq" data-f="ir-criar" style="margin-top:10px">'+
+        'Criar conta grátis</button></div>'
+      : '<div class="cartao nota"><p class="p-nota"><b>Para experimentar:</b><br>'+
+        'patrao@exemplo.cv · 9999</p></div>';
+    b=false;
+  }
+
+  /* ── criar conta ────────────────────────────────────── */
+  /* Quem chega pela página principal fica com a sua frota, vazia e só
+     dele. Pede-se o mínimo: quem é, como se chama a frota, e o e-mail
+     e o código com que vai voltar a entrar. */
+  else if(S.ecra==='criar'){
+    var cc=function(id){ return esc(S.r[id]||''); };
+    h='<div style="height:10px"></div><h1>Criar conta</h1>'+
+      '<p class="sub">30 dias grátis, sem cartão. Depois, se servir, '+
+      'fala-se do preço.</p>'+caixaAviso()+
+      '<label class="campo"><span class="lb">O seu nome</span>'+
+      '<input type="text" id="e-c-nome"'+marcado('e-c-nome')+' autocomplete="name" value="'+
+      cc('e-c-nome')+'" placeholder="Ex.: Manuel Tavares"></label>'+
+      '<label class="campo"><span class="lb">Nome da frota</span>'+
+      '<input type="text" id="e-c-frota"'+marcado('e-c-frota')+' value="'+
+      cc('e-c-frota')+'" placeholder="Ex.: Táxis Tavares"></label>'+
+      '<label class="campo"><span class="lb">E-mail</span>'+
+      '<input type="email" id="e-c-email"'+marcado('e-c-email')+' autocomplete="email" value="'+
+      cc('e-c-email')+'" placeholder="o.seu@email.cv"></label>'+
+      '<label class="campo"><span class="lb">Código para entrar</span>'+
+      '<input type="password" id="e-c-cod"'+marcado('e-c-cod')+' autocomplete="new-password" value="'+
+      cc('e-c-cod')+'" placeholder="pelo menos 6 algarismos ou letras">'+
+      '<span class="aj">É a sua chave. Não a dê a ninguém — os condutores '+
+      'recebem cada um a sua.</span></label>'+
+      '<label class="campo"><span class="lb">O mesmo código outra vez</span>'+
+      '<input type="password" id="e-c-cod2"'+marcado('e-c-cod2')+' autocomplete="new-password" value="'+
+      cc('e-c-cod2')+'"></label>'+
+      '<button class="bt pri" data-f="criar">Criar a minha frota</button>'+
+      '<p style="text-align:center;margin:14px 0 0"><button class="lig" '+
+      'data-f="ir-entrar">Já tenho conta — entrar</button></p>';
     b=false;
   }
 
@@ -3406,7 +3654,7 @@ function pintar(){
     var nAl=S.turnos.reduce(function(s,t){ return s+porResolver(t).length; },0);
     var porExplicar=S.turnos.reduce(function(s,t){ return s+dinheiroDe(t); },0);
 
-    h='<h1>A frota agora</h1>'+
+    h=primeirosPassos()+avisoDoPlano()+'<h1>A frota agora</h1>'+
       '<p class="sub">'+(nVivos?'<span class="ponto"></span>'+nVivos+
         (nVivos===1?' carro':' carros')+' em turno neste momento'
         :'Nenhum carro em turno')+
@@ -3587,8 +3835,19 @@ function pintar(){
     var dif2=ts2.reduce(function(s,t){ return s+dinheiroDe(t); },0);
     var carros={}; ts2.forEach(function(t){ carros[t.carroId]=1; });
 
+    var zap='https://wa.me/'+numeroWhats(m.telefone)+'?text='+
+      encodeURIComponent(acessoDe(m));
     h='<h1>'+esc(m.nome)+'</h1><p class="sub">'+esc(m.email)+' · código <b>'+
       esc(m.codigo)+'</b>'+(m.telefone?' · '+esc(m.telefone):'')+'</p>'+
+      '<div class="cartao'+(S.novoCond===m.id?' nota':'')+'">'+
+      (S.novoCond===m.id ? '<h2>Falta só mandar-lhe o acesso</h2>'+
+        '<p class="p-nota" style="margin:4px 0 10px">Vai o endereço da aplicação, '+
+        'o e-mail e o código. Ele abre no telemóvel e entra.</p>' : '')+
+      '<div class="par">'+
+      '<a class="bt pri pq" id="mandar-zap" href="'+esc(zap)+'" target="_blank" '+
+      'rel="noopener">Mandar pelo WhatsApp</a>'+
+      '<button class="bt sec pq" data-f="copiar-acesso">Copiar</button></div>'+
+      '<p class="p-nota" id="acesso-copiado" style="margin-top:6px"></p></div>'+
       '<div class="cartao"><div style="display:flex;align-items:baseline;gap:8px">'+
       '<h2>Cuidado a registar</h2><span class="num" style="margin-left:auto;'+
       'font-size:24px;font-weight:500;color:'+cor2+'">'+s2.valor+'</span></div>'+
@@ -3833,12 +4092,53 @@ function pintar(){
       '<input type="text" id="e-nomefrota"'+marcado('e-nomefrota')+' value="'+
       esc(cfg('e-nomefrota', S.frota.nome||''))+'"></label>'+
       '<button class="bt pri" data-f="guardar-defs">Guardar</button>';
+    var conta=S.conta||{};
+    if(Nuvem.podeCriarConta && Nuvem.podeCriarConta() && S.conta===undefined
+       && !S.aPedirConta){
+      S.aPedirConta=true;
+      Nuvem.minhaFrota().then(function(c){ S.conta=c||null; S.aPedirConta=false;
+        if(S.ecra==='definicoes' && !aEscrever()) pintar(); }); }
+    var plano = !conta.plano ? '' :
+      conta.plano==='fundador' ? 'Frota fundadora — sem prazo.' :
+      conta.plano==='pago' ? 'Plano pago.' :
+      conta.plano==='ensaio' && conta.ate ? 'Experiência grátis até '+
+        new Date(conta.ate).toLocaleDateString('pt-PT',{day:'numeric',month:'long'})+
+        '. Para continuar: WhatsApp +238 955 78 82.' : '';
     h+='<div class="cartao"><h2>Esta conta</h2>'+
       '<p class="p-nota" style="margin-top:5px">Está a ver como <b>'+
-      esc(DONO.email)+'</b>. Os condutores entram com o email e o código '+
+      esc(conta.email||DONO.email)+'</b>. Os condutores entram com o email e o código '+
       'que lhes der na ficha de cada um.</p>'+
+      (plano?'<p class="p-nota" style="margin-top:6px">'+esc(plano)+'</p>':'')+
       '<button class="bt sec pq" data-f="sair" style="margin-top:10px">'+
       'Sair desta conta</button></div>';
+    if(Nuvem.podeCriarConta && Nuvem.podeCriarConta() && !(Nuvem.ensaio&&Nuvem.ensaio()))
+      h+='<div class="cartao"><h2>Mudar o e-mail ou o código</h2>'+
+        '<p class="p-nota" style="margin:5px 0 8px">Para mudar seja o que for, '+
+        'confirme primeiro o código que usa hoje.</p>'+
+        '<label class="campo"><span class="lb">Código de hoje</span>'+
+        '<input type="password" id="e-a-actual"'+marcado('e-a-actual')+
+        ' autocomplete="current-password" value="'+esc(S.r['e-a-actual']||'')+'"></label>'+
+        '<label class="campo"><span class="lb">E-mail novo <i>(deixe em branco '+
+        'para manter)</i></span><input type="email" id="e-a-email"'+marcado('e-a-email')+
+        ' value="'+esc(S.r['e-a-email']||'')+'"></label>'+
+        '<label class="campo"><span class="lb">Código novo <i>(em branco para '+
+        'manter)</i></span><input type="password" id="e-a-novo"'+marcado('e-a-novo')+
+        ' autocomplete="new-password" value="'+esc(S.r['e-a-novo']||'')+'"></label>'+
+        '<label class="campo"><span class="lb">Código novo, outra vez</span>'+
+        '<input type="password" id="e-a-novo2"'+marcado('e-a-novo2')+
+        ' autocomplete="new-password" value="'+esc(S.r['e-a-novo2']||'')+'"></label>'+
+        '<button class="bt sec pq" data-f="mudar-acesso">Mudar</button></div>';
+    /* Ir-se embora tem de ser tão fácil como entrar. A frota fundadora
+       não se apaga por aqui (a base também recusa). */
+    if(Nuvem.podeCriarConta && Nuvem.podeCriarConta() && !(Nuvem.ensaio&&Nuvem.ensaio())
+       && conta.plano && conta.plano!=='fundador')
+      h+='<div class="cartao"><h2>Apagar a conta</h2>'+
+        '<p class="p-nota" style="margin:5px 0 8px">Apaga a frota, os carros, os '+
+        'condutores e todos os turnos e fotografias. Não se desfaz.</p>'+
+        '<label class="campo"><span class="lb">O seu código, para confirmar</span>'+
+        '<input type="password" id="e-x-cod"'+marcado('e-x-cod')+
+        ' autocomplete="current-password" value="'+esc(S.r['e-x-cod']||'')+'"></label>'+
+        '<button class="bt perigo pq" data-f="apagar-conta">Apagar tudo</button></div>';
     h+='<div class="cartao"><h2>Guardar uma cópia</h2>'+
       '<p class="p-nota" style="margin-top:5px">Leva a frota e os turnos todos '+
       'num ficheiro. Vale a pena fazer isto de vez em quando.</p>'+
@@ -4022,6 +4322,78 @@ document.addEventListener('click', function(e){
       S.sessao=true; S.aviso=null; Nuvem.local('dono-sessao', true); ir('mapa');
     });
   }
+  if(f==='ir-criar'){ S.aviso=null; ir('criar'); return; }
+  if(f==='ir-entrar'){ S.aviso=null; ir('entrar'); return; }
+  if(f==='criar'){
+    var gc=function(id){ var n=el(id); return (n?n.value:(S.r[id]||'')).trim(); };
+    var cn=gc('e-c-nome'), cf=gc('e-c-frota'), ce=gc('e-c-email').toLowerCase();
+    var k1=gc('e-c-cod'), k2=gc('e-c-cod2');
+    var mau=function(campo, d){ S.aviso={campo:campo, d:d}; pintar(); };
+    if(cn.length<2) return mau('e-c-nome','Escreva o seu nome.');
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ce))
+      return mau('e-c-email','Este e-mail não parece estar certo.');
+    if(k1.length<6) return mau('e-c-cod',
+      'O código tem de ter pelo menos 6 algarismos ou letras.');
+    if(k1!==k2) return mau('e-c-cod2','Os dois códigos não são iguais.');
+    S.aviso='a criar a sua frota…'; pintar();
+    Nuvem.criarConta({nome:cn, frota:cf, email:ce, codigo:k1}).then(function(r){
+      if(r.erro){ S.aviso = /e-mail/i.test(r.erro)
+          ? {campo:'e-c-email', d:r.erro} : r.erro; pintar(); return; }
+      S.sessao=true; S.aviso=null; S.conta=undefined;
+      Nuvem.local('dono-sessao', true); ir('mapa');
+    });
+    return; }
+  if(f==='passo-carro'){ ir('viaturas'); setTimeout(function(){
+    var bt=document.querySelector('[data-f="novo-carro"]'); if(bt) bt.click(); },0);
+    return; }
+  if(f==='passo-cond'){ ir('condutores'); setTimeout(function(){
+    var bt=document.querySelector('[data-f="novo-cond"]'); if(bt) bt.click(); },0);
+    return; }
+  if(f==='copiar-acesso'){
+    var mc=S.frota.condutores.filter(function(x){return x.id===S.sel;})[0];
+    var alvo2=el('acesso-copiado'), txt2=mc?acessoDe(mc):'';
+    var mostrar=function(){ if(alvo2){ alvo2.style.whiteSpace='pre-wrap';
+      alvo2.textContent=txt2; } };
+    if(navigator.clipboard&&navigator.clipboard.writeText)
+      navigator.clipboard.writeText(txt2).then(function(){
+        if(alvo2) alvo2.textContent='Copiado. Cole numa mensagem para ele.';
+      }).catch(mostrar);
+    else mostrar();
+    return; }
+  if(f==='mudar-acesso'){
+    var ga=function(id){ var n=el(id); return (n?n.value:(S.r[id]||'')).trim(); };
+    var act=ga('e-a-actual'), ne=ga('e-a-email').toLowerCase();
+    var n1=ga('e-a-novo'), n2=ga('e-a-novo2');
+    var mau2=function(campo, d){ S.aviso={campo:campo, d:d}; pintar(); };
+    if(!act) return mau2('e-a-actual','Escreva o código que usa hoje.');
+    if(!ne && !n1) return mau2('e-a-email','Escreva o e-mail novo, o código novo, ou os dois.');
+    if(ne && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ne))
+      return mau2('e-a-email','Este e-mail não parece estar certo.');
+    if(n1 && n1.length<6) return mau2('e-a-novo',
+      'O código novo tem de ter pelo menos 6 algarismos ou letras.');
+    if(n1!==n2) return mau2('e-a-novo2','Os dois códigos novos não são iguais.');
+    S.aviso='a mudar…'; pintar();
+    Nuvem.mudarAcesso(act, ne, n1).then(function(r){
+      if(!r || r.erro){ S.aviso={campo:/actual/i.test((r&&r.erro)||'')?'e-a-actual':'e-a-email',
+        d:(r&&r.erro)||'Não foi possível mudar.'}; pintar(); return; }
+      S.r={}; S.conta=undefined;
+      S.aviso={d:'Mudado. Da próxima vez entre com '+(r.email||ne)+
+        (n1?' e o código novo.':'.')};
+      pintar(); });
+    return; }
+  if(f==='apagar-conta'){
+    var xn=el('e-x-cod'), xc=(xn?xn.value:(S.r['e-x-cod']||'')).trim();
+    if(!xc){ S.aviso={campo:'e-x-cod', d:'Escreva o seu código para confirmar.'};
+      pintar(); return; }
+    if(!confirm('Apagar a frota e tudo o que está lá dentro? Não se desfaz.')) return;
+    S.aviso='a apagar…'; pintar();
+    Nuvem.apagarConta(xc).then(function(r){
+      if(!r || r.erro){ S.aviso={campo:'e-x-cod', d:(r&&r.erro)||'Não foi possível apagar.'};
+        pintar(); return; }
+      S.sessao=false; S.conta=undefined; Nuvem.local('dono-sessao', false);
+      ir('entrar'); S.aviso={d:'A conta foi apagada. Obrigado por ter experimentado.'};
+      pintar(); });
+    return; }
   if(f==='fechar-lupa'){ S.lupa=null; pintar(); return; }
   if(f==='fechar-cartao'){ S.cartao=null; pintar(); return; }
   if(f==='guardar-defs'){
@@ -4037,7 +4409,8 @@ document.addEventListener('click', function(e){
   if(f==='sair'){
     if(!confirm('Sair desta conta neste aparelho?')) return;
     Nuvem.sair();
-    S.sessao=false; S.r={}; S.aviso=null; Nuvem.local('dono-sessao', false);
+    S.sessao=false; S.r={}; S.aviso=null; S.conta=undefined;
+    Nuvem.local('dono-sessao', false);
     ir('entrar'); return; }
   if(f==='copia'){
     /* Uma cópia de tudo, num ficheiro. Descarregar faz-se de duas
@@ -4145,19 +4518,30 @@ document.addEventListener('click', function(e){
       d:'Já existe um condutor com este email ('+jaTem.nome+'). Dois condutores '+
         'com o mesmo email não dava para saber quem entrou.'};
       pintar(); return; }
-    var m2=S.sel?S.frota.condutores.filter(function(x){return x.id===S.sel;})[0]:null;
-    var antes=m2?m2.nome:null;
-    if(!m2){ m2={id:uid('m'), estado:'ACTIVO'};
-      S.frota.condutores=S.frota.condutores.concat([m2]); }
-    if(!nome) nome='Condutor '+(S.frota.condutores.length);
-    m2.nome=nome; m2.email=mail; m2.telefone=g('e-tel').trim();
-    m2.codigo=cod;
-    S.r={}; S.aviso=null;
-    // se o nome mudou, os turnos antigos continuam a ser dele
-    if(antes&&antes!==m2.nome)
-      S.turnos.forEach(function(t){ if(t.condutor===antes){
-        t.condutor=m2.nome; Nuvem.guardarTurno(t); } });
-    guardar(); ir('condutor', m2.id, {ecra:'condutores'});
+    var tel=g('e-tel').trim(), qual=S.sel;
+    /* Entra-se só com e-mail e código, sem dizer de que frota se é —
+       por isso um e-mail não pode estar em duas. Pergunta-se à base
+       antes de gravar, para o aviso aparecer aqui e não o condutor
+       ficar à porta sem saber porquê. */
+    Nuvem.emailLivre(mail).then(function(livre){
+      if(livre===false){ S.aviso={campo:'e-email2',
+        d:'Este e-mail já está a ser usado noutra frota do FleetCV. '+
+          'Use outro e-mail para este condutor.'}; pintar(); return; }
+      var m2=qual?S.frota.condutores.filter(function(x){return x.id===qual;})[0]:null;
+      var antes=m2?m2.nome:null, eNovo2=!m2;
+      if(!m2){ m2={id:uid('m'), estado:'ACTIVO'};
+        S.frota.condutores=S.frota.condutores.concat([m2]); }
+      if(!nome) nome='Condutor '+(S.frota.condutores.length);
+      m2.nome=nome; m2.email=mail; m2.telefone=tel;
+      m2.codigo=cod;
+      S.r={}; S.aviso=null;
+      if(eNovo2) S.novoCond=m2.id;
+      // se o nome mudou, os turnos antigos continuam a ser dele
+      if(antes&&antes!==m2.nome)
+        S.turnos.forEach(function(t){ if(t.condutor===antes){
+          t.condutor=m2.nome; Nuvem.guardarTurno(t); } });
+      guardar(); ir('condutor', m2.id, {ecra:'condutores'});
+    });
   }
   if(f==='parar-cond'){
     var m3=S.frota.condutores.filter(function(x){return x.id===S.sel;})[0];
@@ -4214,6 +4598,12 @@ S.sessao = !!Nuvem.local('dono-sessao');
    não quer adivinhar um código. */
 if(!S.sessao && Nuvem.ensaio && Nuvem.ensaio()) S.sessao=true;
 S.ecra = S.sessao ? 'mapa' : 'entrar';
+/* quem veio da página principal pelo "Criar conta" cai logo no ecrã
+   de criar, e não no de entrar */
+try{
+  if(!S.sessao && localStorage.getItem('fleetcv-quero-criar')) S.ecra='criar';
+  localStorage.removeItem('fleetcv-quero-criar');
+}catch(e){}
 
 Nuvem.aoMudar(function(){
   var d=Nuvem.dados();
@@ -4221,9 +4611,23 @@ Nuvem.aoMudar(function(){
   S.turnos=d.turnos||[];
   S.vivos=d.vivos||[];
   if(S.cartao && !turnoVivo(S.cartao)) S.cartao=null;
-  if(S.ecra!=='entrar') pintarSePuder(); else pintarTopo();
+  /* O telemóvel lembrava-se de ter entrado, mas a base diz que não há
+     sessão (saiu noutro sítio, ou a sessão caducou). Mostrar a frota
+     vazia era pior do que pedir o código outra vez. */
+  var est=Nuvem.estado();
+  if(S.sessao && (est==='supabase-por-entrar'||est==='servidor-por-entrar')
+     && !(Nuvem.ensaio&&Nuvem.ensaio())){
+    S.sessao=false; Nuvem.local('dono-sessao', false);
+    if(S.ecra!=='criar'){ S.ecra='entrar'; pintar(); return; } }
+  /* o prazo da experiência, lido uma vez por sessão */
+  if(S.sessao && est==='supabase' && S.conta===undefined && !S.aPedirConta){
+    S.aPedirConta=true;
+    Nuvem.minhaFrota().then(function(c){ S.conta=c||null; S.aPedirConta=false;
+      pintarSePuder(); }); }
+  if(S.ecra!=='entrar' && S.ecra!=='criar') pintarSePuder(); else pintarTopo();
 });
 Nuvem.arrancar({
+  papel: 'dono',
   exemplos: function(f){ return turnosDeExemplo(f); }
 });
 pintar();
@@ -4353,6 +4757,27 @@ tic=setInterval(function(){
   var guardado=null, ensaio=null;
   try{ guardado=localStorage.getItem(QUEM); ensaio=localStorage.getItem(DEMO); }
   catch(e){}
+  /* A porta pode vir escolhida no endereço. É assim que o link que o
+     patrão manda ao condutor (…#condutor) abre logo no ecrã de entrar
+     dele, e que os botões da página principal levam cada um ao seu
+     sítio (#dono, #criar, #experimentar). Lê-se uma vez e apaga-se,
+     para um recarregar não voltar a mandar no que o telemóvel já
+     escolheu. */
+  var pedido=String(location.hash||'').replace(/^#/,'');
+  try{
+    if(pedido==='condutor'||pedido==='dono'||pedido==='criar'){
+      localStorage.removeItem(DEMO); ensaio=null;
+      guardado = pedido==='criar' ? 'dono' : pedido;
+      localStorage.setItem(QUEM, guardado);
+      if(pedido==='criar') localStorage.setItem('fleetcv-quero-criar','1');
+    }
+    if(pedido==='experimentar'){
+      localStorage.removeItem(QUEM); localStorage.setItem(DEMO,'1');
+      guardado=null; ensaio='1';
+    }
+  }catch(e){}
+  if(pedido) try{ history.replaceState(null,'',location.pathname+location.search); }
+             catch(e){}
   if(guardado==='condutor'||guardado==='dono') arrancar(guardado);
   else if(ensaio) escolherPapelDoEnsaio();
   else perguntar();
