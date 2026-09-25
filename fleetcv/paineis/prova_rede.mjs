@@ -3,6 +3,13 @@
    condutor num sítio de rede má. Sem a rede de segurança o patrão
    ficava a olhar para um ecrã congelado. Aqui prova-se que não fica. */
 import { chromium } from 'playwright';
+/* O código do proprietário NÃO se escreve aqui: este ficheiro vai para
+   um repositório público. Passa-se por fora:
+     DONO_EMAIL=... DONO_CODIGO=... node este_ficheiro.mjs            */
+const DONO_EMAIL=process.env.DONO_EMAIL||'';
+const DONO_CODIGO=process.env.DONO_CODIGO||'';
+if(!DONO_EMAIL||!DONO_CODIGO){
+  console.log('Falta DONO_EMAIL e DONO_CODIGO no ambiente.'); process.exit(2); }
 import fs from 'node:fs';
 const app=fs.readFileSync('fleetcv.html','utf8');
 const cfg=fs.readFileSync('/home/user/claude/fleetcv/site/fleetcv-config.js','utf8');
@@ -30,7 +37,7 @@ await p.click('[data-quem="dono"]');
 ok('liga-se ao Supabase verdadeiro',
    await ate(async()=>(await p.evaluate(()=>Nuvem.estado())).startsWith('supabase'),40),
    await p.evaluate(()=>Nuvem.estado()));
-await p.fill('#i-email','yanickdrs@gmail.com'); await p.fill('#i-cod','761662');
+await p.fill('#i-email',DONO_EMAIL); await p.fill('#i-cod',DONO_CODIGO);
 await p.click('[data-f="entrar"]');
 ok('o patrão entra', await ate(async()=>(await txt()).includes('A frota agora'),40));
 ok('e o WebSocket está mesmo morto nesta caixa',

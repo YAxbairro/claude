@@ -2,6 +2,13 @@
    Site no Vercel, base no Supabase, dois "telemóveis" diferentes.
    Nada de simuladores: é a coisa real. */
 import { chromium } from 'playwright';
+/* O código do proprietário NÃO se escreve aqui: este ficheiro vai para
+   um repositório público. Passa-se por fora:
+     DONO_EMAIL=... DONO_CODIGO=... node este_ficheiro.mjs            */
+const DONO_EMAIL=process.env.DONO_EMAIL||'';
+const DONO_CODIGO=process.env.DONO_CODIGO||'';
+if(!DONO_EMAIL||!DONO_CODIGO){
+  console.log('Falta DONO_EMAIL e DONO_CODIGO no ambiente.'); process.exit(2); }
 const U='https://fleetcv.vercel.app/';
 /* O Chromium de teste não lê o CA do proxy desta caixa. Em vez de
    desligar a verificação, dá-se-lhe a impressão digital exacta da
@@ -26,7 +33,7 @@ await p.click('[data-quem="dono"]');
 ok('o site liga-se ao Supabase',
    await ate(async()=>(await p.evaluate(()=>Nuvem.estado())).startsWith('supabase'),30),
    await p.evaluate(()=>Nuvem.estado()));
-await p.fill('#i-email','yanickdrs@gmail.com'); await p.fill('#i-cod','761662');
+await p.fill('#i-email',DONO_EMAIL); await p.fill('#i-cod',DONO_CODIGO);
 await p.click('[data-f="entrar"]');
 ok('o patrão entra com o código dele',
    await ate(async()=>(await txt()).includes('A frota agora'),30));
