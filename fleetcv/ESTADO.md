@@ -24,8 +24,10 @@ Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
   da primeira vez que o mudar.
 - **Provado ao vivo**, no site e na base verdadeiros
   (`paineis/prova_ao_vivo.mjs`): criar conta → carro → condutor → o
-  condutor entra e anda → o patrão vê os quilómetros subirem → turno
-  fecha → apagar a conta sem deixar lixo. 19 de 19.
+  condutor fotografa o quadrante e entra e anda → o patrão vê os
+  quilómetros subirem, o carro no mapa, a fotografia do quadrante e a do
+  talão (com os litros) durante o turno → turno fecha → apagar a conta
+  sem deixar lixo. 28 de 28, a 26 de Setembro.
 
 - **O canal ao vivo (WebSocket), provado de fora** — numa máquina do
   GitHub (`paineis/prova_tempo_real.mjs`, corre sozinho em
