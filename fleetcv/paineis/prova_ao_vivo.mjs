@@ -110,6 +110,16 @@ const subiu=await ate(async()=>(await p.evaluate(()=>(Nuvem.dados().vivos[0]||{}
 const km1=await p.evaluate(()=>(Nuvem.dados().vivos[0]||{}).kmGps||0);
 ok('e os quilómetros sobem no ecrã do patrão', subiu, km0+' → '+km1);
 
+/* o mapa a sério: ruas de verdade, o carro nele, tocar segue-o */
+ok('o mapa do patrão é o mapa com ruas (e as ruas chegam)',
+   await ate(async()=>await p.evaluate(()=>
+     !!document.querySelector('#lugar-mapa-frota .leaflet-tile-loaded')), 30));
+ok('o carro aparece no mapa, com a matrícula',
+   await ate(async()=>(await p.locator('.carro-vivo .cv-mat').allTextContents()).includes(MAT), 30));
+await p.locator('.carro-vivo').first().dispatchEvent('click');
+ok('tocar no carro segue-o, com a velocidade por baixo',
+   await ate(async()=>/km\/h/.test(await p.textContent('.faixa').catch(()=>'')), 15));
+
 await c.bringToFront();
 await c.click('[data-f="ir-fim"]'); await c.waitForTimeout(900);
 await c.click('[data-f="terminar"]');
