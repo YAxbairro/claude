@@ -70,7 +70,10 @@ ok('a foto do quadrante entra', await co.isVisible('.foto.feita img'));
 const tam = await co.evaluate(()=>{
   const i=document.querySelector('.foto.feita img');
   return i?Math.round(i.src.length/1024):0; });
-ok('e é leve que chegue para caber num documento', tam>0 && tam<120, tam+' kB');
+/* até 170 mil caracteres (a app sobe até 300 mil): 900 px no lado maior,
+   para os algarismos do quadrante se lerem. Esta imagem é ruído puro, o
+   pior caso — uma fotografia a sério fica bem abaixo. */
+ok('e é leve que chegue para caber num documento', tam>0 && tam<170, tam+' kB');
 
 await co.click('[data-f="ir-gps"]'); await co.waitForTimeout(1300);
 await co.click('[data-f="comecar-sim"]'); await co.waitForTimeout(2500);

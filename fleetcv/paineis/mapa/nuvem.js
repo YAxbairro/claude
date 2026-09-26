@@ -102,12 +102,17 @@ function lojaDoSupabase(sb){
     if(d===null) delete espelho[c][id]; else espelho[c][id]=d;
     tocar(c); };
 
-  var erroDe=function(e){
+  var erroDe=function(e, estado){
     if(!e) return null;
     var c='invalid_argument';
     if(/rate|429|too many/i.test(e.message||'')) c='resource_exhausted';
     if(/fetch|network|timeout/i.test(e.message||'')) c='unavailable';
-    return Object.assign(new Error(e.message||'erro'), {code:c, porque:e.message}); };
+    /* A base disse que não (as regras, ou um pedido mal feito)? Só isso
+       é recusa. Sem rede (0), sessão caducada (401), demasiados pedidos
+       (429) ou o servidor aflito (5xx) passam com o tempo. */
+    var recusa = estado>=400 && estado<500 && [401,408,429].indexOf(estado)<0;
+    return Object.assign(new Error(e.message||'erro'),
+      {code:c, porque:e.message, estado:estado||0, recusa:recusa}); };
 
   /* O condutor não lê a lista dos condutores — leva os códigos de
      todos, e com eles entrava como qualquer colega. Lê a 'equipa', que
@@ -298,7 +303,7 @@ function lojaDoSupabase(sb){
          dizer o mesmo às claras. Se não for a nossa, é recusada. */
       if(eu && eu.frota) linha.frota=eu.frota;
       return sb.from('docs').upsert(linha, {onConflict:'frota,coleccao,id'})
-        .then(function(r){ if(r.error) throw erroDe(r.error); }); },
+        .then(function(r){ if(r.error) throw erroDe(r.error, r.status); }); },
 
     tirar:function(c,id){
       pousar(c,id,null);
@@ -821,11 +826,25 @@ function semRasto(t){
 /* ─── as fotografias ─────────────────────────────────────
    Cada uma no seu documento, com o nome do turno lá dentro para se
    saber de quem é. Lêem-se só quando alguém as quer ver. */
+/* As fotografias sobem assim que são tiradas (a do quadrante logo ao
+   abrir o turno, a do talão logo ao abastecer). Antes subiam só no
+   fim: o patrão não via nada durante o turno, e um telemóvel que
+   morresse antes de fechar levava as provas com ele. As que já
+   subiram não voltam a subir no fim — são dados do condutor. */
+var fotosOk = local('fotos-ok') || {};
 function guardarFoto(chave, turno, dados){
   if(!loja||!dados) return Promise.resolve();
-  if(dados.length>250000) return Promise.resolve();
+  if(fotosOk[chave]) return Promise.resolve();
+  if(dados.length>300000) return Promise.resolve();
   return naFila('fotos', chave, {chave:chave, turno:turno, dados:dados,
                                  quando:Date.now()});
+}
+function fotoSubiu(chave){
+  fotosOk[chave]=Date.now();
+  var ks=Object.keys(fotosOk);
+  if(ks.length>120) ks.sort(function(a,b){ return fotosOk[a]-fotosOk[b]; })
+    .slice(0, ks.length-120).forEach(function(k){ delete fotosOk[k]; });
+  local('fotos-ok', fotosOk);
 }
 function fotoDe(chave){
   if(!loja) return Promise.resolve(null);
@@ -866,14 +885,25 @@ function esvaziarFila(){
   aTentar=true;
   var x=fila[0];
   return loja.por(x.c, x.id, x.d).then(function(){
+    if(x.c==='fotos') fotoSubiu(x.id);
     fila.shift(); guardarFila(); aTentar=false; avisar();
     if(fila.length) return esvaziarFila();
   }).catch(function(e){
     aTentar=false; x.tentativas++;
-    /* um pedido mal formado nunca passa, por muito que se insista */
-    if((e && e.code==='invalid_argument') || x.tentativas>40){
-      fila.shift(); guardarFila(); }
-    avisar();
+    /* Antes desistia-se à primeira de tudo o que não parecesse falta de
+       rede, e ao fim de 40 tentativas de tudo o resto: uma sessão
+       caducada, um 503 do servidor, oito minutos num sítio sem rede, e
+       a fotografia do quadrante ia para o lixo. Agora só se desiste do
+       que a base RECUSA, e só depois de várias vezes: a recusa pode vir
+       de o turno de que a fotografia depende ainda não ter chegado. O
+       resto espera o tempo que for preciso. */
+    var recusa = !!(e && (e.recusa || e.code==='quota_exceeded'));
+    if(recusa) x.recusas=(x.recusas||0)+1;
+    if((x.recusas||0)>=8){ fila.shift(); }
+    /* o que falha passa para o fim, para não prender o que vem atrás */
+    else if(fila.length>1 && (recusa || x.tentativas%5===0)){ fila.push(fila.shift()); }
+    guardarFila(); avisar();
+    if(recusa && fila.length) setTimeout(esvaziarFila, 1500);
   });
 }
 function porEnviar(){ return fila.length; }
@@ -882,6 +912,11 @@ function retomarFila(){
   if(!relogioFila) relogioFila=setInterval(esvaziarFila, 12000);
   esvaziarFila();
 }
+/* a rede voltou, ou o condutor voltou à aplicação: tenta-se já */
+try{
+  window.addEventListener('online', function(){ retomarFila(); });
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) retomarFila(); });
+}catch(e){}
 
 function gravarTurnoNovo(t){
   if(!loja) return Promise.resolve();
@@ -931,9 +966,14 @@ function posicao(t, extra, jaa){
     id:t.id, carroId:t.carroId, matricula:t.matricula, condutor:t.condutor,
     condutorId:t.condutorId||null, inicio:t.inicio, fim:null,
     kmInicio:t.kmInicio, totalCve:t.totalCve||0,
+    /* sem o preço e o depósito, o patrão via "2.000 CVE · 0,00 litros"
+       e as contas do turno ao vivo davam alertas sem sentido */
+    precoLitro:t.precoLitro||null, deposito:t.deposito||null,
     abast:(t.abast||[]).map(function(a){
       return {hora:a.hora, valor:a.valor, posto:a.posto, lat:a.lat, lon:a.lon,
-              litrosTalao:a.litrosTalao||null, temFoto:!!a.foto||!!a.temFoto}; }),
+              litrosTalao:a.litrosTalao||null, temFoto:!!a.foto||!!a.temFoto,
+              chaveFoto:a.chaveFoto||null}; }),
+    temFotoInicio: !!t.fotoInicio || !!t.temFotoInicio,
     lat:u?u[0]:null, lon:u?u[1]:null, precisao:u?u[3]:null, vel:u?u[4]:0,
     kmGps: extra&&extra.kmGps!=null ? +extra.kmGps.toFixed(2) : null,
     bateria: extra?extra.bateria:null,
@@ -998,7 +1038,7 @@ function fecharTurno(t){
       if(t.fotoInicio) ps.push(guardarFoto(t.id+'_inicio', t.id, t.fotoInicio));
       if(t.fotoFim)    ps.push(guardarFoto(t.id+'_fim',    t.id, t.fotoFim));
       (t.abast||[]).forEach(function(a,i){
-        if(a.foto) ps.push(guardarFoto(t.id+'_ab'+i, t.id, a.foto)); });
+        if(a.foto) ps.push(guardarFoto(a.chaveFoto||(t.id+'_ab'+i), t.id, a.foto)); });
       return Promise.all(ps); })
     .then(function(){ return naFila('turnos', t.id, semRasto(t)); })
     .then(function(){ return loja.tirar('vivo', t.id); })
@@ -1060,6 +1100,9 @@ return {
   rastoDe:rastoDe,
   fotoDe:fotoDe,
   fotosDoTurno:fotosDoTurno,
+  /* uma fotografia que sobe já (entra na fila, atrás do turno) */
+  enviarFoto:function(chave, turno, dados){
+    return guardarFoto(chave, turno, dados).catch(function(){}); },
   porEnviar:porEnviar,
   tentarAgora:esvaziarFila,
   local:local,

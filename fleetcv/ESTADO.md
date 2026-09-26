@@ -1,4 +1,4 @@
-# Onde isto está, em 25 de Setembro de 2026 (fim do dia)
+# Onde isto está, em 26 de Setembro de 2026
 
 Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
 
@@ -48,6 +48,22 @@ Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
   fornecedor (MapTiler, Stadia) — é mudar uma linha em
   `paineis/mapa/mapa_vivo.js`.
 
+- **As fotografias (quadrante e talão) entram.** No teste do Yanick
+  nenhuma entrava. Três causas: (1) o telemóvel saía para a câmara, a
+  aplicação repintava-se entretanto e a fotografia voltava para um botão
+  que já não existia — e em Androids com pouca memória a página era
+  fechada; (2) as fotografias só subiam no fim do turno; (3) a fila de
+  envio deitava fora à primeira um envio que apanhasse uma sessão
+  caducada ou um 503 do servidor. Agora: a câmara abre DENTRO da
+  aplicação (com a câmara do telemóvel como recurso), a fotografia sobe
+  logo e o patrão vê-a durante o turno, o passo a meio sobrevive a um
+  recarregar, e a fila só desiste do que a base recusa de vez (8 vezes),
+  tentando de novo quando a rede volta. `paineis/teste_camara.mjs` (31).
+- **Os litros do abastecimento** apareciam "0,00 litros" no turno ao
+  vivo (faltava o preço do litro no turno ao vivo). O turno leva agora o
+  preço e o depósito, e o painel do patrão completa os antigos com os
+  da frota.
+
 ## Como se publica (o nó de antes está desatado)
 
 O Vercel aceita publicar a partir de um repositório público do GitHub
@@ -63,7 +79,7 @@ ficheiros. Os passos estão em `site/INSTALAR.md`.
 | `supabase/provar.sh` | 61 regras + 9 da passagem de uma base antiga, num Postgres a sério. As provas foram postas à prova estragando as regras de propósito |
 | `paineis/teste_contas.mjs` | 40 — o caminho de um cliente novo, do criar conta ao apagar |
 | `paineis/teste_supabase.mjs` | 25 — as regras vistas pela aplicação, a trava, sem rede |
-| o resto dos `teste_*.mjs` | condutor 35, dono 44, junto 16, clicável 23, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9 |
+| o resto dos `teste_*.mjs` | câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 33, mapa vivo 24 |
 
 Os testes que usam o servidor próprio (`teste_clicavel`,
 `teste_formularios`, `teste_servidor`) esperam correr numa pasta com

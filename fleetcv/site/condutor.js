@@ -58,6 +58,24 @@ function guardar(){
       onde:ondeEstou()});
 }
 function carregar(){ return Nuvem.local('condutor'); }
+/* O passo a meio (os km escritos, a fotografia tirada) guarda-se aqui.
+   Se o telemóvel fechar a página — uma chamada, falta de memória — o
+   condutor volta ao mesmo ecrã com o que já tinha feito, em vez de
+   recomeçar do passo 1 sem dar pela fotografia perdida. */
+var PASSOS={'km-inicio':1, 'gps':1, 'abastecer':1, 'km-fim':1}, ultimoPasso='';
+function guardarPasso(){
+  if(!PASSOS[S.ecra]){
+    /* saiu do passo (gravou, ou voltou atrás): já não há nada a meio.
+       Só depois do arranque — antes, o ecrã ainda não é o verdadeiro */
+    if(arrancado && ultimoPasso!=='-'){ ultimoPasso='-'; Nuvem.local('passo', null); }
+    return; }
+  var p={ecra:S.ecra, r:S.r, foto:S.foto, carro:S.carro&&S.carro.id,
+         turno:S.turno&&S.turno.id, quando:Date.now()};
+  var marca=p.ecra+'|'+JSON.stringify(p.r)+'|'+(p.foto?p.foto.length:0);
+  if(marca===ultimoPasso) return;
+  ultimoPasso=marca; Nuvem.local('passo', p);
+}
+function apagarPasso(){ ultimoPasso=''; Nuvem.local('passo', null); }
 function ondeEstou(){
   var u=S.ultimaPos||(S.turno&&S.turno.rasto.length
     ? S.turno.rasto[S.turno.rasto.length-1] : null);
@@ -217,29 +235,39 @@ function simular(){
    pesada baixa-se a qualidade até caber — o que importa é ler os
    números do quadrante ou do talão, não a beleza da imagem. E os
    dados são pagos pelo condutor. */
-var FOTO_MAX=110000;
+/* 900 px no lado maior chegam para ler os números do quadrante e do
+   talão; 620 (o de antes) deixava algarismos pequenos ilegíveis. */
+var FOTO_MAX=170000, FOTO_LADO=900;
+function encolherFoto(fonte, cb){
+  try{
+    var w=fonte.naturalWidth||fonte.videoWidth||fonte.width,
+        h=fonte.naturalHeight||fonte.videoHeight||fonte.height;
+    var k=Math.min(1, FOTO_LADO/Math.max(w,h));
+    var cv=document.createElement('canvas');
+    cv.width=Math.round(w*k); cv.height=Math.round(h*k);
+    cv.getContext('2d').drawImage(fonte,0,0,cv.width,cv.height);
+    var q=0.7, d=cv.toDataURL('image/jpeg',q);
+    while(d.length>FOTO_MAX && q>0.3){ q-=0.1; d=cv.toDataURL('image/jpeg',q); }
+    if(d.length>FOTO_MAX){
+      var cv2=document.createElement('canvas');
+      cv2.width=Math.round(cv.width*0.7); cv2.height=Math.round(cv.height*0.7);
+      cv2.getContext('2d').drawImage(cv,0,0,cv2.width,cv2.height);
+      d=cv2.toDataURL('image/jpeg',0.55);
+    }
+    cb(d);
+  }catch(e){ cb(null); }
+}
 function lerFoto(f,cb){
   var fr=new FileReader();
   fr.onload=function(){
     var im=new Image();
-    im.onload=function(){
-      try{
-        var k=Math.min(1, 620/Math.max(im.width,im.height));
-        var cv=document.createElement('canvas');
-        cv.width=Math.round(im.width*k); cv.height=Math.round(im.height*k);
-        cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
-        var q=0.62, d=cv.toDataURL('image/jpeg',q);
-        while(d.length>FOTO_MAX && q>0.28){ q-=0.1; d=cv.toDataURL('image/jpeg',q); }
-        if(d.length>FOTO_MAX){
-          var cv2=document.createElement('canvas');
-          cv2.width=Math.round(cv.width*0.7); cv2.height=Math.round(cv.height*0.7);
-          cv2.getContext('2d').drawImage(cv,0,0,cv2.width,cv2.height);
-          d=cv2.toDataURL('image/jpeg',0.5);
-        }
-        cb(d);
-      }catch(e){ cb(fr.result); } };
-    im.onerror=function(){ cb(fr.result); };
+    im.onload=function(){ encolherFoto(im, function(d){ cb(d); }); };
+    /* uma imagem que o navegador não consegue abrir não vale a pena
+       guardar: sem isto ia o ficheiro inteiro, megabytes, e depois
+       era recusado ao subir */
+    im.onerror=function(){ cb(null); };
     im.src=fr.result; };
+  fr.onerror=function(){ cb(null); };
   fr.readAsDataURL(f); }
 
 /* ─── contas do turno ────────────────────────────────────── */
@@ -323,15 +351,80 @@ function arco(v){
     'stroke-dashoffset="'+(C*(1-f)).toFixed(1)+
     '" style="transition:stroke-dashoffset .12s linear, stroke .3s"/></svg>';
 }
-function caixaFoto(t,d){
-  return S.foto
-    ? '<label class="foto feita"><img src="'+S.foto+'" alt="'+esc(t)+'">'+
-      '<span class="re">Repetir</span><input type="file" accept="image/*" '+
-      'capture="environment" id="ff"></label>'
-    : '<label class="foto"><span class="ic">📷</span><span class="t">'+esc(t)+'</span>'+
-      '<span class="t2">'+esc(d)+'</span><input type="file" accept="image/*" '+
-      'capture="environment" id="ff"></label>';
+/* O quadrado da fotografia. Antes era um <input type=file> dentro do
+   ecrã: o telemóvel saía para a câmara, a aplicação repintava-se entretanto
+   (chegam novidades da frota a toda a hora) e a fotografia voltava para
+   um botão que já não existia — perdia-se. Em telemóveis com pouca memória
+   o Android chegava a fechar a página com a câmara aberta. Agora a câmara
+   abre aqui dentro (e o GPS continua a gravar); o input de ficheiro, para
+   quando a câmara de dentro não dá, vive fora do ecrã que se repinta. */
+function caixaFoto(t,d,guia){
+  var abre = haCamara() ? 'data-f="camara" data-guia="'+esc(guia||t)+'"' : 'data-f="ficheiro"';
+  return (S.foto
+    ? '<button class="foto feita" '+abre+'><img src="'+S.foto+'" alt="'+esc(t)+'">'+
+      '<span class="re">Repetir</span></button>'
+    : '<button class="foto" '+abre+'><span class="ic">📷</span><span class="t">'+esc(t)+'</span>'+
+      '<span class="t2">'+esc(d)+'</span></button>')+
+    (S.avisoFoto?'<p class="p-nota" style="color:var(--crit);margin-top:6px">'+
+      esc(S.avisoFoto)+'</p>':'');
 }
+function haCamara(){
+  return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+}
+
+/* ─── a câmara de dentro ─────────────────────────────────── */
+var cam={fluxo:null, luz:false};
+function abrirCamara(guia){
+  var cx=el('camara'), v=el('cam-v');
+  el('cam-guia').textContent=guia||'';
+  el('cam-falhou').hidden=true; el('cam-tirar').hidden=false;
+  el('cam-moldura').hidden=false; el('cam-luz').hidden=true; cam.luz=false;
+  el('cam-luz').classList.remove('on');
+  cx.hidden=false;
+  navigator.mediaDevices.getUserMedia({audio:false, video:{
+      facingMode:{ideal:'environment'}, width:{ideal:1920}, height:{ideal:1080}}})
+    .then(function(f){
+      if(cx.hidden){ f.getTracks().forEach(function(t){ t.stop(); }); return; }
+      cam.fluxo=f; v.srcObject=f;
+      try{ var p=v.play(); if(p&&p.catch) p.catch(function(){}); }catch(e){}
+      /* a luz do telemóvel, para o quadrante de noite, onde houver */
+      try{
+        var tr=f.getVideoTracks()[0], cp=tr.getCapabilities&&tr.getCapabilities();
+        if(cp && cp.torch) el('cam-luz').hidden=false;
+      }catch(e){}
+    })
+    .catch(function(){
+      /* sem licença para a câmara, ou sem câmara: fica o botão para a
+         câmara do telemóvel, que é um toque do condutor (tem de ser) */
+      el('cam-falhou').hidden=false; el('cam-tirar').hidden=true;
+      el('cam-moldura').hidden=true;
+    });
+}
+function fecharCamara(){
+  if(cam.fluxo){ cam.fluxo.getTracks().forEach(function(t){ t.stop(); }); cam.fluxo=null; }
+  var v=el('cam-v'); if(v) v.srcObject=null;
+  el('camara').hidden=true;
+}
+function tirarFoto(){
+  var v=el('cam-v');
+  if(!v || !v.videoWidth){ return; }
+  var cv=document.createElement('canvas');
+  cv.width=v.videoWidth; cv.height=v.videoHeight;
+  cv.getContext('2d').drawImage(v,0,0);
+  fecharCamara();
+  encolherFoto(cv, function(u){
+    if(!u){ S.avisoFoto='Não foi possível guardar a fotografia. Tente outra vez.'; pintar(); return; }
+    S.avisoFoto=null; S.foto=u; guardarPasso(); pintar(); });
+}
+function luzCamara(){
+  try{
+    var tr=cam.fluxo.getVideoTracks()[0]; cam.luz=!cam.luz;
+    tr.applyConstraints({advanced:[{torch:cam.luz}]});
+    el('cam-luz').classList.toggle('on', cam.luz);
+  }catch(e){}
+}
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState==='hidden' && cam.fluxo) fecharCamara(); });
 function postosPerto(lat,lon,n){
   if(lat==null) return [];
   return POSTOS.map(function(p){ return {p:p, m:Math.round(dist(lat,lon,p.lat,p.lon))}; })
@@ -438,7 +531,8 @@ function pintar(){
         ? '<div class="cartao aviso"><p class="p-nota"><b>Sem GPS, a fotografia é '+
           'a única prova.</b> Fotografe o quadrante, mesmo que escreva o número '+
           'à mão.</p></div>' : '')+
-      caixaFoto('Fotografar o conta-quilómetros','abre a câmara do telemóvel')+
+      caixaFoto('Fotografar o conta-quilómetros','toque para abrir a câmara',
+        'Aponte aos números do conta-quilómetros')+
       '<div class="ou">ou</div>'+
       '<label class="campo"><span class="lb">Escrever à mão</span>'+
       '<input type="number" inputmode="numeric" id="i-km" value="'+km+'">'+
@@ -582,7 +676,8 @@ function pintar(){
         '<p class="p-nota" style="margin-top:5px">'+nf(val)+' CVE dão '+nf(lt,1)+
         ' litros, e o depósito deste carro leva '+nf(t2.deposito)+'. Confira o valor '+
         '— se estiver certo, o patrão vai perguntar porquê.</p></div>';
-    h+=caixaFoto('Fotografar o talão','ou a bomba, se o talão não der')+
+    h+=caixaFoto('Fotografar o talão','ou a bomba, se o talão não der',
+      'O talão inteiro, com o valor e os litros')+
       '<div class="ou">e</div>'+
       '<label class="campo"><span class="lb">Quanto pagou (CVE)</span>'+
       '<input type="number" inputmode="numeric" id="i-valor" value="'+(val||'')+
@@ -605,7 +700,8 @@ function pintar(){
     var p2=kmF-t3.kmInicio;
     h='<h1>Terminar o turno</h1>'+
       '<p class="sub">Última vez: quantos km marca agora?</p>'+
-      caixaFoto('Fotografar o conta-quilómetros','ou escreva em baixo')+
+      caixaFoto('Fotografar o conta-quilómetros','ou escreva em baixo',
+        'Os números do conta-quilómetros, no fim do turno')+
       '<div class="ou">ou</div>'+
       '<label class="campo"><span class="lb">Escrever à mão</span>'+
       '<input type="number" inputmode="numeric" id="i-kmf" value="'+kmF+'">'+
@@ -686,6 +782,7 @@ function pintar(){
   el('ecra').className = S.ecra==='volante' ? 'col cheia' : 'col';
   el('ecra').innerHTML=h;
   el('accoes').innerHTML=b;
+  guardarPasso();
   var pv=paraOndeVolta();
   el('voltar').hidden = !(pv && pv!=='ficar');
   armarVoltar();
@@ -763,10 +860,23 @@ function suave(){ clearTimeout(adiado); adiado=setTimeout(function(){
   pintar(); if(id){ var n=el(id); if(n){ n.focus();
     try{ n.setSelectionRange(p,p); }catch(x){} } } }, 300); }
 
-document.addEventListener('change', function(e){
-  if(e.target.id==='ff'&&e.target.files&&e.target.files[0])
-    lerFoto(e.target.files[0], function(u){ S.foto=u; pintar(); });
-});
+/* O input de ficheiro não se repinta nunca (vive na caixa da câmara),
+   e ouve-se directamente: mesmo que o condutor demore na câmara do
+   telemóvel, a fotografia volta para o mesmo sítio. */
+(function(){
+  var ff=el('ff'); if(!ff) return;
+  ff.addEventListener('change', function(){
+    var f=ff.files&&ff.files[0]; if(!f) return;
+    fecharCamara();
+    lerFoto(f, function(u){
+      ff.value='';
+      if(!u){ S.avisoFoto='Não foi possível ler essa fotografia. Tire outra.'; pintar(); return; }
+      S.avisoFoto=null; S.foto=u; guardarPasso(); pintar(); });
+  });
+  el('cam-fechar').addEventListener('click', fecharCamara);
+  el('cam-tirar').addEventListener('click', tirarFoto);
+  el('cam-luz').addEventListener('click', luzCamara);
+})();
 
 document.addEventListener('click', function(e){
   var b=e.target.closest('[data-f],[data-carro],[data-posto],[data-ver],[data-apagar]');
@@ -815,15 +925,25 @@ document.addEventListener('click', function(e){
   if(f==='comecar') comecar(false);
   if(f==='comecar-sim') comecar(true);
   if(f==='ir-volante'){ S.foto=null; S.r={}; S.ecra='volante'; pintar(); }
+  if(f==='camara'){ abrirCamara(d.guia); return; }
+  if(f==='ficheiro'){ var ff=el('ff'); if(ff) ff.click(); return; }
   if(f==='ir-abast'){ S.foto=null; S.r={}; S.ecra='abastecer'; pintar(); }
   if(f==='guardar-abast'){
     var v=S.r.valor||0; if(v<=0) return;
     var u2=S.turno.rasto[S.turno.rasto.length-1];
     var pp=postosPerto(u2?u2[0]:null, u2?u2[1]:null, 1);
+    /* A fotografia do talão leva uma chave sua, que não muda se um
+       abastecimento anterior for apagado (com o número de ordem, a
+       fotografia ia parar ao abastecimento errado). */
+    var chaveAb = S.turno.id+'_ab'+Date.now().toString(36);
     S.turno.abast.push({hora:Date.now(), valor:v, litrosTalao:S.r.litros||null,
-      foto:S.foto, posto:S.r.posto||(pp[0]?pp[0].p.nome:'posto'),
+      foto:S.foto, temFoto:!!S.foto, chaveFoto:chaveAb,
+      posto:S.r.posto||(pp[0]?pp[0].p.nome:'posto'),
       lat:u2?u2[0]:null, lon:u2?u2[1]:null});
     S.turno.totalCve+=v;
+    /* sobe já: o patrão vê o talão enquanto o turno decorre, e se o
+       telemóvel morrer antes do fim a prova não se perde */
+    if(S.foto) Nuvem.enviarFoto(chaveAb, S.turno.id, S.foto);
     S.foto=null; S.r={};
     Nuvem.posicao(S.turno, {kmGps:kmRasto(S.turno.rasto), bateria:S.bateria,
       onde:ondeEstou()}, true);
@@ -854,7 +974,7 @@ function comecar(sim){
     carroId:S.carro.id, matricula:S.carro.matricula, condutor:S.eu.nome,
     kmInicio:(S.r.km==null?S.carro.km:S.r.km), kmFim:null,
     gap:(S.r.km==null?S.carro.km:S.r.km)-S.carro.km,
-    deposito:S.carro.deposito, rasto:[], abast:[], totalCve:0,
+    deposito:S.carro.deposito, precoLitro:FROTA.precoLitro, rasto:[], abast:[], totalCve:0,
     fotoInicio:S.foto, simulado:!!sim };
   S.turno.condutorId=S.eu.id;
   S.foto=null; S.r={};
@@ -865,6 +985,10 @@ function comecar(sim){
   /* o patrão passa a ver este turno no mapa dele a partir de agora */
   segurarEcra();
   Nuvem.abrirTurno(S.turno);
+  /* logo a seguir ao turno (a base só aceita a foto de um turno que já
+     lá esteja, e a fila respeita a ordem) */
+  if(S.turno.fotoInicio) Nuvem.enviarFoto(S.turno.id+'_inicio', S.turno.id, S.turno.fotoInicio);
+  apagarPasso();
   Nuvem.guardandoRasto(function(){ return S.turno; });
   Nuvem.posicao(S.turno, {onde:ondeEstou()}, true);
   guardar(); S.ecra='volante'; pintar();
@@ -891,6 +1015,7 @@ function terminar(){
   if(salvo){ clearInterval(salvo); salvo=null; }
   S.carro.km=kmF;
   S.turnos.unshift(t); S.turno=null; S.foto=null; S.r={}; S.simular=false;
+  apagarPasso();
   /* sobe o turno inteiro, com o rasto, e sai do mapa ao vivo */
   largarEcra();
   Nuvem.fecharTurno(t);
@@ -929,6 +1054,17 @@ function retomar(){
   if(!S.eu && Nuvem.ensaio && Nuvem.ensaio()){
     var q=(FROTA.condutores||[])[0];
     if(q){ S.eu=q; S.ecra='carro'; guardar(); }
+  }
+  var P=Nuvem.local('passo');
+  if(P && S.eu && Date.now()-(P.quando||0) < 30*60000){
+    var comTurno = !!(S.turno && !S.turno.fim);
+    if(!comTurno && (P.ecra==='km-inicio'||P.ecra==='gps')){
+      var cp=acha(FROTA.carros, P.carro);
+      if(cp){ S.carro=cp; S.ecra=P.ecra; S.r=P.r||{}; S.foto=P.foto||null; }
+    } else if(comTurno && P.turno===S.turno.id &&
+              (P.ecra==='abastecer'||P.ecra==='km-fim')){
+      S.ecra=P.ecra; S.r=P.r||{}; S.foto=P.foto||null;
+    }
   }
 }
 

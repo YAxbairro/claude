@@ -136,6 +136,32 @@ body.condutor .foto{position:relative; display:block; border:2px dashed var(--li
 body.condutor .foto.feita{border-style:solid; border-color:var(--ok); padding:0; overflow:hidden}
 body.condutor .foto img{width:100%; display:block; max-height:230px; object-fit:cover}
 body.condutor .foto input{position:absolute; inset:0; opacity:0; width:100%; height:100%}
+body.condutor button.foto{width:100%; font:inherit; color:inherit}
+body.condutor .camara{position:fixed; inset:0; z-index:60; background:#000; display:flex;
+  flex-direction:column}
+body.condutor .camara[hidden]{display:none}
+body.condutor .camara video{flex:1; width:100%; min-height:0; object-fit:cover; background:#000}
+body.condutor .cam-guia{position:absolute; left:16px; right:16px;
+  top:calc(env(safe-area-inset-top,0px) + 14px); margin:0; text-align:center;
+  color:#fff; font-size:14px; font-weight:600; text-shadow:0 1px 3px rgba(0,0,0,.8)}
+body.condutor .cam-moldura{position:absolute; left:8%; right:8%; top:30%; height:28%;
+  border:2px solid rgba(255,255,255,.75); border-radius:14px; pointer-events:none;
+  box-shadow:0 0 0 2000px rgba(0,0,0,.28)}
+body.condutor .cam-barra{flex:none; display:flex; align-items:center; justify-content:space-between;
+  padding:18px 22px calc(env(safe-area-inset-bottom,0px) + 22px); background:#000}
+body.condutor .cam-x, body.condutor .cam-luz{background:none; border:none; color:#fff; font:600 15px var(--sans);
+  min-width:72px; padding:10px 0; cursor:pointer}
+body.condutor .cam-luz[hidden]{visibility:hidden; display:block}
+body.condutor .cam-luz.on{color:#ffd54a}
+body.condutor .cam-disparo{width:74px; height:74px; border-radius:50%; border:4px solid #fff;
+  background:none; padding:5px; cursor:pointer}
+body.condutor .cam-disparo span{display:block; width:100%; height:100%; border-radius:50%; background:#fff}
+body.condutor .cam-disparo:active span{background:#d8d8d8}
+body.condutor .cam-falhou{position:absolute; left:16px; right:16px; top:32%; text-align:center; color:#fff}
+body.condutor .cam-falhou[hidden]{display:none}
+body.condutor .cam-falhou p{margin:0 0 14px; font-size:15px}
+body.condutor .cam-falhou .bt{position:relative; overflow:hidden}
+body.condutor .cam-falhou input{position:absolute; inset:0; opacity:0; width:100%; height:100%}
 body.condutor .foto .ic{font-size:30px}
 body.condutor .foto .t{font-weight:600; margin-top:8px; font-size:15px}
 body.condutor .foto .t2{font-size:12.5px; color:var(--muted); margin-top:3px}

@@ -432,15 +432,31 @@ var rastos={}, aBuscar={};
    vez a acreditar na palavra do condutor — que é o que isto veio
    substituir. Vão-se buscar quando ele abre o turno. */
 var fotos={}, aBuscarFoto={};
+/* As fotografias de um turno. Com o turno a decorrer vão chegando (o
+   quadrante ao abrir, o talão a cada abastecimento), por isso não se vão
+   buscar uma vez só: sabe-se quais deviam lá estar, e enquanto faltar
+   alguma volta-se a perguntar, de cinco em cinco segundos. */
+var fotosPedidas={};
+function chavesDeFotos(t){
+  var k=[];
+  if(t.temFotoInicio||t.fotoInicio) k.push(t.id+'_inicio');
+  (t.abast||[]).forEach(function(a,ia){
+    if(a.temFoto||a.foto) k.push(a.chaveFoto||(t.id+'_ab'+ia)); });
+  if(t.temFotoFim||t.fotoFim) k.push(t.id+'_fim');
+  return k;
+}
 function fotosDo(t){
-  if(fotos[t.id]) return fotos[t.id];
-  if(!aBuscarFoto[t.id]){
-    aBuscarFoto[t.id]=true;
+  var tem=fotos[t.id], faltam=chavesDeFotos(t).filter(function(k){
+    return !(tem&&tem[k]); });
+  var ultimo=fotosPedidas[t.id]||0;
+  if((!tem || faltam.length) && !aBuscarFoto[t.id] && Date.now()-ultimo>5000){
+    aBuscarFoto[t.id]=true; fotosPedidas[t.id]=Date.now();
     Nuvem.fotosDoTurno(t.id).then(function(f){
-      fotos[t.id]=f||{};
+      aBuscarFoto[t.id]=false;
+      fotos[t.id]=Object.assign({}, fotos[t.id]||{}, f||{});
       if(S.ecra==='turno' && S.sel===t.id) pintar(); });
   }
-  return null;
+  return tem||null;
 }
 function quadroFoto(src, rot){
   return '<button class="foto-q" data-foto="'+esc(src)+'">'+
@@ -1079,7 +1095,8 @@ function pintar(){
     if(fs[t.id+'_inicio']) quadros.push(quadroFoto(fs[t.id+'_inicio'],
       'Quadrante ao começar · '+nf(t.kmInicio)+' km'));
     (t.abast||[]).forEach(function(a,ia){
-      if(fs[t.id+'_ab'+ia]) quadros.push(quadroFoto(fs[t.id+'_ab'+ia],
+      var kab=a.chaveFoto||(t.id+'_ab'+ia);
+      if(fs[kab]) quadros.push(quadroFoto(fs[kab],
         'Talão · '+nf(a.valor)+' CVE · '+hh(a.hora))); });
     if(fs[t.id+'_fim']) quadros.push(quadroFoto(fs[t.id+'_fim'],
       'Quadrante ao acabar · '+nf(t.kmFim)+' km'));
@@ -1788,11 +1805,20 @@ try{
   localStorage.removeItem('fleetcv-quero-criar');
 }catch(e){}
 
+/* Um turno que chega sem o preço do litro ou sem o depósito do carro
+   (os turnos ao vivo, e os de telemóveis antigos) fica com os da frota.
+   Sem isto as contas davam zero litros, e os alertas eram disparates. */
+function completarTurno(t){
+  if(!t) return t;
+  if(!(t.precoLitro>0)) t.precoLitro=(S.frota&&S.frota.precoLitro)||145;
+  if(!(t.deposito>0)){ var c=S.frota?carroDe(t.carroId):null; t.deposito=(c&&c.deposito)||50; }
+  return t;
+}
 Nuvem.aoMudar(function(){
   var d=Nuvem.dados();
   if(d.frota) S.frota=d.frota;
-  S.turnos=d.turnos||[];
-  S.vivos=d.vivos||[];
+  S.turnos=(d.turnos||[]).map(completarTurno);
+  S.vivos=(d.vivos||[]).map(completarTurno);
   if(S.cartao && !turnoVivo(S.cartao)) S.cartao=null;
   /* O telemóvel lembrava-se de ter entrado, mas a base diz que não há
      sessão (saiu noutro sítio, ou a sessão caducou). Mostrar a frota

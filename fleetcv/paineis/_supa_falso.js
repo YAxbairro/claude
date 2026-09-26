@@ -119,14 +119,20 @@
           if(op && op.onConflict && op.onConflict!=='frota,coleccao,id')
             return Promise.resolve({data:null, error:{message:
               'there is no unique or exclusion constraint matching the ON CONFLICT specification'}});
+          /* os testes podem pôr o servidor aflito por uns pedidos: a
+             sessão caducada e o 503 são o que o Supabase dá de verdade */
+          if(window.__falharEscritas>0){ window.__falharEscritas--;
+            return Promise.resolve(window.__falharEscritas%2
+              ? {data:null, status:401, error:{message:'JWT expired', code:'PGRST303'}}
+              : {data:null, status:503, error:{message:'upstream connect error', code:''}}); }
           var nao=podeEscrever(f, d.coleccao, d.id, d.corpo);
           if(!nao && d.coleccao==='frota' && d.id==='condutores'){
             var repetido=(d.corpo.lista||[]).filter(function(x){
               return x.email && emailNoutra(x.email, f); })[0];
             if(repetido) nao='O e-mail '+repetido.email+' já está a ser usado noutra frota.'; }
-          if(nao) return Promise.resolve({data:null, error:{message:nao}});
+          if(nao) return Promise.resolve({data:null, status:403, error:{message:nao, code:'42501'}});
           gravar(f, d.coleccao, d.id, d.corpo, d.quando);
-          return Promise.resolve({data:null, error:null}); },
+          return Promise.resolve({data:null, status:201, error:null}); },
         delete:function(){ apagar=true; return api; },
         then:function(ok, mal){ return Promise.resolve(correr()).then(ok, mal); },
         catch:function(mal){ return Promise.resolve(correr()).catch(mal); },

@@ -21,7 +21,7 @@ ok('três carros', (await p.locator('[data-carro]').count())===3);
 
 await p.locator('[data-carro]').first().click(); await p.waitForTimeout(400);
 ok('2 · quilometragem', (await txt()).includes('Quantos km marca'));
-ok('foto e número lado a lado', await p.isVisible('#ff') && await p.isVisible('#i-km'));
+ok('foto e número lado a lado', await p.isVisible('.foto') && await p.isVisible('#i-km'));
 await p.click('[data-f="ir-gps"]'); await p.waitForTimeout(1500);
 ok('3 · GPS', (await txt()).includes('GPS'));
 ok('GPS ligado', (await txt()).includes('GPS ligado'));

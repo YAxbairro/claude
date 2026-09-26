@@ -17,8 +17,10 @@ import crypto from 'node:crypto';
 
 const SITE=(process.env.SITE||'https://fleetcv.vercel.app').replace(/\/$/,'');
 const SPKI=process.env.CCR_SPKI||'';
+/* a câmara de mentira do Chromium, para as fotografias do condutor */
 const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium',
-  args: SPKI?['--ignore-certificate-errors-spki-list='+SPKI]:[] });
+  args:['--use-fake-ui-for-media-stream','--use-fake-device-for-media-stream']
+    .concat(SPKI?['--ignore-certificate-errors-spki-list='+SPKI]:[]) });
 const ok=(n,c,x)=>console.log((c?' ok  ':'FALHA')+' · '+n+(x?'  → '+x:''));
 const err=[];
 const ate=async(f,seg=40)=>{ const fim=Date.now()+seg*1000;
@@ -80,7 +82,11 @@ await p.waitForTimeout(2500);
 
 /* ── o condutor, no telemóvel dele ────────────────────────── */
 const cc=await b.newContext({viewport:{width:390,height:840},
-  permissions:['geolocation'], geolocation:{latitude:14.9177,longitude:-23.5092,accuracy:8}});
+  permissions:['geolocation','camera'], geolocation:{latitude:14.9177,longitude:-23.5092,accuracy:8}});
+const fotografar=async()=>{ await c.click('.foto');
+  await ate(()=>c.evaluate(()=>{ const v=document.getElementById('cam-v'); return v&&v.videoWidth>0; }),15);
+  await c.click('#cam-tirar'); await c.waitForTimeout(900);
+  return c.isVisible('.foto.feita img'); };
 const c=await cc.newPage();
 c.on('pageerror',e=>err.push('condutor: '+e.message));
 const ctxt=()=>c.textContent('#ecra');
@@ -96,6 +102,7 @@ const lista=await c.evaluate(()=>Nuvem.dados().frota.condutores);
 ok('e os códigos não lhe chegam ao telemóvel',
    lista.length===1 && lista.every(x=>!('codigo' in x)), JSON.stringify(lista));
 await c.locator('[data-carro]').first().click(); await c.waitForTimeout(900);
+ok('tira a fotografia do quadrante com a câmara dentro da aplicação', await fotografar());
 await c.click('[data-f="ir-gps"]'); await c.waitForTimeout(2000);
 await c.click('[data-f="comecar-sim"]');
 ok('abre turno', await ate(async()=>c.isVisible('.volante'),20));
@@ -119,6 +126,23 @@ ok('o carro aparece no mapa, com a matrícula',
 await p.locator('.carro-vivo').first().dispatchEvent('click');
 ok('tocar no carro segue-o, com a velocidade por baixo',
    await ate(async()=>/km\/h/.test(await p.textContent('.faixa').catch(()=>'')), 15));
+
+/* as fotografias, na base verdadeira, durante o turno */
+await p.click('.faixa [data-turno]'); await p.waitForTimeout(1500);
+ok('o patrão vê a fotografia do quadrante DURANTE o turno',
+   await ate(async()=>/Quadrante ao começar/.test(await txt()), 60));
+await c.bringToFront();
+await c.click('[data-f="ir-abast"]'); await c.waitForTimeout(900);
+ok('o condutor fotografa o talão', await fotografar());
+await c.fill('#i-valor','2000'); await c.waitForTimeout(500);
+await c.click('[data-f="guardar-abast"]');
+ok('e regista o abastecimento', await ate(async()=>/Já abasteceu/.test(await ctxt()),15));
+await p.bringToFront();
+ok('o patrão vê o talão durante o turno',
+   await ate(async()=>/Talão · 2\.000 CVE/.test(await txt()), 60));
+const linhaAb=((await txt()).match(/2\.000 CVE · [\d,]+ litros/)||[''])[0];
+ok('com os litros contados (não "0,00 litros")', /· [1-9][\d,]* litros/.test(linhaAb), linhaAb);
+await p.click('#voltar'); await p.waitForTimeout(800);
 
 await c.bringToFront();
 await c.click('[data-f="ir-fim"]'); await c.waitForTimeout(900);
