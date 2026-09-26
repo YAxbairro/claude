@@ -84,10 +84,10 @@ const km1=await kmDo();
 ok('O CARRO A ANDAR atravessa o servidor',
    await ate(async()=>(await kmDo())>km1+0.05, 30), km1+' km → '+(await kmDo())+' km');
 
-/* tocar no carro abre o cartão com tudo à vista; o turno
-   completo, com o mapa, abre-se a partir dele */
+/* tocar no carro segue-o no mapa, com uma faixa curta por baixo; o
+   turno completo abre-se a partir dela */
 await aoVivo.click(); await patrao.waitForTimeout(900);
-await patrao.locator('.carro-cx .bt.sec').click(); await patrao.waitForTimeout(900);
+await patrao.locator('.faixa [data-turno]').click(); await patrao.waitForTimeout(900);
 ok('o patrão vê o percurso no mapa da Praia', await patrao.isVisible('.mapa'));
 
 /* ── ABASTECER ───────────────────────────────────────────── */

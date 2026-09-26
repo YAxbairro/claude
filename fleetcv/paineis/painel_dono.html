@@ -205,6 +205,31 @@ input.erro{border-color:var(--crit); background:var(--crit-wash)}
 .item.alerta-cx{margin-top:8px; border-color:var(--crit)}
 .item.alerta-cx .p{color:var(--crit)}
 .dica{margin:9px 2px 0; font-size:12.5px; color:var(--muted); text-align:center}
+.lugar-mapa{position:relative}
+.mapa-vivo{position:relative; z-index:0; height:min(58vh,480px); min-height:300px;
+  border-radius:12px; overflow:hidden; border:1px solid var(--line); background:#e6ebea}
+.mapa-vivo .leaflet-control-attribution{font-size:10px}
+.carro-vivo{background:none; border:none}
+.carro-vivo .cv-seta{position:absolute; left:12px; top:12px; width:32px; height:32px;
+  transition:transform .8s linear; filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+.carro-vivo .cv-onda{position:absolute; left:14px; top:14px; width:28px; height:28px;
+  border-radius:50%; animation:onda 2.4s ease-out infinite}
+@keyframes onda{0%{transform:scale(.7); opacity:.4}100%{transform:scale(2); opacity:0}}
+.carro-vivo .cv-mat{position:absolute; left:50%; top:-12px; transform:translateX(-50%);
+  white-space:nowrap; font:700 12px var(--mono); color:#10181a; background:#fff;
+  border-radius:6px; padding:1px 6px; box-shadow:0 1px 3px rgba(0,0,0,.35)}
+.carro-vivo.on .cv-mat{background:var(--accent); color:var(--accent-ink)}
+.faixa{margin-top:10px; background:var(--surface); border:1px solid var(--accent);
+  border-radius:14px; padding:12px 13px}
+.faixa-topo{display:flex; align-items:center; gap:8px; font-size:14px}
+.faixa-topo .mat{font-family:var(--mono)}
+.faixa-topo .fechar{margin-left:auto}
+.faixa-nums{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:10px}
+.faixa-nums b{display:block; font-size:24px; font-weight:500; line-height:1.1}
+.faixa-nums span{font-size:11px; color:var(--muted); text-transform:uppercase;
+  letter-spacing:.06em}
+.faixa-onde{margin-top:8px}
+.seguir-de-novo{margin-top:8px}
 .mapa{width:100%; display:block; border-radius:12px; background:var(--surface2);
   border:1px solid var(--line)}
 .mapa-grande{height:auto}
@@ -712,6 +737,254 @@ function maiorBuraco(rasto){
     mx=Math.max(mx, (rasto[i][2]-rasto[i-1][2])/1000);
   return Math.round(mx);
 }
+/* ════════════════════════════════════════════════════════════
+   O MAPA A SÉRIO
+   O desenho da Praia que vem dentro da aplicação serve para quando
+   não há rede — mas tem só as estradas grandes, sem nomes, e
+   redesenha-se inteiro de cada vez que um carro mexe, mudando de
+   escala. O patrão olhava e não sabia dizer onde o carro estava.
+
+   Este é um mapa como os do telemóvel: ruas com nome, prédios, zoom
+   com os dedos. O carro desliza de uma posição para a seguinte em
+   vez de saltar, e quem toca num carro fica a segui-lo: o mapa
+   aproxima-se e acompanha-o pela cidade.
+
+   Precisa de duas coisas de fora: a biblioteca Leaflet e os
+   quadradinhos do mapa (do OpenStreetMap). Faltando qualquer delas
+   — sem rede, ou dentro de uma moldura que as bloqueie — a aplicação
+   volta sozinha ao desenho de sempre.
+   ════════════════════════════════════════════════════════════ */
+var MapaVivo = (function(){
+"use strict";
+
+var PRAIA=[14.9195,-23.5087];
+var semQuadrados=false, avisos=[];
+
+function haLeaflet(){ return !!(window.L && window.L.map && window.L.divIcon); }
+function pronto(){ return haLeaflet() && !semQuadrados; }
+function quandoFalhar(fn){ avisos.push(fn); }
+function falhou(){
+  if(semQuadrados) return;
+  semQuadrados=true;
+  avisos.forEach(function(f){ try{ f(); }catch(e){} });
+}
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+/* A seta do carro. A cor diz o estado (a andar, com alertas, calado);
+   a matrícula vai por cima, legível sobre qualquer rua. */
+function seta(cor){
+  return '<svg viewBox="-13 -13 26 26" width="32" height="32" aria-hidden="true">'+
+    '<path d="M0 -11 L7.5 9 L0 4.6 L-7.5 9 Z" fill="'+cor+'" stroke="#fff" '+
+    'stroke-width="2" stroke-linejoin="round"/></svg>';
+}
+function icone(c){
+  return L.divIcon({
+    className:'carro-vivo',
+    iconSize:[56,56], iconAnchor:[28,28],
+    html:'<span class="cv-onda" style="background:'+c.cor+'"></span>'+
+      '<span class="cv-seta" style="transform:rotate('+Math.round(c.ang||0)+'deg)">'+
+      seta(c.cor)+'</span>'+
+      (c.rotulo?'<span class="cv-mat">'+esc(c.rotulo)+'</span>':'')});
+}
+
+/* Um mapa que sobrevive às repinturas. Os ecrãs desta aplicação
+   refazem-se inteiros a cada novidade; se o mapa fosse com eles,
+   voltava ao zoom de partida e carregava as ruas outra vez de segundo
+   e meio em segundo e meio. Por isso vive numa caixa sua, que se
+   muda de sítio para o lugar marcado no ecrã novo. */
+function novo(op){
+  op=op||{};
+  var caixa=document.createElement('div');
+  caixa.className='mapa-vivo';
+  var mapa=null, carros={}, cauda=null, chaveVista=null;
+  var aSeguir=null, largou=false, carregouUm=false, erros=0, larg=0, alt=0;
+
+  function criar(){
+    mapa=L.map(caixa,{zoomControl:true, attributionControl:true})
+      .setView(PRAIA,13);
+    mapa.attributionControl.setPrefix(false);
+    var q=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      {maxZoom:19, attribution:'© OpenStreetMap'});
+    q.on('tileload', function(){ carregouUm=true; });
+    /* sem nenhum quadradinho que chegue, é porque não há como os trazer */
+    q.on('tileerror', function(){ erros++; if(!carregouUm && erros>=6) falhou(); });
+    q.addTo(mapa);
+    /* mexer no mapa com o dedo é querer olhar para outro lado: deixa-se
+       de seguir até o patrão pedir outra vez */
+    mapa.on('dragstart', function(){
+      if(aSeguir && !largou){ largou=true; if(op.largou) op.largou(aSeguir); } });
+  }
+
+  function encaixar(lugar){
+    if(!lugar) return false;
+    if(caixa.parentNode!==lugar) lugar.appendChild(caixa);
+    if(!mapa) criar();
+    if(caixa.clientWidth!==larg || caixa.clientHeight!==alt){
+      larg=caixa.clientWidth; alt=caixa.clientHeight;
+      mapa.invalidateSize({pan:false}); }
+    return true;
+  }
+
+  /* De uma posição para a seguinte, a deslizar. Os carros mandam a
+     posição de segundo e meio em segundo e meio; saltar de uma para a
+     outra parecia um carro aos solavancos. */
+  function andar(m, para){
+    var de=m.getLatLng();
+    if(m._anim){ cancelAnimationFrame(m._anim); m._anim=null; }
+    if(!de || de.distanceTo(para)>3000){ m.setLatLng(para); seguirA(m, para); return; }
+    var t0=performance.now(), ms=1300;
+    var passo=function(agora){
+      var f=Math.min(1,(agora-t0)/ms);
+      var p=L.latLng(de.lat+(para.lat-de.lat)*f, de.lng+(para.lng-de.lng)*f);
+      m.setLatLng(p); seguirA(m, p);
+      m._anim = f<1 ? requestAnimationFrame(passo) : null;
+    };
+    m._anim=requestAnimationFrame(passo);
+  }
+  function seguirA(m, p){
+    if(aSeguir && m._id===aSeguir && !largou && caixa.parentNode)
+      mapa.panTo(p,{animate:false});
+  }
+  function rodar(m, ang){
+    var e=m.getElement&&m.getElement();
+    var s=e&&e.querySelector('.cv-seta');
+    if(s) s.style.transform='rotate('+Math.round(ang||0)+'deg)';
+  }
+  function pintarCor(m, cor){
+    var e=m.getElement&&m.getElement(); if(!e) return;
+    var p=e.querySelector('.cv-seta path'); if(p) p.setAttribute('fill', cor);
+    var o=e.querySelector('.cv-onda'); if(o) o.style.background=cor;
+  }
+
+  /* os carros da frota: um marcador por carro, que se mexe e não
+     se refaz */
+  function carrosNoMapa(lista){
+    var vistos={};
+    lista.forEach(function(c){
+      if(c.lat==null||c.lon==null) return;
+      vistos[c.id]=1;
+      var para=L.latLng(c.lat,c.lon), m=carros[c.id];
+      if(!m){
+        m=L.marker(para,{icon:icone(c), keyboard:true, title:c.rotulo||'',
+                         riseOnHover:true}).addTo(mapa);
+        m._id=c.id;
+        m.on('click', function(){ if(op.escolher) op.escolher(c.id); });
+        carros[c.id]=m;
+      } else {
+        andar(m, para); rodar(m, c.ang); pintarCor(m, c.cor);
+      }
+      var e=m.getElement&&m.getElement();
+      if(e) e.classList.toggle('on', aSeguir===c.id);
+    });
+    Object.keys(carros).forEach(function(id){
+      if(vistos[id]) return;
+      mapa.removeLayer(carros[id]); delete carros[id]; });
+  }
+
+  function enquadrar(pontos, chave, zoomUm){
+    if(chaveVista===chave) return;
+    chaveVista=chave;
+    if(!pontos.length){ mapa.setView(PRAIA,13); return; }
+    if(pontos.length===1){ mapa.setView(pontos[0], zoomUm||16); return; }
+    mapa.fitBounds(L.latLngBounds(pontos),{padding:[44,44], maxZoom:16});
+  }
+
+  return {
+    caixa:caixa,
+    encaixar:encaixar,
+    aSeguir:function(){ return aSeguir; },
+    largou:function(){ return largou; },
+    mapa:function(){ return mapa; },
+
+    /* A frota agora: todos os carros em turno; `seguir` é o que o
+       patrão escolheu acompanhar. */
+    frota:function(d){
+      if(!mapa) return;
+      var lista=d.carros||[];
+      carrosNoMapa(lista);
+      var alvo=null;
+      lista.forEach(function(c){ if(c.id===d.seguir) alvo=c; });
+      if(alvo){
+        if(aSeguir!==alvo.id){
+          aSeguir=alvo.id; largou=false; chaveVista='seguir:'+alvo.id;
+          mapa.setView([alvo.lat,alvo.lon], Math.max(mapa.getZoom(),17));
+        }
+        var pts=(alvo.rasto||[]).map(function(p){ return [p[0],p[1]]; });
+        if(pts.length>1){
+          if(!cauda) cauda=L.polyline(pts,{color:'var(--accent)', weight:5,
+            opacity:.55, lineJoin:'round'}).addTo(mapa);
+          else cauda.setLatLngs(pts);
+        } else if(cauda){ mapa.removeLayer(cauda); cauda=null; }
+      } else {
+        aSeguir=null; largou=false;
+        if(cauda){ mapa.removeLayer(cauda); cauda=null; }
+        enquadrar(lista.map(function(c){ return [c.lat,c.lon]; }),
+          'todos:'+lista.map(function(c){ return c.id; }).sort().join(','), 15);
+      }
+    },
+
+    /* Um turno: o caminho todo, o que já foi andado (no filme do
+       percurso), o carro onde está, e onde abasteceu. Ao vivo, segue
+       o carro. */
+    turno:function(d){
+      if(!mapa) return;
+      var pts=(d.pts||[]).map(function(p){ return [p[0],p[1]]; });
+      var n=d.ate==null ? pts.length : Math.max(1,Math.min(d.ate,pts.length));
+      var feito=pts.slice(0,n);
+      if(!this._todo){
+        this._todo=L.polyline([], {color:'#1d2a2c', weight:3, opacity:.22}).addTo(mapa);
+        this._feito=L.polyline([], {color:'var(--accent)', weight:5, opacity:.9,
+                                    lineJoin:'round'}).addTo(mapa);
+        this._inicio=L.circleMarker(PRAIA,{radius:6, color:'var(--ok)', weight:3,
+                                           fillColor:'#fff', fillOpacity:1});
+        this._postos=L.layerGroup().addTo(mapa);
+      }
+      this._todo.setLatLngs(d.ate==null?[]:pts);
+      this._feito.setLatLngs(feito);
+      if(pts.length){ this._inicio.setLatLng(pts[0]); if(!mapa.hasLayer(this._inicio)) this._inicio.addTo(mapa); }
+      else if(mapa.hasLayer(this._inicio)) mapa.removeLayer(this._inicio);
+      var chavePostos=JSON.stringify(d.abast||[]);
+      if(this._chavePostos!==chavePostos){
+        this._chavePostos=chavePostos; this._postos.clearLayers();
+        var gp=this._postos;
+        (d.abast||[]).forEach(function(a){
+          if(a.lat==null) return;
+          L.circleMarker([a.lat,a.lon],{radius:8, color:'#fff', weight:2,
+            fillColor:'var(--warn)', fillOpacity:1})
+            .bindTooltip(esc(a.posto||'abastecimento'),{direction:'top'}).addTo(gp); });
+      }
+      var u=feito[feito.length-1], a=feito[Math.max(0,feito.length-4)];
+      var lista = u ? [{id:'turno', lat:u[0], lon:u[1], rotulo:d.rotulo||'',
+        cor:'var(--accent)',
+        ang:a?Math.atan2((u[1]-a[1])*Math.cos(u[0]*Math.PI/180), u[0]-a[0])*180/Math.PI:0}]
+        : [];
+      carrosNoMapa(lista);
+      if(d.aoVivo && u){
+        if(aSeguir!=='turno' && !largou){
+          aSeguir='turno'; chaveVista='seguir:'+d.id;
+          mapa.setView(u, Math.max(mapa.getZoom(),16)); }
+      } else {
+        aSeguir=null;
+        enquadrar(pts, 'turno:'+d.id+':'+(pts.length>0), 16);
+      }
+    },
+
+    /* voltar a seguir, depois de o patrão ter mexido no mapa */
+    centrar:function(){
+      largou=false;
+      var m=aSeguir&&carros[aSeguir];
+      if(m) mapa.setView(m.getLatLng(), Math.max(mapa.getZoom(),16));
+    },
+    /* ver a frota toda outra vez */
+    verTodos:function(){ chaveVista=null; aSeguir=null; largou=false; },
+    /* um turno novo aberto no mesmo mapa volta a enquadrar-se */
+    esquecer:function(){ chaveVista=null; aSeguir=null; largou=false; }
+  };
+}
+
+return { pronto:pronto, novo:novo, quandoFalhar:quandoFalhar };
+})();
 /* ════════════════════════════════════════════════════════════
    A NUVEM
    O que liga o telemóvel do condutor ao ecrã do patrão.
@@ -2343,6 +2616,12 @@ function turnoVivo(id){
    assim que o botão de ver o carro andar funciona. */
 function mapaTurno(t, ate, altura, op){
   var pts=(t.rasto||[]).filter(function(p){ return p[3]==null||p[3]<=LIM.precisaoMax; });
+  if(window.MapaVivo && MapaVivo.pronto())
+    return '<div class="lugar-mapa" id="lugar-mapa-turno"></div>'+
+      (pts.length>=3 ? '' : '<p class="dica">'+(op&&op.aCarregar
+        ? 'A ir buscar o percurso…' : 'Este turno não tem percurso gravado.')+'</p>')+
+      (t.aoVivo && S.largou ? '<button class="bt sec pq seguir-de-novo" '+
+        'data-f="seguir-de-novo">◎ Voltar a seguir o carro</button>' : '');
   return desenharMapa({
     pts:pts, ate:ate, W:460, H:altura||280, pad:24, minSpan:0.009,
     pulsar:!!t.aoVivo, rotuloCarro:t.aoVivo?t.matricula:null,
@@ -2355,21 +2634,64 @@ function mapaTurno(t, ate, altura, op){
 }
 
 /* Onde estão os carros que estão em turno agora. */
-function mapaFrota(){
-  var activos=emTurno();
-  var carros=activos.map(function(t){
+function carrosDaFrota(){
+  return emTurno().map(function(t){
     var r=t.rasto||[], u=r[r.length-1]||[14.9195,-23.5087],
         a=r[Math.max(0,r.length-4)]||u;
-    return {id:t.id, lat:u[0], lon:u[1], rotulo:t.matricula,
+    return {id:t.id, lat:u[0], lon:u[1], rotulo:t.matricula, rasto:r,
       ang:Math.atan2((u[1]-a[1])*Math.cos(u[0]*Math.PI/180), u[0]-a[0])*180/Math.PI,
       cor: t.aSerio===false ? 'var(--muted)'
          : (porResolver(t).length?'var(--warn)':'var(--ok)')}; });
+}
+function mapaFrota(){
+  var carros=carrosDaFrota();
+  /* o mapa a sério, havendo com que o desenhar; o lugar fica marcado
+     e o mapa (que vive fora das repinturas) muda-se para cá */
+  if(window.MapaVivo && MapaVivo.pronto())
+    return '<div class="lugar-mapa" id="lugar-mapa-frota"></div>'+
+      (carros.length?'':'<p class="dica">Nenhum carro em turno neste momento.</p>');
   return desenharMapa({
     pts:[], carros:carros, W:460, H:330, pad:30, minSpan:0.02,
     escolhido: S.cartao,
     centro: carros.length?null:[14.9195,-23.5087],
     aviso: carros.length?null:'nenhum carro em turno neste momento',
     rotulo:'Onde estão os carros agora. Toque num carro para o ver.'});
+}
+
+/* ─── a faixa do carro que se está a seguir ───────────────
+   O que interessa enquanto se olha para o carro a andar: a que
+   velocidade vai, onde, há quanto tempo mandou a última posição. */
+function haQuanto(ms){
+  var s=Math.max(0,Math.round((Date.now()-(ms||Date.now()))/1000));
+  if(s<5) return 'agora mesmo';
+  if(s<60) return 'há '+s+' s';
+  if(s<3600) return 'há '+Math.round(s/60)+' min';
+  return 'há '+nf(s/3600,1)+' h';
+}
+function faixaDoCarro(t){
+  var r=t.rasto||[], u=r[r.length-1];
+  var onde=u?bairroDe(u[0],u[1]):null;
+  var vel=u&&u[4]!=null?u[4]:0;
+  var calado=Date.now()-(t.momento||t.inicio), parado=calado>300000;
+  var mapaVivo=window.MapaVivo && MapaVivo.pronto();
+  return '<div class="faixa">'+
+    '<div class="faixa-topo"><span><span class="ponto"></span>'+
+      '<b class="mat">'+esc(t.matricula)+'</b> · '+esc(t.condutor)+'</span>'+
+      '<button class="fechar" data-f="parar-seguir" aria-label="Deixar de seguir">×</button></div>'+
+    '<div class="faixa-nums">'+
+      '<div><b class="num">'+(parado?'—':nf(vel))+'</b><span>km/h</span></div>'+
+      '<div><b class="num">'+nf(kmDoTurno(t),1)+'</b><span>km</span></div>'+
+      '<div><b class="num">'+hms((Date.now()-t.inicio)/1000)+'</b><span>em turno</span></div></div>'+
+    '<p class="p-nota faixa-onde">'+(onde?'<b>'+esc(onde)+'</b> · ':'')+
+      'última posição <span id="faixa-ha"'+(parado?' style="color:var(--warn)"':'')+'>'+
+      haQuanto(t.momento||t.inicio)+'</span>'+
+      (u&&u[3]!=null?' · GPS '+nf(u[3])+' m':'')+'</p>'+
+    (mapaVivo && S.largou ? '<button class="bt pri pq" data-f="seguir-de-novo">'+
+      '◎ Voltar a seguir o '+esc(t.matricula)+'</button>' : '')+
+    '<div class="par" style="margin-top:8px">'+
+      '<button class="bt sec pq" data-f="detalhes">'+(S.detalhe?'Menos detalhes':'Mais detalhes')+'</button>'+
+      '<button class="bt sec pq" data-turno="'+t.id+'">O turno todo ›</button></div>'+
+    '</div>';
 }
 
 /* ─── o cartão do carro ───────────────────────────────────
@@ -2585,9 +2907,12 @@ function pintar(){
           ' por fechar</b>':'')+'</p>'+
       mapaFrota();
     var escolhido = S.cartao ? turnoVivo(S.cartao) : null;
-    if(escolhido) h+=cartaoDoCarro(escolhido);
-    else if(nVivos) h+='<p class="dica">Toque num carro no mapa para ver '+
-      'tudo o que se passa nele.</p>';
+    if(!escolhido && S.cartao){ S.cartao=null; S.detalhe=false; S.largou=false; }
+    /* Tocar num carro é querer vê-lo: o mapa aproxima-se e segue-o, e
+       por baixo fica só o essencial. O cartão com tudo abre-se quando
+       se pede — antes abria logo e tapava o mapa. */
+    if(escolhido) h+=faixaDoCarro(escolhido)+(S.detalhe?cartaoDoCarro(escolhido):'');
+    else if(nVivos) h+='<p class="dica">Toque num carro para o seguir no mapa.</p>';
     if(calados.length) h+='<div class="cartao aviso"><h2>'+calados.length+
       (calados.length===1?' turno por fechar':' turnos por fechar')+'</h2>'+
       '<p class="p-nota" style="margin-top:4px">Estes telemóveis deixaram de dar '+
@@ -3123,6 +3448,7 @@ function pintar(){
     '<img src="'+S.lupa+'" alt="fotografia em grande">'+
     '<span class="lupa-x">× fechar</span></div>';
   el('ecra').innerHTML=h;
+  montarMapas();
   el('nav').parentNode.hidden = !b;
   var pv=paraOndeVolta();
   el('voltar').hidden = !(pv && !pv.fechar);
@@ -3212,6 +3538,37 @@ window.addEventListener('popstate', function(){
   voltar();
   armarVoltar();
 });
+/* ─── os mapas a sério ─────────────────────────────────── */
+var mapasVivos={};
+function mapaVivoDo(qual){
+  if(!(window.MapaVivo && MapaVivo.pronto())) return null;
+  if(!mapasVivos[qual]) mapasVivos[qual]=MapaVivo.novo({
+    escolher:function(id){ if(qual==='frota') seguirCarro(id); },
+    largou:function(){ S.largou=true; pintarSePuder(); } });
+  return mapasVivos[qual];
+}
+if(window.MapaVivo) MapaVivo.quandoFalhar(function(){ pintar(); });
+function seguirCarro(id){
+  S.cartao=id; S.detalhe=false; S.largou=false;
+  if(S.ecra!=='mapa') ir('mapa'); else pintar();
+  /* quem tocou no carro na lista, lá em baixo, tem de o ver no mapa */
+  var l=document.getElementById('lugar-mapa-frota')||document.querySelector('svg.mapa');
+  if(l && l.getBoundingClientRect().top<0) l.scrollIntoView({block:'start'});
+}
+function montarMapas(){
+  var lf=document.getElementById('lugar-mapa-frota');
+  if(lf){ var mf=mapaVivoDo('frota');
+    if(mf && mf.encaixar(lf)) mf.frota({carros:carrosDaFrota(), seguir:S.cartao}); }
+  var lt=document.getElementById('lugar-mapa-turno');
+  if(lt){ var mt=mapaVivoDo('turno'),
+      t=turnoVivo(S.sel)||S.turnos.filter(function(x){return x.id===S.sel;})[0];
+    if(mt && t && mt.encaixar(lt)){
+      if(mt._turno!==t.id){ mt.esquecer(); mt._turno=t.id; S.largou=false; }
+      mt.turno({id:t.id, aoVivo:!!t.aoVivo, ate:S.replay, rotulo:t.matricula,
+        pts:(t.rasto||[]).filter(function(p){ return p[3]==null||p[3]<=LIM.precisaoMax; }),
+        abast:(t.abast||[]).map(function(a){ return {lat:a.lat, lon:a.lon, posto:a.posto}; })});
+    } }
+}
 function pararReplay(){ if(cronoReplay){ clearInterval(cronoReplay); cronoReplay=null; } }
 
 document.addEventListener('input', function(e){
@@ -3235,10 +3592,7 @@ document.addEventListener('click', function(e){
 
   /* tocar num carro do mapa abre o cartão dele, ali mesmo; tocar
      outra vez fecha. Não tira ninguém do ecrã onde está. */
-  if(d.vivo){
-    S.cartao = (S.cartao===d.vivo) ? null : d.vivo;
-    if(S.ecra!=='mapa') ir('mapa'); else pintar();
-    return; }
+  if(d.vivo){ seguirCarro(d.vivo); return; }
   if(d.postoMapa){ S.aviso={t:'Posto de combustível', d:d.postoMapa};
     pintar(); setTimeout(function(){ S.aviso=null; pintar(); }, 3200); return; }
   if(d.foto){
@@ -3365,7 +3719,14 @@ document.addEventListener('click', function(e){
       pintar(); });
     return; }
   if(f==='fechar-lupa'){ S.lupa=null; pintar(); return; }
-  if(f==='fechar-cartao'){ S.cartao=null; pintar(); return; }
+  if(f==='fechar-cartao'){ S.detalhe=false; pintar(); return; }
+  if(f==='parar-seguir'){ S.cartao=null; S.detalhe=false; S.largou=false; pintar(); return; }
+  if(f==='detalhes'){ S.detalhe=!S.detalhe; pintar(); return; }
+  if(f==='seguir-de-novo'){
+    S.largou=false;
+    var mv=S.ecra==='turno' ? mapaVivoDo('turno') : mapaVivoDo('frota');
+    if(mv) mv.centrar();
+    pintar(); return; }
   if(f==='guardar-defs'){
     var vd=function(id){ var n=el(id); return n?n.value:(S.r[id]||''); };
     var pr=+String(vd('e-preco')).replace(',','.');
@@ -3602,6 +3963,9 @@ Nuvem.arrancar({
 });
 pintar();
 tic=setInterval(function(){
+  if(S.ecra==='mapa' && S.cartao){
+    var fh=document.getElementById('faixa-ha'), tv=turnoVivo(S.cartao);
+    if(fh && tv) fh.textContent=haQuanto(tv.momento||tv.inicio); }
   if(S.ecra==='turno'&&turnoVivo(S.sel)) pintar(); }, 1000);
 })();
 </script>

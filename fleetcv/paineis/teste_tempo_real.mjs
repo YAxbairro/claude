@@ -71,10 +71,10 @@ ok('e diz em que bairro vai', /desde as/.test(await aoVivo.textContent()),
    (await aoVivo.textContent()).split('·')[0].trim().split('\n').pop());
 
 /* o patrão abre o turno ao vivo e vê o carro no mapa */
-/* tocar no carro abre o cartão com tudo à vista; o turno
-   completo, com o mapa, abre-se a partir dele */
+/* tocar no carro segue-o no mapa, com uma faixa curta por baixo; o
+   turno completo abre-se a partir dela */
 await aoVivo.click(); await patrao.waitForTimeout(900);
-await patrao.locator('.carro-cx .bt.sec').click(); await patrao.waitForTimeout(900);
+await patrao.locator('.faixa [data-turno]').click(); await patrao.waitForTimeout(900);
 ok('o patrão abre o turno a decorrer',
    (await patrao.textContent('#ecra')).includes('Em turno agora'));
 ok('com o carro no mapa da Praia', await patrao.isVisible('.mapa'));

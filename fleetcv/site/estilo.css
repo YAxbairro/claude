@@ -363,6 +363,31 @@ body.dono .item.fino{padding:9px 12px; margin-top:6px}
 body.dono .item.alerta-cx{margin-top:8px; border-color:var(--crit)}
 body.dono .item.alerta-cx .p{color:var(--crit)}
 body.dono .dica{margin:9px 2px 0; font-size:12.5px; color:var(--muted); text-align:center}
+body.dono .lugar-mapa{position:relative}
+body.dono .mapa-vivo{position:relative; z-index:0; height:min(58vh,480px); min-height:300px;
+  border-radius:12px; overflow:hidden; border:1px solid var(--line); background:#e6ebea}
+body.dono .mapa-vivo .leaflet-control-attribution{font-size:10px}
+body.dono .carro-vivo{background:none; border:none}
+body.dono .carro-vivo .cv-seta{position:absolute; left:12px; top:12px; width:32px; height:32px;
+  transition:transform .8s linear; filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+body.dono .carro-vivo .cv-onda{position:absolute; left:14px; top:14px; width:28px; height:28px;
+  border-radius:50%; animation:onda-dono 2.4s ease-out infinite}
+@keyframes onda-dono{0%{transform:scale(.7); opacity:.4}100%{transform:scale(2); opacity:0}}
+body.dono .carro-vivo .cv-mat{position:absolute; left:50%; top:-12px; transform:translateX(-50%);
+  white-space:nowrap; font:700 12px var(--mono); color:#10181a; background:#fff;
+  border-radius:6px; padding:1px 6px; box-shadow:0 1px 3px rgba(0,0,0,.35)}
+body.dono .carro-vivo.on .cv-mat{background:var(--accent); color:var(--accent-ink)}
+body.dono .faixa{margin-top:10px; background:var(--surface); border:1px solid var(--accent);
+  border-radius:14px; padding:12px 13px}
+body.dono .faixa-topo{display:flex; align-items:center; gap:8px; font-size:14px}
+body.dono .faixa-topo .mat{font-family:var(--mono)}
+body.dono .faixa-topo .fechar{margin-left:auto}
+body.dono .faixa-nums{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:10px}
+body.dono .faixa-nums b{display:block; font-size:24px; font-weight:500; line-height:1.1}
+body.dono .faixa-nums span{font-size:11px; color:var(--muted); text-transform:uppercase;
+  letter-spacing:.06em}
+body.dono .faixa-onde{margin-top:8px}
+body.dono .seguir-de-novo{margin-top:8px}
 body.dono .mapa{width:100%; display:block; border-radius:12px; background:var(--surface2);
   border:1px solid var(--line)}
 body.dono .mapa-grande{height:auto}

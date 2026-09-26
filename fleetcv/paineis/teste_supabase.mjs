@@ -98,7 +98,7 @@ ok('e os quilómetros sobem sozinhos', await ate(async()=>(await km())>k1+0.05,3
 /* o patrão toca no carro e abre o turno a decorrer — é aqui que
    ele vê, ao vivo, se o carro já abasteceu e por quanto */
 await aoVivo.click(); await p.waitForTimeout(900);
-await p.locator('.carro-cx .bt.sec').click(); await p.waitForTimeout(900);
+await p.locator('.faixa [data-turno]').click(); await p.waitForTimeout(900);
 ok('o patrão abre o turno a decorrer pelo Supabase',
    (await txt()).includes('Em turno agora'));
 

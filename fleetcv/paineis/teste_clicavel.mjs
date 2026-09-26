@@ -45,8 +45,14 @@ await p.click('[data-f="entrar"]'); await p.waitForTimeout(4000);
 /* ── o carro no mapa ─────────────────────────────────────── */
 ok('o carro no mapa é um botão', (await p.locator('.carro-mapa').count())>0);
 await p.locator('.carro-mapa').first().click({force:true}); await p.waitForTimeout(900);
+/* tocar no carro segue-o: por baixo do mapa fica só o essencial, e o
+   cartão com tudo não tapa o mapa até ser pedido */
+const fx = await p.textContent('.faixa').catch(()=>'');
+ok('tocar no carro mostra a faixa curta, com a velocidade', /km\/h/.test(fx) && /CV-01-AB/.test(fx));
+ok('e não abre logo o cartão grande', (await p.locator('.carro-cx').count())===0);
+await p.click('[data-f="detalhes"]'); await p.waitForTimeout(600);
 const c = await p.textContent('.carro-cx').catch(()=>'');
-ok('tocar no carro abre o cartão do turno', !!c);
+ok('"Mais detalhes" abre o cartão do turno', !!c);
 ok('diz o condutor', /António Semedo/.test(c));
 ok('diz a matrícula e o modelo', /CV-01-AB/.test(c) && /Corolla/.test(c));
 ok('diz há quanto tempo anda', /em turno/.test(c), (c.match(/\d\d:\d\d:\d\d/)||[])[0]);

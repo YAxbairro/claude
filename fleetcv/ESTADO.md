@@ -37,6 +37,17 @@ Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
   clientes pagantes, passar ao plano Pro (25 USD/mês): máquina própria
   e o projecto deixa de adormecer.
 
+- **O mapa do patrão é um mapa a sério** (Leaflet + OpenStreetMap):
+  ruas com nome, zoom com os dedos, o carro a deslizar. Tocar num carro
+  segue-o, com uma faixa curta (velocidade, km, há quanto tempo mandou
+  a posição); os detalhes só quando se pedem. Arrastar o mapa larga o
+  carro; "Voltar a seguir" apanha-o. Sem rede para o mapa, volta sozinho
+  ao desenho da Praia de sempre. `paineis/teste_mapa_vivo.mjs` (24).
+  Os quadradinhos vêm dos servidores do OpenStreetMap, que aceitam uso
+  leve com atribuição. Quando houver dezenas de frotas, passar para um
+  fornecedor (MapTiler, Stadia) — é mudar uma linha em
+  `paineis/mapa/mapa_vivo.js`.
+
 ## Como se publica (o nó de antes está desatado)
 
 O Vercel aceita publicar a partir de um repositório público do GitHub
