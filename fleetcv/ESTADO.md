@@ -66,6 +66,56 @@ Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
   preço e o depósito, e o painel do patrão completa os antigos com os
   da frota.
 
+## Crescer: quanto aguenta e quando pagar (medido a 27 de Setembro)
+
+Contas com os números da base verdadeira (cada ponto do caminho pesa
+47 bytes; a posição ao vivo vai de 1,5 em 1,5 s a andar e de 12 em 12 s
+parado). Supõe-se um turno de 12 h por carro por dia e o patrão com o
+ecrã aberto um terço do tempo.
+
+**Desperdício corrigido hoje** (`paineis/teste_dados.mjs`, 13; a versão
+antiga falha 6):
+- O telemóvel de cada condutor recebia as posições de todos os colegas
+  (8 kB cada): com 10 carros, ~1,1 GB de dados móveis por turno. Agora
+  o condutor só ouve a frota (carros, colegas, preço).
+- Cada posição levava os últimos 160 pontos; agora leva só os novos e
+  a cauda inteira de 30 em 30 s — média 1,0 kB em vez de 7–8 kB. O
+  painel do patrão cose os pedaços (pela posição do ponto no caminho).
+- A rede de segurança voltava a descarregar os 600 turnos de minuto a
+  minuto; agora só os que mudaram (inteiros ao abrir e de 30 em 30 min).
+
+**Mensagens do tempo real por mês** (o Supabase cobra 2,50 USD por
+milhão acima de 5 milhões no Pro; o grátis pára aos 2 milhões):
+
+| carros | antes | agora |
+|---:|---:|---:|
+| 10 | 50 M | 1,6 M |
+| 100 | 502 M | 16 M (≈ +28 USD) |
+| 1000 | 5 000 M | 162 M (≈ +390 USD) |
+
+**A base cresce ~36 MB por carro por mês** (percurso ~21, fotos ~15):
+o grátis (500 MB) enche com 10 carros em mês e meio; o Pro traz 8 GB e
+cobra 0,125 USD por GB a mais.
+
+**Degraus:**
+1. **Já, com o primeiro cliente a pagar:** Supabase Pro (25 USD/mês):
+   sem adormecer, cópias de segurança diárias, 8 GB, 250 GB de tráfego.
+   E o site: o Vercel grátis é só para uso NÃO comercial — Vercel Pro
+   (20 USD/mês) ou mudar o site (é estático) para o Cloudflare Pages,
+   grátis e com uso comercial.
+2. **Aos ~100 carros:** fotos para o armazenamento do Supabase (100 GB
+   incluídos) em vez da tabela; guardar menos pontos parado; prazo de
+   guarda (ex.: percursos 12 meses).
+3. **Aos ~300 carros / muitas frotas:** as posições numa tabela própria
+   filtrada por frota (o Supabase verifica cada mudança contra cada
+   patrão ligado — com muitas frotas isso engasga), ou por Broadcast;
+   o mapa geral a 5 s e 1,5 s só no carro seguido; máquina Small ou
+   Medium (15–60 USD/mês); fornecedor pago de mapas em vez dos
+   servidores do OpenStreetMap.
+
+Com 1000 carros a ~1 000 CVE por carro, a infra-estrutura fica abaixo
+de 5% do que entra.
+
 ## Como se publica (o nó de antes está desatado)
 
 O Vercel aceita publicar a partir de um repositório público do GitHub
@@ -81,7 +131,7 @@ ficheiros. Os passos estão em `site/INSTALAR.md`.
 | `supabase/provar.sh` | 61 regras + 9 da passagem de uma base antiga, num Postgres a sério. As provas foram postas à prova estragando as regras de propósito |
 | `paineis/teste_contas.mjs` | 40 — o caminho de um cliente novo, do criar conta ao apagar |
 | `paineis/teste_supabase.mjs` | 25 — as regras vistas pela aplicação, a trava, sem rede |
-| o resto dos `teste_*.mjs` | câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 33, mapa vivo 24 |
+| o resto dos `teste_*.mjs` | dados 13, câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 33, mapa vivo 24 |
 
 Os testes que usam o servidor próprio (`teste_clicavel`,
 `teste_formularios`, `teste_servidor`) esperam correr numa pasta com

@@ -85,6 +85,7 @@
       if(ev!=='DELETE' && !podeLer(linha)) return;
       ouvintes.forEach(function(o){
         if(o.cliente!==cli || !passaCrivo(o.crivo, linha)) return;
+        contar('__recebidas', linha.coleccao, ev==='DELETE'?60:JSON.stringify(linha).length);
         setTimeout(function(){
           o.fn(ev==='DELETE'
             ? {eventType:ev, new:{}, old:{frota:linha.frota, coleccao:linha.coleccao, id:linha.id}}
@@ -103,11 +104,12 @@
         avisarTodos('UPDATE', {frota:f, coleccao:'frota', id:'equipa', corpo:eq}); } }
 
     function tabela(nome){
-      var filtros=[], ordem=null, lim=null, umSo=false, apagar=false;
+      var filtros=[], ordem=null, lim=null, umSo=false, apagar=false, colunas='';
       var api={
-        select:function(){ return api; },
+        select:function(cols){ colunas=cols||''; return api; },
         eq:function(c,v){ filtros.push([c,'eq',v]); return api; },
         in:function(c,v){ filtros.push([c,'in',v]); return api; },
+        gte:function(c,v){ filtros.push([c,'gte',v]); return api; },
         order:function(c,o){ ordem=[c,(o&&o.ascending)?'asc':'desc']; return api; },
         limit:function(n){ lim=n; return api; },
         maybeSingle:function(){ umSo=true; return api; },
@@ -125,6 +127,7 @@
             return Promise.resolve(window.__falharEscritas%2
               ? {data:null, status:401, error:{message:'JWT expired', code:'PGRST303'}}
               : {data:null, status:503, error:{message:'upstream connect error', code:''}}); }
+          contar('__enviadas', d.coleccao, JSON.stringify(d).length);
           var nao=podeEscrever(f, d.coleccao, d.id, d.corpo);
           if(!nao && d.coleccao==='frota' && d.id==='condutores'){
             var repetido=(d.corpo.lista||[]).filter(function(x){
@@ -172,20 +175,26 @@
             filtros.forEach(function(x){
               var campo=x[0], op=x[1], val=x[2];
               var actual = campo==='coleccao'?c : campo==='id'?id : campo==='frota'?f
+                : campo==='quando' ? (ler(kq(f,c,id))||'')
                 : (campo.indexOf('corpo->>')===0
                     ? corpo[campo.slice(8)] : undefined);
               if(op==='eq' && actual!==val) passa=false;
-              if(op==='in' && val.indexOf(actual)<0) passa=false; });
+              if(op==='in' && val.indexOf(actual)<0) passa=false;
+              if(op==='gte' && !(actual>=val)) passa=false; });
             if(passa) v.push({frota:f, coleccao:c, id:id, corpo:corpo,
                               quando:ler(kq(f,c,id))||''}); });
+          v.forEach(function(x){ contar('__lidas', x.coleccao, JSON.stringify(x.corpo).length); });
           if(ordem) v.sort(function(a,b){
             /* a data é uma coluna da tabela, não um campo do corpo */
             var x=(ordem[0]==='quando'?a.quando:a.corpo[ordem[0]])||0;
             var y=(ordem[0]==='quando'?b.quando:b.corpo[ordem[0]])||0;
             return ordem[1]==='desc'?(x<y?1:x>y?-1:0):(x<y?-1:x>y?1:0); });
           if(lim) v=v.slice(0,lim);
-          v=v.map(function(x){ return {frota:x.frota, coleccao:x.coleccao,
-                                       id:x.id, corpo:x.corpo}; });
+          /* como o Supabase: a data só vem se se pedir a coluna */
+          var comData=/quando/.test(colunas);
+          v=v.map(function(x){ var r={frota:x.frota, coleccao:x.coleccao,
+                                      id:x.id, corpo:x.corpo};
+            if(comData) r.quando=x.quando; return r; });
           return {data: umSo?(v[0]||null):v, error:null};
         }catch(e){ return {data:null, error:{message:String(e)}}; } }
 
@@ -313,6 +322,10 @@
   }
 
   var clientes=[];
+  /* para os testes medirem o que cada telemóvel manda, recebe e lê */
+  function contar(onde, c, bytes){
+    var m=window[onde]=window[onde]||{};
+    var x=m[c]=m[c]||{n:0, bytes:0}; x.n++; x.bytes+=bytes||0; }
   function avisarTodos(ev, linha, local){
     clientes.forEach(function(c){ c._entregar(ev, linha); });
     if(local!==false){ try{ if(canal) canal.postMessage({ev:ev, linha:linha}); }

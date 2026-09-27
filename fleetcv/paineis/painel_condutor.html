@@ -978,6 +978,11 @@ var CAUDA       = 160;     /* pontos que viajam com a posição, para o
                               patrão ver logo o rabicho do carro         */
 var PARTE_MAX   = 800;     /* pontos por pedaço de rasto gravado         */
 var TECTO_VIVO  = 40000;   /* se a nuvem se queixar, abranda até aqui    */
+var CAUDA_CHEIA = 30000;   /* a cauda inteira só vai de 30 em 30 s; pelo
+                              meio vão só os pontos novos, e o ecrã do
+                              patrão cose-os à cauda que já tem. Com os
+                              160 pontos a cada segundo e meio, cada
+                              posição pesava 8 kB em vez de menos de 1. */
 
 var loja=null, quem=null, estado='a-ligar', ritmo=RITMO_VIVO, opGuardado={};
 var ouvintes=[], subs=[], cacheRasto={};
@@ -1066,18 +1071,35 @@ function lojaDoSupabase(sb){
      o condutor abria a aplicação sem carro nenhum para escolher.
      As fotos e os percursos ficam de fora: são pesados e só se vão
      buscar quando alguém os quer ver. */
+  /* O condutor só precisa da frota (os carros, os colegas, o preço).
+     Antes recebia tudo o que o patrão recebe: a posição de cada colega
+     de segundo e meio em segundo e meio, e os 600 turnos da frota de
+     minuto a minuto. Com dez carros eram mais de 1 GB de dados móveis
+     por turno em cada telemóvel, e as mensagens do tempo real
+     multiplicavam-se pelo número de condutores. */
+  var soFrota=function(){ return !!(eu && eu.papel && eu.papel!=='dono'); };
+  /* Os 600 turnos vêm inteiros ao abrir e de meia em meia hora; pelo
+     meio, a rede de segurança só pergunta pelos que mudaram. A folga
+     de 15 minutos cobre os telemóveis de relógio adiantado ou atrasado. */
+  var marcaTurnos=0, turnosInteiros=0;
   function trazer(doZero){
     if(aLer) return Promise.resolve(false);
     aLer=true;
+    var sf=soFrota();
+    var inteiros = doZero || !marcaTurnos || Date.now()-turnosInteiros > 30*60000;
+    var qT=sb.from('docs').select('coleccao,id,corpo,quando').eq('coleccao','turnos');
+    if(!inteiros) qT=qT.gte('quando', new Date(marcaTurnos-15*60000).toISOString());
     return Promise.all([
-      sb.from('docs').select('coleccao,id,corpo').in('coleccao',['frota','vivo']),
-      sb.from('docs').select('coleccao,id,corpo').eq('coleccao','turnos')
-        .order('quando',{ascending:false}).limit(600)
+      sb.from('docs').select('coleccao,id,corpo').in('coleccao', sf?['frota']:['frota','vivo']),
+      sf ? Promise.resolve({data:[]}) : qT.order('quando',{ascending:false}).limit(600)
     ]).then(function(rs){
       aLer=false;
       var t=rs[0], u=rs[1];
       if(t.error) throw erroDe(t.error);
       if(u.error) throw erroDe(u.error);
+      if(!sf && inteiros) turnosInteiros=Date.now();
+      (u.data||[]).forEach(function(x){
+        var q=Date.parse(x.quando||''); if(q>marcaTurnos) marcaTurnos=q; });
       /* A frota e os turnos ao vivo vêm inteiros e substituem o que cá
          estava: é assim que um carro que já fechou o turno desaparece
          do mapa mesmo que se tenha perdido o aviso do fecho. Os turnos
@@ -1200,9 +1222,11 @@ function lojaDoSupabase(sb){
                      turno tirava do mapa o nosso "m1". */
                   if(l.frota && eu && eu.frota && l.frota!==eu.frota) return;
                   var id=comoSeChama(l.coleccao, l.id); if(!id) return;
+                  var q=Date.parse(l.quando||'');
+                  if(l.coleccao==='turnos' && q>marcaTurnos) marcaTurnos=q;
                   pousar(l.coleccao, id, apagou?null:l.corpo); };
                 canal = sb.channel('fleetcv');
-                ['frota','turnos','vivo'].forEach(function(c){
+                (soFrota() ? ['frota'] : ['frota','turnos','vivo']).forEach(function(c){
                   canal.on('postgres_changes',
                     {event:'*', schema:'public', table:'docs',
                      filter:'coleccao=eq.'+c}, chegou); });
@@ -1719,8 +1743,26 @@ function escutar(){
     erro, 'inicio', 200));
 
   /* quem está a andar agora, com a posição ao vivo */
+  var caudas={};
   subs.push(loja.verColeccao('vivo', function(lista){
-    var agora=Date.now();
+    var agora=Date.now(), vistas={};
+    /* uma posição com só os pontos novos: cose-se à cauda que já cá
+       estava, para o rabicho do carro no mapa não encolher */
+    /* (em cópias: o documento que chega pode ser o mesmo que o
+       condutor está a mandar, e mexer-lhe estragava o envio) */
+    lista=lista.map(function(t){
+      if(!t || !t.id) return t;
+      t=Object.assign({}, t);
+      var velha=caudas[t.id], r=t.rasto||[], desde=t.caudaDesde||0;
+      if(t.caudaParcial && velha && desde>=velha.desde){
+        var junta=velha.pts.slice(0, desde-velha.desde).concat(r);
+        var corte=Math.max(0, junta.length-CAUDA);
+        t.rasto=junta.slice(corte); t.caudaDesde=velha.desde+corte;
+      }
+      delete t.caudaParcial;
+      caudas[t.id]={desde:t.caudaDesde||0, pts:t.rasto||[]}; vistas[t.id]=1;
+      return t; });
+    Object.keys(caudas).forEach(function(k){ if(!vistas[k]) delete caudas[k]; });
     /* Antes deitavam-se fora os turnos calados há mais de dez
        minutos. Era pior do que parecia: um condutor que se esquece de
        fechar, ou a quem morre a bateria, desaparecia do ecrã do
@@ -1893,6 +1935,7 @@ function rastoDe(id){
 /* Chamada a cada ponto de GPS, mas só sobe de 4 em 4 segundos e só se
    o carro mexeu. É este travão que faz caber um dia de trabalho. */
 var pendente=null, relogioVivo=null, ultimaSubida=0, aEscrever=false;
+var caudaInteira=0, enviados=0, turnoDaCauda=null;
 var ondeUltima=null, mexeu=true;
 
 function posicao(t, extra, jaa){
@@ -1916,6 +1959,10 @@ function posicao(t, extra, jaa){
     onde: extra?extra.onde:null,
     simulado: !!t.simulado,
     rasto:(t.rasto||[]).slice(-CAUDA),
+    /* onde começa a cauda no caminho todo: é por aqui que o patrão cose
+       os pedaços (a hora dos pontos não serve — no ensaio misturam-se) */
+    caudaDesde: Math.max(0, (t.rasto||[]).length-CAUDA),
+    nPontos: (t.rasto||[]).length,
     momento: Date.now()
   };
   /* andou mais de uns quatro metros, ou vai com velocidade? então é
@@ -1935,11 +1982,21 @@ function subir(jaa){
   if(!jaa && agora-ultimaSubida < espera) return;
   var p=pendente; pendente=null; ultimaSubida=agora; aEscrever=true;
   if(p.lat!=null) ondeUltima=[p.lat, p.lon];
+  var r=p.rasto||[], n=p.nPontos||0;
+  if(r.length && turnoDaCauda===p.id && enviados>0 && enviados<=n
+     && agora-caudaInteira<CAUDA_CHEIA){
+    /* só os pontos que o patrão ainda não tem (e um de sobra, para coser) */
+    var k=Math.min(r.length, n-enviados+1);
+    p=Object.assign({}, p, {rasto:r.slice(r.length-k), caudaDesde:n-k, caudaParcial:true});
+  } else { caudaInteira=agora; turnoDaCauda=p.id; }
+  var antes=enviados; enviados=n;
   loja.por('vivo', p.id, p).then(function(){
     aEscrever=false;
     if(ritmo>RITMO_VIVO) ritmo=Math.max(RITMO_VIVO, ritmo-2000);
   }).catch(function(e){
     aEscrever=false;
+    /* não chegou: a próxima leva a cauda inteira, para não ficar buraco */
+    enviados=antes; caudaInteira=0;
     /* a nuvem queixou-se do ritmo: abrandar em vez de insistir */
     if(e&&e.code==='resource_exhausted') ritmo=Math.min(TECTO_VIVO, ritmo*2);
   });
