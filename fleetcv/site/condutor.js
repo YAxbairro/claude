@@ -264,7 +264,7 @@ function lerFoto(f,cb){
   var fr=new FileReader();
   fr.onload=function(){
     var im=new Image();
-    im.onload=function(){ encolherFoto(im, function(d){ cb(d); }); };
+    im.onload=function(){ lerQuadrante(im); encolherFoto(im, function(d){ cb(d); }); };
     /* uma imagem que o navegador não consegue abrir não vale a pena
        guardar: sem isto ia o ficheiro inteiro, megabytes, e depois
        era recusado ao subir */
@@ -408,6 +408,86 @@ function fecharCamara(){
   var v=el('cam-v'); if(v) v.srcObject=null;
   el('camara').hidden=true;
 }
+/* ─── ler os km na fotografia ─────────────────────────────
+   O PaddleOCR a correr no telemóvel (mapa/leitor_quadrante.js), num
+   Worker para o ecrã não congelar enquanto lê. O motor (ONNX Runtime)
+   e os modelos vêm do jsDelivr uma vez só — cerca de 19 MB — e ficam
+   guardados no telemóvel. Com a poupança de dados ligada, não lê. */
+var LEITOR_ORT='https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/';
+var LEITOR_MOD='https://cdn.jsdelivr.net/npm/@gutenye/ocr-models@1.4.2/assets/';
+var leitor={w:null, n:0, pronto:false, auto:null};
+function haLeitor(){
+  try{ if(navigator.connection && navigator.connection.saveData) return false; }catch(e){}
+  return typeof Worker!=='undefined' && typeof OffscreenCanvas!=='undefined' &&
+    typeof createImageBitmap!=='undefined' && typeof moduloLeitorQuadrante==='function';
+}
+function trabalhador(){
+  if(leitor.w) return leitor.w;
+  var fonte='var ORT='+JSON.stringify(LEITOR_ORT)+';('+moduloLeitorQuadrante.toString()+')(self);'+
+    'self.onmessage=async function(e){var m=e.data;try{'+
+    'if(!self.ort){importScripts(ORT+"ort.wasm.min.js");ort.env.wasm.wasmPaths=ORT;ort.env.wasm.numThreads=1;}'+
+    'await LeitorQuadrante.preparar(m.modelos);var it=await LeitorQuadrante.lerImagem(m.img);'+
+    'postMessage({id:m.id,km:LeitorQuadrante.km(it,m.esperado),it:it});'+
+    '}catch(err){postMessage({id:m.id,erro:String(err&&err.message||err)});}};';
+  leitor.w=new Worker(URL.createObjectURL(new Blob([fonte],{type:'text/javascript'})));
+  leitor.w.onmessage=function(e){ recebeuLeitura(e.data); };
+  leitor.w.onerror=function(){ if(S.ocr&&S.ocr.estado==='a-ler'){ S.ocr={estado:'nada', ecra:S.ocr.ecra}; pintar(); } };
+  return leitor.w;
+}
+/* depois de cada fotografia do conta-quilómetros */
+function lerQuadrante(fonte){
+  var ecra=S.ecra;
+  if(!(ecra==='km-inicio'||ecra==='km-fim') || !haLeitor() || !fonte) return;
+  var w0=fonte.naturalWidth||fonte.width, h0=fonte.naturalHeight||fonte.height;
+  if(!w0||!h0) return;
+  var k=Math.min(1, 1600/Math.max(w0,h0)), c=document.createElement('canvas');
+  c.width=Math.round(w0*k); c.height=Math.round(h0*k);
+  c.getContext('2d').drawImage(fonte,0,0,c.width,c.height);
+  /* sabendo onde o carro ficou, só vale um número dali para a frente */
+  var esperado = ecra==='km-fim' ? (S.turno&&S.turno.kmInicio) : (semKm(S.carro)?0:S.carro.km);
+  var n=++leitor.n;
+  S.ocr={estado:'a-ler', ecra:ecra, n:n, primeiraVez:!leitor.pronto}; pintar();
+  createImageBitmap(c).then(function(bm){
+    trabalhador().postMessage({id:n, img:bm, esperado:esperado||0,
+      modelos:{det:LEITOR_MOD+'ch_PP-OCRv4_det_infer.onnx', rec:LEITOR_MOD+'ch_PP-OCRv4_rec_infer.onnx',
+               dic:LEITOR_MOD+'ppocr_keys_v1.txt'}}, [bm]);
+  }).catch(function(){ S.ocr={estado:'nada', ecra:ecra}; pintar(); });
+  setTimeout(function(){ if(S.ocr&&S.ocr.n===n&&S.ocr.estado==='a-ler'){ S.ocr={estado:'nada', ecra:ecra}; pintar(); } }, 120000);
+}
+function recebeuLeitura(r){
+  if(!S.ocr || S.ocr.n!==r.id) return;              /* uma fotografia mais nova já vai a ler */
+  if(!r.erro) leitor.pronto=true;
+  var ecra=S.ocr.ecra;
+  if(S.ecra!==ecra){ S.ocr=null; return; }
+  if(!(r.km>0)){ S.ocr={estado:'nada', ecra:ecra}; pintar(); return; }
+  /* o que o condutor já escreveu à mão manda: só se preenche o que ele não tocou */
+  /* (uma fotografia repetida pode trocar o que a anterior preencheu) */
+  var auto=false, antes=leitor.auto;
+  if(ecra==='km-inicio'){
+    var proposto=semKm(S.carro)?null:S.carro.km;
+    if(S.r.km==null || S.r.km===proposto || !(S.r.km>0) || S.r.km===antes){ S.r.km=r.km; auto=true; }
+  } else {
+    if(S.r.kmF==null || S.r.kmF===antes){ S.r.kmF=r.km; auto=true; }
+  }
+  if(auto) leitor.auto=r.km;
+  S.ocr={estado:'lido', ecra:ecra, km:r.km, auto:auto || (ecra==='km-inicio'?S.r.km:S.r.kmF)===r.km};
+  guardarPasso(); pintar();
+}
+function notaLeitura(){
+  var o=S.ocr; if(!o || o.ecra!==S.ecra) return '';
+  if(o.estado==='a-ler') return '<p class="p-nota leitura">A ler os números da fotografia…'+
+    (o.primeiraVez?' (da primeira vez demora mais: o telemóvel está a buscar o leitor)':'')+'</p>';
+  if(o.estado==='nada') return '<p class="p-nota leitura">Não consegui ler os números da fotografia. '+
+    'Escreva-os em baixo.</p>';
+  if(o.estado==='lido') return o.auto
+    ? '<p class="p-nota leitura ok">Lido na fotografia: <b>'+nf(o.km)+' km</b>. Confira — se não for '+
+      'este, corrija em baixo.</p>'
+    : '<p class="p-nota leitura aviso">Na fotografia li <b>'+nf(o.km)+' km</b>. Confira o número que '+
+      'escreveu.</p>';
+  return '';
+}
+function kmLido(ecra){ return S.ocr && S.ocr.estado==='lido' && S.ocr.ecra===ecra ? S.ocr.km : null; }
+
 function tirarFoto(){
   var v=el('cam-v');
   if(!v || !v.videoWidth){ return; }
@@ -415,6 +495,7 @@ function tirarFoto(){
   cv.width=v.videoWidth; cv.height=v.videoHeight;
   cv.getContext('2d').drawImage(v,0,0);
   fecharCamara();
+  lerQuadrante(cv);
   encolherFoto(cv, function(u){
     if(!u){ S.avisoFoto='Não foi possível guardar a fotografia. Tente outra vez.'; pintar(); return; }
     S.avisoFoto=null; S.foto=u; guardarPasso(); pintar(); });
@@ -538,7 +619,7 @@ function pintar(){
       'combustível fossem preenchidos agora. <b>Fotografe o quadrante e escreva o '+
       'que ele mostra</b> — fica registado no carro, com a fotografia como prova.</p></div>'+
       caixaFoto('Fotografar o quadrante','os km e o ponteiro do combustível',
-        'O quadrante inteiro: os km e o ponteiro do combustível')+
+        'O quadrante inteiro: os km e o ponteiro do combustível')+notaLeitura()+
       (S.foto ? '' : '<p class="p-nota" style="color:var(--crit)">Sem fotografia, o patrão '+
         'não tem como confirmar os km.</p>')+
       '<label class="campo"><span class="lb">Quantos km marca</span>'+
@@ -563,7 +644,7 @@ function pintar(){
           'a única prova.</b> Fotografe o quadrante, mesmo que escreva o número '+
           'à mão.</p></div>' : '')+
       caixaFoto('Fotografar o conta-quilómetros','toque para abrir a câmara',
-        'Aponte aos números do conta-quilómetros')+
+        'Aponte aos números do conta-quilómetros')+notaLeitura()+
       '<div class="ou">ou</div>'+
       '<label class="campo"><span class="lb">Escrever à mão</span>'+
       '<input type="number" inputmode="numeric" id="i-km" value="'+km+'">'+
@@ -732,7 +813,7 @@ function pintar(){
     h='<h1>Terminar o turno</h1>'+
       '<p class="sub">Última vez: quantos km marca agora?</p>'+
       caixaFoto('Fotografar o conta-quilómetros','ou escreva em baixo',
-        'Os números do conta-quilómetros, no fim do turno')+
+        'Os números do conta-quilómetros, no fim do turno')+notaLeitura()+
       '<div class="ou">ou</div>'+
       '<label class="campo"><span class="lb">Escrever à mão</span>'+
       '<input type="number" inputmode="numeric" id="i-kmf" value="'+kmF+'">'+
@@ -914,7 +995,8 @@ document.addEventListener('click', function(e){
   if(!b) return;
   var d=b.dataset;
   if(d.carro){ S.carro=FROTA.carros.filter(function(c){ return c.id===d.carro; })[0];
-    S.foto=null; S.r=semKm(S.carro)?{}:{km:S.carro.km}; S.ecra='km-inicio'; pintar(); return; }
+    S.foto=null; S.ocr=null; leitor.auto=null;
+    S.r=semKm(S.carro)?{}:{km:S.carro.km}; S.ecra='km-inicio'; pintar(); return; }
   if(d.nivel!=null){ S.r.nivel=+d.nivel; guardarPasso(); pintar(); return; }
   if(d.posto!=null){ S.r.posto=d.posto; pintar(); return; }
   if(d.ver){ S.verTurno=d.ver; S.ecra='resumo'; pintar(); return; }
@@ -983,7 +1065,7 @@ document.addEventListener('click', function(e){
       onde:ondeEstou()}, true);
     guardar(); S.ecra='volante'; pintar();
   }
-  if(f==='ir-fim'){ S.foto=null; S.r={}; S.ecra='km-fim'; pintar(); }
+  if(f==='ir-fim'){ S.foto=null; S.r={}; S.ocr=null; leitor.auto=null; S.ecra='km-fim'; pintar(); }
   if(f==='terminar') terminar();
 });
 
@@ -1012,6 +1094,8 @@ function comecar(sim){
     deposito:S.carro.deposito, precoLitro:FROTA.precoLitro, rasto:[], abast:[], totalCve:0,
     fotoInicio:S.foto, simulado:!!sim };
   S.turno.condutorId=S.eu.id;
+  var lido=kmLido('km-inicio'); if(lido) S.turno.kmLidoInicio=lido;
+  S.ocr=null; leitor.auto=null;
   if(primeiro){
     /* é este turno que dá os km ao carro: a base preenche-o sozinha
        (o condutor não escreve na frota); aqui fica já, para o ecrã */
@@ -1047,6 +1131,8 @@ function terminar(){
   var kmF=S.r.kmF==null?t.kmInicio+Math.round(kmRasto(t.rasto)):S.r.kmF;
   if(kmF<t.kmInicio||kmF-t.kmInicio>LIM.kmMax) return;
   t.kmFim=kmF; t.fim=Date.now(); t.fotoFim=S.foto;
+  var lidoF=kmLido('km-fim'); if(lidoF) t.kmLidoFim=lidoF;
+  S.ocr=null; leitor.auto=null;
   t.kmGps=+kmRasto(t.rasto).toFixed(1);
   t.semSinalS=maiorBuraco(t.rasto);
   t.fotos=!!(t.fotoInicio&&t.fotoFim);

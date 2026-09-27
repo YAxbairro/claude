@@ -15,7 +15,8 @@ FIM = '/*MAPA>>>*/'
 # repositório, onde o mapa vive na sua própria pasta). Assim o mesmo
 # comando funciona nos dois sítios.
 AQUI = os.path.dirname(os.path.abspath(__file__))
-MODULOS = ('mapa_praia.js', 'mapa_render.js', 'mapa_vivo.js', 'nuvem.js')
+MODULOS = ('mapa_praia.js', 'mapa_render.js', 'mapa_vivo.js', 'nuvem.js',
+           'leitor_quadrante.js')
 PAINEIS = ('painel_condutor.html', 'painel_dono.html')
 
 

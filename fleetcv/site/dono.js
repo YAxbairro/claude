@@ -212,6 +212,17 @@ function avaliar(t){
       t2:nf(t.kmInicio)+' → '+nf(t.kmFim), vl:nf(kmQ)+' km'});
     if(!t.fotos) al.push({c:'A11',n:'AVISO',d:'Turno sem foto do conta-quilómetros'});
   }
+  /* O telemóvel leu os números na fotografia (PaddleOCR, no próprio
+     telemóvel). Quando o que o condutor escreveu não bate, avisa-se —
+     aviso e não alerta: o leitor também se engana, raramente. */
+  [['kmLidoInicio', t.kmInicio, 'ao começar'], ['kmLidoFim', t.kmFim, 'ao acabar']].forEach(function(q){
+    var lido=t[q[0]]; if(!(lido>0) || q[1]==null) return;
+    if(Math.abs(lido-q[1])>1){
+      v.push({ok:false, t1:'Os km escritos batem com a fotografia',
+        t2:q[2]+': escreveu '+nf(q[1])+', a fotografia mostra '+nf(lido), vl:(lido>q[1]?'+':'')+nf(lido-q[1])+' km'});
+      al.push({c:'A31',n:'AVISO',d:'Km escritos '+q[2]+' ('+nf(q[1])+') não batem com a fotografia ('+nf(lido)+')'});
+    } else v.push({ok:true, t1:'Os km escritos batem com a fotografia', t2:q[2]+': '+nf(lido)+' km', vl:'bate'});
+  });
 
   if(t.gap>LIM.gapKm){
     v.push({ok:false, t1:'O carro não andou fora do turno',
@@ -1137,13 +1148,15 @@ function pintar(){
     var fs=fotosDo(t)||{};
     var quadros=[];
     if(fs[t.id+'_inicio']) quadros.push(quadroFoto(fs[t.id+'_inicio'],
-      'Quadrante ao começar · '+nf(t.kmInicio)+' km'));
+      'Quadrante ao começar · '+nf(t.kmInicio)+' km'+
+      (t.kmLidoInicio>0?(Math.abs(t.kmLidoInicio-t.kmInicio)>1?' · a foto mostra '+nf(t.kmLidoInicio):' · lido na foto'):'')));
     (t.abast||[]).forEach(function(a,ia){
       var kab=a.chaveFoto||(t.id+'_ab'+ia);
       if(fs[kab]) quadros.push(quadroFoto(fs[kab],
         'Talão · '+nf(a.valor)+' CVE · '+hh(a.hora))); });
     if(fs[t.id+'_fim']) quadros.push(quadroFoto(fs[t.id+'_fim'],
-      'Quadrante ao acabar · '+nf(t.kmFim)+' km'));
+      'Quadrante ao acabar · '+nf(t.kmFim)+' km'+
+      (t.kmLidoFim>0?(Math.abs(t.kmLidoFim-t.kmFim)>1?' · a foto mostra '+nf(t.kmLidoFim):' · lido na foto'):'')));
     if(quadros.length)
       h+='<div class="cartao"><h2>As fotografias</h2>'+
         '<p class="p-nota" style="margin:2px 0 9px">Toque para ver em grande.</p>'+

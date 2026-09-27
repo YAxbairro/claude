@@ -157,6 +157,21 @@ await p.click('#voltar'); await p.waitForTimeout(800);
 
 await c.bringToFront();
 await c.click('[data-f="ir-fim"]'); await c.waitForTimeout(900);
+/* o leitor do quadrante, com o motor e os modelos a vir do jsDelivr a sério */
+const kmIni=await c.evaluate(()=>JSON.parse(localStorage.getItem('fleetcv-condutor')).turno.kmInicio);
+const kmFoto=String(kmIni+Math.max(3, Math.ceil(await c.evaluate(()=>{
+  const t=JSON.parse(localStorage.getItem('fleetcv-condutor')).turno; return (t.rasto||[]).length/40; }))));
+const imgQ=Buffer.from(await c.evaluate(km=>{
+  const k=document.createElement('canvas'); k.width=1280; k.height=720;
+  const x=k.getContext('2d'); x.fillStyle='#15171a'; x.fillRect(0,0,1280,720);
+  x.fillStyle='#f2f2f2'; x.font='bold 54px sans-serif';
+  [[250,215,'60'],[420,110,'80'],[610,80,'100'],[800,110,'120']].forEach(p=>x.fillText(p[2],p[0],p[1]));
+  x.fillStyle='#000'; x.fillRect(420,420,440,110);
+  x.fillStyle='#f5f5f5'; x.font='bold 84px monospace'; x.fillText(km,448,505);
+  return k.toDataURL('image/jpeg',0.9).split(',')[1]; }, kmFoto),'base64');
+await c.setInputFiles('#ff',{name:'q.jpg',mimeType:'image/jpeg',buffer:imgQ});
+ok('o telemóvel lê os km na fotografia do quadrante (leitor vindo do jsDelivr)',
+   await ate(async()=>(await c.inputValue('#i-kmf'))===kmFoto, 120), kmFoto+' → '+(await c.inputValue('#i-kmf')));
 await c.click('[data-f="terminar"]');
 ok('o turno fecha', await ate(async()=>/Turno terminado/.test(await ctxt()),20));
 await p.bringToFront();

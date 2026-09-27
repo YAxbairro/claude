@@ -1017,6 +1017,7 @@ function posicao(t, extra, jaa){
               litrosTalao:a.litrosTalao||null, temFoto:!!a.foto||!!a.temFoto,
               chaveFoto:a.chaveFoto||null}; }),
     temFotoInicio: !!t.fotoInicio || !!t.temFotoInicio,
+    kmLidoInicio: t.kmLidoInicio||null,
     lat:u?u[0]:null, lon:u?u[1]:null, precisao:u?u[3]:null, vel:u?u[4]:0,
     kmGps: extra&&extra.kmGps!=null ? +extra.kmGps.toFixed(2) : null,
     bateria: extra?extra.bateria:null,

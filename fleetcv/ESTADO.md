@@ -72,9 +72,7 @@ Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
   escreve os km e toca no nível do ponteiro (vazio, ¼, ½, ¾, cheio); a
   base (gatilho `docs_km_do_carro`) grava-os no carro com quem, quando e
   o turno — a ficha do carro tem "Ver a fotografia do quadrante". Os km
-  são escritos pelo condutor: ler o número directamente da fotografia
-  pediria um serviço de leitura de imagem (IA), com chave e custo por
-  fotografia — fica para quando se quiser.
+  são lidos da fotografia (ver abaixo) e o condutor confere.
 - **Os km do carro não seguiam os turnos** (erro encontrado a 27/09): o
   condutor não pode escrever na frota, e cada turno novo começava nos km
   do dia em que o carro foi criado (o ST-28-ED estava nos 120.000 com o
@@ -82,6 +80,17 @@ Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
   carro nos km do fim de cada turno fechado — só para a frente e só com
   turnos plausíveis (até 1.500 km). Provas SQL 62–68;
   `paineis/teste_primeiro_turno.mjs` (28).
+- **O telemóvel lê os km na fotografia do quadrante** (27/09). PaddleOCR
+  (PP-OCRv4, livre) a correr no próprio telemóvel, num Worker, com o ONNX
+  Runtime; sem OpenCV (`paineis/mapa/leitor_quadrante.js`). Escolhido
+  numa corrida com 58 quadrantes verdadeiros (`paineis/ocr/`): o
+  Tesseract acertou 8; este, sabendo onde o carro ficou, acerta 40 e
+  errou 1 — quando não tem a certeza, não propõe. O campo dos km fica
+  preenchido e o condutor confere; o que ele escreve manda sempre. O que
+  se leu fica no turno (`kmLidoInicio`/`kmLidoFim`) e o patrão vê um
+  aviso (A31) quando o escrito não bate com a fotografia. O telemóvel
+  descarrega ~19 MB do jsDelivr uma vez só (guardado um ano); com a
+  poupança de dados ligada, não lê. `paineis/teste_leitor.mjs` (17).
 
 ## Crescer: quanto aguenta e quando pagar (medido a 27 de Setembro)
 
@@ -148,7 +157,7 @@ ficheiros. Os passos estão em `site/INSTALAR.md`.
 | `supabase/provar.sh` | 68 regras + 9 da passagem de uma base antiga, num Postgres a sério. As provas foram postas à prova estragando as regras de propósito |
 | `paineis/teste_contas.mjs` | 40 — o caminho de um cliente novo, do criar conta ao apagar |
 | `paineis/teste_supabase.mjs` | 25 — as regras vistas pela aplicação, a trava, sem rede |
-| o resto dos `teste_*.mjs` | primeiro turno 28, dados 13, câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 33, mapa vivo 24 |
+| o resto dos `teste_*.mjs` | leitor 17, primeiro turno 28, dados 13, câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 33, mapa vivo 24 |
 
 Os testes que usam o servidor próprio (`teste_clicavel`,
 `teste_formularios`, `teste_servidor`) esperam correr numa pasta com

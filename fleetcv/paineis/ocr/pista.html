@@ -1,0 +1,19 @@
+<!doctype html><meta charset=utf8>
+<!-- a pista da corrida: o leitor da aplicação a ler cada fotografia -->
+<script src="/node_modules/onnxruntime-web/dist/ort.wasm.min.js"></script>
+<script src="/mapa/leitor_quadrante.js"></script>
+<script>
+function carregar(url){ return new Promise(function(ok,mal){ var i=new Image(); i.onload=function(){ok(i)}; i.onerror=mal; i.src=url; }); }
+function encolher(img, lado){
+  var k=Math.min(1, lado/Math.max(img.naturalWidth,img.naturalHeight));
+  var c=document.createElement('canvas'); c.width=Math.round(img.naturalWidth*k); c.height=Math.round(img.naturalHeight*k);
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height); return c; }
+window.preparar=async function(){
+  ort.env.wasm.wasmPaths='/node_modules/onnxruntime-web/dist/'; ort.env.wasm.numThreads=1;
+  var A='/node_modules/@gutenye/ocr-models/assets/';
+  await LeitorQuadrante.preparar({det:A+'ch_PP-OCRv4_det_infer.onnx', rec:A+'ch_PP-OCRv4_rec_infer.onnx', dic:A+'ppocr_keys_v1.txt'});
+  return true; };
+window.lerFoto=async function(url, lado){ var c=encolher(await carregar(url), lado);
+  var t0=performance.now(); var it=await LeitorQuadrante.lerImagem(c);
+  return {it:it, ms:Math.round(performance.now()-t0)}; };
+</script>
