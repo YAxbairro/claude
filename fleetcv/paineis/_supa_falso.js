@@ -91,10 +91,32 @@
             ? {eventType:ev, new:{}, old:{frota:linha.frota, coleccao:linha.coleccao, id:linha.id}}
             : {eventType:ev, new:linha, old:{}}); },0); }); };
 
+    function kmDoCarro(f, id, t){
+      var fc=doc(f,'frota','carros'); if(!fc || !Array.isArray(fc.lista) || !t) return;
+      var num=function(x){ return typeof x==='number' ? x : null; };
+      var ini=num(t.kmInicio), fim=num(t.kmFim), mudou=false;
+      var lista=fc.lista.map(function(c){
+        if(!c || c.id!==t.carroId) return c;
+        c=Object.assign({}, c); var km=num(c.km);
+        if((c.kmPorPreencher===true || !(km>0)) && ini>0){
+          delete c.kmPorPreencher; c.km=ini;
+          c.kmPreenchido={turno:id, condutor:t.condutor, quando:t.inicio, km:ini};
+          if(typeof t.nivelInicio==='number') c.kmPreenchido.combustivel=t.nivelInicio;
+          if(typeof t.nivelInicio==='number') c.combustivel=t.nivelInicio;
+          if(!(num(c.proxOleoKm)>=ini)) c.proxOleoKm=ini+5000;
+          km=ini; mudou=true; }
+        if(t.fim!=null && fim!=null && ini!=null && km>0 && fim>km && fim>=ini && fim-ini<=1500){
+          c.km=fim; mudou=true; }
+        return c; });
+      if(mudou) gravar(f,'frota','carros',{lista:lista});
+    }
     function gravar(f,c,id,corpo,quando){
       por(kd(f,c,id), corpo);
       por(kq(f,c,id), quando||new Date().toISOString());
       avisarTodos('UPDATE', {frota:f, coleccao:c, id:id, corpo:corpo});
+      /* o gatilho dos km do carro (docs_km_do_carro): o primeiro turno
+         preenche um carro sem km; o fecho deixa-o nos km do fim */
+      if(c==='turnos') kmDoCarro(f, id, corpo);
       /* o gatilho da 'equipa': a lista sem códigos, para os condutores */
       if(c==='frota' && id==='condutores'){
         var eq={lista:(corpo.lista||[]).map(function(x){

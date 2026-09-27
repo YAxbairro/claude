@@ -427,3 +427,85 @@ select '61 · a frota fundadora apaga-se pela aplicação: ' ||
   case when (apagar_frota('9999'))->>'erro' like '%fundadora%'
        then 'RECUSOU (certo)' else 'DEIXOU (MAL)' end;
 reset role;
+
+-- ─── OS KM DO CARRO SEGUEM OS TURNOS ─────────────────────────
+-- O patrão que não sabe os km (vive fora, o carro é novo na frota)
+-- deixa-os por preencher; o primeiro turno preenche-os. E cada turno
+-- fechado deixa o carro onde acabou — antes ficava para sempre nos km
+-- do dia em que foi criado.
+update docs set corpo='{"lista":[{"id":"c1","matricula":"ST-28-ED","deposito":45,"kmPorPreencher":true}]}'::jsonb
+  where frota='f1' and coleccao='frota' and id='carros';
+call quem('22222222-2222-2222-2222-222222222222');
+select entrar('a@x.cv','1234') is not null;
+set role authenticated;
+insert into docs(coleccao,id,corpo) values ('turnos','t-km1',
+  '{"id":"t-km1","condutorId":"m1","condutor":"António","carroId":"c1","inicio":1790000000000,"kmInicio":120384,"nivelInicio":0.5}'::jsonb);
+reset role;
+select '62 · o primeiro turno preenche os km que o patrão não sabia: ' ||
+  case when c->>'km' = '120384' and c->>'combustivel' = '0.5'
+        and not (c ? 'kmPorPreencher') and c->'kmPreenchido'->>'turno' = 't-km1'
+        and c->'kmPreenchido'->>'condutor' = 'António'
+        and c->'kmPreenchido'->>'km' = '120384' and c->'kmPreenchido'->>'combustivel' = '0.5'
+       then 'preencheu, com quem e quando (certo)' else 'NÃO PREENCHEU (MAL) '||c::text end
+  from docs d, jsonb_array_elements(d.corpo->'lista') c
+ where d.frota='f1' and d.coleccao='frota' and d.id='carros' and c->>'id'='c1';
+
+set role authenticated;
+update docs set corpo = corpo || '{"fim":1790040000000,"kmFim":120469}'::jsonb
+ where coleccao='turnos' and id='t-km1';
+reset role;
+select '63 · o turno fecha e o carro fica nos km do fim: ' ||
+  case when c->>'km' = '120469' then 'ficou (certo)' else 'NÃO MUDOU (MAL) '||(c->>'km') end
+  from docs d, jsonb_array_elements(d.corpo->'lista') c
+ where d.frota='f1' and d.coleccao='frota' and d.id='carros' and c->>'id'='c1';
+
+set role authenticated;
+insert into docs(coleccao,id,corpo) values ('turnos','t-km2',
+  '{"id":"t-km2","condutorId":"m1","carroId":"c1","kmInicio":130000,"inicio":1790050000000}'::jsonb);
+insert into docs(coleccao,id,corpo) values ('turnos','t-km3',
+  '{"id":"t-km3","condutorId":"m1","carroId":"c1","kmInicio":120000,"kmFim":120050,"fim":1,"inicio":1}'::jsonb);
+insert into docs(coleccao,id,corpo) values ('turnos','t-km4',
+  '{"id":"t-km4","condutorId":"m1","carroId":"c1","kmInicio":120469,"kmFim":125000,"fim":1,"inicio":1}'::jsonb);
+insert into docs(coleccao,id,corpo) values ('turnos','t-km5',
+  '{"id":"t-km5","condutorId":"m1","carroId":"c1","kmInicio":"muito","kmFim":{"x":1},"fim":1,"inicio":1}'::jsonb);
+reset role;
+select '64 · depois de preenchido, abrir um turno não mexe nos km; recuar, um turno absurdo ou números estragados também não: ' ||
+  case when c->>'km' = '120469' and c->>'combustivel' = '0.5'
+        and c->'kmPreenchido'->>'turno' = 't-km1'
+       then 'não mexeu (certo)' else 'MEXEU (MAL) '||c::text end
+  from docs d, jsonb_array_elements(d.corpo->'lista') c
+ where d.frota='f1' and d.coleccao='frota' and d.id='carros' and c->>'id'='c1';
+select '65 · e os turnos entram na mesma: ' ||
+  case when (select count(*) from docs where frota='f1' and coleccao='turnos' and id like 't-km%') = 5
+       then 'entraram (certo)' else 'FICARAM DE FORA (MAL)' end;
+
+set role authenticated;
+insert into docs(coleccao,id,corpo) values ('frota','carros',
+  '{"lista":[{"id":"c1","matricula":"ST-28-ED","km":999999}]}'::jsonb)
+  on conflict (frota,coleccao,id) do update set corpo=excluded.corpo;
+reset role;
+select '66 · e o condutor continua sem poder mexer no carro à mão: ' ||
+  case when c->>'km' = '120469' then 'RECUSOU (certo)' else 'DEIXOU (MAL)' end
+  from docs d, jsonb_array_elements(d.corpo->'lista') c
+ where d.frota='f1' and d.coleccao='frota' and d.id='carros' and c->>'id'='c1';
+
+-- um turno de outra frota com o mesmo nome de carro não toca neste
+insert into frotas(id, nome) values ('fx-km','Outra') on conflict do nothing;
+insert into docs(frota,coleccao,id,corpo) values ('fx-km','turnos','t-x',
+  '{"id":"t-x","carroId":"c1","kmInicio":120469,"kmFim":121000,"fim":1}'::jsonb);
+select '67 · um turno de outra frota não mexe nos carros desta: ' ||
+  case when c->>'km' = '120469' then 'não mexeu (certo)' else 'MEXEU (MAL)' end
+  from docs d, jsonb_array_elements(d.corpo->'lista') c
+ where d.frota='f1' and d.coleccao='frota' and d.id='carros' and c->>'id'='c1';
+
+-- uma lista de carros estragada (óleo escrito com letras) não pode
+-- impedir o turno de entrar
+update docs set corpo='{"lista":[{"id":"c9","matricula":"X","kmPorPreencher":true,"proxOleoKm":"abc"}]}'::jsonb
+  where frota='f1' and coleccao='frota' and id='carros';
+set role authenticated;
+insert into docs(coleccao,id,corpo) values ('turnos','t-km9',
+  '{"id":"t-km9","condutorId":"m1","carroId":"c9","kmInicio":5000,"inicio":1}'::jsonb);
+reset role;
+select '68 · com a lista de carros estragada, o turno entra na mesma: ' ||
+  case when exists (select 1 from docs where frota='f1' and coleccao='turnos' and id='t-km9')
+       then 'entrou (certo)' else 'FICOU DE FORA (MAL)' end;

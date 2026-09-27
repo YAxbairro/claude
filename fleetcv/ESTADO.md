@@ -66,6 +66,23 @@ Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
   preço e o depósito, e o painel do patrão completa os antigos com os
   da frota.
 
+- **Carro sem km: preenchido pelo primeiro turno.** Ao criar a viatura,
+  o patrão pode escolher "Preencher automaticamente no primeiro turno"
+  (vive fora, não sabe os km). O primeiro condutor fotografa o quadrante,
+  escreve os km e toca no nível do ponteiro (vazio, ¼, ½, ¾, cheio); a
+  base (gatilho `docs_km_do_carro`) grava-os no carro com quem, quando e
+  o turno — a ficha do carro tem "Ver a fotografia do quadrante". Os km
+  são escritos pelo condutor: ler o número directamente da fotografia
+  pediria um serviço de leitura de imagem (IA), com chave e custo por
+  fotografia — fica para quando se quiser.
+- **Os km do carro não seguiam os turnos** (erro encontrado a 27/09): o
+  condutor não pode escrever na frota, e cada turno novo começava nos km
+  do dia em que o carro foi criado (o ST-28-ED estava nos 120.000 com o
+  último turno a acabar nos 120.828). Agora o mesmo gatilho deixa o
+  carro nos km do fim de cada turno fechado — só para a frente e só com
+  turnos plausíveis (até 1.500 km). Provas SQL 62–68;
+  `paineis/teste_primeiro_turno.mjs` (28).
+
 ## Crescer: quanto aguenta e quando pagar (medido a 27 de Setembro)
 
 Contas com os números da base verdadeira (cada ponto do caminho pesa
@@ -128,10 +145,10 @@ ficheiros. Os passos estão em `site/INSTALAR.md`.
 
 | | |
 |---|---|
-| `supabase/provar.sh` | 61 regras + 9 da passagem de uma base antiga, num Postgres a sério. As provas foram postas à prova estragando as regras de propósito |
+| `supabase/provar.sh` | 68 regras + 9 da passagem de uma base antiga, num Postgres a sério. As provas foram postas à prova estragando as regras de propósito |
 | `paineis/teste_contas.mjs` | 40 — o caminho de um cliente novo, do criar conta ao apagar |
 | `paineis/teste_supabase.mjs` | 25 — as regras vistas pela aplicação, a trava, sem rede |
-| o resto dos `teste_*.mjs` | dados 13, câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 33, mapa vivo 24 |
+| o resto dos `teste_*.mjs` | primeiro turno 28, dados 13, câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 33, mapa vivo 24 |
 
 Os testes que usam o servidor próprio (`teste_clicavel`,
 `teste_formularios`, `teste_servidor`) esperam correr numa pasta com

@@ -131,6 +131,11 @@ body.condutor .escolha .mat{font-family:var(--mono); font-weight:600; font-size:
 body.condutor .escolha .s{font-size:12.5px; color:var(--muted)}
 body.condutor .escolha .d{margin-left:auto; text-align:right; font-family:var(--mono); font-size:14px}
 body.condutor .escolha .d small{display:block; font-family:var(--sans); font-size:11px; color:var(--muted)}
+body.condutor .escolha .d.falta{font-family:var(--sans); font-size:12px; color:var(--accent); font-weight:600}
+body.condutor .niveis{display:flex; gap:6px}
+body.condutor .niveis button{flex:1; padding:11px 0; border-radius:10px; border:1px solid var(--line);
+  background:var(--surface); color:var(--ink); font:inherit; font-weight:700; font-size:15px; cursor:pointer}
+body.condutor .niveis button.on{border-color:var(--accent); background:var(--accent-wash); color:var(--accent)}
 body.condutor .foto{position:relative; display:block; border:2px dashed var(--line); border-radius:12px;
   padding:26px 14px; text-align:center; background:var(--surface2); cursor:pointer}
 body.condutor .foto.feita{border-style:solid; border-color:var(--ok); padding:0; overflow:hidden}
@@ -306,6 +311,16 @@ body.dono .campo{display:block}
 body.dono .campo .lb{display:block; font-size:11px; font-weight:700; letter-spacing:.07em;
   text-transform:uppercase; color:var(--muted); margin-bottom:5px}
 body.dono .campo .aj{display:block; font-size:12px; color:var(--muted); margin-top:5px}
+body.dono .opcoes{display:flex; flex-direction:column; gap:8px}
+body.dono .opcao{display:flex; gap:11px; align-items:flex-start; width:100%; text-align:left;
+  padding:12px 13px; border-radius:11px; border:1px solid var(--line);
+  background:var(--surface); color:var(--ink); font:inherit; cursor:pointer}
+body.dono .opcao .bola{flex:none; width:18px; height:18px; border-radius:50%;
+  border:2px solid var(--line); margin-top:1px; box-sizing:border-box}
+body.dono .opcao.on{border-color:var(--accent); background:var(--accent-wash)}
+body.dono .opcao.on .bola{border:5px solid var(--accent)}
+body.dono .opcao .t1{display:block; font-weight:600; font-size:14px}
+body.dono .opcao .t2{display:block; font-size:12.5px; color:var(--muted); margin-top:3px; line-height:1.4}
 body.dono input{width:100%; padding:12px 13px; border-radius:10px; border:1px solid var(--line);
   background:var(--surface); color:var(--ink); font-family:var(--mono); font-size:17px;
   font-weight:500; -moz-appearance:textfield}

@@ -561,6 +561,85 @@ create trigger docs_emails_unicos
   for each row when (new.coleccao = 'frota' and new.id = 'condutores')
   execute function public._emails_unicos();
 
+-- ─── os km do carro seguem os turnos ─────────────────────────
+-- O condutor não escreve na frota (é do patrão). Mas os km do carro
+-- têm de acompanhar os turnos: antes ficavam nos km do dia em que o
+-- carro foi criado, cada turno novo começava lá, e o turno parecia
+-- ter começado atrás de onde o anterior acabou. Quem acerta é a base:
+--  · um carro sem km (o patrão escolheu "preencher no primeiro turno",
+--    ou deixou 0 porque não sabia) fica com os km e o combustível que o
+--    condutor escreveu ao abrir o primeiro turno — com a fotografia do
+--    quadrante como prova, e o nome de quem e quando;
+--  · um turno fechado deixa o carro nos km do fim: só para a frente, e
+--    só se o turno for plausível (até 1.500 km).
+create or replace function public._km_do_carro()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  v_lista jsonb; v_nova jsonb := '[]'::jsonb; c jsonb; v_mudou boolean := false;
+  v_carro text := new.corpo->>'carroId';
+  v_ini numeric; v_fim numeric; v_km numeric; v_oleo numeric;
+begin
+  if v_carro is null then return null; end if;
+  begin
+    v_ini := case when jsonb_typeof(new.corpo->'kmInicio') = 'number'
+                  then (new.corpo->>'kmInicio')::numeric end;
+    v_fim := case when jsonb_typeof(new.corpo->'kmFim') = 'number'
+                  then (new.corpo->>'kmFim')::numeric end;
+  exception when others then return null;
+  end;
+  select corpo->'lista' into v_lista from docs
+   where frota = new.frota and coleccao = 'frota' and id = 'carros'
+   for update;
+  if v_lista is null or jsonb_typeof(v_lista) <> 'array' then return null; end if;
+  for c in select value from jsonb_array_elements(v_lista) loop
+    if jsonb_typeof(c) = 'object' and c->>'id' = v_carro then
+      v_km := case when jsonb_typeof(c->'km') = 'number' then (c->>'km')::numeric end;
+      -- o primeiro turno preenche o que o patrão não sabia
+      if (coalesce(c->>'kmPorPreencher','false') = 'true' or coalesce(v_km,0) <= 0)
+         and v_ini > 0 then
+        c := (c - 'kmPorPreencher') || jsonb_build_object(
+               'km', v_ini,
+               'kmPreenchido', jsonb_strip_nulls(jsonb_build_object('turno', new.id,
+                  'condutor', new.corpo->'condutor', 'quando', new.corpo->'inicio',
+                  'km', v_ini, 'combustivel',
+                  case when jsonb_typeof(new.corpo->'nivelInicio') = 'number'
+                       then new.corpo->'nivelInicio' end)));
+        if jsonb_typeof(new.corpo->'nivelInicio') = 'number' then
+          c := c || jsonb_build_object('combustivel', new.corpo->'nivelInicio');
+        end if;
+        v_oleo := case when jsonb_typeof(c->'proxOleoKm') = 'number'
+                       then (c->>'proxOleoKm')::numeric end;
+        if v_oleo is null or v_oleo < v_ini then
+          c := c || jsonb_build_object('proxOleoKm', v_ini + 5000);
+        end if;
+        v_km := v_ini; v_mudou := true;
+      end if;
+      -- o fecho deixa o carro onde o turno acabou
+      if new.corpo->>'fim' is not null and v_fim is not null and v_ini is not null
+         and v_km > 0 and v_fim > v_km and v_fim >= v_ini and v_fim - v_ini <= 1500 then
+        c := c || jsonb_build_object('km', v_fim);
+        v_mudou := true;
+      end if;
+    end if;
+    v_nova := v_nova || jsonb_build_array(c);
+  end loop;
+  if v_mudou then
+    update docs set corpo = jsonb_set(corpo, '{lista}', v_nova), quando = now()
+     where frota = new.frota and coleccao = 'frota' and id = 'carros';
+  end if;
+  return null;
+-- aconteça o que acontecer aqui, o turno do condutor entra na mesma
+exception when others then
+  return null;
+end;
+$$;
+
+drop trigger if exists docs_km_do_carro on public.docs;
+create trigger docs_km_do_carro
+  after insert or update on public.docs
+  for each row when (new.coleccao = 'turnos')
+  execute function public._km_do_carro();
+
 -- a lista dos condutores de uma base antiga ainda não tem a versão
 -- sem códigos: faz-se agora, tocando-lhe sem mudar nada
 update public.docs set quando = quando
@@ -683,6 +762,7 @@ revoke execute on function public._codigo_certo(jsonb,text)
   from public, anon, authenticated;
 revoke execute on function public._equipa() from public, anon, authenticated;
 revoke execute on function public._emails_unicos() from public, anon, authenticated;
+revoke execute on function public._km_do_carro() from public, anon, authenticated;
 -- entrar e criar conta têm de estar abertas: são as portas. Mas só a
 -- quem já tem sessão (anónima que seja) — é ela que fica marcada.
 revoke execute on function public.entrar(text,text) from public;

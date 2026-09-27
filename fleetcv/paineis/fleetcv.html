@@ -150,6 +150,11 @@ body.condutor .escolha .mat{font-family:var(--mono); font-weight:600; font-size:
 body.condutor .escolha .s{font-size:12.5px; color:var(--muted)}
 body.condutor .escolha .d{margin-left:auto; text-align:right; font-family:var(--mono); font-size:14px}
 body.condutor .escolha .d small{display:block; font-family:var(--sans); font-size:11px; color:var(--muted)}
+body.condutor .escolha .d.falta{font-family:var(--sans); font-size:12px; color:var(--accent); font-weight:600}
+body.condutor .niveis{display:flex; gap:6px}
+body.condutor .niveis button{flex:1; padding:11px 0; border-radius:10px; border:1px solid var(--line);
+  background:var(--surface); color:var(--ink); font:inherit; font-weight:700; font-size:15px; cursor:pointer}
+body.condutor .niveis button.on{border-color:var(--accent); background:var(--accent-wash); color:var(--accent)}
 body.condutor .foto{position:relative; display:block; border:2px dashed var(--line); border-radius:12px;
   padding:26px 14px; text-align:center; background:var(--surface2); cursor:pointer}
 body.condutor .foto.feita{border-style:solid; border-color:var(--ok); padding:0; overflow:hidden}
@@ -328,6 +333,16 @@ body.dono .campo{display:block}
 body.dono .campo .lb{display:block; font-size:11px; font-weight:700; letter-spacing:.07em;
   text-transform:uppercase; color:var(--muted); margin-bottom:5px}
 body.dono .campo .aj{display:block; font-size:12px; color:var(--muted); margin-top:5px}
+body.dono .opcoes{display:flex; flex-direction:column; gap:8px}
+body.dono .opcao{display:flex; gap:11px; align-items:flex-start; width:100%; text-align:left;
+  padding:12px 13px; border-radius:11px; border:1px solid var(--line);
+  background:var(--surface); color:var(--ink); font:inherit; cursor:pointer}
+body.dono .opcao .bola{flex:none; width:18px; height:18px; border-radius:50%;
+  border:2px solid var(--line); margin-top:1px; box-sizing:border-box}
+body.dono .opcao.on{border-color:var(--accent); background:var(--accent-wash)}
+body.dono .opcao.on .bola{border:5px solid var(--accent)}
+body.dono .opcao .t1{display:block; font-weight:600; font-size:14px}
+body.dono .opcao .t2{display:block; font-size:12.5px; color:var(--muted); margin-top:3px; line-height:1.4}
 body.dono input{width:100%; padding:12px 13px; border-radius:10px; border:1px solid var(--line);
   background:var(--surface); color:var(--ink); font-family:var(--mono); font-size:17px;
   font-weight:500; -moz-appearance:textfield}
@@ -2494,6 +2509,9 @@ function kmRasto(p){ var m=0,a=null;
   return m/1000; }
 /* Guarda-se sempre no próprio telemóvel — é o que segura o turno se
    a rede cair ou a bateria acabar — e a nuvem leva-o ao patrão. */
+/* um carro cujos km o patrão deixou para o primeiro turno (ou em 0) */
+function semKm(c){ return !!c && (c.kmPorPreencher===true || !(c.km>0)); }
+
 function guardar(){
   Nuvem.local('condutor', {eu:S.eu&&S.eu.id, carro:S.carro&&S.carro.id,
     turno:S.turno, turnos:S.turnos.slice(0,20)});
@@ -2961,9 +2979,37 @@ function pintar(){
         '" data-carro="'+c.id+'">'+
         '<span><span class="mat">'+esc(c.matricula)+'</span><br>'+
         '<span class="s">'+esc(c.marca+' '+c.modelo)+' · depósito de '+c.deposito+' l</span>'+
-        '</span><span class="d">'+nf(c.km)+'<small>km</small></span></button>'; }).join('');
+        '</span>'+(semKm(c)
+          ? '<span class="d falta">km por<br>preencher</span>'
+          : '<span class="d">'+nf(c.km)+'<small>km</small></span>')+'</button>'; }).join('');
     b=(S.turnos.length?'<button class="lig" data-f="ir-meus">Os meus turnos</button>':'')+
       '<button class="lig" data-f="sair">Sair</button>';
+  }
+
+  else if(S.ecra==='km-inicio' && semKm(S.carro)){
+    /* O patrão não sabia os km deste carro (vive fora, o carro é novo
+       na frota): pediu que fossem preenchidos no primeiro turno. O que
+       o condutor escrever aqui, com a fotografia, fica no carro. */
+    var kmP=S.r.km>0 ? S.r.km : '';
+    h='<div class="passo">Passo 2 de 3</div><h1>Primeiro turno deste carro</h1>'+
+      '<p class="sub">'+esc(S.carro.matricula)+' ainda não tem os km registados.</p>'+
+      '<div class="cartao nota"><p class="p-nota">O patrão pediu que os km e o '+
+      'combustível fossem preenchidos agora. <b>Fotografe o quadrante e escreva o '+
+      'que ele mostra</b> — fica registado no carro, com a fotografia como prova.</p></div>'+
+      caixaFoto('Fotografar o quadrante','os km e o ponteiro do combustível',
+        'O quadrante inteiro: os km e o ponteiro do combustível')+
+      (S.foto ? '' : '<p class="p-nota" style="color:var(--crit)">Sem fotografia, o patrão '+
+        'não tem como confirmar os km.</p>')+
+      '<label class="campo"><span class="lb">Quantos km marca</span>'+
+      '<input type="number" inputmode="numeric" id="i-km" value="'+kmP+'" placeholder="ex.: 120384">'+
+      '<span class="aj">Os números do conta-quilómetros, tal e qual.</span></label>'+
+      '<div class="campo"><span class="lb">Quanto combustível marca o ponteiro</span>'+
+      '<div class="niveis">'+[[0,'Vazio'],[0.25,'¼'],[0.5,'½'],[0.75,'¾'],[1,'Cheio']]
+        .map(function(n){ return '<button data-nivel="'+n[0]+'"'+
+          (S.r.nivel===n[0]?' class="on"':'')+'>'+n[1]+'</button>'; }).join('')+
+      '</div></div>';
+    b='<button class="bt pri" data-f="ir-gps"'+(kmP?'':' disabled')+'>Continuar</button>'+
+      '<button class="lig" data-f="ir-carro">Trocar de carro</button>';
   }
 
   else if(S.ecra==='km-inicio'){
@@ -3323,11 +3369,12 @@ function suave(){ clearTimeout(adiado); adiado=setTimeout(function(){
 })();
 
 document.addEventListener('click', function(e){
-  var b=e.target.closest('[data-f],[data-carro],[data-posto],[data-ver],[data-apagar]');
+  var b=e.target.closest('[data-f],[data-carro],[data-posto],[data-ver],[data-apagar],[data-nivel]');
   if(!b) return;
   var d=b.dataset;
   if(d.carro){ S.carro=FROTA.carros.filter(function(c){ return c.id===d.carro; })[0];
-    S.foto=null; S.r={km:S.carro.km}; S.ecra='km-inicio'; pintar(); return; }
+    S.foto=null; S.r=semKm(S.carro)?{}:{km:S.carro.km}; S.ecra='km-inicio'; pintar(); return; }
+  if(d.nivel!=null){ S.r.nivel=+d.nivel; guardarPasso(); pintar(); return; }
   if(d.posto!=null){ S.r.posto=d.posto; pintar(); return; }
   if(d.ver){ S.verTurno=d.ver; S.ecra='resumo'; pintar(); return; }
   if(d.apagar!=null && S.turno && !S.turno.fim){
@@ -3364,7 +3411,9 @@ document.addEventListener('click', function(e){
   if(f==='percebi'){ S.avisoEcraVisto=true;
     Nuvem.local('aviso-ecra', true); pintar(); return; }
   if(f==='ir-meus'){ S.verTurno=null; S.ecra='meus'; pintar(); }
-  if(f==='ir-gps'){ S.simular=false; ligarGps(); S.ecra='gps'; pintar(); }
+  if(f==='ir-gps'){
+    if(S.ecra==='km-inicio' && semKm(S.carro) && !(S.r.km>0)) return;
+    S.simular=false; ligarGps(); S.ecra='gps'; pintar(); }
   if(f==='pedir-gps'){ ligarGps(); pintar(); }
   if(f==='comecar') comecar(false);
   if(f==='comecar-sim') comecar(true);
@@ -3414,13 +3463,27 @@ document.addEventListener('visibilitychange', function(){
 
 function comecar(sim){
   S.simular=!!sim;
+  var primeiro=semKm(S.carro) && S.r.km>0;
   S.turno={ id:'t'+Date.now(), inicio:Date.now(), fim:null,
     carroId:S.carro.id, matricula:S.carro.matricula, condutor:S.eu.nome,
     kmInicio:(S.r.km==null?S.carro.km:S.r.km), kmFim:null,
-    gap:(S.r.km==null?S.carro.km:S.r.km)-S.carro.km,
+    gap:primeiro ? 0 : (S.r.km==null?S.carro.km:S.r.km)-S.carro.km,
     deposito:S.carro.deposito, precoLitro:FROTA.precoLitro, rasto:[], abast:[], totalCve:0,
     fotoInicio:S.foto, simulado:!!sim };
   S.turno.condutorId=S.eu.id;
+  if(primeiro){
+    /* é este turno que dá os km ao carro: a base preenche-o sozinha
+       (o condutor não escreve na frota); aqui fica já, para o ecrã */
+    S.turno.kmPrimeiro=true;
+    if(typeof S.r.nivel==='number') S.turno.nivelInicio=S.r.nivel;
+    S.carro.km=S.turno.kmInicio; delete S.carro.kmPorPreencher;
+    S.carro.kmPreenchido={turno:S.turno.id, condutor:S.eu.nome, quando:S.turno.inicio,
+      km:S.turno.kmInicio};
+    if(typeof S.r.nivel==='number') S.carro.kmPreenchido.combustivel=S.r.nivel;
+    if(typeof S.r.nivel==='number') S.carro.combustivel=S.r.nivel;
+    if(!(S.carro.proxOleoKm>=S.carro.km)) S.carro.proxOleoKm=S.carro.km+5000;
+    Nuvem.guardarFrota(FROTA);
+  }
   S.foto=null; S.r={};
   if(sim){ desligarGps(); simular(); } else ligarGps();
   if(!tic) tic=setInterval(function(){ if(S.ecra==='volante') pintar(); }, 1000);
@@ -3646,6 +3709,26 @@ function caixaAviso(){
   var mau = typeof S.aviso==='object' && S.aviso.campo;
   return '<div class="cartao '+(mau?'mau':'aviso')+'"><p class="p-nota">'+
     esc(t)+'</p></div>';
+}
+/* um carro cujos km vêm do primeiro turno (ou que ficou em 0) */
+function semKm(c){ return !!c && (c.kmPorPreencher===true || !(c.km>0)); }
+function nivelTexto(n, dep){
+  var t={0:'vazio', 0.25:'¼ do depósito', 0.5:'meio depósito', 0.75:'¾ do depósito', 1:'cheio'}[n];
+  if(t==null) return '';
+  return t+(dep&&n>0&&n<1?' (~'+Math.round(n*dep)+' l)':'');
+}
+/* de onde vieram os km: quem, quando, e a fotografia para conferir */
+function cartaoPreenchido(c){
+  var p=c.kmPreenchido||{}, q=p.quando?new Date(p.quando):null, lin=[];
+  if(p.km>0) lin.push(nf(p.km)+' km');
+  if(typeof p.combustivel==='number') lin.push(nivelTexto(p.combustivel, c.deposito));
+  return '<div class="cartao"><h2>Preenchido no primeiro turno</h2>'+
+    '<p class="p-nota" style="margin-top:5px">'+
+    (p.condutor?esc(p.condutor):'O condutor')+
+    (q?', a '+q.toLocaleDateString('pt-PT')+' às '+hh(p.quando):'')+
+    (lin.length?': <b>'+lin.join(' · ')+'</b>':'')+'.</p>'+
+    (p.turno?'<button class="lig" data-turno="'+esc(p.turno)+'" style="margin-top:6px;padding:0">'+
+      'Ver a fotografia do quadrante ›</button>':'')+'</div>';
 }
 function marcado(id){
   return (S.aviso && typeof S.aviso==='object' && S.aviso.campo===id)
@@ -4391,11 +4474,12 @@ function pintar(){
     h+=S.frota.carros.map(function(c){
       var ts=turnosDoCarro(c.id).filter(function(t){ return t.fim; });
       var cons=consumoDoCarro(c.id);
-      var oleo=c.proxOleoKm-c.km;
+      var oleo=semKm(c) ? Infinity : c.proxOleoKm-c.km;
       return '<button class="item" data-carro="'+c.id+'">'+
         '<span><span class="p" style="font-family:var(--mono)">'+esc(c.matricula)+'</span>'+
         (c.estado!=='ACTIVO'?' <span class="selo i">parado</span>':'')+
-        '<br><span class="s">'+esc(c.marca+' '+c.modelo)+' · '+nf(c.km)+' km · '+
+        '<br><span class="s">'+esc(c.marca+' '+c.modelo)+' · '+
+        (semKm(c) ? 'km no 1.º turno' : nf(c.km)+' km')+' · '+
         ts.length+' turnos</span>'+
         (oleo<=1000?'<br><span class="selo n" style="margin-top:4px">óleo em '+
           nf(Math.max(0,oleo))+' km</span>':'')+
@@ -4412,17 +4496,25 @@ function pintar(){
     var km=ts.reduce(function(s,t){ return s+((t.kmFim||0)-t.kmInicio); },0);
     var cve=ts.reduce(function(s,t){ return s+(t.totalCve||0); },0);
     var cons=consumoDoCarro(c.id);
-    var oleo=c.proxOleoKm-c.km;
+    var oleo=c.proxOleoKm-c.km, falta=semKm(c);
     var quem={}; ts.forEach(function(t){ quem[t.condutor]=(quem[t.condutor]||0)+1; });
 
     h='<h1 style="font-family:var(--mono)">'+esc(c.matricula)+'</h1>'+
       '<p class="sub">'+esc(c.marca+' '+c.modelo+(c.ano?' · '+c.ano:''))+'</p>'+
+      (falta
+        ? '<div class="cartao nota"><h2>À espera do primeiro turno</h2>'+
+          '<p class="p-nota" style="margin-top:5px">O primeiro condutor que levar este '+
+          'carro fotografa o quadrante e escreve os km e o combustível. Aparecem aqui '+
+          'sozinhos, com a fotografia.</p></div>'
+        : c.kmPreenchido ? cartaoPreenchido(c) : '')+
       '<div class="tiles">'+
-      '<div><b class="num">'+nf(c.km)+'</b><span>km no conta-quilómetros</span></div>'+
+      '<div><b class="num">'+(falta?'—':nf(c.km))+'</b><span>km no conta-quilómetros</span></div>'+
       '<div><b class="num">'+nf(cons,2)+'</b><span>litros por 100 km</span></div>'+
       '<div><b class="num">'+nf(cve)+'</b><span>CVE em combustível</span></div>'+
       '<div><b class="num">'+ts.length+'</b><span>turnos · '+nf(km)+' km</span></div></div>';
-    h+='<div class="cartao'+(oleo<=1000?' aviso':'')+'"><h2>Manutenção</h2>'+
+    if(falta) h+='<div class="cartao"><h2>Manutenção</h2><p class="p-nota" style="margin-top:5px">'+
+      'A mudança de óleo conta-se a partir dos km do primeiro turno.</p></div>';
+    else h+='<div class="cartao'+(oleo<=1000?' aviso':'')+'"><h2>Manutenção</h2>'+
       '<div class="linhas" style="margin-top:6px">'+
       '<div><span class="k">Próxima mudança de óleo</span><span class="v">'+
       nf(c.proxOleoKm)+' km</span></div>'+
@@ -4457,6 +4549,7 @@ function pintar(){
     /* o que o utilizador escreveu manda sobre o que está gravado */
     var cp=function(id, seVazio){
       return S.r[id]!=null ? S.r[id] : (seVazio==null?'':seVazio); };
+    var auto=S.r['e-auto']!=null ? S.r['e-auto']==='1' : !!(ec&&ec.kmPorPreencher);
     h='<h1>'+(ec?'Editar viatura':'Nova viatura')+'</h1>'+caixaAviso()+
       '<label class="campo"><span class="lb">Matrícula</span>'+
       '<input type="text" id="e-mat"'+marcado('e-mat')+' value="'+
@@ -4470,16 +4563,30 @@ function pintar(){
       '<label class="campo"><span class="lb">Modelo</span>'+
       '<input type="text" id="e-modelo"'+marcado('e-modelo')+' value="'+esc(cp('e-modelo', ec?ec.modelo:''))+
       '"></label></div>'+
-      '<div class="par"><label class="campo"><span class="lb">Km agora</span>'+
+      '<div class="campo"><span class="lb">Quilómetros e combustível</span><div class="opcoes">'+
+      '<button class="opcao'+(auto?'':' on')+'" data-f="km-modo" data-modo="eu">'+
+        '<span class="bola"></span><span><span class="t1">Escrevo eu agora</span>'+
+        '<span class="t2">Os km que o carro marca hoje.</span></span></button>'+
+      '<button class="opcao'+(auto?' on':'')+'" data-f="km-modo" data-modo="auto">'+
+        '<span class="bola"></span><span><span class="t1">Preencher automaticamente no '+
+        'primeiro turno</span><span class="t2">Não sabe os km? O condutor, ao começar o '+
+        'primeiro turno com este carro, fotografa o quadrante e escreve os km e o '+
+        'combustível. Entram aqui sozinhos, com a fotografia como prova.</span></span></button>'+
+      '</div></div>'+
+      (auto ? '' :
+      '<label class="campo"><span class="lb">Km agora</span>'+
       '<input type="number" inputmode="numeric" id="e-km"'+marcado('e-km')+' value="'+
-      esc(cp('e-km', ec?ec.km:''))+'" placeholder="0"></label>'+
-      '<label class="campo"><span class="lb">Depósito (l)</span>'+
+      esc(cp('e-km', ec&&!semKm(ec)?ec.km:''))+'" placeholder="0"></label>')+
+      '<label class="campo"><span class="lb">Depósito (litros)</span>'+
       '<input type="number" inputmode="numeric" id="e-dep"'+marcado('e-dep')+' value="'+
-      esc(cp('e-dep', ec?ec.deposito:45))+'"></label></div>'+
+      esc(cp('e-dep', ec?ec.deposito:45))+'">'+
+      (auto?'<span class="aj">Quantos litros levam o depósito cheio. Se não souber, deixe 45.</span>':'')+
+      '</label>'+
+      (auto ? '' :
       '<label class="campo"><span class="lb">Óleo a mudar aos</span>'+
       '<input type="number" inputmode="numeric" id="e-oleo"'+marcado('e-oleo')+' value="'+
       esc(cp('e-oleo', ec?ec.proxOleoKm:''))+'" placeholder="0"><span class="aj">A aplicação avisa quando faltarem '+
-      '1.000 km.</span></label>'+
+      '1.000 km.</span></label>')+
       '<button class="bt pri" data-f="guardar-carro">Guardar</button>';
     if(ec) h+='<button class="bt perigo pq" data-f="apagar-carro">Apagar viatura</button>'+
       '<p class="p-nota">Apagar leva os turnos deste carro com ele. Se é só para deixar '+
@@ -5237,13 +5344,21 @@ document.addEventListener('click', function(e){
     if(mat.erro){ S.aviso={campo:'e-mat', d:mat.erro}; pintar(); return; }
     var c=S.sel?carroDe(S.sel):null, eNovo=!c;
     if(!c){ c={id:uid('c'), estado:'ACTIVO'}; S.frota.carros=S.frota.carros.concat([c]); }
+    var auto=S.r['e-auto']!=null ? S.r['e-auto']==='1' : !!c.kmPorPreencher;
     var km=+v('e-km')||0, dep=+v('e-dep')||45;
-    if(!eNovo && km<c.km-1 && !confirm('O conta-quilómetros vai para trás: de '+
+    if(!auto && !eNovo && !semKm(c) && km<c.km-1 && !confirm('O conta-quilómetros vai para trás: de '+
       nf(c.km)+' para '+nf(km)+' km. Tem a certeza?')) return;
     c.matricula=mat.ok || ('Carro '+(S.frota.carros.length));
     c.marca=v('e-marca').trim(); c.modelo=v('e-modelo').trim();
-    c.km=km; c.deposito=dep;
-    c.proxOleoKm=+v('e-oleo')||km+5000;
+    c.deposito=dep;
+    if(auto){
+      /* os km (e o óleo, que se conta a partir deles) vêm do primeiro
+         turno: a base preenche-os quando o condutor abrir o turno */
+      c.kmPorPreencher=true; c.km=0; delete c.proxOleoKm;
+    } else {
+      delete c.kmPorPreencher;
+      c.km=km; c.proxOleoKm=+v('e-oleo')||km+5000;
+    }
     S.r={}; S.aviso=null;
     guardar(); ir('carro', c.id, {ecra:'viaturas'});
   }
@@ -5259,6 +5374,7 @@ document.addEventListener('click', function(e){
     S.frota.carros=S.frota.carros.filter(function(c){ return c.id!==S.sel; });
     guardar(); ir('viaturas');
   }
+  if(f==='km-modo'){ S.r['e-auto']=d.modo==='auto'?'1':'0'; pintar(); return; }
   if(f==='oleo-feito'){
     var co2=carroDe(S.sel); co2.proxOleoKm=co2.km+5000; guardar(); pintar();
   }

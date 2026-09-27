@@ -64,9 +64,12 @@ ok('vazia, sem turnos inventados',
 
 await p.click('[data-f="passo-carro"]'); await p.waitForTimeout(1200);
 await p.fill('#e-mat',MAT); await p.fill('#e-marca','Toyota');
-await p.fill('#e-km','50000'); await p.fill('#e-dep','45');
+/* o patrão não sabe os km: ficam para o primeiro turno */
+await p.click('[data-modo="auto"]'); await p.waitForTimeout(500);
+await p.fill('#e-dep','45');
 await p.click('[data-f="guardar-carro"]');
-ok('junta um carro', await ate(async()=>(await txt()).includes(MAT),15));
+ok('junta um carro, com os km para o primeiro turno',
+   await ate(async()=>(await txt()).includes(MAT) && /À espera do primeiro turno/.test(await txt()),15));
 await p.click('[data-tab="condutores"]'); await p.waitForTimeout(800);
 await p.click('[data-f="novo-cond"]'); await p.waitForTimeout(800);
 await p.fill('#e-nome','Condutor de Prova');
@@ -102,7 +105,10 @@ const lista=await c.evaluate(()=>Nuvem.dados().frota.condutores);
 ok('e os códigos não lhe chegam ao telemóvel',
    lista.length===1 && lista.every(x=>!('codigo' in x)), JSON.stringify(lista));
 await c.locator('[data-carro]').first().click(); await c.waitForTimeout(900);
+ok('o primeiro turno pede os km do carro', /Primeiro turno deste carro/.test(await ctxt()));
 ok('tira a fotografia do quadrante com a câmara dentro da aplicação', await fotografar());
+await c.fill('#i-km','50000'); await c.waitForTimeout(700);
+await c.click('[data-nivel="0.5"]'); await c.waitForTimeout(400);
 await c.click('[data-f="ir-gps"]'); await c.waitForTimeout(2000);
 await c.click('[data-f="comecar-sim"]');
 ok('abre turno', await ate(async()=>c.isVisible('.volante'),20));
@@ -116,6 +122,11 @@ const km0=await p.evaluate(()=>(Nuvem.dados().vivos[0]||{}).kmGps||0);
 const subiu=await ate(async()=>(await p.evaluate(()=>(Nuvem.dados().vivos[0]||{}).kmGps||0))>km0, 60);
 const km1=await p.evaluate(()=>(Nuvem.dados().vivos[0]||{}).kmGps||0);
 ok('e os quilómetros sobem no ecrã do patrão', subiu, km0+' → '+km1);
+
+/* a base verdadeira preencheu o carro sozinha */
+ok('a base preencheu o carro com os km e o combustível do primeiro turno',
+   await ate(()=>p.evaluate(m=>{ const c=Nuvem.dados().frota.carros.filter(x=>x.matricula===m)[0];
+     return c && c.km===50000 && c.combustivel===0.5 && !c.kmPorPreencher; }, MAT), 30));
 
 /* o mapa a sério: ruas de verdade, o carro nele, tocar segue-o */
 ok('o mapa do patrão é o mapa com ruas (e as ruas chegam)',
@@ -151,6 +162,10 @@ ok('o turno fecha', await ate(async()=>/Turno terminado/.test(await ctxt()),20))
 await p.bringToFront();
 ok('e entra no histórico do patrão',
    await ate(async()=>(await p.evaluate(()=>Nuvem.dados().turnos.length))>=1, 60));
+const fechado=await p.evaluate(()=>Nuvem.dados().turnos[0]);
+ok('e o carro fica nos km do fim do turno',
+   await ate(()=>p.evaluate(a=>{ const c=Nuvem.dados().frota.carros.filter(x=>x.matricula===a.m)[0];
+     return c && c.km===a.k; }, {m:MAT, k:fechado.kmFim}), 30), 'fim '+fechado.kmFim);
 
 /* ── e vai-se embora, sem deixar lixo ─────────────────────── */
 await p.click('[data-tab="definicoes"]');
