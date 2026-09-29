@@ -6,9 +6,11 @@ O cliente (Yanick) não programa. Pediu explicitamente:
 
 1. **Sempre que uma conta ou serviço for mencionado, dizer qual o email/conta a usar.**
    Ele gere várias contas e perde-se. Nunca escrever "entra no Vercel" sem dizer com que email.
-2. **Resumo curto no fim de cada resposta**, para não ter de ler tudo.
-3. **Explicar o porquê**, não só o que fazer — ele quer aprender.
-4. Português de Portugal.
+2. **Sempre link direto e clicável**, nunca "vai a Definições → X → Y". Se o link exacto não for
+   conhecido com certeza, dizer isso em vez de inventar um que aterra na página errada.
+3. **Resumo curto no fim de cada resposta**, para não ter de ler tudo.
+4. **Explicar o porquê**, não só o que fazer — ele quer aprender.
+5. Português de Portugal.
 
 ## Que conta usar em cada serviço
 
