@@ -799,3 +799,15 @@ revoke all on public.perfis from anon;
 revoke all on public.frotas from anon;
 revoke insert, update, delete on public.frotas from authenticated;
 revoke insert, update, delete on public.perfis from authenticated;
+
+-- O cofre: o que não pode ir para o GitHub (a chave que assina a
+-- aplicação Android, ver android/LEIA-ME.md). Fechado: sem regras nem
+-- licenças, a aplicação não lhe chega; só o SQL Editor do Supabase o lê.
+-- Os valores nunca se escrevem neste ficheiro.
+create table if not exists public._cofre(
+  nome   text primary key,
+  valor  text not null,
+  quando timestamptz not null default now()
+);
+alter table public._cofre enable row level security;
+revoke all on public._cofre from public, anon, authenticated;

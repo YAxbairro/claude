@@ -1,0 +1,17 @@
+{
+  "appId": "cv.fleetcv.condutor",
+  "appName": "FleetCV",
+  "webDir": "www",
+  "server": {
+    "url": "https://fleetcv.vercel.app/app#condutor",
+    "errorPath": "erro.html",
+    "allowNavigation": ["fleetcv.vercel.app", "fleetcv-up1b.vercel.app"]
+  },
+  "android": {
+    "useLegacyBridge": true,
+    "backgroundColor": "#0B7F8E"
+  },
+  "plugins": {
+    "CapacitorHttp": { "enabled": true }
+  }
+}

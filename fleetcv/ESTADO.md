@@ -106,9 +106,25 @@ Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
   (`pausas`, aviso A32 com 5 min ou mais). Antes de começar, o condutor
   é avisado de que tem de deixar a página no ecrã, e de abrir no Chrome
   se estiver dentro do Instagram/Facebook. `paineis/teste_fora.mjs` (18).
-  **A solução de fundo é uma aplicação Android instalada**, com o GPS a
-  correr em segundo plano (serviço com notificação, como a Uber/Yango):
-  ver "O que falta fazer".
+  **A solução de fundo é a aplicação Android** (a seguir).
+
+- **Aplicação Android do condutor** (30/09): https://fleetcv.vercel.app/android
+  (APK em `/FleetCV.apk`, 3,6 MB, `cv.fleetcv.condutor` 1.0.0). Abre a
+  mesma aplicação do site, mas o GPS vem de um serviço do Android com
+  notificação fixa ("FleetCV · GPS ligado"), que continua com o ecrã
+  apagado e com outras aplicações à frente — como a Uber/Yango. Liga-se
+  ao ir para o ecrã do GPS e desliga-se ao fechar o turno (ou ao recuar
+  sem o abrir). Pede para sair da poupança de bateria (Samsung/Xiaomi
+  matam aplicações em segundo plano) e, sem licença de localização,
+  leva às definições. Os pedidos à base vão pelo lado nativo, que o
+  Android não trava em segundo plano. No navegador de um Android, o
+  ecrã do GPS sugere instalar a aplicação. Como carrega o site, as
+  mudanças no site chegam sem reinstalar. Instala-se à mão (fora da
+  Play Store: "Permitir desta origem"). A chave de assinatura está na
+  tabela fechada `_cofre` do Supabase, nunca no GitHub — ver
+  `android/LEIA-ME.md`. `paineis/teste_app_android.mjs` (21) prova a
+  página com a aplicação imitada; o serviço nativo só se prova num
+  telemóvel verdadeiro (aqui não há emulador).
 
 ## Crescer: quanto aguenta e quando pagar (medido a 27 de Setembro)
 
@@ -172,10 +188,10 @@ ficheiros. Os passos estão em `site/INSTALAR.md`.
 
 | | |
 |---|---|
-| `supabase/provar.sh` | 68 regras + 9 da passagem de uma base antiga, num Postgres a sério. As provas foram postas à prova estragando as regras de propósito |
+| `supabase/provar.sh` | 69 regras + 9 da passagem de uma base antiga, num Postgres a sério. As provas foram postas à prova estragando as regras de propósito |
 | `paineis/teste_contas.mjs` | 40 — o caminho de um cliente novo, do criar conta ao apagar |
 | `paineis/teste_supabase.mjs` | 25 — as regras vistas pela aplicação, a trava, sem rede |
-| o resto dos `teste_*.mjs` | leitor 17, primeiro turno 28, dados 13, câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 33, mapa vivo 24 |
+| o resto dos `teste_*.mjs` | aplicação Android 21, fora da aplicação 18, leitor 17, primeiro turno 28, dados 13, câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 33, mapa vivo 24 |
 
 Os testes que usam o servidor próprio (`teste_clicavel`,
 `teste_formularios`, `teste_servidor`) esperam correr numa pasta com
@@ -183,13 +199,10 @@ Os testes que usam o servidor próprio (`teste_clicavel`,
 
 ## O que falta fazer
 
-0. **Aplicação Android do condutor, com GPS em segundo plano.** Um
-   invólucro (Capacitor) à volta da mesma aplicação, com um serviço de
-   localização que continua com o ecrã apagado (notificação fixa "A
-   FleetCV está a registar o percurso"). O APK pode ser feito nas
-   máquinas grátis do GitHub e instalado à mão, ou publicado na Google
-   Play (conta de programador: 25 USD, uma vez). iPhone depois (Apple:
-   99 USD/ano).
+0. **Provar a aplicação Android num telemóvel verdadeiro** (um turno
+   com o ecrã apagado) e, depois, pô-la na Google Play (conta de
+   programador: 25 USD, uma vez; `android/LEIA-ME.md`). iPhone depois
+   (Apple: 99 USD/ano).
 
 1. **Entrar com o Google.** Ainda não está feito. Primeiro o Yanick
    tem de criar um cliente OAuth na Google Cloud e colá-lo no Supabase
@@ -198,8 +211,8 @@ Os testes que usam o servidor próprio (`teste_clicavel`,
    provar. Até lá, entra-se com e-mail e código.
 2. **Pagamentos automáticos.** A Stripe não trabalha com Cabo Verde;
    Vinti4 por API pede contrato com o banco (SISP). Até lá, à mão.
-3. **Vigiar no piloto:** o ecrã que apaga (o navegador pára de gravar o
-   caminho), e o projecto gratuito do Supabase que adormece ao fim de
+3. **Vigiar no piloto:** o ecrã que apaga no iPhone e no navegador (só
+   a aplicação Android grava com o ecrã apagado), e o projecto gratuito do Supabase que adormece ao fim de
    uns sete dias sem uso.
 4. **Quando crescer:** as fotografias saem da tabela para o armazenamento
    do Supabase, e o tempo real tem tecto no plano gratuito (200 ligações

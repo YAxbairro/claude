@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FleetCV</string>
+    <string name="title_activity_main">FleetCV</string>
+    <string name="package_name">cv.fleetcv.condutor</string>
+    <string name="custom_url_scheme">cv.fleetcv.condutor</string>
+    <!-- a notificação fixa enquanto o turno está aberto (é ela que mantém o GPS) -->
+    <string name="capacitor_background_geolocation_notification_channel_name">Percurso do turno</string>
+    <string name="capacitor_background_geolocation_notification_icon">drawable/ic_percurso</string>
+    <string name="capacitor_background_geolocation_notification_color">#0B7F8E</string>
+</resources>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0B7F8E">
+<meta name="description" content="Instalar a aplicação FleetCV do condutor no Android: o GPS do turno continua com o ecrã apagado.">
+<title>FleetCV para Android</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#EDF0F0; --surface:#FFFFFF; --surface2:#F4F7F7; --line:#D5DCDC;
+  --ink:#0F1618; --muted:#5C6A6C; --accent:#0B7F8E; --accent-ink:#FFFFFF; --accent-wash:#E3F1F3;
+  --warn:#A86A05; --warn-wash:#F8EEDC;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif; --display:'Archivo',var(--sans);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark; --ground:#0B1011; --surface:#141A1B; --surface2:#1A2122; --line:#293233;
+  --ink:#E3E9E8; --muted:#8A9897; --accent:#3FC0CE; --accent-ink:#06191C; --accent-wash:#122E32;
+  --warn:#DCA43C; --warn-wash:#2E2310;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark; --ground:#0B1011; --surface:#141A1B; --surface2:#1A2122; --line:#293233;
+  --ink:#E3E9E8; --muted:#8A9897; --accent:#3FC0CE; --accent-ink:#06191C; --accent-wash:#122E32;
+  --warn:#DCA43C; --warn-wash:#2E2310;
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--ground); color:var(--ink); font:16px/1.5 var(--sans)}
+main{max-width:560px; margin:0 auto; padding:24px 16px 48px}
+.marca{display:flex; align-items:center; gap:10px; font:700 20px var(--display); color:var(--ink); text-decoration:none}
+.marca img{width:36px; height:36px; border-radius:9px}
+h1{font:700 28px/1.15 var(--display); margin:22px 0 8px; text-wrap:balance}
+.sub{color:var(--muted); margin:0 0 20px}
+.baixar{display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:16px;
+  border-radius:14px; background:var(--accent); color:var(--accent-ink); font:700 18px var(--display);
+  text-decoration:none}
+.nota-baixar{font-size:13px; color:var(--muted); text-align:center; margin:8px 0 26px}
+ol{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px; counter-reset:p}
+ol li{counter-increment:p; display:flex; gap:12px; background:var(--surface); border:1px solid var(--line);
+  border-radius:14px; padding:14px}
+ol li::before{content:counter(p); flex:none; width:28px; height:28px; border-radius:50%;
+  background:var(--accent-wash); color:var(--accent); font:700 15px/28px var(--display); text-align:center}
+ol b{display:block; margin-bottom:2px}
+ol span{color:var(--muted); font-size:14.5px}
+.aviso{margin-top:18px; background:var(--warn-wash); color:var(--ink); border-radius:14px; padding:14px; font-size:14.5px}
+.aviso b{color:var(--warn)}
+.volta{display:block; text-align:center; margin-top:22px; color:var(--accent); font-weight:600; text-decoration:none}
+</style>
+<main>
+  <a class="marca" href="/"><img src="/icone.png" alt="">FleetCV</a>
+  <h1>A aplicação do condutor, para Android</h1>
+  <p class="sub">Com a aplicação, o GPS do turno continua com o ecrã apagado e com outras
+    aplicações abertas (chamadas, WhatsApp). No navegador, o telemóvel pára o GPS quando o ecrã
+    se apaga.</p>
+
+  <a class="baixar" href="/FleetCV.apk" download>Descarregar a FleetCV (4 MB)</a>
+  <p class="nota-baixar">Grátis. Para telemóveis Android 6 ou mais recentes.</p>
+
+  <ol>
+    <li><div><b>Descarregue e abra o ficheiro</b>
+      <span>Toque no botão de cima. Quando acabar, toque em "Abrir" (ou procure
+      <i>FleetCV.apk</i> nas Transferências).</span></div></li>
+    <li><div><b>Permita a instalação</b>
+      <span>O Android pergunta se deixa instalar aplicações desta origem. Toque em
+      <b>Definições</b>, ligue <b>Permitir desta origem</b> e volte atrás. Isto acontece porque a
+      FleetCV ainda não está na Play Store.</span></div></li>
+    <li><div><b>Instale e abra</b>
+      <span>Toque em <b>Instalar</b>. Se aparecer um aviso do Play Protect, toque em
+      <b>Mais detalhes → Instalar mesmo assim</b>.</span></div></li>
+    <li><div><b>Entre com o seu e-mail e código</b>
+      <span>Os mesmos que o patrão lhe mandou pelo WhatsApp.</span></div></li>
+    <li><div><b>Diga "Permitir" a tudo o que ela pedir</b>
+      <span>Localização (o melhor é <b>Permitir sempre</b>), notificações e câmara. E quando
+      pedir para sair da <b>poupança de bateria</b>, escolha <b>Permitir</b>.</span></div></li>
+  </ol>
+
+  <p class="aviso"><b>Durante o turno aparece uma notificação fixa da FleetCV.</b> É ela que mantém
+    o GPS a funcionar com o ecrã apagado. Desaparece sozinha quando fechar o turno.</p>
+
+  <a class="volta" href="/app#condutor">Continuar sem a aplicação, no navegador ›</a>
+</main>
+</html>

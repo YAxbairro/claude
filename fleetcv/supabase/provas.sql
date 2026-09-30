@@ -509,3 +509,12 @@ reset role;
 select '68 · com a lista de carros estragada, o turno entra na mesma: ' ||
   case when exists (select 1 from docs where frota='f1' and coleccao='turnos' and id='t-km9')
        then 'entrou (certo)' else 'FICOU DE FORA (MAL)' end;
+
+-- o cofre (a chave da aplicação Android) não se lê de fora, nem por
+-- quem entrou na aplicação
+insert into _cofre(nome, valor) values ('prova','segredo') on conflict (nome) do nothing;
+select '69 · o cofre fechado a quem entrou e a quem não entrou: ' ||
+  case when not has_table_privilege('authenticated','public._cofre','select')
+        and not has_table_privilege('anon','public._cofre','select')
+        and not has_table_privilege('authenticated','public._cofre','insert')
+       then 'fechado (certo)' else 'ABERTO (MAL)' end;
