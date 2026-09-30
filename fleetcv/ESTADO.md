@@ -126,6 +126,25 @@ Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
   página com a aplicação imitada; o serviço nativo só se prova num
   telemóvel verdadeiro (aqui não há emulador).
 
+- **Dados e bateria do telemóvel do condutor** (medido a 30/09, a meio
+  de um turno de 6 h, com o ecrã apagado; `paineis/teste_consumo.mjs`,
+  12). Com o GPS a correr o turno inteiro apareceram quatro gastos que a
+  página no navegador escondia (parava antes): o percurso TODO subia
+  outra vez de 45 em 45 s (103 MB por hora às 6 h de turno — mais de
+  1 GB num dia); guardava-se um ponto por segundo mesmo parado (e os
+  saltinhos do GPS parado somavam km falsos: 127 km em vez de 97);
+  recontavam-se os km do turno inteiro a cada ponto (107 ms de
+  telemóvel por ponto); e o volante desenhava-se com o ecrã apagado.
+  Agora: sobe só o pedaço novo do percurso; fica um ponto a cada 20 m a
+  andar e um de 30 em 30 s parado; os km contam-se aos bocados (0,5 ms
+  por ponto); com o ecrã apagado não se desenha; os turnos fechados
+  guardam-se no telemóvel com o percurso resumido (antes enchiam a
+  memória da página em poucos dias). Fica **~4,5 MB por hora** (metade
+  a andar, metade parado) — ~50 MB num turno de 12 h, quase tudo a
+  posição ao vivo de 1,5 em 1,5 s e os ~2 kB de cabeçalhos de cada
+  envio. A bateria só se mede num telemóvel verdadeiro (Definições →
+  Bateria → utilização por aplicação).
+
 ## Crescer: quanto aguenta e quando pagar (medido a 27 de Setembro)
 
 Contas com os números da base verdadeira (cada ponto do caminho pesa
@@ -191,7 +210,7 @@ ficheiros. Os passos estão em `site/INSTALAR.md`.
 | `supabase/provar.sh` | 69 regras + 9 da passagem de uma base antiga, num Postgres a sério. As provas foram postas à prova estragando as regras de propósito |
 | `paineis/teste_contas.mjs` | 40 — o caminho de um cliente novo, do criar conta ao apagar |
 | `paineis/teste_supabase.mjs` | 25 — as regras vistas pela aplicação, a trava, sem rede |
-| o resto dos `teste_*.mjs` | aplicação Android 21, fora da aplicação 18, leitor 17, primeiro turno 28, dados 13, câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 33, mapa vivo 24 |
+| o resto dos `teste_*.mjs` | consumo 12, aplicação Android 21, fora da aplicação 18, leitor 17, primeiro turno 28, dados 13, câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 33, mapa vivo 24 |
 
 Os testes que usam o servidor próprio (`teste_clicavel`,
 `teste_formularios`, `teste_servidor`) esperam correr numa pasta com

@@ -1670,14 +1670,29 @@ function gravarTurnoNovo(t){
 
 /* O rasto vai aos pedaços: um documento não leva mais do que cabe, e
    assim uma gravação que falha não leva o turno todo à frente. */
+/* Sobe só o pedaço que mudou. Antes subia o percurso TODO de 45 em 45
+   segundos, desde o começo do turno: com a aplicação Android (o GPS o
+   turno inteiro), às 6 horas era 1 MB de cada vez — mais de 100 MB por
+   hora dos dados do condutor. Fica guardado no telemóvel quantos pontos
+   cada pedaço já levou, para não recomeçar do zero se a aplicação
+   reabrir a meio do turno. */
+var subido=null;
 function gravarRasto(id, pts){
   if(!loja||!pts||!pts.length) return Promise.resolve();
-  var partes=[];
-  for(var i=0;i<pts.length;i+=PARTE_MAX)
-    partes.push(pts.slice(i, i+PARTE_MAX));
-  return partes.reduce(function(p, pedaco, n){
+  if(!subido) subido=local('rasto-subido')||{};
+  if(subido.turno!==id) subido={turno:id, partes:{}};
+  var novas=[];
+  for(var i=0, n=0; i<pts.length; i+=PARTE_MAX, n++){
+    var tam=Math.min(PARTE_MAX, pts.length-i);
+    if(subido.partes[n]===tam) continue;
+    subido.partes[n]=tam;
+    novas.push({n:n, pts:pts.slice(i, i+tam)});
+  }
+  if(!novas.length) return Promise.resolve();
+  local('rasto-subido', subido);
+  return novas.reduce(function(p, x){
     return p.then(function(){
-      return naFila('rastos', id+'_'+n, {turno:id, parte:n, pts:pedaco});
+      return naFila('rastos', id+'_'+x.n, {turno:id, parte:x.n, pts:x.pts});
     });
   }, Promise.resolve()).catch(function(){});
 }
@@ -1705,7 +1720,7 @@ var ondeUltima=null, mexeu=true;
 
 function posicao(t, extra, jaa){
   if(!t||!t.id) return;
-  var u=(t.rasto||[])[(t.rasto||[]).length-1];
+  var u=(t.rasto||[])[(t.rasto||[]).length-1], a=extra&&extra.agora;
   pendente = {
     id:t.id, carroId:t.carroId, matricula:t.matricula, condutor:t.condutor,
     condutorId:t.condutorId||null, inicio:t.inicio, fim:null,
@@ -1722,7 +1737,10 @@ function posicao(t, extra, jaa){
     /* o telemóvel pára a página quando o ecrã apaga ou se abre outra
        aplicação: o patrão tem de saber que é isso, e não o carro parado */
     fora: !!t.foraDesde, foraDesde: t.foraDesde||null, pausas: t.pausas||[],
-    lat:u?u[0]:null, lon:u?u[1]:null, precisao:u?u[3]:null, vel:u?u[4]:0,
+    /* onde está agora: o último ponto do GPS, mesmo que não tenha ficado
+       no percurso (parado, só se guarda um de 30 em 30 s) */
+    lat:a?a[0]:(u?u[0]:null), lon:a?a[1]:(u?u[1]:null),
+    precisao:a?a[2]:(u?u[3]:null), vel:a?a[3]:(u?u[4]:0),
     kmGps: extra&&extra.kmGps!=null ? +extra.kmGps.toFixed(2) : null,
     bateria: extra?extra.bateria:null,
     onde: extra?extra.onde:null,
@@ -1734,11 +1752,12 @@ function posicao(t, extra, jaa){
     nPontos: (t.rasto||[]).length,
     momento: Date.now()
   };
-  /* andou mais de uns quatro metros, ou vai com velocidade? então é
-     um carro a mexer-se e vale a pena contá-lo já */
+  /* andou mais de uns treze metros, ou vai com velocidade? então é um
+     carro a mexer-se e vale a pena contá-lo já (parado, o GPS dança uns
+     metros para cá e para lá, e isso não é andar) */
   mexeu = !ondeUltima || pendente.lat==null
-       || Math.abs(pendente.lat-ondeUltima[0])>0.00004
-       || Math.abs(pendente.lon-ondeUltima[1])>0.00004
+       || Math.abs(pendente.lat-ondeUltima[0])>0.00012
+       || Math.abs(pendente.lon-ondeUltima[1])>0.00012
        || (pendente.vel||0) > 3;
   if(!relogioVivo) relogioVivo=setInterval(subir, 500);
   subir(jaa);

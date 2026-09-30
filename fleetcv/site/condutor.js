@@ -41,13 +41,37 @@ function el(id){ return document.getElementById(id); }
 function dist(a,b,c,d){ var R=6371000,g=Math.PI/180;
   return 2*R*Math.asin(Math.sqrt(Math.pow(Math.sin((c-a)*g/2),2)+
     Math.cos(a*g)*Math.cos(c*g)*Math.pow(Math.sin((d-b)*g/2),2))); }
-function kmRasto(p){ var m=0,a=null;
-  for(var i=0;i<(p||[]).length;i++){ var x=p[i];
+/* Os km do percurso. Chamada a cada ponto de GPS e a cada segundo no
+   volante: recontar o turno inteiro de cada vez era, às 6 horas de
+   turno, mais de 100 ms de telemóvel por ponto (bateria). Continua-se
+   de onde se ficou, enquanto for o mesmo percurso a crescer. */
+var kmFeito={p:null, n:0, m:0, a:null};
+function kmRasto(p){ p=p||[];
+  var c=kmFeito;
+  if(c.p!==p || p.length<c.n){ c={p:p, n:0, m:0, a:null}; kmFeito=c; }
+  for(var i=c.n;i<p.length;i++){ var x=p[i];
     if(x[3]!=null&&x[3]>LIM.precisaoMax) continue;
-    if(a){ var s=(x[2]-a[2])/1000, d=dist(a[0],a[1],x[0],x[1]);
-      if(s>0&&(d/s)*3.6<=LIM.velMax) m+=d; }
-    a=x; }
-  return m/1000; }
+    if(c.a){ var s=(x[2]-c.a[2])/1000, d=dist(c.a[0],c.a[1],x[0],x[1]);
+      if(s>0&&(d/s)*3.6<=LIM.velMax) c.m+=d; }
+    c.a=x; }
+  c.n=p.length;
+  return c.m/1000; }
+/* Que pontos do GPS ficam no percurso. Com a aplicação, o GPS dá um
+   ponto por segundo o turno inteiro: eram 43 mil pontos num dia de 12 h,
+   e parado os saltinhos do GPS (uns metros para cá e para lá) somavam
+   km que o carro não fez. Fica o ponto quando o carro andou 20 m (ou
+   mais do que o erro do GPS nesse ponto), e parado, um de 30 em 30 s. */
+var PASSO_M=20, PASSO_MS=30000;
+function guardarPonto(t, x){
+  var u=t.rasto[t.rasto.length-1];
+  if(u && x[2]-u[2]<PASSO_MS && dist(u[0],u[1],x[0],x[1])<Math.max(PASSO_M, x[3]||0)) return false;
+  t.rasto.push(x); return true;
+}
+/* o que vai com a posição ao vivo */
+function extraVivo(){
+  return {kmGps:kmRasto(S.turno.rasto), bateria:S.bateria, onde:ondeEstou(),
+          agora:S.simular?null:S.gps.agora};
+}
 /* Guarda-se sempre no próprio telemóvel — é o que segura o turno se
    a rede cair ou a bateria acabar — e a nuvem leva-o ao patrão. */
 function androide(){ return /Android/i.test(navigator.userAgent||''); }
@@ -67,12 +91,25 @@ function dentroDeOutraApp(){
 /* um carro cujos km o patrão deixou para o primeiro turno (ou em 0) */
 function semKm(c){ return !!c && (c.kmPorPreencher===true || !(c.km>0)); }
 
+/* Os turnos fechados ficam no telemóvel para o condutor os rever, mas
+   com o percurso inteiro (milhares de pontos cada) enchiam a memória da
+   página em poucos dias — e aí nem o turno aberto se conseguia guardar.
+   Tirando o último, guardam-se com o percurso resumido, que chega para
+   o mapinha; os km do GPS ficaram contados no fecho (kmGps). */
+function resumido(t){
+  var r=t.rasto||[];
+  if(r.length<=400) return t;
+  var passo=Math.ceil(r.length/400), p=[];
+  for(var i=0;i<r.length;i+=passo) p.push(r[i]);
+  if(p[p.length-1]!==r[r.length-1]) p.push(r[r.length-1]);
+  return Object.assign({}, t, {rasto:p, rastoResumido:true,
+    kmGps: t.kmGps!=null ? t.kmGps : +kmRasto(r).toFixed(1)});
+}
 function guardar(){
   Nuvem.local('condutor', {eu:S.eu&&S.eu.id, carro:S.carro&&S.carro.id,
-    turno:S.turno, turnos:S.turnos.slice(0,20)});
+    turno:S.turno, turnos:S.turnos.slice(0,20).map(function(t,i){ return i?resumido(t):t; })});
   if(S.turno&&!S.turno.fim)
-    Nuvem.posicao(S.turno, {kmGps:kmRasto(S.turno.rasto), bateria:S.bateria,
-      onde:ondeEstou()});
+    Nuvem.posicao(S.turno, extraVivo());
 }
 function carregar(){ return Nuvem.local('condutor'); }
 /* O passo a meio (os km escritos, a fotografia tirada) guarda-se aqui.
@@ -221,13 +258,14 @@ function aceitarGps(pos){
   var kmh = doTelemovel ? c.speed*3.6 : calcVel(pos);
   S.gps.velAlvo = doTelemovel ? kmh
                 : (S.gps.velAlvo||0)*0.35 + kmh*0.65;
-  if(S.turno&&!S.turno.fim&&c.accuracy<=120)
-    S.turno.rasto.push([+c.latitude.toFixed(6), +c.longitude.toFixed(6),
-      pos.timestamp, Math.round(c.accuracy), Math.round(kmh)]);
+  if(c.accuracy<=120){
+    var x=[+c.latitude.toFixed(6), +c.longitude.toFixed(6),
+      pos.timestamp, Math.round(c.accuracy), Math.round(kmh)];
+    S.gps.agora=[x[0], x[1], x[3], x[4]];
+    if(S.turno&&!S.turno.fim) guardarPonto(S.turno, x);
+  }
   S.ultimaPos=[c.latitude, c.longitude];
-  if(S.turno&&!S.turno.fim)
-    Nuvem.posicao(S.turno, {kmGps:kmRasto(S.turno.rasto), bateria:S.bateria,
-      onde:ondeEstou()});
+  if(S.turno&&!S.turno.fim) Nuvem.posicao(S.turno, extraVivo());
   if(S.ecra==='gps'&&antes!=='ligado') pintar();
   else if(S.ecra==='volante') pintar(); else pintarTopo();
 }
@@ -300,8 +338,7 @@ function simular(){
       S.gps.velAlvo=vel; S.ultimaPos=[p[0],p[1]]; n++;
     }
     S.gps.estado='ligado'; S.gps.precisao=8;
-    Nuvem.posicao(S.turno, {kmGps:kmRasto(S.turno.rasto), bateria:S.bateria,
-      onde:ondeEstou()});
+    Nuvem.posicao(S.turno, extraVivo());
     if(S.ecra==='volante') pintar();
   }, 420);
 }
@@ -349,7 +386,7 @@ function lerFoto(f,cb){
 
 /* ─── contas do turno ────────────────────────────────────── */
 function contas(t){
-  var v=[], kmQ=t.kmFim-t.kmInicio, kmG=kmRasto(t.rasto), dif=0;
+  var v=[], kmQ=t.kmFim-t.kmInicio, kmG=t.rastoResumido?(t.kmGps||0):kmRasto(t.rasto), dif=0;
   v.push({ok:true, t1:'Quilometragem registada',
     t2:nf(t.kmInicio)+' → '+nf(t.kmFim), vl:nf(kmQ)+' km'});
   if(t.gap>LIM.gapKm){
@@ -405,6 +442,7 @@ function mapa(rasto, seguir){
    mexendo só esses dois pedaços do ecrã — redesenhar o mapa inteiro a
    este ritmo punha um telemóvel barato de joelhos. */
 function pulsarVel(){
+  if(document.hidden) return;
   var alvo=S.gps.velAlvo||0;
   S.gps.vel += (alvo - S.gps.vel)*0.28;
   if(Math.abs(alvo-S.gps.vel)<0.25) S.gps.vel=alvo;
@@ -618,6 +656,7 @@ document.addEventListener('focusout', function(){
 });
 
 function pintarTopo(){
+  if(document.hidden) return;
   var p=[];
   if(S.ecra!=='entrar'){
     var r={ligado:'GPS ligado','a-procurar':'a procurar',recusado:'sem GPS',
@@ -646,6 +685,10 @@ function pintar(){
   /* O GPS da aplicação (com a notificação) só vive no passo do GPS e
      durante o turno: recuar dali, por qualquer botão, desliga-o. */
   if(vigiaNativa!=null && S.ecra!=='gps' && (!S.turno || S.turno.fim)) desligarGpsNativo();
+  /* com o ecrã apagado (a aplicação continua a gravar) ninguém vê o
+     volante: desenhá-lo a cada ponto era gastar bateria. Desenha-se ao
+     voltar. */
+  if(document.hidden && S.ecra==='volante') return;
 
   if(S.ecra==='entrar'){
     h='<div style="height:10px"></div>'+
@@ -1109,8 +1152,7 @@ document.addEventListener('click', function(e){
     if(!confirm('Apagar o abastecimento de '+nf(aa.valor)+' CVE?')) return;
     S.turno.abast.splice(ia,1);
     S.turno.totalCve=S.turno.abast.reduce(function(s,x){ return s+x.valor; },0);
-    Nuvem.posicao(S.turno, {kmGps:kmRasto(S.turno.rasto), bateria:S.bateria,
-      onde:ondeEstou()}, true);
+    Nuvem.posicao(S.turno, extraVivo(), true);
     guardar(); pintar(); return; }
 
   var f=d.f;
@@ -1173,8 +1215,7 @@ document.addEventListener('click', function(e){
        telemóvel morrer antes do fim a prova não se perde */
     if(S.foto) Nuvem.enviarFoto(chaveAb, S.turno.id, S.foto);
     S.foto=null; S.r={};
-    Nuvem.posicao(S.turno, {kmGps:kmRasto(S.turno.rasto), bateria:S.bateria,
-      onde:ondeEstou()}, true);
+    Nuvem.posicao(S.turno, extraVivo(), true);
     guardar(); S.ecra='volante'; pintar();
   }
   if(f==='ir-fim'){ S.foto=null; S.r={}; S.ocr=null; leitor.auto=null; S.ecra='km-fim'; pintar(); }
@@ -1209,7 +1250,7 @@ function saiu(){
   /* na aplicação Android o GPS continua com o ecrã apagado: não saiu */
   if(vigiaNativa!=null) return;
   S.turno.foraDesde=Date.now(); guardar();
-  Nuvem.posicao(S.turno, {kmGps:kmRasto(S.turno.rasto), bateria:S.bateria, onde:ondeEstou()}, true);
+  Nuvem.posicao(S.turno, extraVivo(), true);
 }
 function voltou(){
   if(!S.turno || S.turno.fim || !S.turno.foraDesde) return;
@@ -1217,10 +1258,11 @@ function voltou(){
   delete S.turno.foraDesde;
   if(m>60000){ (S.turno.pausas=S.turno.pausas||[]).push({de:de, ate:Date.now()}); S.avisoFora=m; }
   guardar();
-  Nuvem.posicao(S.turno, {kmGps:kmRasto(S.turno.rasto), bateria:S.bateria, onde:ondeEstou()}, true);
+  Nuvem.posicao(S.turno, extraVivo(), true);
   segurarEcra(); pintar();
 }
-document.addEventListener('visibilitychange', function(){ if(document.hidden) saiu(); else voltou(); });
+document.addEventListener('visibilitychange', function(){
+  if(document.hidden) saiu(); else { voltou(); if(S.ecra==='volante') pintar(); } });
 window.addEventListener('pagehide', saiu);
 
 function comecar(sim){
