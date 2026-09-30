@@ -92,6 +92,24 @@ Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
   descarrega ~19 MB do jsDelivr uma vez só (guardado um ano); com a
   poupança de dados ligada, não lê. `paineis/teste_leitor.mjs` (17).
 
+- **Uma página não corre em segundo plano** (teste de 30/09). O
+  telemóvel do condutor (Samsung Internet) mandou posições 10 segundos
+  e calou-se: os registos do Supabase mostram o último pedido às 09:15
+  e nada depois. Com o ecrã apagado ou outra aplicação à frente, o
+  Android pára a página e o GPS com ela — é assim com qualquer site. O
+  mapa do patrão mostrava o carro parado com a última velocidade.
+  Agora: no instante em que a página sai do ecrã avisa a base
+  (`fora`/`foraDesde` no documento ao vivo) e o patrão lê "O condutor
+  saiu da aplicação há X min"; calado há mais de 45 s, o carro fica
+  cinzento, sem velocidade, com "Sem sinal há X min"; o condutor, ao
+  voltar, vê quanto tempo o GPS parou; as saídas ficam no turno
+  (`pausas`, aviso A32 com 5 min ou mais). Antes de começar, o condutor
+  é avisado de que tem de deixar a página no ecrã, e de abrir no Chrome
+  se estiver dentro do Instagram/Facebook. `paineis/teste_fora.mjs` (18).
+  **A solução de fundo é uma aplicação Android instalada**, com o GPS a
+  correr em segundo plano (serviço com notificação, como a Uber/Yango):
+  ver "O que falta fazer".
+
 ## Crescer: quanto aguenta e quando pagar (medido a 27 de Setembro)
 
 Contas com os números da base verdadeira (cada ponto do caminho pesa
@@ -164,6 +182,14 @@ Os testes que usam o servidor próprio (`teste_clicavel`,
 `servidor/` ao lado e `servidor/fleetcv.html`.
 
 ## O que falta fazer
+
+0. **Aplicação Android do condutor, com GPS em segundo plano.** Um
+   invólucro (Capacitor) à volta da mesma aplicação, com um serviço de
+   localização que continua com o ecrã apagado (notificação fixa "A
+   FleetCV está a registar o percurso"). O APK pode ser feito nas
+   máquinas grátis do GitHub e instalado à mão, ou publicado na Google
+   Play (conta de programador: 25 USD, uma vez). iPhone depois (Apple:
+   99 USD/ano).
 
 1. **Entrar com o Google.** Ainda não está feito. Primeiro o Yanick
    tem de criar um cliente OAuth na Google Cloud e colá-lo no Supabase

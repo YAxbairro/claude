@@ -212,6 +212,17 @@ function avaliar(t){
       t2:nf(t.kmInicio)+' → '+nf(t.kmFim), vl:nf(kmQ)+' km'});
     if(!t.fotos) al.push({c:'A11',n:'AVISO',d:'Turno sem foto do conta-quilómetros'});
   }
+  /* Saídas da aplicação a meio do turno: o GPS esteve parado. Uma é
+     distracção; muitas, ou longas, são um caminho que não se vê. */
+  var pausas=(t.pausas||[]).filter(function(p){ return p.ate>p.de; });
+  if(pausas.length){
+    var foraMin=Math.round(pausas.reduce(function(s,p){ return s+(p.ate-p.de); },0)/60000);
+    v.push({ok:foraMin<5, t1:'A aplicação esteve aberta o turno todo',
+      t2:'saiu '+pausas.length+(pausas.length===1?' vez':' vezes')+' · '+foraMin+' min sem GPS',
+      vl:foraMin+' min'});
+    if(foraMin>=5) al.push({c:'A32',n:'AVISO',d:'O condutor saiu da aplicação '+pausas.length+
+      (pausas.length===1?' vez':' vezes')+' — '+foraMin+' min sem GPS'});
+  }
   /* O telemóvel leu os números na fotografia (PaddleOCR, no próprio
      telemóvel). Quando o que o condutor escreveu não bate, avisa-se —
      aviso e não alerta: o leitor também se engana, raramente. */
@@ -539,7 +550,7 @@ function carrosDaFrota(){
         a=r[Math.max(0,r.length-4)]||u;
     return {id:t.id, lat:u[0], lon:u[1], rotulo:t.matricula, rasto:r,
       ang:Math.atan2((u[1]-a[1])*Math.cos(u[0]*Math.PI/180), u[0]-a[0])*180/Math.PI,
-      cor: t.aSerio===false ? 'var(--muted)'
+      cor: (t.aSerio===false || semSinal(t)) ? 'var(--muted)'
          : (porResolver(t).length?'var(--warn)':'var(--ok)')}; });
 }
 function mapaFrota(){
@@ -567,11 +578,22 @@ function haQuanto(ms){
   if(s<3600) return 'há '+Math.round(s/60)+' min';
   return 'há '+nf(s/3600,1)+' h';
 }
+function semSinal(t){ return !!t.fora || Date.now()-(t.momento||t.inicio)>45000; }
+/* Porque é que o carro não se mexe no mapa: o telemóvel do condutor
+   deixou de mandar. Quando ele saiu da aplicação, sabe-se a hora. */
+function semSinalTexto(t){
+  if(t.fora && t.foraDesde)
+    return '<b>O condutor saiu da aplicação '+haQuanto(t.foraDesde)+'.</b> Com o ecrã apagado '+
+      'ou outra aplicação aberta, o telemóvel pára o GPS. O carro aparece onde estava nessa hora.';
+  return '<b>Sem sinal '+haQuanto(t.momento||t.inicio)+'.</b> O telemóvel do condutor deixou de '+
+    'mandar a posição: ecrã apagado, aplicação fechada, sem rede ou sem bateria. O carro aparece '+
+    'onde estava nessa hora.';
+}
 function faixaDoCarro(t){
   var r=t.rasto||[], u=r[r.length-1];
   var onde=u?bairroDe(u[0],u[1]):null;
   var vel=u&&u[4]!=null?u[4]:0;
-  var calado=Date.now()-(t.momento||t.inicio), parado=calado>300000;
+  var calado=Date.now()-(t.momento||t.inicio), parado=calado>45000 || !!t.fora;
   var mapaVivo=window.MapaVivo && MapaVivo.pronto();
   return '<div class="faixa">'+
     '<div class="faixa-topo"><span><span class="ponto"></span>'+
@@ -585,6 +607,7 @@ function faixaDoCarro(t){
       'última posição <span id="faixa-ha"'+(parado?' style="color:var(--warn)"':'')+'>'+
       haQuanto(t.momento||t.inicio)+'</span>'+
       (u&&u[3]!=null?' · GPS '+nf(u[3])+' m':'')+'</p>'+
+    (parado ? '<p class="p-nota faixa-fora">'+semSinalTexto(t)+'</p>' : '')+
     (mapaVivo && S.largou ? '<button class="bt pri pq" data-f="seguir-de-novo">'+
       '◎ Voltar a seguir o '+esc(t.matricula)+'</button>' : '')+
     '<div class="par" style="margin-top:8px">'+
@@ -608,7 +631,7 @@ function cartaoDoCarro(t){
   var carro=carroDe(t.carroId);
   var vel=u&&u[4]!=null?u[4]:0;
   var calado = Date.now()-(t.momento||t.inicio);
-  var parado = calado>300000;
+  var parado = calado>45000 || !!t.fora;
   var alertas=porResolver(t);
 
   var linha=function(bom, t1, t2, vl, extra){
@@ -1906,9 +1929,17 @@ Nuvem.arrancar({
   exemplos: function(f){ return turnosDeExemplo(f); }
 });
 pintar();
+var sinalVisto={};
 tic=setInterval(function(){
   if(S.ecra==='mapa' && S.cartao){
     var fh=document.getElementById('faixa-ha'), tv=turnoVivo(S.cartao);
     if(fh && tv) fh.textContent=haQuanto(tv.momento||tv.inicio); }
+  /* um carro que deixou de mandar a posição muda de cor e de faixa sem
+     esperar por novidades (que, justamente, deixaram de chegar) */
+  if(S.ecra==='mapa'){
+    var mudou=false;
+    emTurno().forEach(function(t){ var ss=semSinal(t);
+      if(sinalVisto[t.id]!==undefined && sinalVisto[t.id]!==ss) mudou=true; sinalVisto[t.id]=ss; });
+    if(mudou) pintarSePuder(); }
   if(S.ecra==='turno'&&turnoVivo(S.sel)) pintar(); }, 1000);
 }

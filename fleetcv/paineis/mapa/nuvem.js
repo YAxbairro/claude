@@ -838,6 +838,8 @@ function escutar(){
         t.aoVivo=true;
         t.calado=Math.max(0, agora-t.momento);
         t.aSerio=t.calado<=600000;      /* mesmo a andar agora */
+        /* parado, o telemóvel manda de 12 em 12 s: 45 s calado já é sem sinal */
+        t.semSinal=!!t.fora || t.calado>45000;
         return t; });
     avisar(); }, erro));
 
@@ -1018,6 +1020,9 @@ function posicao(t, extra, jaa){
               chaveFoto:a.chaveFoto||null}; }),
     temFotoInicio: !!t.fotoInicio || !!t.temFotoInicio,
     kmLidoInicio: t.kmLidoInicio||null,
+    /* o telemóvel pára a página quando o ecrã apaga ou se abre outra
+       aplicação: o patrão tem de saber que é isso, e não o carro parado */
+    fora: !!t.foraDesde, foraDesde: t.foraDesde||null, pausas: t.pausas||[],
     lat:u?u[0]:null, lon:u?u[1]:null, precisao:u?u[3]:null, vel:u?u[4]:0,
     kmGps: extra&&extra.kmGps!=null ? +extra.kmGps.toFixed(2) : null,
     bateria: extra?extra.bateria:null,
@@ -1043,6 +1048,9 @@ function posicao(t, extra, jaa){
 function subir(jaa){
   if(!loja||!pendente||aEscrever) return;
   var agora=Date.now();
+  /* o relógio do telemóvel andou para trás (acerto da hora pela rede):
+     sem isto, as posições deixavam de subir até ele lá voltar */
+  if(ultimaSubida>agora) ultimaSubida=0;
   var espera = mexeu ? ritmo : Math.max(ritmo, RITMO_PARADO);
   if(!jaa && agora-ultimaSubida < espera) return;
   var p=pendente; pendente=null; ultimaSubida=agora; aEscrever=true;
