@@ -87,7 +87,7 @@ ok('O CARRO A ANDAR atravessa o servidor',
 /* tocar no carro segue-o no mapa, com uma faixa curta por baixo; o
    turno completo abre-se a partir dela */
 await aoVivo.click(); await patrao.waitForTimeout(900);
-await patrao.locator('.faixa [data-turno]').click(); await patrao.waitForTimeout(900);
+await patrao.locator('.faixa [data-f="detalhes"]').click(); await patrao.waitForTimeout(900);
 ok('o patrão vê o percurso no mapa da Praia', await patrao.isVisible('.mapa'));
 
 /* ── ABASTECER ───────────────────────────────────────────── */

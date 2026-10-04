@@ -518,3 +518,29 @@ select '69 · o cofre fechado a quem entrou e a quem não entrou: ' ||
         and not has_table_privilege('anon','public._cofre','select')
         and not has_table_privilege('authenticated','public._cofre','insert')
        then 'fechado (certo)' else 'ABERTO (MAL)' end;
+
+-- ─── o registo de erros ──────────────────────────────────────
+call quem('22222222-2222-2222-2222-222222222222');      -- o António, condutor da f1
+set role authenticated;
+insert into erros(tipo, onde, mensagem, detalhe)
+  values ('aviso', 'gps-parou', '312 s com o ecrã apagado', '{"bateriaPresa":true}'::jsonb);
+reset role;
+select '70 · o telemóvel escreve no registo de erros, e a base põe a frota e quem é: ' ||
+  case when exists (select 1 from erros where onde='gps-parou' and frota='f1'
+                     and quem='22222222-2222-2222-2222-222222222222'::uuid)
+       then 'escreveu (certo)' else 'NÃO ESCREVEU (MAL)' end;
+select '71 · mas não o lê, e quem não entrou nem escreve: ' ||
+  case when not has_table_privilege('authenticated','public.erros','select')
+        and not has_table_privilege('anon','public.erros','insert')
+       then 'fechado (certo)' else 'ABERTO (MAL)' end;
+select '72 · e não pode dizer que é outro, nem de outra frota: ' ||
+  case when not has_column_privilege('authenticated','public.erros','quem','insert')
+        and not has_column_privilege('authenticated','public.erros','frota','insert')
+       then 'não pode (certo)' else 'PODE (MAL)' end;
+set role authenticated;
+insert into erros(tipo, onde, mensagem) select 'erro', 'em-ciclo', 'repete '||g from generate_series(1,150) g;
+reset role;
+select '73 · um erro em ciclo não enche a base (120 por hora, no máximo): ' ||
+  case when (select count(*) from erros where quem='22222222-2222-2222-2222-222222222222'::uuid) <= 120
+       then 'parou nos '||(select count(*) from erros where quem='22222222-2222-2222-2222-222222222222'::uuid)||' (certo)'
+       else 'NÃO PAROU (MAL)' end;

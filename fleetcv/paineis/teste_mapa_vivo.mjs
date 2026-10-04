@@ -121,15 +121,36 @@ ok('"Mais detalhes" abre o cartão com tudo', await p.isVisible('.carro-cx'));
 await p.click('[data-f="detalhes"]'); await p.waitForTimeout(400);
 ok('e fecha-se outra vez', !(await p.isVisible('.carro-cx')));
 
-/* ── o turno todo, ao vivo, no mapa a sério ───────────────── */
-await p.click('.faixa [data-turno]'); await p.waitForTimeout(1500);
-ok('o turno ao vivo também é no mapa a sério',
-   await p.isVisible('#lugar-mapa-turno .leaflet-container'));
+/* ── um carro em turno vê-se num ecrã só ──────────────────
+   (no teste de 02/10 havia dois mapas: este, com a velocidade, e o do
+   "turno todo", com o percurso — o patrão não sabia qual usar) */
+await p.click('.faixa [data-f="detalhes"]'); await p.waitForTimeout(1500);
+ok('os detalhes abrem por baixo do mesmo mapa (não há um segundo mapa)',
+   await p.isVisible('#lugar-mapa-frota .leaflet-container') && !(await p.isVisible('#lugar-mapa-turno')) &&
+   /Começou às/.test(await p.textContent('#ecra')));
 ok('com o caminho desenhado',
-   (await p.locator('#lugar-mapa-turno path.leaflet-interactive').count())>=1);
+   (await p.locator('#lugar-mapa-frota path.leaflet-interactive').count())>=1);
 ok('e o carro seguido ao meio', (await perto())<60, Math.round(await perto())+' px do meio');
-await p.click('#voltar'); await p.waitForTimeout(800);
-ok('ao voltar, o mapa da frota ainda segue o mesmo carro', await p.isVisible('.faixa'));
+/* um abastecimento, tocado nos detalhes, mostra-se no mesmo mapa */
+await c.click('[data-f="ir-abast"]'); await c.waitForTimeout(500);
+await c.fill('#i-valor','1500'); await c.waitForTimeout(300);
+await c.click('[data-f="guardar-abast"]'); await c.waitForTimeout(2500);
+await p.bringToFront();
+await esperar(()=>p.isVisible('[data-ver-abast]'), 8000);
+await p.click('[data-ver-abast]'); await p.waitForTimeout(900);
+ok('tocar num abastecimento mostra no mapa onde foi (e deixa de seguir o carro)',
+   /Abasteceu aqui · 1\.500 CVE/.test(await p.textContent('#lugar-mapa-frota')) &&
+   await p.isVisible('[data-f="seguir-de-novo"]'));
+await p.click('[data-f="seguir-de-novo"]'); await p.waitForTimeout(900);
+ok('e "voltar a seguir" volta ao carro, sem a marca', !/Abasteceu aqui/.test(await p.textContent('#lugar-mapa-frota')));
+/* um "ver o turno todo" de um carro em turno (como nos alertas) */
+await p.click('[data-tab="viaturas"]'); await p.waitForTimeout(500);
+const idVivo=await p.evaluate(()=>JSON.parse(localStorage.getItem('fleetcv-condutor')).turno.id);
+await p.evaluate(id=>{ const b=document.createElement('button'); b.dataset.turno=id; b.textContent='ver';
+  document.getElementById('ecra').appendChild(b); b.click(); }, idVivo);
+await p.waitForTimeout(1200);
+ok('o "turno todo" de um carro em turno traz para este mesmo ecrã', await p.isVisible('.faixa') &&
+   !(await p.isVisible('#lugar-mapa-turno')));
 await p.click('[data-f="parar-seguir"]'); await p.waitForTimeout(700);
 ok('o × deixa de seguir', !(await p.isVisible('.faixa')));
 

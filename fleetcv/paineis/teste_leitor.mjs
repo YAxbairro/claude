@@ -120,7 +120,7 @@ await p.goto(U+'#dono'); await p.waitForTimeout(1500);
 await p.fill('#i-email','patrao@exemplo.cv'); await p.fill('#i-cod','9999');
 await p.click('[data-f="entrar"]'); await p.waitForTimeout(2500);
 await p.locator('[data-vivo]').first().click(); await p.waitForTimeout(700);
-await p.click('.faixa [data-turno]'); await p.waitForTimeout(1500);
+await p.click('.faixa [data-f="detalhes"]'); await p.waitForTimeout(1500);
 ok('durante o turno, o patrão vê na fotografia que o número não bate',
    await esperar(async()=>/Quadrante ao começar · 120\.070 km · a foto mostra 120\.050/.test(await p.textContent('#ecra')), 10000));
 
@@ -143,6 +143,9 @@ await c.fill('#i-kmf','120120'); await c.waitForTimeout(500);
 await c.click('[data-f="terminar"]'); await c.waitForTimeout(1500);
 ok('o turno fecha', /Turno terminado/.test(await txt()));
 await p.bringToFront();
+ok('o carro que o patrão seguia acabou o turno: as contas estão a um toque',
+   await esperar(()=>p.isVisible('.acabou [data-turno]'), 15000));
+await p.click('.acabou [data-turno]'); await p.waitForTimeout(1500);
 ok('e nas contas do turno, o patrão vê o aviso: o número escrito não bate com a fotografia',
    await esperar(async()=>/escreveu 120\.070, a fotografia mostra 120\.050/.test(await p.textContent('#ecra')), 15000));
 

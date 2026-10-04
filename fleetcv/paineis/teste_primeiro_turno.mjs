@@ -136,8 +136,9 @@ ok('e propõe os km onde o outro acabou, sem alerta de km a mais',
 
 /* ── escrever os km à mão continua como era ───────────────── */
 await p.bringToFront();
-await p.click('#voltar'); await p.waitForTimeout(400);
-await p.click('#voltar').catch(()=>{}); await p.waitForTimeout(400);
+/* (o turno a decorrer abre no mapa, com os detalhes — pode já não haver "Voltar") */
+if(await p.isVisible('#voltar')){ await p.click('#voltar'); await p.waitForTimeout(400); }
+if(await p.isVisible('#voltar')){ await p.click('#voltar'); await p.waitForTimeout(400); }
 await p.click('[data-tab="viaturas"]'); await p.waitForTimeout(400);
 await p.click('[data-f="novo-carro"]'); await p.waitForTimeout(400);
 ok('"Escrevo eu agora" vem escolhido por omissão, com o campo dos km',

@@ -23,12 +23,64 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 @CapacitorPlugin(name = "Bateria")
 public class BateriaPlugin extends Plugin {
 
+    private PowerManager.WakeLock trava;
+
     @PluginMethod
     public void estado(PluginCall call) {
         JSObject r = new JSObject();
         r.put("semRestricoes", livre());
         r.put("fabricante", Build.MANUFACTURER);
+        r.put("modelo", Build.MODEL);
+        r.put("android", Build.VERSION.RELEASE);
+        r.put("versao", versao());
         call.resolve(r);
+    }
+
+    /**
+     * Durante o turno, o telemóvel não adormece por baixo do GPS. No teste
+     * de 02/10 (Samsung A24, Android 16) o GPS parava 4 a 9 minutos de cada
+     * vez que o ecrã apagava. Com a FleetCV livre da poupança de bateria,
+     * o Android respeita esta trava; no máximo 16 horas, para um turno
+     * esquecido aberto não gastar a bateria até ao fim.
+     */
+    @PluginMethod
+    public void segurar(PluginCall call) {
+        try {
+            if (trava == null) {
+                PowerManager pm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
+                trava = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "FleetCV:turno");
+                trava.setReferenceCounted(false);
+            }
+            if (!trava.isHeld()) trava.acquire(16L * 60 * 60 * 1000);
+        } catch (Exception ignored) { }
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void largar(PluginCall call) {
+        soltar();
+        call.resolve();
+    }
+
+    @Override
+    protected void handleOnDestroy() {
+        soltar();
+        super.handleOnDestroy();
+    }
+
+    private void soltar() {
+        try {
+            if (trava != null && trava.isHeld()) trava.release();
+        } catch (Exception ignored) { }
+    }
+
+    private String versao() {
+        try {
+            return getContext().getPackageManager()
+                .getPackageInfo(getContext().getPackageName(), 0).versionName;
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     @SuppressLint("BatteryLife")

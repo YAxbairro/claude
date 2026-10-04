@@ -74,9 +74,9 @@ ok('e diz em que bairro vai', /desde as/.test(await aoVivo.textContent()),
 /* tocar no carro segue-o no mapa, com uma faixa curta por baixo; o
    turno completo abre-se a partir dela */
 await aoVivo.click(); await patrao.waitForTimeout(900);
-await patrao.locator('.faixa [data-turno]').click(); await patrao.waitForTimeout(900);
-ok('o patrão abre o turno a decorrer',
-   (await patrao.textContent('#ecra')).includes('Em turno agora'));
+await patrao.locator('.faixa [data-f="detalhes"]').click(); await patrao.waitForTimeout(900);
+ok('o patrão abre o turno a decorrer (no mapa, com os detalhes)',
+   (await patrao.textContent('#ecra')).includes('Começou às'));
 ok('com o carro no mapa da Praia', await patrao.isVisible('.mapa'));
 await patrao.screenshot({path:'r1-patrao-ao-vivo.png', animations:'allow', timeout:8000}).catch(()=>console.log('  (sem foto de '+'r1-patrao-ao-vivo.png'+')'));
 

@@ -76,11 +76,22 @@ function extraVivo(){
    a rede cair ou a bateria acabar — e a nuvem leva-o ao patrão. */
 function androide(){ return /Android/i.test(navigator.userAgent||''); }
 function cartaoBateria(){
-  return '<div class="cartao aviso"><h2>Tire a FleetCV da poupança de bateria</h2>'+
-    '<p class="p-nota" style="margin-top:4px">Neste telemóvel a poupança de bateria pode fechar a '+
-    'FleetCV a meio do turno, e o GPS pára. Toque em baixo e escolha <b>Permitir</b> '+
-    '(ou "Sem restrições").</p>'+
-    '<button class="bt sec pq" data-f="bateria" style="margin-top:8px">Tirar da poupança de bateria</button></div>';
+  var fab=(S.app&&S.app.fabricante)||'';
+  return '<div class="cartao mau"><h2>Falta um passo: a bateria</h2>'+
+    '<p class="p-nota" style="margin-top:4px">Sem isto, '+(fab?esc(fab.charAt(0).toUpperCase()+fab.slice(1))+' ':'o telemóvel ')+
+    'adormece a FleetCV com o ecrã apagado e o GPS pára (no teste, até 9 minutos de cada vez). '+
+    'Toque em <b>Tirar da poupança de bateria</b> e escolha <b>Permitir</b>.</p>'+
+    '<p class="p-nota" style="margin-top:6px">Se o telemóvel não perguntar nada: Definições → Aplicações → '+
+    'FleetCV → Bateria → <b>Sem restrições</b>.</p></div>';
+}
+/* a aplicação instalada é anterior a esta página (a página actualiza-se
+   sozinha, a aplicação não) */
+function cartaoAtualizar(){
+  return '<div class="cartao nota"><h2>Há uma versão nova da aplicação</h2>'+
+    '<p class="p-nota" style="margin-top:4px">Segura melhor o GPS com o ecrã apagado. Instale-a por '+
+    'cima desta (não perde nada).</p>'+
+    '<a class="bt sec pq" href="/FleetCV.apk" style="margin-top:8px;display:inline-block;'+
+    'text-decoration:none">Descarregar a versão nova</a></div>';
 }
 /* aberto dentro do Instagram, Facebook, TikTok…: aí a página pára ainda mais */
 function dentroDeOutraApp(){
@@ -171,50 +182,126 @@ function pluginNativo(nome){
   }catch(e){ return null; }
 }
 var vigiaNativa=null, aLigarNativa=false;
+/* O que o teste do Yanick (02/10, um Samsung A24 com Android 16)
+   mostrou, e que a aplicação imitada dos testes escondia:
+   · dentro da aplicação, a página vem do site, sem o @capacitor/core:
+     o addWatcher devolve logo o número da vigia, e não uma promessa. O
+     ".then" rebentava ali — o GPS nativo ligava-se, mas a página não o
+     sabia: dava o condutor como "fora da aplicação" a cada ecrã apagado
+     e nunca pedia a poupança de bateria;
+   · as licenças eram pedidas todas ao mesmo tempo (localização e
+     notificações), e o serviço do GPS tentava pôr-se em primeiro plano
+     antes de a localização estar dada — no Android 14 e seguintes isso
+     falha calado, fica sem a notificação fixa, e com o ecrã apagado o
+     Android corta o GPS (4 a 9 minutos de cada vez, no teste).
+   Agora: primeiro a licença da localização, só depois o GPS (que assim
+   já arranca com a notificação), e só depois a das notificações. */
+function quando(r){ return (r && typeof r.then==='function') ? r : Promise.resolve(r); }
+/* para o registo de erros (Nuvem.registar), com o que ajuda a perceber */
+function modoGps(){ return vigiaNativa!=null ? 'app' : (nativo() ? 'app-sem-gps-nativo' : 'navegador'); }
+function registar(tipo, onde, msg, extra){
+  try{ Nuvem.registar(tipo, onde, msg, Object.assign({ecra:S.ecra, modo:modoGps(),
+    turno:S.turno&&S.turno.id, app:S.app||null, bateriaPresa:!!S.bateriaPresa}, extra||{})); }catch(e){}
+}
 function ligarGpsNativo(){
   var BG=pluginNativo('BackgroundGeolocation'); if(!BG) return false;
   if(vigiaNativa!=null || aLigarNativa) return true;
   aLigarNativa=true;
   if(S.gps.estado!=='ligado'){ S.gps.estado='a-procurar'; S.gps.porque=null; pintar(); }
-  /* Android 13 e seguintes: sem esta licença a notificação do turno não aparece */
-  try{ var LN=pluginNativo('LocalNotifications'); if(LN && LN.requestPermissions) LN.requestPermissions().catch(function(){}); }catch(e){}
-  BG.addWatcher({
-      backgroundTitle:'FleetCV · GPS ligado',
-      backgroundMessage:'A registar o percurso do carro. Para parar, feche o turno na aplicação.',
-      requestPermissions:true, stale:false, distanceFilter:0 },
-    function(loc, erro){
-      if(erro){
-        if(erro.code==='NOT_AUTHORIZED'){
-          S.gps.estado='recusado'; S.gps.definicoes=true;
-          S.gps.porque='A FleetCV não tem licença para a localização. Abra as definições e permita '+
-            'a localização (o melhor é "Permitir sempre").';
-          pintar();
-        } else falhouGps({code:2});
-        return;
-      }
-      if(!loc) return;
-      aceitarGps({coords:{latitude:loc.latitude, longitude:loc.longitude, accuracy:loc.accuracy,
-                          speed:(loc.speed!=null?loc.speed:null), heading:loc.bearing},
-                  timestamp:loc.time||Date.now()});
-    }).then(function(id){ vigiaNativa=id; aLigarNativa=false; verBateria(); })
-      .catch(function(){ aLigarNativa=false; falhouGps({code:2}); });
+  licencaLocalizacao(BG).then(function(dada){
+    if(!dada){ aLigarNativa=false; semLicencaNativa(); return; }
+    var r;
+    try{
+      r=BG.addWatcher({
+          backgroundTitle:'FleetCV · GPS ligado',
+          backgroundMessage:'A registar o percurso do carro. Para parar, feche o turno na aplicação.',
+          requestPermissions:true, stale:false, distanceFilter:0 },
+        function(loc, erro){
+          if(erro){
+            registar('aviso', 'gps-nativo', (erro.code||'')+' '+(erro.message||''));
+            if(erro.code==='NOT_AUTHORIZED' && /disabled/i.test(erro.message||'')){
+              S.gps.estado='recusado'; S.gps.definicoes=false;
+              S.gps.porque='A localização do telemóvel está desligada. Puxe a barra do topo para baixo '+
+                'e ligue a "Localização".';
+              pintar();
+            } else if(erro.code==='NOT_AUTHORIZED') semLicencaNativa();
+            else falhouGps({code:2});
+            return;
+          }
+          if(!loc) return;
+          aceitarGps({coords:{latitude:loc.latitude, longitude:loc.longitude, accuracy:loc.accuracy,
+                              speed:(loc.speed!=null?loc.speed:null), heading:loc.bearing},
+                      timestamp:loc.time||Date.now()});
+        });
+    }catch(e){
+      aLigarNativa=false; registar('erro', 'gps-nativo', 'addWatcher: '+(e&&e.message||e));
+      ligarGpsDoNavegador(); return;
+    }
+    quando(r).then(function(id){
+      vigiaNativa=id; aLigarNativa=false;
+      segurarTelemovel(true);
+      pedirNotificacoes().then(verBateria);
+    }).catch(function(e){
+      aLigarNativa=false; registar('erro', 'gps-nativo', 'vigia: '+(e&&e.message||e));
+      ligarGpsDoNavegador(); });
+  });
   return true;
+}
+/* A licença da localização, antes de ligar o GPS. Os métodos vêm do
+   próprio Capacitor (checkPermissions/requestPermissions de cada módulo). */
+function licencaLocalizacao(BG){
+  if(!BG.checkPermissions || !BG.requestPermissions) return Promise.resolve(true);
+  return quando(BG.checkPermissions()).then(function(p){
+    if(p && p.location==='granted') return true;
+    return quando(BG.requestPermissions({permissions:['location']})).then(function(q){
+      registar('info', 'licenca-localizacao', q && q.location);
+      return !!(q && q.location==='granted'); });
+  }).catch(function(e){ registar('aviso', 'licenca-localizacao', e&&e.message||e); return true; });
+}
+function semLicencaNativa(){
+  S.gps.estado='recusado'; S.gps.definicoes=true;
+  S.gps.porque='A FleetCV não tem licença para a localização. Toque em "Abrir as definições" → '+
+    'Licenças → Localização → "Permitir sempre" (ou "Permitir durante a utilização").';
+  pintar();
+}
+/* Android 13 e seguintes: sem esta licença a notificação do turno não se
+   vê (o GPS funciona na mesma). Pede-se depois da localização, nunca ao
+   mesmo tempo: dois pedidos juntos, o Android responde "não" a um deles. */
+function pedirNotificacoes(){
+  var LN=pluginNativo('LocalNotifications');
+  if(!LN || !LN.requestPermissions) return Promise.resolve();
+  return quando(LN.requestPermissions()).catch(function(){});
 }
 function desligarGpsNativo(){
   var BG=pluginNativo('BackgroundGeolocation');
-  if(BG && vigiaNativa!=null){ try{ BG.removeWatcher({id:vigiaNativa}); }catch(e){} }
+  if(BG && vigiaNativa!=null){ try{ quando(BG.removeWatcher({id:vigiaNativa})).catch(function(){}); }catch(e){} }
+  if(vigiaNativa!=null) segurarTelemovel(false);
   vigiaNativa=null;
 }
-/* A poupança de bateria (a dos Samsung e Xiaomi mais ainda) mata a
-   aplicação em segundo plano, com notificação e tudo. */
+/* A poupança de bateria (a dos Samsung e Xiaomi mais ainda) adormece a
+   aplicação em segundo plano, com notificação e tudo: no teste de 02/10
+   o GPS parava 4 a 9 minutos de cada vez que o ecrã apagava. Sem ela
+   livre, não se começa o turno sem o condutor saber. */
 function verBateria(){
-  var B=pluginNativo('Bateria'); if(!B) return;
-  B.estado().then(function(r){ S.bateriaPresa = !(r && r.semRestricoes); pintar(); }).catch(function(){});
+  var B=pluginNativo('Bateria'); if(!B) return Promise.resolve();
+  return quando(B.estado()).then(function(r){
+    S.bateriaPresa = !(r && r.semRestricoes);
+    S.app = {versao:(r&&r.versao)||'1.0.0', fabricante:(r&&r.fabricante)||'', trava:!!B.segurar};
+    pintar(); }).catch(function(){});
+}
+/* Durante o turno, o telemóvel não adormece por baixo do GPS (só a
+   versão 1.0.1 da aplicação o sabe fazer; a anterior ignora isto). */
+function segurarTelemovel(sim){
+  var B=pluginNativo('Bateria'); if(!B || !B.segurar) return;
+  try{ quando(sim ? B.segurar() : B.largar()).catch(function(){}); }catch(e){}
 }
 
 function ligarGps(){
   if(S.simular) return;
   if(ligarGpsNativo()) return;
+  ligarGpsDoNavegador();
+}
+function ligarGpsDoNavegador(){
   if(!navigator.geolocation){
     S.gps.estado='indisponivel';
     S.gps.porque='Este telemóvel não sabe dar a localização ao navegador.';
@@ -245,7 +332,14 @@ function ligarGps(){
 }
 
 function aceitarGps(pos){
-  var c=pos.coords, antes=S.gps.estado;
+  var c=pos.coords, antes=S.gps.estado, chegou=Date.now();
+  /* mais de um minuto sem posição nenhuma, com o turno aberto: o
+     telemóvel parou o GPS (ou adormeceu a aplicação). Fica registado. */
+  if(S.turno && !S.turno.fim && S.gps.ultimaChegada && chegou-S.gps.ultimaChegada>60000)
+    registar('aviso', 'gps-parou', Math.round((chegou-S.gps.ultimaChegada)/1000)+' s sem posições'+
+      (S.gps.escondidaDesde && S.gps.escondidaDesde<S.gps.ultimaChegada+5000 ? ', com o ecrã apagado' : ''),
+      {segundos:Math.round((chegou-S.gps.ultimaChegada)/1000)});
+  S.gps.ultimaChegada=chegou;
   if(primeiroTiro){ clearTimeout(primeiroTiro); primeiroTiro=null; }
   S.gps.estado='ligado'; S.gps.porque=null; S.gps.precisao=Math.round(c.accuracy);
   /* O telemóvel mede a velocidade pelo desvio do sinal dos satélites,
@@ -628,6 +722,27 @@ function postosPerto(lat,lon,n){
 }
 
 /* ═══ OS ECRÃS ═══════════════════════════════════════════ */
+/* O mapa do volante: o mesmo mapa a sério do patrão (ruas com nome,
+   escuro e limpo no tema escuro), a seguir o carro. No teste de 02/10
+   o Yanick gostou do desenho escuro do condutor mas faltava-lhe
+   informação — os nomes das ruas e dos sítios. Sem rede para o mapa,
+   fica o desenho de sempre. */
+var mapaVolante=null;
+function mapaDoVolante(t){
+  if(window.MapaVivo && MapaVivo.pronto()) return '<div class="lugar-mapa" id="lugar-mapa-volante"></div>';
+  return mapa(t.rasto,true);
+}
+function montarMapaDoVolante(){
+  var l=document.getElementById('lugar-mapa-volante');
+  if(!l || !S.turno || !(window.MapaVivo && MapaVivo.pronto())) return;
+  if(!mapaVolante) mapaVolante=MapaVivo.novo({fixo:true});
+  if(!mapaVolante.encaixar(l)) return;
+  if(mapaVolante._turno!==S.turno.id){ mapaVolante.esquecer(); mapaVolante._turno=S.turno.id; }
+  var pts=(S.turno.rasto||[]).filter(function(p){ return p[3]==null||p[3]<=LIM.precisaoMax; });
+  mapaVolante.turno({id:S.turno.id, aoVivo:true, rotulo:'', pts:pts,
+    abast:(S.turno.abast||[]).map(function(a){ return {lat:a.lat, lon:a.lon, posto:a.posto}; })});
+}
+if(window.MapaVivo) MapaVivo.quandoFalhar(function(){ if(S.ecra==='volante') pintar(); });
 function ajustarMapa(){
   var cx=document.querySelector('.volante'); if(!cx) return;
   var W=Math.round(cx.clientWidth), H=Math.round(cx.clientHeight);
@@ -816,6 +931,7 @@ function pintar(){
             '<a class="bt sec pq" href="/android" style="margin-top:8px;display:inline-block;'+
             'text-decoration:none">Instalar a aplicação</a></div>' : ''))+
       (S.bateriaPresa ? cartaoBateria() : '')+
+      (nativo() && S.app && !S.app.trava ? cartaoAtualizar() : '')+
       (dentroDeOutraApp() ? '<div class="cartao mau"><h2>Abra no Chrome</h2><p class="p-nota" '+
         'style="margin-top:4px">Esta página abriu dentro de outra aplicação (Instagram, Facebook…). '+
         'Aí o GPS pára ainda mais depressa. Copie o endereço e abra-o no Chrome.</p></div>' : '');
@@ -837,7 +953,10 @@ function pintar(){
       'Dentro de um edifício pode demorar. Encoste-se a uma janela.')+'</p></div>';
     else if(e==='sem-sinal') h+='<div class="cartao aviso"><h2>Sem sinal</h2>'+
       '<p class="p-nota" style="margin-top:4px">'+esc(S.gps.porque||'')+'</p></div>';
-    b = (e==='ligado' ? '<button class="bt pri" data-f="comecar">Começar turno</button>'
+    b = (e==='ligado' && S.bateriaPresa
+          ? '<button class="bt pri" data-f="bateria">Tirar da poupança de bateria</button>'+
+            '<button class="lig" data-f="comecar">Começar mesmo assim</button>'
+      : e==='ligado' ? '<button class="bt pri" data-f="comecar">Começar turno</button>'
       : ((emMoldura()&&e==='recusado')
           ? '<button class="bt pri" data-f="comecar">Começar sem GPS</button>'
           : '<button class="bt pri" data-f="pedir-gps">'+(e==='recusado'
@@ -856,7 +975,7 @@ function pintar(){
       '<button class="bt sec pq" data-f="ok-fora" style="margin-top:8px">Percebi</button></div>' : '';
     var ondeAgora=S.ultimaPos||(t.rasto.length?t.rasto[t.rasto.length-1]:null);
     var bairro=ondeAgora?bairroDe(ondeAgora[0],ondeAgora[1]):null;
-    h='<div class="volante">'+mapa(t.rasto,true)+
+    h='<div class="volante">'+mapaDoVolante(t)+
       '<div class="hud"><div class="vel"><span class="n num" id="v-num">'+
       Math.round(S.gps.vel)+'</span><span class="u">KM/H</span>'+arco(S.gps.vel)+'</div>'+
       (bairro?'<div class="onde">'+esc(bairro)+'</div>':'')+'</div>'+
@@ -882,7 +1001,7 @@ function pintar(){
        deixa de gravar o caminho. Depois o GPS não bate com o
        quadrante e parece desvio quando foi só o bolso. Vale mais
        dizer-lho uma vez do que descobrir no fim do dia. */
-    if(!S.simular && !S.avisoEcraVisto)
+    if(!S.simular && !S.avisoEcraVisto && vigiaNativa==null)
       h+='<div class="cartao nota"><p class="p-nota"><b>Deixe o ecrã aceso.</b> '+
         'Se o telemóvel adormecer, o caminho deixa de ser gravado e os '+
         'quilómetros não vão bater no fim. Ponha-o no suporte, com carregador. '+
@@ -1045,7 +1164,7 @@ function pintar(){
   el('voltar').hidden = !(pv && pv!=='ficar');
   armarVoltar();
   pintarTopo();
-  if(S.ecra==='volante') ajustarMapa();
+  if(S.ecra==='volante'){ montarMapaDoVolante(); ajustarMapa(); }
 }
 
 /* ─── voltar ──────────────────────────────────────────────
@@ -1191,10 +1310,10 @@ document.addEventListener('click', function(e){
   if(f==='ir-volante'){ S.foto=null; S.r={}; S.ecra='volante'; pintar(); }
   if(f==='ok-fora'){ S.avisoFora=null; pintar(); return; }
   if(f==='bateria'){ var B=pluginNativo('Bateria');
-    if(B) B.pedir().then(function(){ setTimeout(verBateria, 1500); }).catch(function(){});
+    if(B) quando(B.pedir()).then(function(){ setTimeout(verBateria, 1500); }).catch(function(){});
     return; }
   if(f==='definicoes-gps'){ var BG=pluginNativo('BackgroundGeolocation');
-    if(BG && BG.openSettings) BG.openSettings(); return; }
+    if(BG && BG.openSettings) quando(BG.openSettings()).catch(function(){}); return; }
   if(f==='camara'){ abrirCamara(d.guia); return; }
   if(f==='ficheiro'){ var ff=el('ff'); if(ff) ff.click(); return; }
   if(f==='ir-abast'){ S.foto=null; S.r={}; S.ecra='abastecer'; pintar(); }
@@ -1262,7 +1381,11 @@ function voltou(){
   segurarEcra(); pintar();
 }
 document.addEventListener('visibilitychange', function(){
-  if(document.hidden) saiu(); else { voltou(); if(S.ecra==='volante') pintar(); } });
+  S.gps.escondidaDesde = document.hidden ? Date.now() : null;
+  if(document.hidden) saiu();
+  else { voltou(); if(S.ecra==='volante') pintar();
+    /* volta das definições do telemóvel (bateria, licenças): ver outra vez */
+    if(vigiaNativa!=null) verBateria(); } });
 window.addEventListener('pagehide', saiu);
 
 function comecar(sim){
@@ -1298,6 +1421,9 @@ function comecar(sim){
   /* o patrão passa a ver este turno no mapa dele a partir de agora */
   segurarEcra();
   Nuvem.abrirTurno(S.turno);
+  /* para se saber, no registo, em que modo cada turno correu */
+  registar('info', 'turno-aberto', modoGps()+(S.bateriaPresa?' · bateria presa':'')+
+    (S.app?' · aplicação '+S.app.versao:''));
   /* logo a seguir ao turno (a base só aceita a foto de um turno que já
      lá esteja, e a fila respeita a ordem) */
   if(S.turno.fotoInicio) Nuvem.enviarFoto(S.turno.id+'_inicio', S.turno.id, S.turno.fotoInicio);

@@ -19,11 +19,18 @@ directório).
   segundo plano; assim vão pelo lado nativo) — ver `capacitor.config.json`;
 - `BateriaPlugin.java`: pergunta se a FleetCV está livre da poupança de
   bateria e pede ao condutor que a liberte (os Samsung e Xiaomi matam
-  aplicações em segundo plano);
+  aplicações em segundo plano); segura o telemóvel acordado durante o
+  turno (`segurar`/`largar`, desde a 1.0.1) e diz a versão da aplicação
+  (a página pede para actualizar quem tiver uma anterior);
 - licenças: localização, notificações, câmara, ecrã aceso.
 
 A página sabe que está dentro da aplicação (`window.Capacitor`) e usa o GPS
 nativo em vez do do navegador (`paineis/painel_condutor.html`, `nativo()`).
+Atenção: a página vem do site, sem o `@capacitor/core` — os módulos são os
+que o Android injecta, e um método de "callback" (o `addWatcher`) devolve
+logo o número da vigia, não uma promessa. E as licenças pedem-se uma de cada
+vez: a localização antes de ligar o GPS (senão, no Android 14+, o serviço não
+fica em primeiro plano e o GPS pára com o ecrã apagado).
 Provado em `paineis/teste_app_android.mjs`, com a aplicação imitada.
 
 ## Compilar

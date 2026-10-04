@@ -136,6 +136,15 @@
         limit:function(n){ lim=n; return api; },
         maybeSingle:function(){ umSo=true; return api; },
         single:function(){ umSo=true; return api; },
+        /* só o registo de erros usa insert: guarda-se para os testes verem
+           (com window.__semTabelaErros, faz de base sem a tabela) */
+        insert:function(d){
+          if(nome!=='erros') return Promise.resolve({data:null, status:404, error:{message:'sem a tabela '+nome, code:'PGRST205'}});
+          if(window.__semTabelaErros)
+            return Promise.resolve({data:null, status:404, error:{message:"Could not find the table 'public.erros'", code:'PGRST205'}});
+          var pf=perfil();
+          (window.__erros=window.__erros||[]).push(Object.assign({frota:pf&&pf.frota||null}, d));
+          return Promise.resolve({data:null, status:201, error:null}); },
         upsert:function(d, op){
           var pf=perfil();
           /* sem frota no pedido, a base põe a de quem escreve */

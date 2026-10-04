@@ -90,7 +90,7 @@ async function texto(img, cx){
     if(mi!==0 && mi!==antes){ s+=dicionario[mi-1]||''; soma+=m; n++; }
     antes=mi;
   }
-  return {text:s, conf:n?soma/n*100:0, h:cx.h};
+  return {text:s, conf:n?soma/n*100:0, h:cx.h, x:cx.x, y:cx.y, w:cx.w};
 }
 
 async function lerImagem(img){
@@ -109,11 +109,39 @@ function daEscala(s){
     return false; }
   return parte(s);
 }
+/* O rótulo de um número: o do próprio pedaço ("ODO 6140km"), ou o de
+   um rótulo sozinho por cima dele ou à esquerda, na mesma linha. No
+   quadrante do teste de 02/10 estavam "ODO 6140km" e "Trip 137.0km",
+   um por baixo do outro, e o leitor escolheu um número tirado do Trip
+   (o parcial), por ter mais algarismos. */
+var R_ODO=/ODO|ODOMETER|TOTAL/i, R_TRIP=/TRIP|PARC|DIST|JOUR/i;
+function rotuloProprio(t){ return R_ODO.test(t) ? 'odo' : (R_TRIP.test(t) ? 'trip' : null); }
+function rotuloDe(it, itens){
+  var r=rotuloProprio(String(it.text||'')); if(r) return r;
+  if(it.x==null) return null;
+  var melhor=null, dmin=1e9;
+  itens.forEach(function(o){
+    if(o===it || o.x==null) return;
+    var ot=String(o.text||''), ro=rotuloProprio(ot);
+    if(!ro || /\d{3}/.test(ot)) return;              /* só rótulos sozinhos */
+    var sobrepoe = o.x < it.x+it.w && o.x+o.w > it.x;
+    var dy = it.y-(o.y+o.h);
+    var dCima = (sobrepoe && dy > -o.h*0.6 && dy < it.h*1.6) ? Math.abs(dy) : 1e9;
+    var mesmaLinha = Math.abs((o.y+o.h/2)-(it.y+it.h/2)) < it.h*0.6;
+    var dx = it.x-(o.x+o.w);
+    var dEsq = (mesmaLinha && dx > -o.w*0.3 && dx < it.h*3) ? Math.abs(dx) : 1e9;
+    var d=Math.min(dCima, dEsq);
+    if(d<dmin){ dmin=d; melhor=ro; } });
+  return melhor;
+}
 function candidatos(itens){
   var c=[];
   (itens||[]).forEach(function(it){
     var t=' '+String(it.text||'')+' ';
-    var odo=/ODO|ODOMETER/i.test(t);
+    /* o conta-rotações ("x1000 r/min") não é o conta-quilómetros */
+    if(/r\s*\/\s*m[il1]n|rpm|[x×]\s*1000/i.test(t)) return;
+    var rot=rotuloDe(it, itens||[]);
+    var odo=rot==='odo', trip=rot==='trip';
     t=t.replace(/\b\d{1,2}[.\/]\d{1,2}[.\/]\d{2,4}\b/g,' ');     /* datas */
     t=t.replace(/\b\d{1,2}[:h]\d{2}\b/g,' ');                      /* relógio */
     t=t.replace(/(\d)\s*[°º]\s*C/gi,'$1C ');                        /* temperatura */
@@ -130,14 +158,17 @@ function candidatos(itens){
     if(odo) t=t.replace(/(ODO\w*\s*(?:KM)?\s*)((?:\d+\s)+\d+)/i,function(m,a,g){ return a+g.replace(/\s/g,''); });
     var re=/\d[\d.,]*\d|\d/g, m;
     while((m=re.exec(t))){
-      var s=m[0], mm=s.match(/^(\d+)[.,](\d)$/);
+      /* "137.0" e "137.01" são parciais com décimas (o leitor chegou a ler
+         "137.0km" como "137.01" e a fazer dele 13.701); os milhares têm
+         três algarismos depois do ponto ("120.050") */
+      var s=m[0], mm=s.match(/^(\d+)[.,](\d{1,2})$/);
       var inteiro=mm?mm[1]:s.replace(/[.,]/g,'');
       var sem0=inteiro.replace(/^0+/,'');
       if(sem0.length<3||sem0.length>7) continue;
       var depois=t.slice(re.lastIndex, re.lastIndex+4);
       c.push({v:parseInt(inteiro,10), nz:inteiro.length, zero:inteiro[0]==='0',
-        km:/^\s?(km|KM|Km|krn)/.test(depois), odo:odo, escala:daEscala(inteiro),
-        h:it.h||0, conf:it.conf||0});
+        km:/^\s?(km|KM|Km|krn)/.test(depois), odo:odo, trip:trip, decimal:!!mm,
+        escala:daEscala(inteiro), h:it.h||0, conf:it.conf||0});
     }
   });
   return c;
@@ -146,16 +177,31 @@ function candidatos(itens){
    (até 2.500 km): é assim que quase nunca se engana. Sem saber (o
    primeiro turno), escolhe o mais provável — e o condutor confere. */
 function escolher(c, esperado){
+  /* Entre os plausíveis: o parcial (Trip) fica de fora se houver outro
+     (o aviso "TRIP" aparece ao lado do total em muitos painéis), e
+     havendo um com "ODO", é esse */
+  function apurar(l){
+    var semParcial=l.filter(function(x){ return !x.trip; });
+    if(semParcial.length) l=semParcial;
+    var doOdo=l.filter(function(x){ return x.odo; });
+    return doOdo.length ? doOdo : l;
+  }
   if(esperado>0){
     var perto=[];
     c.forEach(function(x){ [x.v, Math.floor(x.v/10)].forEach(function(v){
-      if(v>=esperado-2 && v<=esperado+2500) perto.push({v:v, d:v-esperado, h:x.h}); }); });
+      if(v>=esperado-2 && v<=esperado+2500) perto.push({v:v, d:v-esperado, h:x.h, trip:x.trip, odo:x.odo}); }); });
     if(!perto.length) return null;
+    perto=apurar(perto);
     perto.sort(function(a,b){ return a.d-b.d || b.h-a.h; });
     return perto[0].v;
   }
   var f=c.filter(function(x){ return !x.escala && x.nz>=4 && !(x.v<=300 && x.v%10===0); });
   if(!f.length) return null;
+  f=apurar(f);
+  /* um inteiro com "km" ou "ODO" passa à frente de um número com
+     décimas (as décimas são quase sempre do parcial: "Trip 137.0km") */
+  var marcados=f.filter(function(x){ return !x.decimal && (x.km || x.odo); });
+  if(marcados.length && f.some(function(x){ return x.decimal; })) f=marcados;
   function pontos(x){ return (x.nz>=5?100:0) + (x.zero&&x.nz>=5?60:0) + (x.km||x.odo?80:0)
     + Math.min(x.h,80)*0.5 + x.conf*0.1; }
   f.sort(function(a,b){ return pontos(b)-pontos(a); });

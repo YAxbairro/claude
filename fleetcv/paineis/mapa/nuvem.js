@@ -357,7 +357,12 @@ function lojaDoSupabase(sb){
           return (r.data||[]).map(function(x){ return x.corpo; }); })
         .catch(function(){ return []; }); },
 
-    licenca:function(){ return Promise.resolve(!!(eu&&eu.papel==='dono')); }
+    licenca:function(){ return Promise.resolve(!!(eu&&eu.papel==='dono')); },
+
+    /* o registo de erros: só se escreve (ver registar, mais abaixo) */
+    registar:function(linha){
+      return sb.from('erros').insert(linha)
+        .then(function(r){ if(r && r.error) throw erroDe(r.error, r.status); }); }
   };
 }
 
@@ -692,7 +697,7 @@ function arrancar(op){
      Claude, e por fim só este aparelho. Fica o primeiro que houver. */
   ligarSupabase(op.papel).then(function(sb){
     if(sb){
-      var ls=lojaDoSupabase(sb); loja=ls;
+      var ls=lojaDoSupabase(sb); loja=ls; enviarRegistos();
       return ls.comecar().then(function(entrou){
         estado = !entrou ? 'supabase-por-entrar'
                : ls.semRede() ? 'supabase-sem-rede' : 'supabase';
@@ -1159,9 +1164,55 @@ function apagarTurno(id){
   return loja.tirar('turnos', id).catch(function(){});
 }
 
+/* ─── o registo de erros ────────────────────────────────── */
+/* O que corre mal nos telemóveis chega à base (tabela erros): o GPS
+   que pára com o ecrã apagado, uma licença recusada, um erro da página.
+   No teste de 02/10 só se soube o que aconteceu indo aos registos do
+   servidor; agora fica escrito, com a hora, o telemóvel e a versão.
+   Cada mensagem igual vai uma vez por sessão, e no máximo 40 por
+   sessão — um erro em ciclo não gasta os dados do condutor. Se a base
+   ainda não tiver a tabela, cala-se até à próxima sessão. */
+var porRegistar=[], registados=0, jaVistos={}, semRegisto=false;
+function versaoSite(){
+  try{ var s=document.querySelector('script[src*="?v="]');
+    return s ? (s.getAttribute('src').split('?v=')[1]||'').slice(0,20) : ''; }catch(e){ return ''; }
+}
+function registar(tipo, onde, mensagem, detalhe){
+  if(semRegisto || registados>=40) return;
+  mensagem=String(mensagem==null?'':mensagem).slice(0,500);
+  var chave=tipo+'|'+onde+'|'+mensagem;
+  if(jaVistos[chave]) return; jaVistos[chave]=1; registados++;
+  var d={}; try{ d=JSON.parse(JSON.stringify(detalhe||{})); }catch(e){}
+  try{ d.pagina=location.hash||''; d.escondida=!!document.hidden; }catch(e){}
+  porRegistar.push({tipo:tipo, onde:String(onde).slice(0,60), mensagem:mensagem, detalhe:d,
+    ua:String((typeof navigator!=='undefined'&&navigator.userAgent)||'').slice(0,300),
+    versao:versaoSite()});
+  if(porRegistar.length>20) porRegistar.shift();
+  enviarRegistos();
+}
+function enviarRegistos(){
+  if(!loja || !loja.registar || !porRegistar.length) return;
+  var l=porRegistar.shift();
+  loja.registar(l).then(enviarRegistos).catch(function(e){
+    /* a tabela ainda não existe (ou não deixa): não se insiste */
+    if(e && e.recusa) semRegisto=true; else porRegistar.unshift(l); });
+}
+try{
+  window.addEventListener('error', function(ev){
+    var m=(ev && ev.message)||'';
+    if(!m || m==='Script error.') return;          /* de fora da página: não se sabe nada */
+    registar('erro', 'pagina', m, {onde:(ev.filename||'').split('/').pop()+':'+(ev.lineno||0)});
+  });
+  window.addEventListener('unhandledrejection', function(ev){
+    var r=ev && ev.reason; var m=(r && (r.message||r.toString&&r.toString()))||'';
+    if(m) registar('erro', 'promessa', m);
+  });
+}catch(e){}
+
 /* ════════════════════════════════════════════════════════ */
 return {
   arrancar:arrancar,
+  registar:registar,
   aoMudar:function(f){ ouvintes.push(f); },
   estado:function(){ return estado; },
   ensaio:noEnsaio,

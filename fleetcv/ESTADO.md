@@ -145,6 +145,55 @@ Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
   envio. A bateria só se mede num telemóvel verdadeiro (Definições →
   Bateria → utilização por aplicação).
 
+- **O primeiro teste na estrada** (sexta, 02/10, ST-CM24, 19:30–21:31,
+  condutor num Samsung A24 com Android 16, patrão num Xiaomi, os dois
+  na aplicação). Os registos do Supabase mostraram que o telemóvel
+  estava na aplicação (pedidos "Dalvik"), mas o GPS nativo **não
+  arrancou bem**: com o ecrã apagado parava 4 a 9 minutos de cada vez
+  (às vezes voltava sozinho), e o patrão lia "o condutor saiu da
+  aplicação". Três causas, todas corrigidas:
+  1. dentro da aplicação a página vem do site (sem o @capacitor/core) e
+     o `addWatcher` devolve o número da vigia, não uma promessa — o
+     `.then` rebentava, a página não sabia que estava no GPS nativo, e
+     nunca pedia a poupança de bateria;
+  2. as licenças eram pedidas ao mesmo tempo (localização e
+     notificações) e o serviço tentava pôr-se em primeiro plano antes de
+     haver licença — no Android 14+ isso falha calado (sem notificação
+     fixa, o Android corta o GPS). Agora: localização primeiro, depois o
+     GPS, depois as notificações;
+  3. a poupança de bateria (Samsung) adormecia a aplicação. Agora, sem
+     ela livre, o passo principal antes de "Começar turno" é tirá-la da
+     poupança; e a aplicação **1.0.1** segura o telemóvel acordado
+     durante o turno (trava de 16 h no máximo) e diz a sua versão — quem
+     tiver a 1.0.0 vê "Há uma versão nova da aplicação".
+  `paineis/teste_app_android.mjs` (30) imita agora a aplicação como ela
+  é (a imitação de antes devolvia uma promessa e escondeu o erro; contra
+  a versão antiga, o teste novo falha 6).
+- **Registo de erros**: o que corre mal nos telemóveis (o GPS que pára
+  mais de um minuto, licenças, erros da página) vai para a tabela
+  `erros` (os telemóveis só escrevem, até 120 por hora; provas 70–73).
+  **A tabela ainda não está na base verdadeira** (a migração ficou à
+  espera de autorização): até lá, a aplicação cala-se sem erro.
+- **O mapa do patrão cortado** (só o canto de cima com ruas): o mapa da
+  frota esperava fora da página enquanto o patrão via outro ecrã; se a
+  janela mudasse de tamanho nesse tempo, ficava medido zero por zero.
+  Agora mede-se sempre contra a caixa verdadeira
+  (`paineis/teste_mapa_tamanho.mjs`, 4; antes: 8% do mapa com ruas).
+- **Um ecrã só para o carro em turno**: o mapa, a velocidade e, em "Mais
+  detalhes", as fotografias, os abastecimentos (tocar mostra no mapa
+  onde foi) e os alertas. O "turno todo" de um carro em turno traz para
+  aqui; quando o turno fecha aparece "acabou · ver as contas".
+- **Mapa escuro com nomes**: no tema escuro, os mapas do patrão e o do
+  volante do condutor são escuros e limpos (os do OpenStreetMap com um
+  filtro), com ruas e sítios; no claro, cores suaves. O volante usa o
+  desenho de sempre quando não há rede para o mapa.
+- **Leitura do quadrante, ODO e Trip**: no painel do teste ("ODO
+  6140km", por baixo "Trip 137.0km") o leitor propôs 13.701 (o parcial
+  mal lido como "137.01"). Agora sabe onde está cada palavra: o número
+  do "ODO" ganha, o do "Trip" sai se houver outro, "137.01" é 137, e o
+  conta-rotações não conta. Nas 58 fotografias verdadeiras: os mesmos
+  acertos (38 e 40) e menos um engano (`paineis/teste_leitor_rotulos.mjs`, 11).
+
 ## Crescer: quanto aguenta e quando pagar (medido a 27 de Setembro)
 
 Contas com os números da base verdadeira (cada ponto do caminho pesa
@@ -207,10 +256,10 @@ ficheiros. Os passos estão em `site/INSTALAR.md`.
 
 | | |
 |---|---|
-| `supabase/provar.sh` | 69 regras + 9 da passagem de uma base antiga, num Postgres a sério. As provas foram postas à prova estragando as regras de propósito |
+| `supabase/provar.sh` | 73 regras + 9 da passagem de uma base antiga, num Postgres a sério. As provas foram postas à prova estragando as regras de propósito |
 | `paineis/teste_contas.mjs` | 40 — o caminho de um cliente novo, do criar conta ao apagar |
 | `paineis/teste_supabase.mjs` | 25 — as regras vistas pela aplicação, a trava, sem rede |
-| o resto dos `teste_*.mjs` | consumo 12, aplicação Android 21, fora da aplicação 18, leitor 17, primeiro turno 28, dados 13, câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 33, mapa vivo 24 |
+| o resto dos `teste_*.mjs` | aplicação Android 30, leitor ODO/Trip 11, mapa cortado 4, consumo 12, fora da aplicação 18, leitor 18, primeiro turno 28, dados 13, câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 33, mapa vivo 26 |
 
 Os testes que usam o servidor próprio (`teste_clicavel`,
 `teste_formularios`, `teste_servidor`) esperam correr numa pasta com

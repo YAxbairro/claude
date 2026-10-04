@@ -811,3 +811,45 @@ create table if not exists public._cofre(
 );
 alter table public._cofre enable row level security;
 revoke all on public._cofre from public, anon, authenticated;
+
+-- O registo de erros: o que corre mal nos telemóveis (o GPS que pára
+-- com o ecrã apagado, uma licença recusada, um erro da página) chega
+-- aqui, para se saber o que aconteceu sem depender de "não funciona".
+-- Os telemóveis só escrevem: não lêem nada, nem o seu. A frota e quem
+-- escreveu põe-nas a base (não se podem inventar), e cada telemóvel
+-- escreve no máximo 120 por hora — um erro em ciclo não enche a base.
+create table if not exists public.erros(
+  id       bigint generated always as identity primary key,
+  quando   timestamptz not null default now(),
+  frota    text default public.minha_frota(),
+  quem     uuid default auth.uid(),
+  tipo     text not null check (tipo in ('erro','aviso','info')),
+  onde     text not null check (length(onde) <= 60),
+  mensagem text not null check (length(mensagem) <= 600),
+  detalhe  jsonb check (detalhe is null or pg_column_size(detalhe) <= 4000),
+  ua       text check (ua is null or length(ua) <= 300),
+  versao   text check (versao is null or length(versao) <= 60)
+);
+create index if not exists erros_quem_quando on public.erros(quem, quando);
+create index if not exists erros_frota_quando on public.erros(frota, quando);
+alter table public.erros enable row level security;
+revoke all on public.erros from public, anon, authenticated;
+grant insert (tipo, onde, mensagem, detalhe, ua, versao) on public.erros to authenticated;
+drop policy if exists erros_escrever on public.erros;
+create policy erros_escrever on public.erros for insert to authenticated
+  with check (quem is not distinct from auth.uid());
+
+create or replace function public._erros_tecto() returns trigger
+  language plpgsql security definer set search_path = public as $$
+begin
+  if (select count(*) from public.erros
+       where quem is not distinct from new.quem
+         and quando > now() - interval '1 hour') >= 120 then
+    return null;
+  end if;
+  return new;
+end $$;
+revoke execute on function public._erros_tecto() from public, anon, authenticated;
+drop trigger if exists erros_tecto on public.erros;
+create trigger erros_tecto before insert on public.erros
+  for each row execute function public._erros_tecto();

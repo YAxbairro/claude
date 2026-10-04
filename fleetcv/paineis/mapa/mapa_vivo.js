@@ -59,10 +59,18 @@ function novo(op){
   var caixa=document.createElement('div');
   caixa.className='mapa-vivo';
   var mapa=null, carros={}, cauda=null, chaveVista=null;
-  var aSeguir=null, largou=false, carregouUm=false, erros=0, larg=0, alt=0;
+  var aSeguir=null, largou=false, carregouUm=false, erros=0;
 
   function criar(){
-    mapa=L.map(caixa,{zoomControl:true, attributionControl:true})
+    /* trackResize desligado: a biblioteca media a caixa a cada mudança
+       da janela, mesmo com o mapa guardado fora da página — e guardava
+       zero por zero (ver medir) */
+    /* op.fixo: o mapa do volante, que o condutor não tem de mexer a
+       conduzir — segue o carro e pronto */
+    var fixo=!!op.fixo;
+    mapa=L.map(caixa,{zoomControl:!fixo, attributionControl:true, trackResize:false,
+      dragging:!fixo, touchZoom:!fixo, doubleClickZoom:!fixo, scrollWheelZoom:!fixo,
+      boxZoom:!fixo, keyboard:!fixo})
       .setView(PRAIA,13);
     mapa.attributionControl.setPrefix(false);
     var q=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -77,13 +85,32 @@ function novo(op){
       if(aSeguir && !largou){ largou=true; if(op.largou) op.largou(aSeguir); } });
   }
 
+  /* A medida que a biblioteca guardou tem de ser a da caixa na página.
+     No telemóvel do patrão (02/10), o mapa da frota esperava fora da
+     página enquanto ele via o turno todo; a janela mudou de tamanho
+     nesse tempo, ficou medido zero por zero, e ao voltar ninguém o
+     corrigia: ruas só no canto de cima, o carro fora do meio. Agora
+     compara-se sempre com a caixa verdadeira, e só com ela à vista. */
+  function medir(){
+    if(!mapa || !caixa.isConnected) return;
+    var w=caixa.clientWidth, h=caixa.clientHeight;
+    if(!w || !h) return;
+    var s=mapa.getSize();
+    if(s.x===w && s.y===h) return;
+    mapa.invalidateSize({pan:false});
+    var m=aSeguir && !largou && carros[aSeguir];
+    if(m) mapa.panTo(m.getLatLng(), {animate:false});
+  }
+  try{
+    if(window.ResizeObserver) new ResizeObserver(function(){ medir(); }).observe(caixa);
+    window.addEventListener('resize', function(){ setTimeout(medir, 60); });
+  }catch(e){}
+
   function encaixar(lugar){
     if(!lugar) return false;
     if(caixa.parentNode!==lugar) lugar.appendChild(caixa);
     if(!mapa) criar();
-    if(caixa.clientWidth!==larg || caixa.clientHeight!==alt){
-      larg=caixa.clientWidth; alt=caixa.clientHeight;
-      mapa.invalidateSize({pan:false}); }
+    medir();
     return true;
   }
 
@@ -104,7 +131,7 @@ function novo(op){
     m._anim=requestAnimationFrame(passo);
   }
   function seguirA(m, p){
-    if(aSeguir && m._id===aSeguir && !largou && caixa.parentNode)
+    if(aSeguir && m._id===aSeguir && !largou && caixa.isConnected)
       mapa.panTo(p,{animate:false});
   }
   function rodar(m, ang){
@@ -201,8 +228,13 @@ function novo(op){
                                            fillColor:'#fff', fillOpacity:1});
         this._postos=L.layerGroup().addTo(mapa);
       }
-      this._todo.setLatLngs(d.ate==null?[]:pts);
-      this._feito.setLatLngs(feito);
+      /* o percurso só se redesenha quando mudou: o volante pede isto a
+         cada segundo, e um turno longo tem milhares de pontos */
+      var chaveP=pts.length+':'+n+':'+(pts.length?pts[pts.length-1].join(','):'');
+      if(this._chaveP!==chaveP){
+        this._chaveP=chaveP;
+        this._todo.setLatLngs(d.ate==null?[]:pts);
+        this._feito.setLatLngs(feito); }
       if(pts.length){ this._inicio.setLatLng(pts[0]); if(!mapa.hasLayer(this._inicio)) this._inicio.addTo(mapa); }
       else if(mapa.hasLayer(this._inicio)) mapa.removeLayer(this._inicio);
       var chavePostos=JSON.stringify(d.abast||[]);
@@ -231,8 +263,20 @@ function novo(op){
       }
     },
 
+    /* mostrar um ponto (onde abasteceu), deixando de seguir o carro */
+    verPonto:function(lat, lon, texto){
+      if(!mapa) return;
+      largou=true;
+      if(!this._ponto) this._ponto=L.circleMarker([lat,lon],{radius:9, color:'#fff', weight:2,
+        fillColor:'var(--warn)', fillOpacity:1});
+      this._ponto.setLatLng([lat,lon]);
+      if(!mapa.hasLayer(this._ponto)) this._ponto.addTo(mapa);
+      this._ponto.unbindTooltip().bindTooltip(esc(texto),{permanent:true, direction:'top', offset:[0,-8]});
+      mapa.setView([lat,lon], Math.max(mapa.getZoom(),17));
+    },
     /* voltar a seguir, depois de o patrão ter mexido no mapa */
     centrar:function(){
+      if(this._ponto && mapa.hasLayer(this._ponto)) mapa.removeLayer(this._ponto);
       largou=false;
       var m=aSeguir&&carros[aSeguir];
       if(m) mapa.setView(m.getLatLng(), Math.max(mapa.getZoom(),16));

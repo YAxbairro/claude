@@ -496,7 +496,7 @@ function fotosDo(t){
     Nuvem.fotosDoTurno(t.id).then(function(f){
       aBuscarFoto[t.id]=false;
       fotos[t.id]=Object.assign({}, fotos[t.id]||{}, f||{});
-      if(S.ecra==='turno' && S.sel===t.id) pintar(); });
+      if((S.ecra==='turno' && S.sel===t.id) || (S.ecra==='mapa' && S.cartao===t.id && S.detalhe)) pintar(); });
   }
   return tem||null;
 }
@@ -504,6 +504,43 @@ function quadroFoto(src, rot){
   return '<button class="foto-q" data-foto="'+esc(src)+'">'+
     '<img src="'+src+'" alt="'+esc(rot)+'" loading="lazy">'+
     '<span>'+esc(rot)+'</span></button>';
+}
+/* As fotografias de um turno (quadrante e talões), em grande. Servem o
+   turno todo e o "Mais detalhes" do carro que se está a seguir. */
+function fotosDoTurno(t, aoVivo){
+  var fs=fotosDo(t)||{};
+  var quadros=[];
+  if(fs[t.id+'_inicio']) quadros.push(quadroFoto(fs[t.id+'_inicio'],
+    'Quadrante ao começar · '+nf(t.kmInicio)+' km'+
+    (t.kmLidoInicio>0?(Math.abs(t.kmLidoInicio-t.kmInicio)>1?' · a foto mostra '+nf(t.kmLidoInicio):' · lido na foto'):'')));
+  (t.abast||[]).forEach(function(a,ia){
+    var kab=a.chaveFoto||(t.id+'_ab'+ia);
+    if(fs[kab]) quadros.push(quadroFoto(fs[kab],
+      'Talão · '+nf(a.valor)+' CVE · '+hh(a.hora))); });
+  if(fs[t.id+'_fim']) quadros.push(quadroFoto(fs[t.id+'_fim'],
+    'Quadrante ao acabar · '+nf(t.kmFim)+' km'+
+    (t.kmLidoFim>0?(Math.abs(t.kmLidoFim-t.kmFim)>1?' · a foto mostra '+nf(t.kmLidoFim):' · lido na foto'):'')));
+  if(quadros.length)
+    return '<div class="cartao"><h2>As fotografias</h2>'+
+      '<p class="p-nota" style="margin:2px 0 9px">Toque para ver em grande.</p>'+
+      '<div class="fotos">'+quadros.join('')+'</div></div>';
+  if(t.exemplo)
+    return '<div class="cartao nota"><h2>Turno de exemplo</h2>'+
+      '<p class="p-nota" style="margin-top:4px">Os turnos de estreia não têm '+
+      'fotografias — servem só para mostrar como fica. Os turnos verdadeiros '+
+      'trazem o quadrante e os talões.</p></div>';
+  if(!aoVivo && (t.temFotoInicio||t.temFotoFim||
+      (t.abast||[]).some(function(a){ return a.temFoto; })))
+    return '<div class="cartao"><h2>As fotografias</h2>'+
+      '<p class="p-nota" style="margin-top:4px">'+
+      (aBuscarFoto[t.id]&&!fotos[t.id] ? 'a ir buscar…'
+        : 'O condutor tirou fotografias mas ainda não chegaram aqui — '+
+          'o telemóvel dele deve estar sem rede.')+'</p></div>';
+  if(!aoVivo)
+    return '<div class="cartao aviso"><h2>Sem fotografias</h2>'+
+      '<p class="p-nota" style="margin-top:4px">Este turno não tem foto do '+
+      'conta-quilómetros nem do talão. Fica só a palavra do condutor.</p></div>';
+  return '';
 }
 function percursoDe(t){
   if(rastos[t.id]) return rastos[t.id];
@@ -610,9 +647,8 @@ function faixaDoCarro(t){
     (parado ? '<p class="p-nota faixa-fora">'+semSinalTexto(t)+'</p>' : '')+
     (mapaVivo && S.largou ? '<button class="bt pri pq" data-f="seguir-de-novo">'+
       '◎ Voltar a seguir o '+esc(t.matricula)+'</button>' : '')+
-    '<div class="par" style="margin-top:8px">'+
-      '<button class="bt sec pq" data-f="detalhes">'+(S.detalhe?'Menos detalhes':'Mais detalhes')+'</button>'+
-      '<button class="bt sec pq" data-turno="'+t.id+'">O turno todo ›</button></div>'+
+    '<button class="bt sec pq" data-f="detalhes" style="margin-top:8px">'+
+      (S.detalhe?'Menos detalhes ▴':'Mais detalhes: fotografias, abastecimentos, alertas ▾')+'</button>'+
     '</div>';
 }
 
@@ -665,7 +701,7 @@ function cartaoDoCarro(t){
 
   if(abast.length){
     h+=abast.map(function(a){
-      return '<button class="item fino" data-turno="'+t.id+'">'+
+      return '<button class="item fino" data-ver-abast="'+abast.indexOf(a)+'">'+
         '<span><span class="p">Abasteceu '+nf(a.valor)+' CVE</span><br>'+
         '<span class="s">'+hh(a.hora)+' · '+esc(a.posto||'posto')+' · '+
         nf(a.valor/(t.precoLitro||145),2)+' litros</span></span>'+
@@ -681,15 +717,12 @@ function cartaoDoCarro(t){
     ' com o quadrante nos '+nf(t.kmInicio)+' km'+
     (litros?' · '+nf(litros,2)+' litros até agora':'')+'.</p>';
 
+  /* os alertas, aqui mesmo (antes levavam a outro ecrã, com outro mapa) */
   if(alertas.length)
-    h+='<button class="item alerta-cx" data-turno="'+t.id+'">'+
-      '<span><span class="p">'+alertas.length+
-      (alertas.length===1?' coisa para ver':' coisas para ver')+'</span><br>'+
-      '<span class="s">'+esc(alertas[0].d)+'</span></span>'+
-      '<span class="seta">›</span></button>';
+    h+='<div class="alerta-cx"><p class="p"><b>'+alertas.length+
+      (alertas.length===1?' coisa para ver':' coisas para ver')+'</b></p>'+
+      alertas.map(function(a){ return '<p class="s">· '+esc(a.d)+'</p>'; }).join('')+'</div>';
 
-  h+='<button class="bt sec" data-turno="'+t.id+'" style="margin-top:10px">'+
-    'Ver o turno todo, com o mapa</button>';
   /* Um condutor esquece-se de fechar e o carro fica "em turno" para
      sempre; o turno seguinte não abre limpo e o mapa mente. Passadas
      duas horas sem notícias, o patrão pode fechá-lo daqui. */
@@ -698,7 +731,7 @@ function cartaoDoCarro(t){
       '" style="margin-top:8px">Fechar este turno</button>'+
       '<p class="p-nota" style="margin-top:6px">Sem notícias há mais de duas horas. '+
       'Fechar aqui fica registado como fecho do patrão, não do condutor.</p>';
-  return h+'</div>';
+  return h+'</div>'+fotosDoTurno(t, true);
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -829,7 +862,14 @@ function pintar(){
           ' por fechar</b>':'')+'</p>'+
       mapaFrota();
     var escolhido = S.cartao ? turnoVivo(S.cartao) : null;
-    if(!escolhido && S.cartao){ S.cartao=null; S.detalhe=false; S.largou=false; }
+    if(!escolhido && S.cartao){ acabouOSeguido(); S.cartao=null; S.detalhe=false; S.largou=false; }
+    /* o turno do carro que se seguia acabou: as contas estão a um toque */
+    if(!escolhido && S.acabou){
+      var ta=S.turnos.filter(function(x){ return x.id===S.acabou; })[0];
+      if(ta) h+='<div class="cartao bom acabou"><h2>O turno do '+esc(ta.matricula)+' acabou'+
+        (ta.fim?' às '+hh(ta.fim):'')+'</h2>'+
+        '<p class="p-nota" style="margin-top:4px">'+esc(ta.condutor||'')+' fechou o turno. As contas já estão feitas.</p>'+
+        '<button class="bt sec pq" data-turno="'+ta.id+'" style="margin-top:8px">Ver as contas do turno ›</button></div>'; }
     /* Tocar num carro é querer vê-lo: o mapa aproxima-se e segue-o, e
        por baixo fica só o essencial. O cartão com tudo abre-se quando
        se pede — antes abria logo e tapava o mapa. */
@@ -1168,38 +1208,7 @@ function pintar(){
       '<div><b class="num">'+nf(t.totalCve)+'</b><span>CVE em combustível</span></div>'+
       '<div><b class="num">'+hms(dur/1000)+'</b><span>tempo</span></div></div>';
     /* as fotografias, em grande, antes das contas */
-    var fs=fotosDo(t)||{};
-    var quadros=[];
-    if(fs[t.id+'_inicio']) quadros.push(quadroFoto(fs[t.id+'_inicio'],
-      'Quadrante ao começar · '+nf(t.kmInicio)+' km'+
-      (t.kmLidoInicio>0?(Math.abs(t.kmLidoInicio-t.kmInicio)>1?' · a foto mostra '+nf(t.kmLidoInicio):' · lido na foto'):'')));
-    (t.abast||[]).forEach(function(a,ia){
-      var kab=a.chaveFoto||(t.id+'_ab'+ia);
-      if(fs[kab]) quadros.push(quadroFoto(fs[kab],
-        'Talão · '+nf(a.valor)+' CVE · '+hh(a.hora))); });
-    if(fs[t.id+'_fim']) quadros.push(quadroFoto(fs[t.id+'_fim'],
-      'Quadrante ao acabar · '+nf(t.kmFim)+' km'+
-      (t.kmLidoFim>0?(Math.abs(t.kmLidoFim-t.kmFim)>1?' · a foto mostra '+nf(t.kmLidoFim):' · lido na foto'):'')));
-    if(quadros.length)
-      h+='<div class="cartao"><h2>As fotografias</h2>'+
-        '<p class="p-nota" style="margin:2px 0 9px">Toque para ver em grande.</p>'+
-        '<div class="fotos">'+quadros.join('')+'</div></div>';
-    else if(t.exemplo)
-      h+='<div class="cartao nota"><h2>Turno de exemplo</h2>'+
-        '<p class="p-nota" style="margin-top:4px">Os turnos de estreia não têm '+
-        'fotografias — servem só para mostrar como fica. Os turnos verdadeiros '+
-        'trazem o quadrante e os talões.</p></div>';
-    else if(!aoVivo && (t.temFotoInicio||t.temFotoFim||
-        (t.abast||[]).some(function(a){ return a.temFoto; })))
-      h+='<div class="cartao"><h2>As fotografias</h2>'+
-        '<p class="p-nota" style="margin-top:4px">'+
-        (aBuscarFoto[t.id]&&!fotos[t.id] ? 'a ir buscar…'
-          : 'O condutor tirou fotografias mas ainda não chegaram aqui — '+
-            'o telemóvel dele deve estar sem rede.')+'</p></div>';
-    else if(!aoVivo)
-      h+='<div class="cartao aviso"><h2>Sem fotografias</h2>'+
-        '<p class="p-nota" style="margin-top:4px">Este turno não tem foto do '+
-        'conta-quilómetros nem do talão. Fica só a palavra do condutor.</p></div>';
+    h+=fotosDoTurno(t, aoVivo);
 
     if((t.abast||[]).length)
       h+='<div class="cartao"><h2>Abastecimentos</h2>'+
@@ -1497,8 +1506,14 @@ function mapaVivoDo(qual){
   return mapasVivos[qual];
 }
 if(window.MapaVivo) MapaVivo.quandoFalhar(function(){ pintar(); });
+/* o carro que se seguia saiu do mapa porque o turno fechou: lembra-se,
+   para o ecrã do mapa oferecer as contas logo ali */
+function acabouOSeguido(){
+  var id=S.cartao; if(!id) return;
+  if(S.turnos.some(function(x){ return x.id===id && x.fim; })) S.acabou=id;
+}
 function seguirCarro(id){
-  S.cartao=id; S.detalhe=false; S.largou=false;
+  S.cartao=id; S.detalhe=false; S.largou=false; S.acabou=null;
   if(S.ecra!=='mapa') ir('mapa'); else pintar();
   /* quem tocou no carro na lista, lá em baixo, tem de o ver no mapa */
   var l=document.getElementById('lugar-mapa-frota')||document.querySelector('svg.mapa');
@@ -1533,7 +1548,7 @@ document.addEventListener('input', function(e){
 document.addEventListener('click', function(e){
   var b=e.target.closest('[data-f],[data-tab],[data-turno],[data-carro],[data-cond],'+
     '[data-res],[data-carro-lig],[data-cond-nome],[data-vivo],[data-posto-mapa],'+
-    '[data-tile],[data-mes],[data-turnos-de],[data-turnos-cond],[data-abast],'+
+    '[data-tile],[data-mes],[data-turnos-de],[data-turnos-cond],[data-abast],[data-ver-abast],'+
     '[data-foto],'+
     '#voltar');
   if(!b) return;
@@ -1558,7 +1573,28 @@ document.addEventListener('click', function(e){
 
   if(b.id==='voltar'){ voltar(); return; }
   if(d.tab){ ir(d.tab, null, null); return; }
-  if(d.turno){ ir('turno', d.turno, {ecra:S.ecra, sel:S.sel}); return; }
+  /* um abastecimento do carro seguido: mostra no mapa onde foi (sem o
+     mapa a sério, abre o turno, com o desenho e os postos) */
+  if(d.verAbast!=null){
+    var tv=turnoVivo(S.cartao), ab=tv&&(tv.abast||[])[+d.verAbast], mf=mapasVivos.frota;
+    if(ab && ab.lat!=null && mf && mf.mapa()){
+      S.largou=true; mf.verPonto(ab.lat, ab.lon, 'Abasteceu aqui · '+nf(ab.valor)+' CVE · '+hh(ab.hora));
+      pintar();
+      var lm2=document.getElementById('lugar-mapa-frota'); if(lm2) lm2.scrollIntoView({block:'start'});
+    } else if(tv) ir('turno', tv.id, {ecra:S.ecra, sel:S.sel});
+    return; }
+  if(d.turno){
+    S.acabou=null;
+    /* Um carro em turno vê-se num ecrã só: o mapa, a velocidade, e por
+       baixo os detalhes (no teste de 02/10 havia dois mapas — um com a
+       velocidade, outro com o percurso — e o patrão não sabia qual). */
+    if(turnoVivo(d.turno)){
+      S.cartao=d.turno; S.detalhe=true; S.largou=false;
+      if(S.ecra!=='mapa') ir('mapa'); else pintar();
+      var lm=document.getElementById('lugar-mapa-frota')||document.querySelector('svg.mapa');
+      if(lm) lm.scrollIntoView({block:'start'});
+      return; }
+    ir('turno', d.turno, {ecra:S.ecra, sel:S.sel}); return; }
   if(d.carro){ ir('carro', d.carro, {ecra:S.ecra, sel:S.sel}); return; }
   if(d.carroLig){ ir('carro', d.carroLig, {ecra:S.ecra, sel:S.sel}); return; }
   if(d.cond){ ir('condutor', d.cond, {ecra:S.ecra, sel:S.sel}); return; }
@@ -1908,7 +1944,7 @@ Nuvem.aoMudar(function(){
   if(d.frota) S.frota=d.frota;
   S.turnos=(d.turnos||[]).map(completarTurno);
   S.vivos=(d.vivos||[]).map(completarTurno);
-  if(S.cartao && !turnoVivo(S.cartao)) S.cartao=null;
+  if(S.cartao && !turnoVivo(S.cartao)){ acabouOSeguido(); S.cartao=null; }
   /* O telemóvel lembrava-se de ter entrado, mas a base diz que não há
      sessão (saiu noutro sítio, ou a sessão caducou). Mostrar a frota
      vazia era pior do que pedir o código outra vez. */

@@ -13,6 +13,7 @@
   --warn:#A86A05; --warn-wash:#F8EEDC;
   --crit:#B02E20; --crit-wash:#F8E6E3;
   --terra:#EEF2F1; --rua:#A4B2B0; --rua2:#CCD6D4; --costa:#7BA3A8;
+  --mapa-filtro:saturate(.5) contrast(.96) brightness(1.02);
   --sombra:0 1px 2px rgba(15,22,24,.06), 0 10px 28px -20px rgba(15,22,24,.45);
   --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
   --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
@@ -25,6 +26,7 @@
   --ok:#77C34B; --ok-wash:#17280F; --warn:#DCA43C; --warn-wash:#2E2310;
   --crit:#E4776A; --crit-wash:#331714;
   --terra:#0D1314; --rua:#47585A; --rua2:#263132; --costa:#42636A;
+  --mapa-filtro:invert(1) hue-rotate(180deg) saturate(.3) brightness(.95) contrast(.9);
   --sombra:0 1px 2px rgba(0,0,0,.45), 0 10px 28px -20px rgba(0,0,0,.9);
 }}
 :root[data-theme="dark"]{
@@ -34,6 +36,7 @@
   --ok:#77C34B; --ok-wash:#17280F; --warn:#DCA43C; --warn-wash:#2E2310;
   --crit:#E4776A; --crit-wash:#331714;
   --terra:#0D1314; --rua:#47585A; --rua2:#263132; --costa:#42636A;
+  --mapa-filtro:invert(1) hue-rotate(180deg) saturate(.3) brightness(.95) contrast(.9);
   --sombra:0 1px 2px rgba(0,0,0,.45), 0 10px 28px -20px rgba(0,0,0,.9);
 }
 *{box-sizing:border-box}
@@ -168,6 +171,20 @@ button.foto{width:100%; font:inherit; color:inherit}
 .volante{position:relative; flex:1; min-height:320px; border-radius:16px; overflow:hidden;
   border:1px solid var(--line); background:var(--surface2); box-shadow:var(--sombra)}
 .mapa{position:absolute; inset:0; width:100%; height:100%; display:block}
+.volante .lugar-mapa{position:absolute; inset:0}
+.volante .mapa-vivo{position:absolute; inset:0; z-index:0}
+.volante .mapa-vivo.leaflet-container{background:var(--surface2)}
+.volante .mapa-vivo .leaflet-tile-pane{filter:var(--mapa-filtro)}
+.volante .mapa-vivo .leaflet-tile-container img{width:256.6px!important; height:256.6px!important}
+.volante .mapa-vivo .leaflet-bottom{bottom:58px}
+.volante .mapa-vivo .leaflet-control-attribution{font-size:9px; opacity:.8}
+.volante .hud, .volante .baixo{z-index:500}
+.carro-vivo{background:none; border:none}
+.carro-vivo .cv-seta{position:absolute; left:12px; top:12px; width:32px; height:32px;
+  transition:transform .8s linear; filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+.carro-vivo .cv-onda{position:absolute; left:14px; top:14px; width:28px; height:28px;
+  border-radius:50%; animation:onda 2.4s ease-out infinite}
+@keyframes onda{0%{transform:scale(.7); opacity:.4}100%{transform:scale(2); opacity:0}}
 .hud{position:absolute; top:0; left:0; right:0; padding:14px 16px 0; display:flex;
   align-items:flex-start; justify-content:space-between; pointer-events:none}
 .vel{display:flex; align-items:baseline; gap:7px; padding:8px 14px 7px; border-radius:13px;
@@ -755,10 +772,18 @@ function novo(op){
   var caixa=document.createElement('div');
   caixa.className='mapa-vivo';
   var mapa=null, carros={}, cauda=null, chaveVista=null;
-  var aSeguir=null, largou=false, carregouUm=false, erros=0, larg=0, alt=0;
+  var aSeguir=null, largou=false, carregouUm=false, erros=0;
 
   function criar(){
-    mapa=L.map(caixa,{zoomControl:true, attributionControl:true})
+    /* trackResize desligado: a biblioteca media a caixa a cada mudança
+       da janela, mesmo com o mapa guardado fora da página — e guardava
+       zero por zero (ver medir) */
+    /* op.fixo: o mapa do volante, que o condutor não tem de mexer a
+       conduzir — segue o carro e pronto */
+    var fixo=!!op.fixo;
+    mapa=L.map(caixa,{zoomControl:!fixo, attributionControl:true, trackResize:false,
+      dragging:!fixo, touchZoom:!fixo, doubleClickZoom:!fixo, scrollWheelZoom:!fixo,
+      boxZoom:!fixo, keyboard:!fixo})
       .setView(PRAIA,13);
     mapa.attributionControl.setPrefix(false);
     var q=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -773,13 +798,32 @@ function novo(op){
       if(aSeguir && !largou){ largou=true; if(op.largou) op.largou(aSeguir); } });
   }
 
+  /* A medida que a biblioteca guardou tem de ser a da caixa na página.
+     No telemóvel do patrão (02/10), o mapa da frota esperava fora da
+     página enquanto ele via o turno todo; a janela mudou de tamanho
+     nesse tempo, ficou medido zero por zero, e ao voltar ninguém o
+     corrigia: ruas só no canto de cima, o carro fora do meio. Agora
+     compara-se sempre com a caixa verdadeira, e só com ela à vista. */
+  function medir(){
+    if(!mapa || !caixa.isConnected) return;
+    var w=caixa.clientWidth, h=caixa.clientHeight;
+    if(!w || !h) return;
+    var s=mapa.getSize();
+    if(s.x===w && s.y===h) return;
+    mapa.invalidateSize({pan:false});
+    var m=aSeguir && !largou && carros[aSeguir];
+    if(m) mapa.panTo(m.getLatLng(), {animate:false});
+  }
+  try{
+    if(window.ResizeObserver) new ResizeObserver(function(){ medir(); }).observe(caixa);
+    window.addEventListener('resize', function(){ setTimeout(medir, 60); });
+  }catch(e){}
+
   function encaixar(lugar){
     if(!lugar) return false;
     if(caixa.parentNode!==lugar) lugar.appendChild(caixa);
     if(!mapa) criar();
-    if(caixa.clientWidth!==larg || caixa.clientHeight!==alt){
-      larg=caixa.clientWidth; alt=caixa.clientHeight;
-      mapa.invalidateSize({pan:false}); }
+    medir();
     return true;
   }
 
@@ -800,7 +844,7 @@ function novo(op){
     m._anim=requestAnimationFrame(passo);
   }
   function seguirA(m, p){
-    if(aSeguir && m._id===aSeguir && !largou && caixa.parentNode)
+    if(aSeguir && m._id===aSeguir && !largou && caixa.isConnected)
       mapa.panTo(p,{animate:false});
   }
   function rodar(m, ang){
@@ -897,8 +941,13 @@ function novo(op){
                                            fillColor:'#fff', fillOpacity:1});
         this._postos=L.layerGroup().addTo(mapa);
       }
-      this._todo.setLatLngs(d.ate==null?[]:pts);
-      this._feito.setLatLngs(feito);
+      /* o percurso só se redesenha quando mudou: o volante pede isto a
+         cada segundo, e um turno longo tem milhares de pontos */
+      var chaveP=pts.length+':'+n+':'+(pts.length?pts[pts.length-1].join(','):'');
+      if(this._chaveP!==chaveP){
+        this._chaveP=chaveP;
+        this._todo.setLatLngs(d.ate==null?[]:pts);
+        this._feito.setLatLngs(feito); }
       if(pts.length){ this._inicio.setLatLng(pts[0]); if(!mapa.hasLayer(this._inicio)) this._inicio.addTo(mapa); }
       else if(mapa.hasLayer(this._inicio)) mapa.removeLayer(this._inicio);
       var chavePostos=JSON.stringify(d.abast||[]);
@@ -927,8 +976,20 @@ function novo(op){
       }
     },
 
+    /* mostrar um ponto (onde abasteceu), deixando de seguir o carro */
+    verPonto:function(lat, lon, texto){
+      if(!mapa) return;
+      largou=true;
+      if(!this._ponto) this._ponto=L.circleMarker([lat,lon],{radius:9, color:'#fff', weight:2,
+        fillColor:'var(--warn)', fillOpacity:1});
+      this._ponto.setLatLng([lat,lon]);
+      if(!mapa.hasLayer(this._ponto)) this._ponto.addTo(mapa);
+      this._ponto.unbindTooltip().bindTooltip(esc(texto),{permanent:true, direction:'top', offset:[0,-8]});
+      mapa.setView([lat,lon], Math.max(mapa.getZoom(),17));
+    },
     /* voltar a seguir, depois de o patrão ter mexido no mapa */
     centrar:function(){
+      if(this._ponto && mapa.hasLayer(this._ponto)) mapa.removeLayer(this._ponto);
       largou=false;
       var m=aSeguir&&carros[aSeguir];
       if(m) mapa.setView(m.getLatLng(), Math.max(mapa.getZoom(),16));
@@ -1301,7 +1362,12 @@ function lojaDoSupabase(sb){
           return (r.data||[]).map(function(x){ return x.corpo; }); })
         .catch(function(){ return []; }); },
 
-    licenca:function(){ return Promise.resolve(!!(eu&&eu.papel==='dono')); }
+    licenca:function(){ return Promise.resolve(!!(eu&&eu.papel==='dono')); },
+
+    /* o registo de erros: só se escreve (ver registar, mais abaixo) */
+    registar:function(linha){
+      return sb.from('erros').insert(linha)
+        .then(function(r){ if(r && r.error) throw erroDe(r.error, r.status); }); }
   };
 }
 
@@ -1636,7 +1702,7 @@ function arrancar(op){
      Claude, e por fim só este aparelho. Fica o primeiro que houver. */
   ligarSupabase(op.papel).then(function(sb){
     if(sb){
-      var ls=lojaDoSupabase(sb); loja=ls;
+      var ls=lojaDoSupabase(sb); loja=ls; enviarRegistos();
       return ls.comecar().then(function(entrou){
         estado = !entrou ? 'supabase-por-entrar'
                : ls.semRede() ? 'supabase-sem-rede' : 'supabase';
@@ -2103,9 +2169,55 @@ function apagarTurno(id){
   return loja.tirar('turnos', id).catch(function(){});
 }
 
+/* ─── o registo de erros ────────────────────────────────── */
+/* O que corre mal nos telemóveis chega à base (tabela erros): o GPS
+   que pára com o ecrã apagado, uma licença recusada, um erro da página.
+   No teste de 02/10 só se soube o que aconteceu indo aos registos do
+   servidor; agora fica escrito, com a hora, o telemóvel e a versão.
+   Cada mensagem igual vai uma vez por sessão, e no máximo 40 por
+   sessão — um erro em ciclo não gasta os dados do condutor. Se a base
+   ainda não tiver a tabela, cala-se até à próxima sessão. */
+var porRegistar=[], registados=0, jaVistos={}, semRegisto=false;
+function versaoSite(){
+  try{ var s=document.querySelector('script[src*="?v="]');
+    return s ? (s.getAttribute('src').split('?v=')[1]||'').slice(0,20) : ''; }catch(e){ return ''; }
+}
+function registar(tipo, onde, mensagem, detalhe){
+  if(semRegisto || registados>=40) return;
+  mensagem=String(mensagem==null?'':mensagem).slice(0,500);
+  var chave=tipo+'|'+onde+'|'+mensagem;
+  if(jaVistos[chave]) return; jaVistos[chave]=1; registados++;
+  var d={}; try{ d=JSON.parse(JSON.stringify(detalhe||{})); }catch(e){}
+  try{ d.pagina=location.hash||''; d.escondida=!!document.hidden; }catch(e){}
+  porRegistar.push({tipo:tipo, onde:String(onde).slice(0,60), mensagem:mensagem, detalhe:d,
+    ua:String((typeof navigator!=='undefined'&&navigator.userAgent)||'').slice(0,300),
+    versao:versaoSite()});
+  if(porRegistar.length>20) porRegistar.shift();
+  enviarRegistos();
+}
+function enviarRegistos(){
+  if(!loja || !loja.registar || !porRegistar.length) return;
+  var l=porRegistar.shift();
+  loja.registar(l).then(enviarRegistos).catch(function(e){
+    /* a tabela ainda não existe (ou não deixa): não se insiste */
+    if(e && e.recusa) semRegisto=true; else porRegistar.unshift(l); });
+}
+try{
+  window.addEventListener('error', function(ev){
+    var m=(ev && ev.message)||'';
+    if(!m || m==='Script error.') return;          /* de fora da página: não se sabe nada */
+    registar('erro', 'pagina', m, {onde:(ev.filename||'').split('/').pop()+':'+(ev.lineno||0)});
+  });
+  window.addEventListener('unhandledrejection', function(ev){
+    var r=ev && ev.reason; var m=(r && (r.message||r.toString&&r.toString()))||'';
+    if(m) registar('erro', 'promessa', m);
+  });
+}catch(e){}
+
 /* ════════════════════════════════════════════════════════ */
 return {
   arrancar:arrancar,
+  registar:registar,
   aoMudar:function(f){ ouvintes.push(f); },
   estado:function(){ return estado; },
   ensaio:noEnsaio,
@@ -2320,7 +2432,7 @@ async function texto(img, cx){
     if(mi!==0 && mi!==antes){ s+=dicionario[mi-1]||''; soma+=m; n++; }
     antes=mi;
   }
-  return {text:s, conf:n?soma/n*100:0, h:cx.h};
+  return {text:s, conf:n?soma/n*100:0, h:cx.h, x:cx.x, y:cx.y, w:cx.w};
 }
 
 async function lerImagem(img){
@@ -2339,11 +2451,39 @@ function daEscala(s){
     return false; }
   return parte(s);
 }
+/* O rótulo de um número: o do próprio pedaço ("ODO 6140km"), ou o de
+   um rótulo sozinho por cima dele ou à esquerda, na mesma linha. No
+   quadrante do teste de 02/10 estavam "ODO 6140km" e "Trip 137.0km",
+   um por baixo do outro, e o leitor escolheu um número tirado do Trip
+   (o parcial), por ter mais algarismos. */
+var R_ODO=/ODO|ODOMETER|TOTAL/i, R_TRIP=/TRIP|PARC|DIST|JOUR/i;
+function rotuloProprio(t){ return R_ODO.test(t) ? 'odo' : (R_TRIP.test(t) ? 'trip' : null); }
+function rotuloDe(it, itens){
+  var r=rotuloProprio(String(it.text||'')); if(r) return r;
+  if(it.x==null) return null;
+  var melhor=null, dmin=1e9;
+  itens.forEach(function(o){
+    if(o===it || o.x==null) return;
+    var ot=String(o.text||''), ro=rotuloProprio(ot);
+    if(!ro || /\d{3}/.test(ot)) return;              /* só rótulos sozinhos */
+    var sobrepoe = o.x < it.x+it.w && o.x+o.w > it.x;
+    var dy = it.y-(o.y+o.h);
+    var dCima = (sobrepoe && dy > -o.h*0.6 && dy < it.h*1.6) ? Math.abs(dy) : 1e9;
+    var mesmaLinha = Math.abs((o.y+o.h/2)-(it.y+it.h/2)) < it.h*0.6;
+    var dx = it.x-(o.x+o.w);
+    var dEsq = (mesmaLinha && dx > -o.w*0.3 && dx < it.h*3) ? Math.abs(dx) : 1e9;
+    var d=Math.min(dCima, dEsq);
+    if(d<dmin){ dmin=d; melhor=ro; } });
+  return melhor;
+}
 function candidatos(itens){
   var c=[];
   (itens||[]).forEach(function(it){
     var t=' '+String(it.text||'')+' ';
-    var odo=/ODO|ODOMETER/i.test(t);
+    /* o conta-rotações ("x1000 r/min") não é o conta-quilómetros */
+    if(/r\s*\/\s*m[il1]n|rpm|[x×]\s*1000/i.test(t)) return;
+    var rot=rotuloDe(it, itens||[]);
+    var odo=rot==='odo', trip=rot==='trip';
     t=t.replace(/\b\d{1,2}[.\/]\d{1,2}[.\/]\d{2,4}\b/g,' ');     /* datas */
     t=t.replace(/\b\d{1,2}[:h]\d{2}\b/g,' ');                      /* relógio */
     t=t.replace(/(\d)\s*[°º]\s*C/gi,'$1C ');                        /* temperatura */
@@ -2360,14 +2500,17 @@ function candidatos(itens){
     if(odo) t=t.replace(/(ODO\w*\s*(?:KM)?\s*)((?:\d+\s)+\d+)/i,function(m,a,g){ return a+g.replace(/\s/g,''); });
     var re=/\d[\d.,]*\d|\d/g, m;
     while((m=re.exec(t))){
-      var s=m[0], mm=s.match(/^(\d+)[.,](\d)$/);
+      /* "137.0" e "137.01" são parciais com décimas (o leitor chegou a ler
+         "137.0km" como "137.01" e a fazer dele 13.701); os milhares têm
+         três algarismos depois do ponto ("120.050") */
+      var s=m[0], mm=s.match(/^(\d+)[.,](\d{1,2})$/);
       var inteiro=mm?mm[1]:s.replace(/[.,]/g,'');
       var sem0=inteiro.replace(/^0+/,'');
       if(sem0.length<3||sem0.length>7) continue;
       var depois=t.slice(re.lastIndex, re.lastIndex+4);
       c.push({v:parseInt(inteiro,10), nz:inteiro.length, zero:inteiro[0]==='0',
-        km:/^\s?(km|KM|Km|krn)/.test(depois), odo:odo, escala:daEscala(inteiro),
-        h:it.h||0, conf:it.conf||0});
+        km:/^\s?(km|KM|Km|krn)/.test(depois), odo:odo, trip:trip, decimal:!!mm,
+        escala:daEscala(inteiro), h:it.h||0, conf:it.conf||0});
     }
   });
   return c;
@@ -2376,16 +2519,31 @@ function candidatos(itens){
    (até 2.500 km): é assim que quase nunca se engana. Sem saber (o
    primeiro turno), escolhe o mais provável — e o condutor confere. */
 function escolher(c, esperado){
+  /* Entre os plausíveis: o parcial (Trip) fica de fora se houver outro
+     (o aviso "TRIP" aparece ao lado do total em muitos painéis), e
+     havendo um com "ODO", é esse */
+  function apurar(l){
+    var semParcial=l.filter(function(x){ return !x.trip; });
+    if(semParcial.length) l=semParcial;
+    var doOdo=l.filter(function(x){ return x.odo; });
+    return doOdo.length ? doOdo : l;
+  }
   if(esperado>0){
     var perto=[];
     c.forEach(function(x){ [x.v, Math.floor(x.v/10)].forEach(function(v){
-      if(v>=esperado-2 && v<=esperado+2500) perto.push({v:v, d:v-esperado, h:x.h}); }); });
+      if(v>=esperado-2 && v<=esperado+2500) perto.push({v:v, d:v-esperado, h:x.h, trip:x.trip, odo:x.odo}); }); });
     if(!perto.length) return null;
+    perto=apurar(perto);
     perto.sort(function(a,b){ return a.d-b.d || b.h-a.h; });
     return perto[0].v;
   }
   var f=c.filter(function(x){ return !x.escala && x.nz>=4 && !(x.v<=300 && x.v%10===0); });
   if(!f.length) return null;
+  f=apurar(f);
+  /* um inteiro com "km" ou "ODO" passa à frente de um número com
+     décimas (as décimas são quase sempre do parcial: "Trip 137.0km") */
+  var marcados=f.filter(function(x){ return !x.decimal && (x.km || x.odo); });
+  if(marcados.length && f.some(function(x){ return x.decimal; })) f=marcados;
   function pontos(x){ return (x.nz>=5?100:0) + (x.zero&&x.nz>=5?60:0) + (x.km||x.odo?80:0)
     + Math.min(x.h,80)*0.5 + x.conf*0.1; }
   f.sort(function(a,b){ return pontos(b)-pontos(a); });
@@ -2482,11 +2640,22 @@ function extraVivo(){
    a rede cair ou a bateria acabar — e a nuvem leva-o ao patrão. */
 function androide(){ return /Android/i.test(navigator.userAgent||''); }
 function cartaoBateria(){
-  return '<div class="cartao aviso"><h2>Tire a FleetCV da poupança de bateria</h2>'+
-    '<p class="p-nota" style="margin-top:4px">Neste telemóvel a poupança de bateria pode fechar a '+
-    'FleetCV a meio do turno, e o GPS pára. Toque em baixo e escolha <b>Permitir</b> '+
-    '(ou "Sem restrições").</p>'+
-    '<button class="bt sec pq" data-f="bateria" style="margin-top:8px">Tirar da poupança de bateria</button></div>';
+  var fab=(S.app&&S.app.fabricante)||'';
+  return '<div class="cartao mau"><h2>Falta um passo: a bateria</h2>'+
+    '<p class="p-nota" style="margin-top:4px">Sem isto, '+(fab?esc(fab.charAt(0).toUpperCase()+fab.slice(1))+' ':'o telemóvel ')+
+    'adormece a FleetCV com o ecrã apagado e o GPS pára (no teste, até 9 minutos de cada vez). '+
+    'Toque em <b>Tirar da poupança de bateria</b> e escolha <b>Permitir</b>.</p>'+
+    '<p class="p-nota" style="margin-top:6px">Se o telemóvel não perguntar nada: Definições → Aplicações → '+
+    'FleetCV → Bateria → <b>Sem restrições</b>.</p></div>';
+}
+/* a aplicação instalada é anterior a esta página (a página actualiza-se
+   sozinha, a aplicação não) */
+function cartaoAtualizar(){
+  return '<div class="cartao nota"><h2>Há uma versão nova da aplicação</h2>'+
+    '<p class="p-nota" style="margin-top:4px">Segura melhor o GPS com o ecrã apagado. Instale-a por '+
+    'cima desta (não perde nada).</p>'+
+    '<a class="bt sec pq" href="/FleetCV.apk" style="margin-top:8px;display:inline-block;'+
+    'text-decoration:none">Descarregar a versão nova</a></div>';
 }
 /* aberto dentro do Instagram, Facebook, TikTok…: aí a página pára ainda mais */
 function dentroDeOutraApp(){
@@ -2577,50 +2746,126 @@ function pluginNativo(nome){
   }catch(e){ return null; }
 }
 var vigiaNativa=null, aLigarNativa=false;
+/* O que o teste do Yanick (02/10, um Samsung A24 com Android 16)
+   mostrou, e que a aplicação imitada dos testes escondia:
+   · dentro da aplicação, a página vem do site, sem o @capacitor/core:
+     o addWatcher devolve logo o número da vigia, e não uma promessa. O
+     ".then" rebentava ali — o GPS nativo ligava-se, mas a página não o
+     sabia: dava o condutor como "fora da aplicação" a cada ecrã apagado
+     e nunca pedia a poupança de bateria;
+   · as licenças eram pedidas todas ao mesmo tempo (localização e
+     notificações), e o serviço do GPS tentava pôr-se em primeiro plano
+     antes de a localização estar dada — no Android 14 e seguintes isso
+     falha calado, fica sem a notificação fixa, e com o ecrã apagado o
+     Android corta o GPS (4 a 9 minutos de cada vez, no teste).
+   Agora: primeiro a licença da localização, só depois o GPS (que assim
+   já arranca com a notificação), e só depois a das notificações. */
+function quando(r){ return (r && typeof r.then==='function') ? r : Promise.resolve(r); }
+/* para o registo de erros (Nuvem.registar), com o que ajuda a perceber */
+function modoGps(){ return vigiaNativa!=null ? 'app' : (nativo() ? 'app-sem-gps-nativo' : 'navegador'); }
+function registar(tipo, onde, msg, extra){
+  try{ Nuvem.registar(tipo, onde, msg, Object.assign({ecra:S.ecra, modo:modoGps(),
+    turno:S.turno&&S.turno.id, app:S.app||null, bateriaPresa:!!S.bateriaPresa}, extra||{})); }catch(e){}
+}
 function ligarGpsNativo(){
   var BG=pluginNativo('BackgroundGeolocation'); if(!BG) return false;
   if(vigiaNativa!=null || aLigarNativa) return true;
   aLigarNativa=true;
   if(S.gps.estado!=='ligado'){ S.gps.estado='a-procurar'; S.gps.porque=null; pintar(); }
-  /* Android 13 e seguintes: sem esta licença a notificação do turno não aparece */
-  try{ var LN=pluginNativo('LocalNotifications'); if(LN && LN.requestPermissions) LN.requestPermissions().catch(function(){}); }catch(e){}
-  BG.addWatcher({
-      backgroundTitle:'FleetCV · GPS ligado',
-      backgroundMessage:'A registar o percurso do carro. Para parar, feche o turno na aplicação.',
-      requestPermissions:true, stale:false, distanceFilter:0 },
-    function(loc, erro){
-      if(erro){
-        if(erro.code==='NOT_AUTHORIZED'){
-          S.gps.estado='recusado'; S.gps.definicoes=true;
-          S.gps.porque='A FleetCV não tem licença para a localização. Abra as definições e permita '+
-            'a localização (o melhor é "Permitir sempre").';
-          pintar();
-        } else falhouGps({code:2});
-        return;
-      }
-      if(!loc) return;
-      aceitarGps({coords:{latitude:loc.latitude, longitude:loc.longitude, accuracy:loc.accuracy,
-                          speed:(loc.speed!=null?loc.speed:null), heading:loc.bearing},
-                  timestamp:loc.time||Date.now()});
-    }).then(function(id){ vigiaNativa=id; aLigarNativa=false; verBateria(); })
-      .catch(function(){ aLigarNativa=false; falhouGps({code:2}); });
+  licencaLocalizacao(BG).then(function(dada){
+    if(!dada){ aLigarNativa=false; semLicencaNativa(); return; }
+    var r;
+    try{
+      r=BG.addWatcher({
+          backgroundTitle:'FleetCV · GPS ligado',
+          backgroundMessage:'A registar o percurso do carro. Para parar, feche o turno na aplicação.',
+          requestPermissions:true, stale:false, distanceFilter:0 },
+        function(loc, erro){
+          if(erro){
+            registar('aviso', 'gps-nativo', (erro.code||'')+' '+(erro.message||''));
+            if(erro.code==='NOT_AUTHORIZED' && /disabled/i.test(erro.message||'')){
+              S.gps.estado='recusado'; S.gps.definicoes=false;
+              S.gps.porque='A localização do telemóvel está desligada. Puxe a barra do topo para baixo '+
+                'e ligue a "Localização".';
+              pintar();
+            } else if(erro.code==='NOT_AUTHORIZED') semLicencaNativa();
+            else falhouGps({code:2});
+            return;
+          }
+          if(!loc) return;
+          aceitarGps({coords:{latitude:loc.latitude, longitude:loc.longitude, accuracy:loc.accuracy,
+                              speed:(loc.speed!=null?loc.speed:null), heading:loc.bearing},
+                      timestamp:loc.time||Date.now()});
+        });
+    }catch(e){
+      aLigarNativa=false; registar('erro', 'gps-nativo', 'addWatcher: '+(e&&e.message||e));
+      ligarGpsDoNavegador(); return;
+    }
+    quando(r).then(function(id){
+      vigiaNativa=id; aLigarNativa=false;
+      segurarTelemovel(true);
+      pedirNotificacoes().then(verBateria);
+    }).catch(function(e){
+      aLigarNativa=false; registar('erro', 'gps-nativo', 'vigia: '+(e&&e.message||e));
+      ligarGpsDoNavegador(); });
+  });
   return true;
+}
+/* A licença da localização, antes de ligar o GPS. Os métodos vêm do
+   próprio Capacitor (checkPermissions/requestPermissions de cada módulo). */
+function licencaLocalizacao(BG){
+  if(!BG.checkPermissions || !BG.requestPermissions) return Promise.resolve(true);
+  return quando(BG.checkPermissions()).then(function(p){
+    if(p && p.location==='granted') return true;
+    return quando(BG.requestPermissions({permissions:['location']})).then(function(q){
+      registar('info', 'licenca-localizacao', q && q.location);
+      return !!(q && q.location==='granted'); });
+  }).catch(function(e){ registar('aviso', 'licenca-localizacao', e&&e.message||e); return true; });
+}
+function semLicencaNativa(){
+  S.gps.estado='recusado'; S.gps.definicoes=true;
+  S.gps.porque='A FleetCV não tem licença para a localização. Toque em "Abrir as definições" → '+
+    'Licenças → Localização → "Permitir sempre" (ou "Permitir durante a utilização").';
+  pintar();
+}
+/* Android 13 e seguintes: sem esta licença a notificação do turno não se
+   vê (o GPS funciona na mesma). Pede-se depois da localização, nunca ao
+   mesmo tempo: dois pedidos juntos, o Android responde "não" a um deles. */
+function pedirNotificacoes(){
+  var LN=pluginNativo('LocalNotifications');
+  if(!LN || !LN.requestPermissions) return Promise.resolve();
+  return quando(LN.requestPermissions()).catch(function(){});
 }
 function desligarGpsNativo(){
   var BG=pluginNativo('BackgroundGeolocation');
-  if(BG && vigiaNativa!=null){ try{ BG.removeWatcher({id:vigiaNativa}); }catch(e){} }
+  if(BG && vigiaNativa!=null){ try{ quando(BG.removeWatcher({id:vigiaNativa})).catch(function(){}); }catch(e){} }
+  if(vigiaNativa!=null) segurarTelemovel(false);
   vigiaNativa=null;
 }
-/* A poupança de bateria (a dos Samsung e Xiaomi mais ainda) mata a
-   aplicação em segundo plano, com notificação e tudo. */
+/* A poupança de bateria (a dos Samsung e Xiaomi mais ainda) adormece a
+   aplicação em segundo plano, com notificação e tudo: no teste de 02/10
+   o GPS parava 4 a 9 minutos de cada vez que o ecrã apagava. Sem ela
+   livre, não se começa o turno sem o condutor saber. */
 function verBateria(){
-  var B=pluginNativo('Bateria'); if(!B) return;
-  B.estado().then(function(r){ S.bateriaPresa = !(r && r.semRestricoes); pintar(); }).catch(function(){});
+  var B=pluginNativo('Bateria'); if(!B) return Promise.resolve();
+  return quando(B.estado()).then(function(r){
+    S.bateriaPresa = !(r && r.semRestricoes);
+    S.app = {versao:(r&&r.versao)||'1.0.0', fabricante:(r&&r.fabricante)||'', trava:!!B.segurar};
+    pintar(); }).catch(function(){});
+}
+/* Durante o turno, o telemóvel não adormece por baixo do GPS (só a
+   versão 1.0.1 da aplicação o sabe fazer; a anterior ignora isto). */
+function segurarTelemovel(sim){
+  var B=pluginNativo('Bateria'); if(!B || !B.segurar) return;
+  try{ quando(sim ? B.segurar() : B.largar()).catch(function(){}); }catch(e){}
 }
 
 function ligarGps(){
   if(S.simular) return;
   if(ligarGpsNativo()) return;
+  ligarGpsDoNavegador();
+}
+function ligarGpsDoNavegador(){
   if(!navigator.geolocation){
     S.gps.estado='indisponivel';
     S.gps.porque='Este telemóvel não sabe dar a localização ao navegador.';
@@ -2651,7 +2896,14 @@ function ligarGps(){
 }
 
 function aceitarGps(pos){
-  var c=pos.coords, antes=S.gps.estado;
+  var c=pos.coords, antes=S.gps.estado, chegou=Date.now();
+  /* mais de um minuto sem posição nenhuma, com o turno aberto: o
+     telemóvel parou o GPS (ou adormeceu a aplicação). Fica registado. */
+  if(S.turno && !S.turno.fim && S.gps.ultimaChegada && chegou-S.gps.ultimaChegada>60000)
+    registar('aviso', 'gps-parou', Math.round((chegou-S.gps.ultimaChegada)/1000)+' s sem posições'+
+      (S.gps.escondidaDesde && S.gps.escondidaDesde<S.gps.ultimaChegada+5000 ? ', com o ecrã apagado' : ''),
+      {segundos:Math.round((chegou-S.gps.ultimaChegada)/1000)});
+  S.gps.ultimaChegada=chegou;
   if(primeiroTiro){ clearTimeout(primeiroTiro); primeiroTiro=null; }
   S.gps.estado='ligado'; S.gps.porque=null; S.gps.precisao=Math.round(c.accuracy);
   /* O telemóvel mede a velocidade pelo desvio do sinal dos satélites,
@@ -3034,6 +3286,27 @@ function postosPerto(lat,lon,n){
 }
 
 /* ═══ OS ECRÃS ═══════════════════════════════════════════ */
+/* O mapa do volante: o mesmo mapa a sério do patrão (ruas com nome,
+   escuro e limpo no tema escuro), a seguir o carro. No teste de 02/10
+   o Yanick gostou do desenho escuro do condutor mas faltava-lhe
+   informação — os nomes das ruas e dos sítios. Sem rede para o mapa,
+   fica o desenho de sempre. */
+var mapaVolante=null;
+function mapaDoVolante(t){
+  if(window.MapaVivo && MapaVivo.pronto()) return '<div class="lugar-mapa" id="lugar-mapa-volante"></div>';
+  return mapa(t.rasto,true);
+}
+function montarMapaDoVolante(){
+  var l=document.getElementById('lugar-mapa-volante');
+  if(!l || !S.turno || !(window.MapaVivo && MapaVivo.pronto())) return;
+  if(!mapaVolante) mapaVolante=MapaVivo.novo({fixo:true});
+  if(!mapaVolante.encaixar(l)) return;
+  if(mapaVolante._turno!==S.turno.id){ mapaVolante.esquecer(); mapaVolante._turno=S.turno.id; }
+  var pts=(S.turno.rasto||[]).filter(function(p){ return p[3]==null||p[3]<=LIM.precisaoMax; });
+  mapaVolante.turno({id:S.turno.id, aoVivo:true, rotulo:'', pts:pts,
+    abast:(S.turno.abast||[]).map(function(a){ return {lat:a.lat, lon:a.lon, posto:a.posto}; })});
+}
+if(window.MapaVivo) MapaVivo.quandoFalhar(function(){ if(S.ecra==='volante') pintar(); });
 function ajustarMapa(){
   var cx=document.querySelector('.volante'); if(!cx) return;
   var W=Math.round(cx.clientWidth), H=Math.round(cx.clientHeight);
@@ -3222,6 +3495,7 @@ function pintar(){
             '<a class="bt sec pq" href="/android" style="margin-top:8px;display:inline-block;'+
             'text-decoration:none">Instalar a aplicação</a></div>' : ''))+
       (S.bateriaPresa ? cartaoBateria() : '')+
+      (nativo() && S.app && !S.app.trava ? cartaoAtualizar() : '')+
       (dentroDeOutraApp() ? '<div class="cartao mau"><h2>Abra no Chrome</h2><p class="p-nota" '+
         'style="margin-top:4px">Esta página abriu dentro de outra aplicação (Instagram, Facebook…). '+
         'Aí o GPS pára ainda mais depressa. Copie o endereço e abra-o no Chrome.</p></div>' : '');
@@ -3243,7 +3517,10 @@ function pintar(){
       'Dentro de um edifício pode demorar. Encoste-se a uma janela.')+'</p></div>';
     else if(e==='sem-sinal') h+='<div class="cartao aviso"><h2>Sem sinal</h2>'+
       '<p class="p-nota" style="margin-top:4px">'+esc(S.gps.porque||'')+'</p></div>';
-    b = (e==='ligado' ? '<button class="bt pri" data-f="comecar">Começar turno</button>'
+    b = (e==='ligado' && S.bateriaPresa
+          ? '<button class="bt pri" data-f="bateria">Tirar da poupança de bateria</button>'+
+            '<button class="lig" data-f="comecar">Começar mesmo assim</button>'
+      : e==='ligado' ? '<button class="bt pri" data-f="comecar">Começar turno</button>'
       : ((emMoldura()&&e==='recusado')
           ? '<button class="bt pri" data-f="comecar">Começar sem GPS</button>'
           : '<button class="bt pri" data-f="pedir-gps">'+(e==='recusado'
@@ -3262,7 +3539,7 @@ function pintar(){
       '<button class="bt sec pq" data-f="ok-fora" style="margin-top:8px">Percebi</button></div>' : '';
     var ondeAgora=S.ultimaPos||(t.rasto.length?t.rasto[t.rasto.length-1]:null);
     var bairro=ondeAgora?bairroDe(ondeAgora[0],ondeAgora[1]):null;
-    h='<div class="volante">'+mapa(t.rasto,true)+
+    h='<div class="volante">'+mapaDoVolante(t)+
       '<div class="hud"><div class="vel"><span class="n num" id="v-num">'+
       Math.round(S.gps.vel)+'</span><span class="u">KM/H</span>'+arco(S.gps.vel)+'</div>'+
       (bairro?'<div class="onde">'+esc(bairro)+'</div>':'')+'</div>'+
@@ -3288,7 +3565,7 @@ function pintar(){
        deixa de gravar o caminho. Depois o GPS não bate com o
        quadrante e parece desvio quando foi só o bolso. Vale mais
        dizer-lho uma vez do que descobrir no fim do dia. */
-    if(!S.simular && !S.avisoEcraVisto)
+    if(!S.simular && !S.avisoEcraVisto && vigiaNativa==null)
       h+='<div class="cartao nota"><p class="p-nota"><b>Deixe o ecrã aceso.</b> '+
         'Se o telemóvel adormecer, o caminho deixa de ser gravado e os '+
         'quilómetros não vão bater no fim. Ponha-o no suporte, com carregador. '+
@@ -3451,7 +3728,7 @@ function pintar(){
   el('voltar').hidden = !(pv && pv!=='ficar');
   armarVoltar();
   pintarTopo();
-  if(S.ecra==='volante') ajustarMapa();
+  if(S.ecra==='volante'){ montarMapaDoVolante(); ajustarMapa(); }
 }
 
 /* ─── voltar ──────────────────────────────────────────────
@@ -3597,10 +3874,10 @@ document.addEventListener('click', function(e){
   if(f==='ir-volante'){ S.foto=null; S.r={}; S.ecra='volante'; pintar(); }
   if(f==='ok-fora'){ S.avisoFora=null; pintar(); return; }
   if(f==='bateria'){ var B=pluginNativo('Bateria');
-    if(B) B.pedir().then(function(){ setTimeout(verBateria, 1500); }).catch(function(){});
+    if(B) quando(B.pedir()).then(function(){ setTimeout(verBateria, 1500); }).catch(function(){});
     return; }
   if(f==='definicoes-gps'){ var BG=pluginNativo('BackgroundGeolocation');
-    if(BG && BG.openSettings) BG.openSettings(); return; }
+    if(BG && BG.openSettings) quando(BG.openSettings()).catch(function(){}); return; }
   if(f==='camara'){ abrirCamara(d.guia); return; }
   if(f==='ficheiro'){ var ff=el('ff'); if(ff) ff.click(); return; }
   if(f==='ir-abast'){ S.foto=null; S.r={}; S.ecra='abastecer'; pintar(); }
@@ -3668,7 +3945,11 @@ function voltou(){
   segurarEcra(); pintar();
 }
 document.addEventListener('visibilitychange', function(){
-  if(document.hidden) saiu(); else { voltou(); if(S.ecra==='volante') pintar(); } });
+  S.gps.escondidaDesde = document.hidden ? Date.now() : null;
+  if(document.hidden) saiu();
+  else { voltou(); if(S.ecra==='volante') pintar();
+    /* volta das definições do telemóvel (bateria, licenças): ver outra vez */
+    if(vigiaNativa!=null) verBateria(); } });
 window.addEventListener('pagehide', saiu);
 
 function comecar(sim){
@@ -3704,6 +3985,9 @@ function comecar(sim){
   /* o patrão passa a ver este turno no mapa dele a partir de agora */
   segurarEcra();
   Nuvem.abrirTurno(S.turno);
+  /* para se saber, no registo, em que modo cada turno correu */
+  registar('info', 'turno-aberto', modoGps()+(S.bateriaPresa?' · bateria presa':'')+
+    (S.app?' · aplicação '+S.app.versao:''));
   /* logo a seguir ao turno (a base só aceita a foto de um turno que já
      lá esteja, e a fila respeita a ordem) */
   if(S.turno.fotoInicio) Nuvem.enviarFoto(S.turno.id+'_inicio', S.turno.id, S.turno.fotoInicio);

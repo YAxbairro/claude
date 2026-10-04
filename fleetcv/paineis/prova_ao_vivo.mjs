@@ -139,7 +139,7 @@ ok('tocar no carro segue-o, com a velocidade por baixo',
    await ate(async()=>/km\/h/.test(await p.textContent('.faixa').catch(()=>'')), 15));
 
 /* as fotografias, na base verdadeira, durante o turno */
-await p.click('.faixa [data-turno]'); await p.waitForTimeout(1500);
+await p.click('.faixa [data-f="detalhes"]'); await p.waitForTimeout(1500);
 ok('o patrão vê a fotografia do quadrante DURANTE o turno',
    await ate(async()=>/Quadrante ao começar/.test(await txt()), 60));
 await c.bringToFront();
@@ -151,9 +151,8 @@ ok('e regista o abastecimento', await ate(async()=>/Já abasteceu/.test(await ct
 await p.bringToFront();
 ok('o patrão vê o talão durante o turno',
    await ate(async()=>/Talão · 2\.000 CVE/.test(await txt()), 60));
-const linhaAb=((await txt()).match(/2\.000 CVE · [\d,]+ litros/)||[''])[0];
+const linhaAb=((await txt()).match(/Abasteceu 2\.000 CVE.*?[\d,]+ litros/)||[''])[0];
 ok('com os litros contados (não "0,00 litros")', /· [1-9][\d,]* litros/.test(linhaAb), linhaAb);
-await p.click('#voltar'); await p.waitForTimeout(800);
 
 await c.bringToFront();
 await c.click('[data-f="ir-fim"]'); await c.waitForTimeout(900);

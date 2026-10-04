@@ -91,7 +91,7 @@ await p.goto(U+'#dono'); await p.waitForTimeout(1500);
 await p.fill('#i-email','patrao@exemplo.cv'); await p.fill('#i-cod','9999');
 await p.click('[data-f="entrar"]'); await p.waitForTimeout(2500);
 await p.locator('[data-vivo]').first().click(); await p.waitForTimeout(700);
-await p.click('.faixa [data-turno]'); await p.waitForTimeout(1500);
+await p.click('.faixa [data-f="detalhes"]'); await p.waitForTimeout(1500);
 ok('o patrão vê a fotografia do quadrante DURANTE o turno',
    await esperar(async()=>/Quadrante ao começar/.test(await p.textContent('#ecra')), 10000));
 
@@ -114,8 +114,8 @@ await p.bringToFront();
 ok('e o patrão vê o talão durante o turno',
    await esperar(async()=>/Talão · 2\.000 CVE/.test(await p.textContent('#ecra')), 12000));
 ok('com os litros certos (2.000 CVE a 145 = 13,79 litros, não "0,00 litros")',
-   /2\.000 CVE · 13,79 litros/.test(await p.textContent('#ecra')),
-   ((await p.textContent('#ecra')).match(/[\d.]+ CVE · [\d,]+ litros/)||[''])[0]);
+   /Abasteceu 2\.000 CVE[^]*?13,79 litros/.test(await p.textContent('#ecra')),
+   ((await p.textContent('#ecra')).match(/Abasteceu [\d.]+ CVE[^]*?[\d,]+ litros/)||[''])[0]);
 ok('e as contas do turno ao vivo não dão disparates',
    !/NaN|Infinity|undefined/.test(await p.textContent('#ecra')),
    ((await p.textContent('#ecra')).match(/.{40}(NaN|Infinity|undefined).{20}/)||[''])[0]);

@@ -7,6 +7,7 @@
   --warn:#A86A05; --warn-wash:#F8EEDC;
   --crit:#B02E20; --crit-wash:#F8E6E3;
   --terra:#EEF2F1; --rua:#A4B2B0; --rua2:#CCD6D4; --costa:#7BA3A8;
+  --mapa-filtro:saturate(.5) contrast(.96) brightness(1.02);
   --sombra:0 1px 2px rgba(15,22,24,.06), 0 10px 28px -20px rgba(15,22,24,.45);
   --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
   --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
@@ -19,6 +20,7 @@
   --ok:#77C34B; --ok-wash:#17280F; --warn:#DCA43C; --warn-wash:#2E2310;
   --crit:#E4776A; --crit-wash:#331714;
   --terra:#0D1314; --rua:#47585A; --rua2:#263132; --costa:#42636A;
+  --mapa-filtro:invert(1) hue-rotate(180deg) saturate(.3) brightness(.95) contrast(.9);
   --sombra:0 1px 2px rgba(0,0,0,.45), 0 10px 28px -20px rgba(0,0,0,.9);
 }}
 :root[data-theme="dark"]{
@@ -28,6 +30,7 @@
   --ok:#77C34B; --ok-wash:#17280F; --warn:#DCA43C; --warn-wash:#2E2310;
   --crit:#E4776A; --crit-wash:#331714;
   --terra:#0D1314; --rua:#47585A; --rua2:#263132; --costa:#42636A;
+  --mapa-filtro:invert(1) hue-rotate(180deg) saturate(.3) brightness(.95) contrast(.9);
   --sombra:0 1px 2px rgba(0,0,0,.45), 0 10px 28px -20px rgba(0,0,0,.9);
 }
 html,body{height:100%}
@@ -191,6 +194,20 @@ body.condutor .turno-lin .seta{color:var(--muted); font-size:19px}
 body.condutor .volante{position:relative; flex:1; min-height:320px; border-radius:16px; overflow:hidden;
   border:1px solid var(--line); background:var(--surface2); box-shadow:var(--sombra)}
 body.condutor .mapa{position:absolute; inset:0; width:100%; height:100%; display:block}
+body.condutor .volante .lugar-mapa{position:absolute; inset:0}
+body.condutor .volante .mapa-vivo{position:absolute; inset:0; z-index:0}
+body.condutor .volante .mapa-vivo.leaflet-container{background:var(--surface2)}
+body.condutor .volante .mapa-vivo .leaflet-tile-pane{filter:var(--mapa-filtro)}
+body.condutor .volante .mapa-vivo .leaflet-tile-container img{width:256.6px!important; height:256.6px!important}
+body.condutor .volante .mapa-vivo .leaflet-bottom{bottom:58px}
+body.condutor .volante .mapa-vivo .leaflet-control-attribution{font-size:9px; opacity:.8}
+body.condutor .volante .hud, body.condutor .volante .baixo{z-index:500}
+body.condutor .carro-vivo{background:none; border:none}
+body.condutor .carro-vivo .cv-seta{position:absolute; left:12px; top:12px; width:32px; height:32px;
+  transition:transform .8s linear; filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+body.condutor .carro-vivo .cv-onda{position:absolute; left:14px; top:14px; width:28px; height:28px;
+  border-radius:50%; animation:onda-condutor 2.4s ease-out infinite}
+@keyframes onda-condutor{0%{transform:scale(.7); opacity:.4}100%{transform:scale(2); opacity:0}}
 body.condutor .hud{position:absolute; top:0; left:0; right:0; padding:14px 16px 0; display:flex;
   align-items:flex-start; justify-content:space-between; pointer-events:none}
 body.condutor .vel{display:flex; align-items:baseline; gap:7px; padding:8px 14px 7px; border-radius:13px;
@@ -407,11 +424,17 @@ body.dono .tiles.clic>div[data-tile]:hover{background:var(--surface2)}
 body.dono .item.fino{padding:9px 12px; margin-top:6px}
 body.dono .item.alerta-cx{margin-top:8px; border-color:var(--crit)}
 body.dono .item.alerta-cx .p{color:var(--crit)}
+body.dono div.alerta-cx{margin-top:9px; padding:9px 11px; border:1px solid var(--crit); border-radius:10px}
+body.dono div.alerta-cx .p{color:var(--crit); margin:0 0 3px}
+body.dono div.alerta-cx .s{margin:2px 0; font-size:14px}
 body.dono .dica{margin:9px 2px 0; font-size:12.5px; color:var(--muted); text-align:center}
 body.dono .lugar-mapa{position:relative}
 body.dono .mapa-vivo{position:relative; z-index:0; height:min(58vh,480px); min-height:300px;
   border-radius:12px; overflow:hidden; border:1px solid var(--line); background:#e6ebea}
 body.dono .mapa-vivo .leaflet-control-attribution{font-size:10px}
+body.dono .mapa-vivo.leaflet-container{background:var(--surface2)}
+body.dono .mapa-vivo .leaflet-tile-pane{filter:var(--mapa-filtro)}
+body.dono .mapa-vivo .leaflet-tile-container img{width:256.6px!important; height:256.6px!important}
 body.dono .carro-vivo{background:none; border:none}
 body.dono .carro-vivo .cv-seta{position:absolute; left:12px; top:12px; width:32px; height:32px;
   transition:transform .8s linear; filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
