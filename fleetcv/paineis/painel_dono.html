@@ -225,7 +225,8 @@ div.alerta-cx .s{margin:2px 0; font-size:14px}
 .lugar-mapa{position:relative}
 .mapa-vivo{position:relative; z-index:0; height:min(58vh,480px); min-height:300px;
   border-radius:12px; overflow:hidden; border:1px solid var(--line); background:#e6ebea}
-.mapa-vivo .leaflet-control-attribution{font-size:10px}
+.mapa-vivo .leaflet-control-attribution{font-size:8.5px; line-height:1.4; padding:0 4px; background:transparent!important; color:var(--muted); opacity:.55}
+.mapa-vivo .leaflet-control-attribution a{color:inherit}
 .mapa-vivo.leaflet-container{background:var(--surface2)}
 .mapa-vivo.raster .leaflet-tile-pane{filter:var(--mapa-filtro)}
 .mapa-vivo.raster .leaflet-tile-container img{width:256.6px!important; height:256.6px!important}
@@ -872,7 +873,9 @@ function novo(op){
     desviarMapa();
     try{
       camada=window.protomapsL.leafletLayer({url:urlDoMapa(), flavor:escuro()?'dark':'light',
-        lang:'pt', maxZoom:19, attribution:'© OpenStreetMap · Protomaps'});
+        lang:'pt', maxZoom:19, attribution:'© OpenStreetMap'});
+      /* (a licença dos dados do OpenStreetMap obriga a dizê-lo no mapa;
+         fica pequeno e discreto, no canto — ver o estilo) */
       camada.addTo(mapa);
     }catch(e){ camada=null; quadradinhos(); return; }
     /* o ficheiro tem de vir aos pedaços (206); se não vier, quadradinhos */

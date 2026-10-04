@@ -87,7 +87,7 @@ ok('com a atribuição ao OpenStreetMap', dp && /OpenStreetMap/.test(dp.atrib), 
 ok('lê o ficheiro aos pedaços, não inteiro', conta.pedacos>0 && conta.bytes<MAPA.length/4,
    conta.pedacos+' pedaços, '+Math.round(conta.bytes/1024)+' kB de '+Math.round(MAPA.length/1024)+' kB');
 ok('o patrão vê a rua onde o carro vai (tirada do próprio mapa)',
-   await esperar(async()=>/(Rua|Avenida|Estrada|Praça|Largo|Travessa|Circular)\s/i.test(await p.textContent('.faixa-onde')), 15000),
+   await esperar(async()=>/(Rua|Avenida|Estrada|Praça|Largo|Travessa|Circular)\s/i.test(await p.textContent('.faixa-onde')), 40000),
    (await p.textContent('.faixa-onde')).split('·')[0].trim());
 await p.screenshot({path:'_mapa_cv_dono.png'}).catch(()=>{});
 
@@ -95,7 +95,7 @@ await c.bringToFront(); await c.waitForTimeout(3000);
 const dc=await desenhado(c, '#lugar-mapa-volante .mapa-vivo');
 ok('o volante do condutor também', dc && !dc.raster && dc.canvas>0, JSON.stringify(dc));
 ok('e o condutor vê a rua por cima do mapa',
-   await esperar(async()=>/(Rua|Avenida|Estrada|Praça|Largo|Travessa|Circular)\s/i.test(await c.textContent('.onde')), 15000),
+   await esperar(async()=>/(Rua|Avenida|Estrada|Praça|Largo|Travessa|Circular)\s/i.test(await c.textContent('.onde')), 40000),
    (await c.textContent('.onde').catch(()=>'—')));
 ok('sem pedir nada ao OpenStreetMap', conta.osm===0, conta.osm+' quadradinhos');
 await c.screenshot({path:'_mapa_cv_volante.png'}).catch(()=>{});

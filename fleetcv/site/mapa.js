@@ -564,7 +564,9 @@ function novo(op){
     desviarMapa();
     try{
       camada=window.protomapsL.leafletLayer({url:urlDoMapa(), flavor:escuro()?'dark':'light',
-        lang:'pt', maxZoom:19, attribution:'© OpenStreetMap · Protomaps'});
+        lang:'pt', maxZoom:19, attribution:'© OpenStreetMap'});
+      /* (a licença dos dados do OpenStreetMap obriga a dizê-lo no mapa;
+         fica pequeno e discreto, no canto — ver o estilo) */
       camada.addTo(mapa);
     }catch(e){ camada=null; quadradinhos(); return; }
     /* o ficheiro tem de vir aos pedaços (206); se não vier, quadradinhos */
