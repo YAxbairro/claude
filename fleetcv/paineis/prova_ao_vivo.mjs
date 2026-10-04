@@ -39,6 +39,9 @@ ok('a página principal está no endereço principal',
    r0.ok && /O condutor diz/.test(h0) && h0.includes('/app#criar'));
 const r1=await fetch(SITE+'/app');
 ok('e a aplicação em /app', r1.ok && /porteiro\.js/.test(await r1.text()));
+const legais=await Promise.all(['/privacidade','/termos','/ajuda'].map(async u=>{
+  const r=await fetch(SITE+u); return r.ok && /FleetCV/.test(await r.text()); }));
+ok('e a privacidade, os termos e a ajuda', legais.every(Boolean), legais.join(' '));
 
 /* ── o patrão novo ────────────────────────────────────────── */
 const cp=await b.newContext({viewport:{width:430,height:950}});
@@ -55,9 +58,20 @@ ok('e liga-se ao Supabase verdadeiro',
 for(const [k,v] of Object.entries({'e-c-nome':'Prova Automática',
   'e-c-frota':'Frota de Prova '+marca,'e-c-email':EMAIL,
   'e-c-cod':CODIGO,'e-c-cod2':CODIGO})) await p.fill('#'+k, v);
+await p.check('#e-c-aceito');
 await p.click('[data-f="criar"]');
+/* com as funções de recuperação na base, aparece primeiro o código para
+   guardar; sem elas (por aplicar), segue direito para a frota */
+await ate(async()=>/Guarde este código|Bem-vindo à sua frota/.test(await txt()));
+const comRec=/Guarde este código/.test(await txt());
+if(comRec){ ok('recebe o código de recuperação', /^[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(
+    (await p.textContent('#rec-codigo')).trim()));
+  await p.click('[data-f="rec-guardado"]'); }
+else console.log(' --   · o código de recuperação ainda não está na base (supabase/por_aplicar.sql)');
 ok('cria a conta e entra na frota nova',
    await ate(async()=>/Bem-vindo à sua frota/.test(await txt())), (await txt()).slice(0,80));
+ok('e fica escrito que aceitou os termos',
+   await ate(async()=>(await p.evaluate(()=>Nuvem.dados().frota.termos))==='2026-10-04', 15));
 ok('vazia, sem turnos inventados',
    await p.evaluate(()=>{ const d=Nuvem.dados();
      return d.frota.carros.length===0 && d.turnos.length===0; }));
