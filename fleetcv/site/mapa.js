@@ -1048,6 +1048,19 @@ function lojaDoSupabase(sb){
         if(r.data && r.data.ok){ eu=null;
           try{ localStorage.removeItem(COPIA); }catch(e){} }
         return r.data||{erro:'Não foi possível apagar.'}; }); },
+    /* o código de recuperação (supabase/esquema.sql) */
+    recuperar:function(email, rec, novo){
+      return sb.rpc('recuperar_acesso', {p_email:email, p_recuperacao:rec, p_codigo_novo:novo})
+        .then(function(r){
+          if(r.error) throw erroDe(r.error, r.status);
+          if(r.data && r.data.erro) throw Object.assign(new Error(r.data.erro),
+            {code:'invalid_argument', porque:r.data.erro});
+          eu=r.data; return r.data; }); },
+    novaRecuperacao:function(codigo){
+      return sb.rpc('novo_codigo_recuperacao', {p_codigo_actual:codigo})
+        .then(function(r){
+          if(r.error) throw erroDe(r.error, r.status);
+          return r.data||{erro:'Não foi possível.'}; }); },
     emailLivre:function(email){
       return sb.rpc('email_livre', {p_email:email}).then(function(r){
         return (r && !r.error) ? r.data : null; }); },
@@ -1605,10 +1618,12 @@ function escutar(){
     var f=D.frota||{};
     var n={nome:f.nome, precoLitro:f.precoLitro,
            carros:f.carros||[], condutores:f.condutores||[]};
+    if(f.termos) n.termos=f.termos;
     mudar(n); D.frota=n; local('frota', n); avisar(); };
 
   subs.push(loja.verDoc('frota','config', function(d){
-    if(d) frotaNova(function(n){ n.precoLitro=d.precoLitro; n.nome=d.nome; }); },
+    if(d) frotaNova(function(n){ n.precoLitro=d.precoLitro; n.nome=d.nome;
+      if(d.termos) n.termos=d.termos; }); },
     erro));
 
   subs.push(loja.verDoc('frota','carros', function(d){
@@ -1955,10 +1970,14 @@ function guardarFrota(f){
      lista velha que o aviso acabou de lá pôr, e a alteração
      perdia-se sem dar erro nenhum. */
   var cfg={precoLitro:f.precoLitro, nome:f.nome||''};
+  /* a versão dos termos que o patrão aceitou ao criar a conta */
+  var termos=f.termos||(D.frota&&D.frota.termos);
+  if(termos) cfg.termos=termos;
   var carros=(f.carros||[]).slice();
   var conds=(f.condutores||[]).slice();
   D.frota={nome:cfg.nome, precoLitro:cfg.precoLitro,
            carros:carros, condutores:conds};
+  if(termos) D.frota.termos=termos;
   local('frota', D.frota);
   if(!loja) return Promise.resolve();
   return Promise.all([
@@ -1974,6 +1993,11 @@ function guardarTurno(t){
 function apagarTurno(id){
   if(!loja) return Promise.resolve();
   return loja.tirar('turnos', id).catch(function(){});
+}
+
+/* a base ainda não tem a função (por aplicar): 404 / PGRST202 */
+function semFuncao(x){
+  return !!x && (x.estado===404 || /PGRST202|could not find the function|não existe/i.test(x.porque||x.message||''));
 }
 
 /* ─── o registo de erros ────────────────────────────────── */
@@ -2099,6 +2123,10 @@ return {
     return loja.criarConta(d).then(function(j){
       return loja.comecar().then(function(){
         return semear(opGuardado).then(escutar).then(function(){
+          /* fica escrito que aceitou os termos, e que versão */
+          if(d.termos) loja.ler('frota','config').then(function(c){
+            return loja.por('frota','config', Object.assign({precoLitro:145,
+              nome:d.frota||'A minha frota'}, c||{}, {termos:d.termos})); }).catch(function(){});
           estado='supabase'; avisar();
           return {papel:j.papel, id:j.id, nome:j.nome, frota:j.frota}; }); });
     }).catch(function(x){
@@ -2121,6 +2149,27 @@ return {
         estado='supabase-por-entrar'; avisar(); }
       return r;
     }).catch(function(x){ return {erro:(x&&x.porque)||'Não foi possível apagar.'}; });
+  },
+  /* O código esquecido. Enquanto a base não tiver as funções (por
+     aplicar: supabase/por_aplicar.sql), responde semFuncao — e o ecrã
+     manda falar pelo WhatsApp. */
+  recuperarAcesso:function(email, rec, novo){
+    if(!(loja&&loja.supabase))
+      return Promise.resolve({erro:'Isto só se faz com a internet ligada.'});
+    var e=String(email||'').trim().toLowerCase();
+    return loja.recuperar(e, String(rec||''), String(novo||'').trim()).then(function(j){
+      return loja.comecar().then(function(){
+        return semear(opGuardado).then(escutar).then(function(){
+          estado='supabase'; avisar();
+          return {papel:j.papel, id:j.id, nome:j.nome, recuperacao:j.recuperacao}; }); });
+    }).catch(function(x){
+      return semFuncao(x) ? {semFuncao:true}
+        : {erro:(x&&x.porque)||'Não foi possível recuperar o acesso.'}; });
+  },
+  novoCodigoRecuperacao:function(codigo){
+    if(!(loja&&loja.supabase)) return Promise.resolve({semFuncao:true});
+    return loja.novaRecuperacao(String(codigo||'').trim()).catch(function(x){
+      return semFuncao(x) ? {semFuncao:true} : {erro:(x&&x.porque)||'Não foi possível.'}; });
   },
   /* true: pode usar · false: já está noutra frota · null: não se sabe */
   emailLivre:function(email){

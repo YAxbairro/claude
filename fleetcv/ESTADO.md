@@ -1,4 +1,4 @@
-# Onde isto está, em 26 de Setembro de 2026
+# Onde isto está, em 4 de Outubro de 2026
 
 Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
 
@@ -207,6 +207,39 @@ Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
   conta-rotações não conta. Nas 58 fotografias verdadeiras: os mesmos
   acertos (38 e 40) e menos um engano (`paineis/teste_leitor_rotulos.mjs`, 11).
 
+### Pronto para vender (04/10)
+
+- **Esqueci-me do código.** Ao criar a conta, o patrão recebe um código de
+  recuperação (12 letras e algarismos, guardado baralhado como o código).
+  Com ele escolhe um código novo sozinho, no ecrã de entrar; cada código de
+  recuperação serve uma vez e quem estava dentro com o código antigo sai.
+  Quem criou a conta antes tira um em Mais → Código de recuperação. O
+  condutor que se esquece pede o código ao patrão (vê-o na ficha).
+  Base: provas 75–80; aplicação: `paineis/teste_recuperar.mjs` (31).
+  **Precisa das funções na base verdadeira** (`supabase/por_aplicar.sql`):
+  até lá o ecrã manda falar pelo WhatsApp e criar conta segue direito.
+- **Privacidade, termos e ajuda**: `/privacidade`, `/termos`, `/ajuda` (com
+  as perguntas de patrões e condutores, o "apagar a conta" que a Google pede
+  e um aviso pronto a assinar pelos condutores). Criar conta pede "Li e
+  aceito" e guarda a versão aceite na frota. São rascunhos para um jurista
+  rever; faltam o nome da empresa, o NIF e a morada (a amarelo).
+  `paineis/teste_paginas.mjs` (20) confere que a política diz o que o
+  código faz (o passo do GPS, os 90 dias dos registos de erros).
+- **Registos de erros apagam-se ao fim de 90 dias** (prova 81; vai no
+  `por_aplicar.sql`).
+- **Google Play preparada**: aplicação **1.1.0** (código 3) feita para o
+  Android 16 (API 36, obrigatório desde 31/08/2026) e com a página entre as
+  barras do sistema; AAB e APK de teste em `site/teste/`; textos, imagens,
+  formulários e a escolha da chave em `android/play/LEIA-ME.md`. A 1.1.0
+  ainda não correu num telemóvel verdadeiro: testar antes de enviar.
+- **Pronto a mudar de casa**: `site/_headers` e `site/_redirects` para o
+  Cloudflare Pages (grátis e comercial), iguais ao `vercel.json`
+  (`paineis/teste_alojamento.mjs`, 17). Passos e domínio em `ALOJAMENTO.md`
+  (fleetcv.com estava livre a 04/10).
+- **Ecrã da fotografia do quadrante**: "Fotografar o conta-quilómetros" e
+  "toque para abrir a câmara" saíam colados numa linha; agora um por baixo
+  do outro.
+
 ## Crescer: quanto aguenta e quando pagar (medido a 27 de Setembro)
 
 Contas com os números da base verdadeira (cada ponto do caminho pesa
@@ -269,43 +302,50 @@ ficheiros. Os passos estão em `site/INSTALAR.md`.
 
 | | |
 |---|---|
-| `supabase/provar.sh` | 73 regras + 9 da passagem de uma base antiga, num Postgres a sério. As provas foram postas à prova estragando as regras de propósito |
-| `paineis/teste_contas.mjs` | 40 — o caminho de um cliente novo, do criar conta ao apagar |
+| `supabase/provar.sh` | 90 regras (com as da passagem de uma base antiga e o `por_aplicar.sql` carregado duas vezes), num Postgres a sério. As provas foram postas à prova estragando as regras de propósito |
+| `paineis/teste_contas.mjs` | 45 — o caminho de um cliente novo, do criar conta (com os termos e o código de recuperação) ao apagar |
+| `paineis/teste_recuperar.mjs` | 31 — o código esquecido, de ponta a ponta, e sem as funções na base |
 | `paineis/teste_supabase.mjs` | 25 — as regras vistas pela aplicação, a trava, sem rede |
-| o resto dos `teste_*.mjs` | mapa de Cabo Verde 9, aplicação Android 30, leitor ODO/Trip 11, mapa cortado 4, consumo 12, fora da aplicação 18, leitor 18, primeiro turno 28, dados 13, câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 33, mapa vivo 26 |
+| o resto dos `teste_*.mjs` | mapa de Cabo Verde 9, aplicação Android 30, leitor ODO/Trip 11, mapa cortado 4, consumo 12, fora da aplicação 18, leitor 18, primeiro turno 28, dados 13, câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 35, mapa vivo 26, páginas 20, alojamento 17 |
+
+A 04/10, os 29 conjuntos deram 659 de 659 e o `provar.sh` 90 de 90.
 
 Os testes que usam o servidor próprio (`teste_clicavel`,
 `teste_formularios`, `teste_servidor`) esperam correr numa pasta com
 `servidor/` ao lado e `servidor/fleetcv.html`.
 
-## O que falta fazer
+## Lista de lançamento (04/10)
 
-0. **Provar a aplicação Android num telemóvel verdadeiro** (um turno
-   com o ecrã apagado) e, depois, pô-la na Google Play (conta de
-   programador: 25 USD, uma vez; `android/LEIA-ME.md`). iPhone depois
-   (Apple: 99 USD/ano).
+**Do lado do Yanick** (precisa da conta dele, de pagar, ou de um telemóvel):
 
-1. **Entrar com o Google.** Ainda não está feito. Primeiro o Yanick
-   tem de criar um cliente OAuth na Google Cloud e colá-lo no Supabase
-   (Authentication → Providers → Google), uns dez minutos do lado dele.
-   Só depois se liga na aplicação, porque sem isso não há como o
-   provar. Até lá, entra-se com e-mail e código.
-2. **Pagamentos automáticos.** A Stripe não trabalha com Cabo Verde;
-   Vinti4 por API pede contrato com o banco (SISP). Até lá, à mão.
-3. **Vigiar no piloto:** o ecrã que apaga no iPhone e no navegador (só
-   a aplicação Android grava com o ecrã apagado), e o projecto gratuito do Supabase que adormece ao fim de
-   uns sete dias sem uso.
-4. **Quando crescer:** as fotografias saem da tabela para o armazenamento
-   do Supabase, e o tempo real tem tecto no plano gratuito (200 ligações
-   ao mesmo tempo, que dá umas dezenas de frotas).
+1. **Autorizar as mudanças da base**: `supabase/por_aplicar.sql` (registo de
+   erros com os 90 dias, entrar/sair só com sessão, código de recuperação).
+   Provado duas vezes por cima da base no `provar.sh`. Sem isto, o
+   "Esqueci-me do código" manda para o WhatsApp e o registo de erros fica
+   calado.
+2. **Piloto com a 1.0.1** (`/FleetCV.apk`): bateria "Permitir", ver a
+   notificação fixa, 30 min de ecrã apagado a andar.
+3. **Testar a 1.1.0** (`/teste/FleetCV-1.1.0.apk`) num telemóvel: as barras
+   do sistema, um turno com o ecrã apagado (lista em `android/play/LEIA-ME.md`).
+4. **Jurista**: rever `/privacidade` e `/termos`, completar empresa, NIF e
+   morada; ver se o uso pelos clientes pede comunicação à CNPD.
+5. **Domínio e casa comercial**: comprar o domínio e criar o Cloudflare
+   Pages (`ALOJAMENTO.md`), ou passar a Vercel a Pro (20 USD/mês). Decidir o
+   domínio antes da Google Play.
+6. **Supabase Pro** (25 USD/mês) com o primeiro cliente a pagar.
+7. **Google Play**: conta de programador (25 USD), e-mail de suporte, teste
+   fechado com 12 pessoas durante 14 dias (contas pessoais). Tudo o resto
+   está pronto em `android/play/`.
+8. Fechar o turno que ficou aberto no ST-20-AA (Táxi silva).
 
-## Uma regra aprendida à força
+**Mais tarde:**
 
-Códigos e palavras-passe não entram em ficheiro nenhum que vá para o
-GitHub. Aconteceu duas vezes no mesmo dia — no guia de instalação e nos
-ficheiros de prova. O que resolve é trocar a senha, não apagar o
-histórico. O condutor de teste "PROVA (apagar)", cujo código ficou num
-ficheiro antigo, foi desactivado na frota `f1`.
-
-A cópia da base antes da passagem para várias frotas ficou só na
-máquina da sessão (tem códigos), não no repositório.
+- **Entrar com o Google**: o Yanick cria um cliente OAuth na Google Cloud e
+  cola-o no Supabase (Authentication → Providers → Google); só depois se liga
+  na aplicação.
+- **Pagamentos automáticos**: a Stripe não trabalha com Cabo Verde; Vinti4
+  por API pede contrato com o banco (SISP). Até lá, à mão.
+- **iPhone** (Apple: 99 USD/ano). Até lá, no iPhone o ecrã tem de ficar aceso.
+- **Quando crescer**: as fotografias saem da tabela para o armazenamento do
+  Supabase, e o tempo real tem tecto no plano gratuito (200 ligações ao
+  mesmo tempo, umas dezenas de frotas).

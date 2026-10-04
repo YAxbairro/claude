@@ -27,6 +27,10 @@
   var doc=function(f,c,id){ return ler(kd(f,c,id)); };
   var todasFrotas=function(){ return ler('frotas')||{}; };
   var baralhar=function(c){ return 'h:'+String(c).split('').reverse().join(''); };
+  /* o código de recuperação: 12 letras e algarismos sem os que se confundem */
+  var novaRec=function(){ var A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789', r='';
+    for(var i=0;i<12;i++) r+=A[Math.floor(Math.random()*A.length)];
+    return r.slice(0,4)+'-'+r.slice(4,8)+'-'+r.slice(8); };
   var certo=function(dono, c){
     if(!dono) return false;
     if(dono.hash) return dono.hash===baralhar(c);
@@ -305,8 +309,43 @@
         if(emailNoutra(em, pf.frota))
           return {erro:'Esse e-mail já está a ser usado noutra conta.'};
         var n={email:em, nome:d.nome, hash: co?baralhar(co):(d.hash||baralhar(d.codigo))};
+        if(d.recuperacao) n.recuperacao=d.recuperacao;
         gravar(pf.frota,'frota','dono',n);
         return {ok:true, email:em}; },
+      /* o código de recuperação (como em supabase/esquema.sql) */
+      novo_codigo_recuperacao:function(a){
+        var pf=perfil();
+        if(!pf || pf.papel!=='dono') return {erro:'Só o proprietário faz isto.'};
+        var d=doc(pf.frota,'frota','dono');
+        if(!certo(d, String(a.p_codigo_actual||'').trim()))
+          return {erro:'O código actual não está certo.'};
+        var c=novaRec(); gravar(pf.frota,'frota','dono', Object.assign({}, d, {recuperacao:baralhar(c.replace(/-/g,''))}));
+        return {codigo:c}; },
+      recuperar_acesso:function(a){
+        var em=String(a.p_email||'').trim().toLowerCase();
+        var rec=String(a.p_recuperacao||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+        var co=String(a.p_codigo_novo||'').trim();
+        var QUARTO=15*60*1000, t=ler('trava:'+em);
+        if(t && t.falhas>=5 && (Date.now()-t.ultima)<QUARTO)
+          return {erro:'Demasiadas tentativas. Espere um quarto de hora e tente outra vez.'};
+        if(t && (Date.now()-t.ultima)>=QUARTO) t=null;
+        if(co.length<6) return {erro:'O código novo tem de ter pelo menos 6 algarismos ou letras.'};
+        var achou=null;
+        Object.keys(todasFrotas()).forEach(function(f){ var d=doc(f,'frota','dono');
+          if(d && String(d.email||'').toLowerCase()===em) achou={f:f, d:d}; });
+        if(!achou || !achou.d.recuperacao || rec.length!==12 || achou.d.recuperacao!==baralhar(rec)){
+          por('trava:'+em, {falhas:((t&&t.falhas)||0)+1, ultima:Date.now()});
+          return {erro:'E-mail ou código de recuperação errados.'}; }
+        if((todasFrotas()[achou.f]||{}).plano==='suspensa')
+          return {erro:'Esta frota está suspensa. Fale com a FleetCV pelo WhatsApp.'};
+        tirar('trava:'+em);
+        var c=novaRec();
+        gravar(achou.f,'frota','dono', {email:achou.d.email, nome:achou.d.nome, hash:baralhar(co),
+                                        recuperacao:baralhar(c.replace(/-/g,''))});
+        chaves().forEach(function(k){ var p=ler(k);
+          if(k.indexOf('perfil:')===0 && p && p.frota===achou.f && p.papel==='dono') tirar(k); });
+        por('perfil:'+sessao, {papel:'dono', quem:'dono', nome:achou.d.nome||'Proprietário', frota:achou.f});
+        return {papel:'dono', id:'dono', nome:achou.d.nome||'Proprietário', frota:achou.f, recuperacao:c}; },
       apagar_frota:function(a){
         var pf=perfil();
         if(!pf || pf.papel!=='dono') return {erro:'Só o proprietário apaga a conta.'};
@@ -338,7 +377,11 @@
       },
       rpc:function(nome, args){
         var f=rpcs[nome];
-        if(!f) return Promise.resolve({data:null, error:{message:'função '+nome+' não existe'}});
+        /* como o Supabase: uma função que não existe dá 404 (PGRST202);
+           window.__semFuncoes:[...] faz de base onde ainda não estão */
+        if(!f || (window.__semFuncoes||[]).indexOf(nome)>=0)
+          return Promise.resolve({data:null, status:404, error:{code:'PGRST202',
+            message:'Could not find the function public.'+nome+' in the schema cache'}});
         return Promise.resolve({data:f(args||{}), error:null}); },
       from:tabela,
       channel:function(){ return {

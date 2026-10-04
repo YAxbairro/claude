@@ -59,6 +59,10 @@ echo "   ok"
 echo "── e volta a carregar por cima de si próprio ──"
 $P -f "$AQUI/esquema.sql" 2>&1 | grep -v 'NOTICE' || true
 echo "   ok"
+echo "── o que espera aprovação (por_aplicar.sql) corre por cima, duas vezes ──"
+$P -f "$AQUI/por_aplicar.sql" 2>&1 | grep -v 'NOTICE' || true
+$P -f "$AQUI/por_aplicar.sql" 2>&1 | grep -v 'NOTICE' || true
+echo "   ok"
 
 echo
 echo "── as regras ──"

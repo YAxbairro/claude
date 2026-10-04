@@ -1,0 +1,63 @@
+:root{
+  --ground:#EDF0F0; --surface:#FFFFFF; --surface2:#F4F7F7; --line:#D5DCDC; --line2:#E7ECEC;
+  --ink:#0F1618; --muted:#5C6A6C; --accent:#0B7F8E; --accent-ink:#FFFFFF; --accent-wash:#E3F1F3;
+  --warn:#A86A05; --warn-wash:#F8EEDC;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif; --display:'Archivo',var(--sans);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark; --ground:#0B1011; --surface:#141A1B; --surface2:#1A2122; --line:#293233; --line2:#212929;
+  --ink:#E3E9E8; --muted:#8A9897; --accent:#3FC0CE; --accent-ink:#06191C; --accent-wash:#122E32;
+  --warn:#DCA43C; --warn-wash:#2E2310;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark; --ground:#0B1011; --surface:#141A1B; --surface2:#1A2122; --line:#293233; --line2:#212929;
+  --ink:#E3E9E8; --muted:#8A9897; --accent:#3FC0CE; --accent-ink:#06191C; --accent-wash:#122E32;
+  --warn:#DCA43C; --warn-wash:#2E2310;
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--ground); color:var(--ink); font:16px/1.6 var(--sans);
+  -webkit-font-smoothing:antialiased}
+main{max-width:680px; margin:0 auto; padding:24px 16px 56px}
+.marca{display:flex; align-items:center; gap:10px; font:700 20px var(--display); color:var(--ink); text-decoration:none}
+.marca img{width:36px; height:36px; border-radius:9px}
+h1{font:700 30px/1.15 var(--display); margin:24px 0 6px; text-wrap:balance; letter-spacing:-.018em}
+h2{font:700 20px/1.25 var(--display); margin:34px 0 8px; text-wrap:balance; letter-spacing:-.012em;
+  scroll-margin-top:16px}
+h3{font:600 16px/1.35 var(--sans); margin:20px 0 4px}
+p,ul,ol{margin:0 0 12px; max-width:65ch}
+ul,ol{padding-left:22px}
+li{margin-bottom:6px}
+a{color:var(--accent)}
+.sub{color:var(--muted); margin:0 0 18px}
+.data{font-size:13.5px; color:var(--muted); margin:0 0 18px; letter-spacing:.01em}
+.indice{display:flex; flex-wrap:wrap; gap:8px; margin:0 0 8px; padding:0; list-style:none}
+.indice li{margin:0}
+.indice a{display:inline-block; padding:7px 12px; border-radius:999px; background:var(--surface);
+  border:1px solid var(--line); color:var(--ink); text-decoration:none; font-size:14px}
+.caixa{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px 16px;
+  margin:0 0 12px}
+.caixa p:last-child,.caixa ul:last-child{margin-bottom:0}
+.revisao{background:var(--warn-wash); border-radius:14px; padding:12px 16px; margin:0 0 18px;
+  font-size:14.5px}
+.revisao b{color:var(--warn)}
+.falta{background:var(--warn-wash); color:var(--warn); border-radius:5px; padding:0 4px; font-weight:600}
+.curto{background:var(--accent-wash); border-radius:14px; padding:14px 16px; margin:0 0 12px}
+.curto p:last-child,.curto ul:last-child{margin-bottom:0}
+details{background:var(--surface); border:1px solid var(--line); border-radius:14px; margin:0 0 8px}
+summary{cursor:pointer; padding:13px 16px; font-weight:600; list-style:none; display:flex; gap:10px;
+  align-items:flex-start}
+summary::-webkit-details-marker{display:none}
+summary::before{content:'+'; flex:none; width:20px; color:var(--accent); font:700 18px/1.3 var(--display)}
+details[open] summary::before{content:'–'}
+details>div{padding:0 16px 12px 46px}
+details>div p:last-child,details>div ol:last-child,details>div ul:last-child{margin-bottom:0}
+.zap{display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:2px 8px; width:100%; padding:15px; text-align:center;
+  border-radius:14px; background:var(--accent); color:var(--accent-ink); font:700 17px var(--display);
+  text-decoration:none; margin:6px 0 8px}
+.modelo{white-space:pre-wrap; font:14.5px/1.55 var(--sans); background:var(--surface2);
+  border:1px dashed var(--line); border-radius:12px; padding:12px 14px; margin:0 0 8px}
+.copiar{font:600 14px var(--sans); padding:8px 14px; border-radius:10px; border:1px solid var(--line);
+  background:var(--surface); color:var(--ink); cursor:pointer}
+footer{max-width:680px; margin:0 auto; padding:18px 16px 40px; border-top:1px solid var(--line2);
+  display:flex; flex-wrap:wrap; gap:8px 18px; font-size:14px; color:var(--muted)}
+footer a{color:var(--muted)}

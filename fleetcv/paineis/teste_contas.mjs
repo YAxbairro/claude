@@ -42,11 +42,23 @@ await preencher({'e-c-nome':'Manuel Tavares','e-c-frota':'Táxis Tavares',
 await p.click('[data-f="criar"]'); await p.waitForTimeout(400);
 ok('códigos diferentes: avisa antes de ir à base', /não são iguais/.test(await txt()));
 await preencher({'e-c-email':'patrao@exemplo.cv','e-c-cod2':'tavares1'});
+await p.click('[data-f="criar"]'); await p.waitForTimeout(400);
+ok('sem aceitar os termos não se cria a conta', /aceite os termos/.test(await txt()));
+ok('e o ecrã liga aos termos e à política de privacidade',
+   await p.getAttribute('.aceito a[href="/termos"]','href')==='/termos' &&
+   await p.getAttribute('.aceito a[href="/privacidade"]','href')==='/privacidade');
+await p.check('#e-c-aceito');
 await p.click('[data-f="criar"]'); await p.waitForTimeout(1200);
 ok('um e-mail que já tem conta noutra frota é recusado', /já tem conta/.test(await txt()));
 await preencher({'e-c-email':'manuel@tavares.cv'});
 await p.click('[data-f="criar"]');
-ok('com tudo certo, entra na frota nova',
+ok('com tudo certo, recebe logo o código de recuperação para guardar',
+   await esperar(async()=>/Guarde este código/.test(await txt())));
+ok('três grupos de quatro, sem letras que se confundam',
+   /^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/.test(await p.textContent('#rec-codigo')),
+   await p.textContent('#rec-codigo'));
+await p.click('[data-f="rec-guardado"]');
+ok('e, depois de o guardar, entra na frota nova',
    await esperar(async()=>/A frota agora/.test(await txt())));
 ok('e dão-lhe as boas-vindas com os primeiros passos',
    /Bem-vindo à sua frota/.test(await txt()));
@@ -54,6 +66,10 @@ const f0=await p.evaluate(()=>Nuvem.dados().frota);
 ok('a frota nova está vazia (não herdou a de ninguém)',
    f0 && f0.carros.length===0 && f0.condutores.length===0,
    f0 ? f0.carros.length+' carros, '+f0.condutores.length+' condutores' : 'sem frota');
+ok('e fica escrito que versão dos termos aceitou',
+   await esperar(async()=>(await p.evaluate(()=>{ const k=Object.keys(localStorage).find(k=>/^sb:d\|[^|]+\|frota\|config$/.test(k)
+       && JSON.parse(localStorage.getItem(k)).nome==='Táxis Tavares');
+     return k ? JSON.parse(localStorage.getItem(k)).termos : null; }))==='2026-10-04'));
 ok('e tem o nome que ele escolheu',
    /Táxis Tavares/.test(await p.textContent('#sub-marca')));
 await p.waitForTimeout(1500);

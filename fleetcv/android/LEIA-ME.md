@@ -35,7 +35,7 @@ Provado em `paineis/teste_app_android.mjs`, com a aplicação imitada.
 
 ## Compilar
 
-Precisa de Java 21, Node e do SDK do Android (plataforma 35):
+Precisa de Java 21, Node e do SDK do Android (plataforma 36):
 
 ```sh
 npm install
@@ -70,9 +70,15 @@ Impressão digital do certificado (SHA-256):
 Nunca apagar essas duas linhas: sem a chave, quem já tem a aplicação teria de
 a desinstalar para receber a seguinte.
 
-## Google Play (mais tarde)
+## Google Play
 
-Conta de programador (25 USD, uma vez). A Play pede o formato AAB
-(`./gradlew bundleRelease`) e assina ela própria; esta chave passa a ser a
-"chave de envio". A licença `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` tem de ser
-justificada na revisão (localização contínua durante o trabalho).
+Tudo o que a Play pede (pacote AAB, textos, imagens, formulários, a escolha
+da chave) está em [`play/LEIA-ME.md`](play/LEIA-ME.md). A partir da 1.1.0 a
+aplicação é feita para o Android 16 (API 36: `compileSdkVersion` e
+`targetSdkVersion` em `android/variables.gradle`), como a Play exige desde
+31/08/2026, e ajusta a página às barras do sistema
+(`android.adjustMarginsForEdgeToEdge: "auto"` no `capacitor.config.json`).
+
+```sh
+./gradlew bundleRelease     # sai em android/app/build/outputs/bundle/release/app-release.aab
+```

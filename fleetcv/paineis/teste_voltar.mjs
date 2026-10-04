@@ -47,7 +47,13 @@ ok('e o botão do telemóvel leva ao ecrã de entrar', /Painel do proprietário/
 await p.click('[data-f="ir-criar"]'); await p.waitForTimeout(500);
 for(const [k,v] of Object.entries({'e-c-nome':'Manuel Tavares','e-c-frota':'Táxis Tavares',
   'e-c-email':'manuel@tavares.cv','e-c-cod':'tavares1','e-c-cod2':'tavares1'})) await p.fill('#'+k,v);
+await p.check('#e-c-aceito');
 await p.click('[data-f="criar"]');
+await esperar(async()=>/Guarde este código/.test(await txt()));
+ok('o código de recuperação não tem "Voltar" (só se vê uma vez)', !(await temVoltar(p)));
+await botaoDoTelemovel(p);
+ok('e o botão do telemóvel não o fecha sem querer', /Guarde este código/.test(await txt()));
+await p.click('[data-f="rec-guardado"]');
 await esperar(async()=>/A frota agora/.test(await txt()));
 ok('no mapa (o ecrã de partida) não há "Voltar"', !(await temVoltar(p)));
 

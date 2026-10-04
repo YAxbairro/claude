@@ -9,6 +9,7 @@
   },
   "android": {
     "useLegacyBridge": true,
+    "adjustMarginsForEdgeToEdge": "auto",
     "backgroundColor": "#0B7F8E"
   },
   "plugins": {

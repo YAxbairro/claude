@@ -544,3 +544,56 @@ select '73 · um erro em ciclo não enche a base (120 por hora, no máximo): ' |
   case when (select count(*) from erros where quem='22222222-2222-2222-2222-222222222222'::uuid) <= 120
        then 'parou nos '||(select count(*) from erros where quem='22222222-2222-2222-2222-222222222222'::uuid)||' (certo)'
        else 'NÃO PAROU (MAL)' end;
+insert into erros(quando, quem, frota, tipo, onde, mensagem)
+  values (now() - interval '91 days', '33333333-3333-3333-3333-333333333333'::uuid, 'f1',
+          'info', 'velho', 'de há três meses');
+set role authenticated;
+insert into erros(tipo, onde, mensagem) values ('info', 'novo', 'de hoje');
+reset role;
+select '81 · o que tem mais de 90 dias sai sozinho do registo de erros: ' ||
+  case when not exists (select 1 from erros where onde='velho')
+       then 'saiu (certo)' else 'FICOU (MAL)' end;
+
+-- ─── quem não tem sessão nem bate à porta ────────────────────
+select '74 · sem sessão não se chama o entrar nem o sair (só com sessão): ' ||
+  case when not has_function_privilege('anon','public.entrar(text,text)','execute')
+        and not has_function_privilege('anon','public.sair()','execute')
+        and has_function_privilege('authenticated','public.entrar(text,text)','execute')
+       then 'só com sessão (certo)' else 'ABERTO (MAL)' end;
+
+-- ─── o código de recuperação ─────────────────────────────────
+call quem('11111111-1111-1111-1111-111111111111');          -- o patrão da f1, dentro
+select (entrar('patrao@exemplo.cv','9999'))->>'papel';
+create temp table _rec as select (novo_codigo_recuperacao('9999'))->>'codigo' as c;
+select '75 · o patrão recebe um código de recuperação (com o código dele): ' ||
+  case when (select c from _rec) ~ '^[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$'
+        and (novo_codigo_recuperacao('0000'))->>'erro' is not null
+       then 'recebe, e com o código errado não (certo)' else 'NÃO (MAL)' end;
+-- o novo_codigo_recuperacao('0000') de cima contou uma falha: limpa-se
+delete from tentativas where email='patrao@exemplo.cv';
+update _rec set c = (novo_codigo_recuperacao('9999'))->>'codigo';
+
+call quem('77777777-7777-7777-7777-777777777777');          -- outro telemóvel, sem o código
+insert into auth.users values ('77777777-7777-7777-7777-777777777777') on conflict do nothing;
+select '76 · com o e-mail e o código de recuperação, muda o código e entra: ' ||
+  case when (recuperar_acesso('patrao@exemplo.cv', lower(replace((select c from _rec),'-',' ')), 'novo-codigo-42'))->>'papel' = 'dono'
+        and (entrar('patrao@exemplo.cv','novo-codigo-42'))->>'papel' = 'dono'
+        and (entrar('patrao@exemplo.cv','9999'))->>'erro' is not null
+       then 'entrou, e o código antigo já não abre (certo)' else 'NÃO (MAL)' end;
+delete from tentativas where email='patrao@exemplo.cv';
+select '77 · o telemóvel que estava dentro com o código antigo saiu: ' ||
+  case when not exists (select 1 from perfis where uid='11111111-1111-1111-1111-111111111111')
+       then 'saiu (certo)' else 'FICOU (MAL)' end;
+select '78 · o código de recuperação só serve uma vez: ' ||
+  case when (recuperar_acesso('patrao@exemplo.cv', (select c from _rec), 'outro-codigo-1'))->>'erro' is not null
+       then 'segunda vez recusada (certo)' else 'SERVIU OUTRA VEZ (MAL)' end;
+delete from tentativas where email='patrao@exemplo.cv';
+select '79 · cinco códigos de recuperação errados travam a conta: ' ||
+  case when (select count(*) from generate_series(1,5) g
+              where (recuperar_acesso('patrao@exemplo.cv','AAAA-BBBB-CCCC','tenta-'||g))->>'erro' is not null) = 5
+        and (recuperar_acesso('patrao@exemplo.cv','AAAA-BBBB-CCCC','tenta-6'))->>'erro' like 'Demasiadas%'
+       then 'travou (certo)' else 'NÃO TRAVOU (MAL)' end;
+select '80 · quem não entrou não pede códigos de recuperação, e ninguém os lê: ' ||
+  case when not has_function_privilege('anon','public.recuperar_acesso(text,text,text)','execute')
+        and not has_function_privilege('authenticated','public._guardar_recuperacao(text)','execute')
+       then 'fechado (certo)' else 'ABERTO (MAL)' end;

@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="pt">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0B7F8E">
+<meta name="description" content="Que dados a FleetCV recolhe, para quê, onde ficam, quanto tempo e como os pode ver ou apagar.">
+<title>Privacidade · FleetCV</title>
+<link rel="icon" href="/icone.png">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/paginas.css">
+<main>
+  <a class="marca" href="/"><img src="/icone.png" alt="">FleetCV</a>
+  <h1>Política de privacidade</h1>
+  <p class="data">Versão de 4 de Outubro de 2026</p>
+  <p class="revisao"><b>Versão provisória, em revisão jurídica.</b> O que aqui está descreve o que a
+    FleetCV faz hoje. Os campos assinalados a amarelo serão completados com os dados da empresa.</p>
+
+  <ul class="indice">
+    <li><a href="#condutor">Para condutores</a></li>
+    <li><a href="#dados">Que dados</a></li>
+    <li><a href="#onde">Onde ficam</a></li>
+    <li><a href="#tempo">Quanto tempo</a></li>
+    <li><a href="#direitos">Os seus direitos</a></li>
+  </ul>
+
+  <h2 id="condutor">Em poucas palavras, para quem conduz</h2>
+  <div class="curto">
+    <ul>
+      <li>A FleetCV só sabe onde o carro está <b>enquanto o seu turno está aberto</b>. Começa quando
+        carrega em "Começar o turno" e acaba quando o fecha. Fora do turno, não regista nada.</li>
+      <li>Na aplicação Android, com o turno aberto aparece sempre uma <b>notificação fixa da
+        FleetCV</b>. Se a vir, o GPS está a registar. No navegador, o GPS só regista com a página
+        aberta e o turno a decorrer.</li>
+      <li>Quem vê o seu percurso, as fotografias e os abastecimentos é <b>o proprietário da sua
+        frota</b>. Os seus colegas não vêem os seus turnos nem o seu código.</li>
+      <li>A aplicação não lê os seus contactos, mensagens, chamadas nem as outras fotografias do
+        telemóvel. Não há publicidade e os seus dados não se vendem.</li>
+      <li>Se tiver uma dúvida, ou quiser ver ou corrigir o que há sobre si, fale primeiro com o
+        proprietário da frota. Também nos pode escrever pelo WhatsApp, +238 955 78 82.</li>
+    </ul>
+  </div>
+
+  <h2>1. Quem somos</h2>
+  <p>A FleetCV é um serviço de controlo de frotas de táxi, feito na Praia, Cabo Verde. É prestado por
+    <span class="falta">[nome da empresa]</span>, NIF <span class="falta">[número]</span>, com sede em
+    <span class="falta">[morada]</span>. Para qualquer assunto de privacidade: WhatsApp
+    <a href="https://wa.me/2389557882">+238 955 78 82</a>.</p>
+
+  <h2>2. Quem decide o quê</h2>
+  <p>O <b>proprietário da frota</b> decide usar a FleetCV com os seus carros e condutores. Dos dados
+    dos condutores e das viaturas, ele é o responsável pelo tratamento; a FleetCV trata esses dados por
+    conta dele, só para lhe prestar o serviço, e não os usa para mais nada.</p>
+  <p>Dos dados da conta do próprio proprietário (nome, e-mail, código), a FleetCV é a responsável.</p>
+
+  <h2 id="dados">3. Que dados recolhemos</h2>
+  <h3>Da conta do proprietário</h3>
+  <ul>
+    <li>Nome, e-mail, nome da frota e preço do litro que usa nas contas.</li>
+    <li>O código de entrar e o código de recuperação, guardados <b>baralhados</b> (bcrypt): nem a
+      FleetCV os consegue ler.</li>
+  </ul>
+  <h3>Dos condutores e das viaturas (escritos pelo proprietário)</h3>
+  <ul>
+    <li>Nome, e-mail e telefone do condutor, e o código de acesso que o proprietário lhe dá (o
+      proprietário vê-o, para lho poder mandar).</li>
+    <li>Matrícula, marca, quilómetros e tamanho do depósito de cada carro.</li>
+  </ul>
+  <h3>Durante o turno</h3>
+  <ul>
+    <li>A posição do telemóvel (GPS): guarda-se um ponto a cada 20 metros a andar, ou a cada 30
+      segundos parado, com a hora e a precisão. A posição ao vivo, que o proprietário vê no mapa, vai
+      sendo substituída pela seguinte.</li>
+    <li>As fotografias do conta-quilómetros no começo e no fim do turno, e dos talões de
+      abastecimento, com os valores e os litros escritos.</li>
+    <li>Os alertas que a FleetCV calcula a partir disto (quilómetros que não batem, abastecimento sem
+      talão, gasto acima do normal, tempo sem sinal).</li>
+  </ul>
+  <h3>Do telemóvel</h3>
+  <ul>
+    <li>A versão da aplicação, a marca e o modelo do telemóvel e a versão do Android, e se a poupança
+      de bateria está a parar o GPS. Serve para ajudar quando o GPS falha.</li>
+    <li>Registos de erros técnicos (por exemplo, "o GPS parou 5 minutos"), com o tipo de navegador.
+      Não levam fotografias nem percursos.</li>
+    <li>No próprio telemóvel ficam a sessão e uma cópia dos dados da frota, para a aplicação
+      funcionar sem rede. Não usamos cookies de publicidade nem de estatísticas.</li>
+  </ul>
+  <h3>O que não recolhemos</h3>
+  <p>A posição fora do turno; contactos, mensagens, chamadas, a galeria de fotografias, ou o que se
+    faz noutras aplicações.</p>
+
+  <h2>4. Para quê</h2>
+  <ul>
+    <li><b>Prestar o serviço contratado</b> pelo proprietário: mostrar onde andam os carros, quantos
+      quilómetros fizeram, quanto gastaram, e as contas de cada turno.</li>
+    <li><b>Controlo da frota e das despesas</b>, pelo proprietário, no âmbito da relação de trabalho ou
+      de prestação de serviço que tem com o condutor, e só durante o turno.</li>
+    <li><b>Manter o serviço seguro e a funcionar</b>: travar tentativas de adivinhar códigos e perceber
+      porque é que um GPS parou.</li>
+  </ul>
+  <p>A FleetCV não usa os dados para publicidade, não os vende e não os cruza com outros.</p>
+
+  <h2>5. As fotografias</h2>
+  <p>A leitura automática do número do conta-quilómetros faz-se <b>no próprio telemóvel</b>: a
+    fotografia não é enviada a nenhum serviço de inteligência artificial. A fotografia é guardada
+    na frota para o proprietário poder confirmar o número.</p>
+
+  <h2 id="onde">6. Onde ficam e quem os vê</h2>
+  <ul>
+    <li>A base de dados fica no <b>Supabase</b>, em servidores na <b>União Europeia (Irlanda)</b>, um
+      espaço com regras de protecção de dados exigentes (RGPD).</li>
+    <li>Cada frota está fechada sobre si por regras da própria base de dados: só o proprietário e os
+      seus condutores lhe chegam. Os condutores não vêem os turnos nem os códigos dos colegas.</li>
+    <li>O site e a aplicação são servidos pela <b>Vercel</b>. O mapa é um ficheiro nosso, servido pelo
+      mesmo site; se falhar, o mapa vem do <b>OpenStreetMap</b>. As bibliotecas da aplicação vêm do
+      <b>jsDelivr</b> e as letras do <b>Google Fonts</b>. Estes serviços recebem o endereço de
+      internet do telemóvel, como em qualquer página, mas não os dados da frota.</li>
+    <li>O WhatsApp só entra quando alguém carrega num botão de mandar mensagem.</li>
+    <li>Na FleetCV, só quem dá apoio técnico acede à base, e só quando é preciso para resolver um
+      problema.</li>
+  </ul>
+
+  <h2 id="tempo">7. Quanto tempo</h2>
+  <ul>
+    <li>Os dados da frota ficam enquanto a conta existir. O proprietário pode guardar uma cópia de tudo
+      e <b>apagar a conta a qualquer momento</b> (em Mais → Apagar a conta): a frota, os carros, os
+      condutores, os turnos e as fotografias apagam-se de imediato.</li>
+    <li>Se a conta ficar suspensa por falta de pagamento, os dados guardam-se 60 dias, para se poder
+      voltar. Depois disso podem ser apagados, com aviso antes.</li>
+    <li>Os registos de erros técnicos apagam-se sozinhos ao fim de 90 dias.</li>
+    <li>As cópias de segurança automáticas do fornecedor da base vão sendo substituídas pelas novas
+      em poucos dias.</li>
+  </ul>
+
+  <h2>8. Segurança</h2>
+  <p>Ligações sempre cifradas (HTTPS); códigos guardados baralhados; ao fim de cinco códigos errados,
+    a conta fica travada um quarto de hora; e cada frota separada das outras pela própria base de
+    dados, não pela aplicação.</p>
+
+  <h2 id="direitos">9. Os seus direitos</h2>
+  <p>Pela lei de Cabo Verde (Lei n.º 133/V/2001, com as alterações das Leis n.º 41/VIII/2013 e
+    n.º 121/IX/2021), pode pedir para ver os seus dados, corrigi-los, apagá-los ou opor-se ao seu
+    tratamento.</p>
+  <ul>
+    <li><b>Proprietários:</b> quase tudo se faz na própria aplicação (Mais). Para o resto, fale
+      connosco pelo WhatsApp.</li>
+    <li><b>Condutores:</b> fale primeiro com o proprietário da frota, que é quem decide sobre os seus
+      dados. Se não resolver, escreva-nos: ajudamos.</li>
+  </ul>
+  <p>Também pode apresentar queixa à <b>Comissão Nacional de Protecção de Dados (CNPD)</b>, na
+    Praia.</p>
+
+  <h2>10. Menores</h2>
+  <p>A FleetCV é para proprietários de frotas e condutores profissionais. Não se destina a menores de
+    18 anos.</p>
+
+  <h2>11. Mudanças a esta política</h2>
+  <p>Quando mudar alguma coisa importante, a data lá em cima muda e avisamos dentro da aplicação
+    antes de a mudança valer.</p>
+</main>
+<footer>
+  <a href="/">FleetCV</a>
+  <a href="/termos">Termos de utilização</a>
+  <a href="/ajuda">Ajuda</a>
+  <span>WhatsApp <a href="https://wa.me/2389557882">+238 955 78 82</a></span>
+</footer>
+</html>

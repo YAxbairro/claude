@@ -1,0 +1,46 @@
+# Os cabeçalhos para o Cloudflare Pages: os mesmos do vercel.json
+# (paineis/teste_alojamento.mjs confere que não se desencontram).
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(self)
+
+/FleetCV.apk
+  Content-Type: application/vnd.android.package-archive
+  Content-Disposition: attachment; filename="FleetCV.apk"
+  Cache-Control: public, max-age=300
+
+/teste/*.apk
+  Content-Type: application/vnd.android.package-archive
+  Content-Disposition: attachment
+  Cache-Control: public, max-age=300
+  X-Robots-Tag: noindex
+
+/teste/*.aab
+  Content-Type: application/octet-stream
+  Content-Disposition: attachment
+  Cache-Control: public, max-age=300
+  X-Robots-Tag: noindex
+
+/fleetcv-config.js
+  Cache-Control: no-store
+
+/mapa.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/condutor.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/dono.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/porteiro.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/estilo.css
+  Cache-Control: public, max-age=31536000, immutable
+
+/mapa/*.pmtiles
+  Content-Type: application/octet-stream
+  Cache-Control: public, max-age=31536000, immutable

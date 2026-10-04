@@ -823,8 +823,11 @@ function pintar(){
         'antonio@exemplo.cv · 1234<br>jorge@exemplo.cv · 2345<br>'+
         'nuno@exemplo.cv · 3456</p></div>';
     else
-      h+='<p class="p-nota" style="margin-top:4px">Não tem código? Peça-o ao patrão '+
-        '— ele manda-lho pelo WhatsApp.</p>';
+      h+='<p class="p-nota" style="margin-top:4px">Não tem código, ou esqueceu-se dele? '+
+        'Peça-o ao patrão — ele vê-o na sua ficha e manda-lho pelo WhatsApp.</p>'+
+        '<p class="p-nota" style="margin-top:8px"><a href="/privacidade#condutor" '+
+        'style="color:var(--accent)">O que a FleetCV regista, e quando</a> · '+
+        '<a href="/ajuda#condutor" style="color:var(--accent)">Ajuda</a></p>';
     b='<button class="bt pri" data-f="entrar">Entrar</button>';
   }
 

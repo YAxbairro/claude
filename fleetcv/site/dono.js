@@ -13,6 +13,8 @@ var LIM={gapKm:3, kmMax:500, divAviso:15, divCritica:25, semSinalS:900,
 var PENAL={A04:50,A06:40,A19:30,A15:30,A16:30,A14:30,A13:25,A12:25,A17:20,
            A08:15,A09:15,A11:10,A20:10,A21:5,A07:5,A03:5};
 var DONO={email:'patrao@exemplo.cv', codigo:'9999', nome:'Dona Fátima'};
+/* a versão dos termos e da política que se aceita ao criar conta (site/termos.html) */
+var TERMOS='2026-10-04';
 /* Os postos são os verdadeiros do OpenStreetMap (ver mapa_praia). */
 var POSTOS=MAPA_PRAIA.postos;
 
@@ -795,6 +797,9 @@ function pintar(){
       esc(S.r.cod||'')+'" placeholder="o seu código"></label>';
     h+=caixaAviso();
     h+='<button class="bt pri" data-f="entrar">Entrar</button>';
+    if(Nuvem.podeCriarConta && Nuvem.podeCriarConta())
+      h+='<p style="text-align:center;margin:12px 0 0"><button class="lig" '+
+        'data-f="ir-recuperar">Esqueci-me do código</button></p>';
     /* Com a base de dados ligada, quem ainda não tem conta cria-a aqui.
        Sem ela (aberto como ficheiro) não há onde guardar contas, e fica
        o código de experimentar de sempre. */
@@ -835,9 +840,78 @@ function pintar(){
       '<label class="campo"><span class="lb">O mesmo código outra vez</span>'+
       '<input type="password" id="e-c-cod2"'+marcado('e-c-cod2')+' autocomplete="new-password" value="'+
       cc('e-c-cod2')+'"></label>'+
+      '<label class="aceito'+(S.aviso&&S.aviso.campo==='e-c-aceito'?' mau':'')+'">'+
+      '<input type="checkbox" id="e-c-aceito"'+(S.r['e-c-aceito']?' checked':'')+'>'+
+      '<span>Li e aceito os <a href="/termos" target="_blank" rel="noopener">termos de '+
+      'utilização</a> e a <a href="/privacidade" target="_blank" rel="noopener">política de '+
+      'privacidade</a>.</span></label>'+
       '<button class="bt pri" data-f="criar">Criar a minha frota</button>'+
       '<p style="text-align:center;margin:14px 0 0"><button class="lig" '+
       'data-f="ir-entrar">Já tenho conta — entrar</button></p>';
+    b=false;
+  }
+
+  /* ── esqueci-me do código ───────────────────────────── */
+  /* Com o código de recuperação que se guardou ao criar a conta, o
+     patrão escolhe um código novo sozinho, a qualquer hora. Sem ele,
+     fala connosco: confirmamos que a conta é dele e ajudamos. */
+  else if(S.ecra==='recuperar'){
+    var rc=function(id){ return esc(S.r[id]||''); };
+    h='<div style="height:10px"></div><h1>Esqueci-me do código</h1>'+
+      '<p class="sub">Com o código de recuperação que guardou quando criou a '+
+      'conta, escolhe já um código novo.</p>'+caixaAviso()+
+      '<label class="campo"><span class="lb">E-mail da conta</span>'+
+      '<input type="email" id="e-r-email"'+marcado('e-r-email')+' autocomplete="email" value="'+
+      esc(S.r['e-r-email']!=null?S.r['e-r-email']:(S.recEmail||''))+
+      '" placeholder="o.seu@email.cv"></label>'+
+      '<label class="campo"><span class="lb">Código de recuperação</span>'+
+      '<input type="text" id="e-r-rec"'+marcado('e-r-rec')+' autocomplete="off" '+
+      'autocapitalize="characters" spellcheck="false" value="'+rc('e-r-rec')+
+      '" placeholder="XXXX-XXXX-XXXX" style="font-family:var(--mono);letter-spacing:.06em">'+
+      '<span class="aj">São 12 letras e algarismos, em três grupos de quatro.</span></label>'+
+      '<label class="campo"><span class="lb">Código novo para entrar</span>'+
+      '<input type="password" id="e-r-novo"'+marcado('e-r-novo')+' autocomplete="new-password" value="'+
+      rc('e-r-novo')+'" placeholder="pelo menos 6 algarismos ou letras"></label>'+
+      '<label class="campo"><span class="lb">O código novo outra vez</span>'+
+      '<input type="password" id="e-r-novo2"'+marcado('e-r-novo2')+' autocomplete="new-password" value="'+
+      rc('e-r-novo2')+'"></label>'+
+      '<button class="bt pri" data-f="recuperar">Mudar o código e entrar</button>'+
+      '<div class="cartao nota" style="margin-top:14px"><p class="p-nota">'+
+      '<b>Não tem o código de recuperação?</b> Fale connosco pelo WhatsApp, '+
+      '<b>+238 955 78 82</b>. Confirmamos que a conta é sua e ajudamos a entrar.</p>'+
+      '<a class="bt sec pq" style="margin-top:10px" target="_blank" rel="noopener" '+
+      'href="https://wa.me/2389557882?text='+encodeURIComponent(
+        'Olá, esqueci-me do código da minha conta FleetCV.')+'">Falar pelo WhatsApp</a>'+
+      '<p class="p-nota" style="margin-top:10px"><b>É condutor?</b> O seu código é '+
+      'o patrão que lho dá. Peça-lho a ele.</p></div>'+
+      '<p style="text-align:center;margin:14px 0 0"><button class="lig" '+
+      'data-f="ir-entrar">Voltar a entrar</button></p>';
+    b=false;
+  }
+
+  /* ── o código de recuperação, para guardar ───────────── */
+  /* Só se vê uma vez: a base guarda-o baralhado, como o código de
+     entrar. Por isso o ecrã não deixa seguir sem um "já guardei". */
+  else if(S.ecra==='guardar-rec'){
+    var rcod=S.recNovo||'';
+    h='<div style="height:10px"></div><h1>Guarde este código</h1>'+
+      '<p class="sub">Se um dia se esquecer do código de entrar, é com este que '+
+      'volta a entrar sozinho. Só aparece agora.</p>'+caixaAviso()+
+      '<div class="cartao" style="text-align:center;padding:22px 12px">'+
+      '<div id="rec-codigo" style="font-family:var(--mono);font-size:26px;font-weight:600;'+
+      'letter-spacing:.08em;color:var(--ink);user-select:all;word-break:break-all">'+
+      esc(rcod)+'</div>'+
+      '<p class="p-nota" id="rec-copiado" style="margin-top:8px">Conta: '+
+      esc(S.recConta||'')+'</p>'+
+      '<button class="bt sec pq" data-f="copiar-rec" style="margin-top:12px">Copiar</button></div>'+
+      '<div class="cartao nota"><p class="p-nota">Escreva-o num papel e guarde-o com '+
+      'os documentos da frota, ou mande-o para si próprio no WhatsApp. '+
+      '<b>Não o dê a ninguém</b> — nem aos condutores. Cada código de '+
+      'recuperação serve uma vez; depois de usado, recebe outro.</p>'+
+      '<a class="bt sec pq" style="margin-top:10px" target="_blank" rel="noopener" '+
+      'href="https://wa.me/?text='+encodeURIComponent('FleetCV — código de recuperação da conta '+
+        (S.recConta||'')+': '+rcod)+'">Mandar para mim no WhatsApp</a></div>'+
+      '<button class="bt pri" data-f="rec-guardado">Já guardei</button>';
     b=false;
   }
 
@@ -1337,6 +1411,17 @@ function pintar(){
         '<input type="password" id="e-a-novo2"'+marcado('e-a-novo2')+
         ' autocomplete="new-password" value="'+esc(S.r['e-a-novo2']||'')+'"></label>'+
         '<button class="bt sec pq" data-f="mudar-acesso">Mudar</button></div>';
+    /* O código de recuperação: quem criou a conta antes de ele existir
+       tira um aqui; quem o perdeu, troca-o (o antigo deixa de servir). */
+    if(Nuvem.podeCriarConta && Nuvem.podeCriarConta() && !(Nuvem.ensaio&&Nuvem.ensaio()))
+      h+='<div class="cartao"><h2>Código de recuperação</h2>'+
+        '<p class="p-nota" style="margin:5px 0 8px">É o que o deixa voltar a entrar '+
+        'se se esquecer do código. Se não o tem guardado, tire um novo — o antigo '+
+        'deixa de servir.</p>'+
+        '<label class="campo"><span class="lb">O seu código de hoje</span>'+
+        '<input type="password" id="e-q-cod"'+marcado('e-q-cod')+
+        ' autocomplete="current-password" value="'+esc(S.r['e-q-cod']||'')+'"></label>'+
+        '<button class="bt sec pq" data-f="nova-rec">Tirar um código de recuperação</button></div>';
     /* Ir-se embora tem de ser tão fácil como entrar. A frota fundadora
        não se apaga por aqui (a base também recusa). */
     if(Nuvem.podeCriarConta && Nuvem.podeCriarConta() && !(Nuvem.ensaio&&Nuvem.ensaio())
@@ -1348,6 +1433,13 @@ function pintar(){
         '<input type="password" id="e-x-cod"'+marcado('e-x-cod')+
         ' autocomplete="current-password" value="'+esc(S.r['e-x-cod']||'')+'"></label>'+
         '<button class="bt perigo pq" data-f="apagar-conta">Apagar tudo</button></div>';
+    h+='<div class="cartao"><h2>Ajuda</h2>'+
+      '<p class="p-nota" style="margin-top:5px">Dúvidas, ou alguma coisa que não funciona: '+
+      'WhatsApp <b>+238 955 78 82</b>.</p>'+
+      '<p class="ligacoes"><a href="/ajuda" target="_blank" rel="noopener">Perguntas frequentes</a>'+
+      '<a href="/ajuda#aviso" target="_blank" rel="noopener">Aviso para os condutores</a>'+
+      '<a href="/privacidade" target="_blank" rel="noopener">Privacidade</a>'+
+      '<a href="/termos" target="_blank" rel="noopener">Termos</a></p></div>';
     h+='<div class="cartao"><h2>Guardar uma cópia</h2>'+
       '<p class="p-nota" style="margin-top:5px">Leva a frota e os turnos todos '+
       'num ficheiro. Vale a pena fazer isto de vez em quando.</p>'+
@@ -1412,7 +1504,7 @@ function pintar(){
   montarMapas();
   el('nav').parentNode.hidden = !b;
   var pv=paraOndeVolta();
-  el('voltar').hidden = !(pv && !pv.fechar);
+  el('voltar').hidden = !(pv && !pv.fechar && !pv.ficar);
   armarVoltar();
   el('sub-marca').textContent = S.sessao&&S.frota ? ' · '+S.frota.nome : '';
   pintarNav(); pintarTopo();
@@ -1462,8 +1554,11 @@ function ir(ecra, sel, voltar){
 function paraOndeVolta(){
   if(S.lupa) return {fechar:'lupa'};
   if(S.voltarPara) return {ir:S.voltarPara};
+  /* o código de recuperação só se vê uma vez: sai-se pelo "Já guardei",
+     e o botão de voltar do telemóvel não o fecha sem querer */
+  if(S.ecra==='guardar-rec') return {ficar:true};
   if(!S.sessao){
-    if(S.ecra==='criar') return {ir:{ecra:'entrar'}};
+    if(S.ecra==='criar' || S.ecra==='recuperar') return {ir:{ecra:'entrar'}};
     /* do ecrã de entrar volta-se à escolha entre condutor e patrão */
     if(S.ecra==='entrar' && document.getElementById('trocar')) return {porta:true};
     return null; }
@@ -1474,6 +1569,7 @@ function paraOndeVolta(){
 function voltar(){
   var v=paraOndeVolta();
   if(!v) return false;
+  if(v.ficar) return true;
   if(v.fechar==='lupa'){ S.lupa=null; pintar(); }
   else if(v.fechar==='cartao'){ S.cartao=null; pintar(); }
   else if(v.porta){ var t=document.getElementById('trocar'); if(t) t.click(); }
@@ -1544,7 +1640,8 @@ document.addEventListener('input', function(e){
   if(id==='i-cod') S.r.cod=e.target.value;
   /* tudo o que começa por "e-" é um campo de formulário: guarda-se à
      medida que se escreve, para nada se perder se o ecrã se repintar */
-  if(id && id.indexOf('e-')===0){ S.r[id]=e.target.value;
+  if(id && id.indexOf('e-')===0){
+    S.r[id]= e.target.type==='checkbox' ? (e.target.checked?'1':'') : e.target.value;
     if(S.aviso && S.aviso.campo===id){ S.aviso=null; pinturaEmEspera=true; } }
 });
 
@@ -1635,6 +1732,53 @@ document.addEventListener('click', function(e){
     });
   }
   if(f==='ir-criar'){ S.aviso=null; ir('criar'); return; }
+  if(f==='ir-recuperar'){ S.recEmail=(S.r.email||'').trim(); S.aviso=null;
+    ir('recuperar'); return; }
+  if(f==='recuperar'){
+    var gr=function(id){ var n=el(id); return (n?n.value:(S.r[id]||'')).trim(); };
+    var re=gr('e-r-email').toLowerCase(), rr=gr('e-r-rec');
+    var r1=gr('e-r-novo'), r2=gr('e-r-novo2');
+    var mau3=function(campo, d){ S.aviso={campo:campo, d:d}; pintar(); };
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(re))
+      return mau3('e-r-email','Escreva o e-mail com que entra.');
+    if(rr.replace(/[^A-Za-z0-9]/g,'').length!==12)
+      return mau3('e-r-rec','O código de recuperação tem 12 letras e algarismos.');
+    if(r1.length<6) return mau3('e-r-novo',
+      'O código novo tem de ter pelo menos 6 algarismos ou letras.');
+    if(r1!==r2) return mau3('e-r-novo2','Os dois códigos novos não são iguais.');
+    S.aviso='a recuperar…'; pintar();
+    Nuvem.recuperarAcesso(re, rr, r1).then(function(r){
+      if(r.semFuncao){ S.aviso={d:'Ainda não dá para recuperar por aqui. Fale connosco '+
+        'pelo WhatsApp, +238 955 78 82, e ajudamos a entrar.'}; pintar(); return; }
+      if(r.erro){ S.aviso={campo:/novo/i.test(r.erro)?'e-r-novo':'e-r-rec', d:r.erro};
+        pintar(); return; }
+      S.sessao=true; S.aviso=null; S.conta=undefined;
+      Nuvem.local('dono-sessao', true);
+      S.recNovo=r.recuperacao||null; S.recConta=re;
+      ir(S.recNovo?'guardar-rec':'mapa');
+      if(S.recNovo){ S.aviso={d:'Pronto: entrou com o código novo. Este código de '+
+        'recuperação também é novo — o que usou já não serve.'}; pintar(); }
+    });
+    return; }
+  if(f==='copiar-rec'){
+    var alvo3=el('rec-copiado'), rtxt=S.recNovo||'';
+    if(navigator.clipboard&&navigator.clipboard.writeText)
+      navigator.clipboard.writeText(rtxt).then(function(){
+        if(alvo3) alvo3.textContent='Copiado. Guarde-o já num sítio seguro.';
+      }).catch(function(){});
+    return; }
+  if(f==='rec-guardado'){ S.recNovo=null; S.aviso=null; ir('mapa'); return; }
+  if(f==='nova-rec'){
+    var qn=el('e-q-cod'), qc=(qn?qn.value:(S.r['e-q-cod']||'')).trim();
+    if(!qc){ S.aviso={campo:'e-q-cod', d:'Escreva o código que usa hoje.'}; pintar(); return; }
+    S.aviso='a tirar…'; pintar();
+    Nuvem.novoCodigoRecuperacao(qc).then(function(r){
+      if(r.semFuncao){ S.aviso={campo:'e-q-cod', d:'Ainda não está disponível. Volte a '+
+        'tentar daqui a uns dias.'}; pintar(); return; }
+      if(!r.codigo){ S.aviso={campo:'e-q-cod', d:r.erro||'Não foi possível.'}; pintar(); return; }
+      S.recNovo=r.codigo; S.recConta=(S.conta&&S.conta.email)||'';
+      S.aviso=null; ir('guardar-rec'); });
+    return; }
   if(f==='ir-entrar'){ S.aviso=null; ir('entrar'); return; }
   if(f==='criar'){
     var gc=function(id){ var n=el(id); return (n?n.value:(S.r[id]||'')).trim(); };
@@ -1647,12 +1791,20 @@ document.addEventListener('click', function(e){
     if(k1.length<6) return mau('e-c-cod',
       'O código tem de ter pelo menos 6 algarismos ou letras.');
     if(k1!==k2) return mau('e-c-cod2','Os dois códigos não são iguais.');
+    var ac=el('e-c-aceito');
+    if(!(ac?ac.checked:S.r['e-c-aceito'])) return mau('e-c-aceito',
+      'Para criar a conta, leia e aceite os termos e a política de privacidade.');
     S.aviso='a criar a sua frota…'; pintar();
-    Nuvem.criarConta({nome:cn, frota:cf, email:ce, codigo:k1}).then(function(r){
+    Nuvem.criarConta({nome:cn, frota:cf, email:ce, codigo:k1, termos:TERMOS}).then(function(r){
       if(r.erro){ S.aviso = /e-mail/i.test(r.erro)
           ? {campo:'e-c-email', d:r.erro} : r.erro; pintar(); return; }
       S.sessao=true; S.aviso=null; S.conta=undefined;
-      Nuvem.local('dono-sessao', true); ir('mapa');
+      Nuvem.local('dono-sessao', true);
+      /* logo a seguir, o código de recuperação — enquanto a base não o
+         souber dar, segue-se direito para a frota */
+      Nuvem.novoCodigoRecuperacao(k1).then(function(q){
+        if(q && q.codigo){ S.recNovo=q.codigo; S.recConta=ce; ir('guardar-rec'); }
+        else ir('mapa'); });
     });
     return; }
   if(f==='passo-carro'){ ir('viaturas'); setTimeout(function(){
@@ -1955,13 +2107,14 @@ Nuvem.aoMudar(function(){
   if(S.sessao && (est==='supabase-por-entrar'||est==='servidor-por-entrar')
      && !(Nuvem.ensaio&&Nuvem.ensaio())){
     S.sessao=false; Nuvem.local('dono-sessao', false);
-    if(S.ecra!=='criar'){ S.ecra='entrar'; pintar(); return; } }
+    if(S.ecra!=='criar' && S.ecra!=='recuperar'){ S.ecra='entrar'; pintar(); return; } }
   /* o prazo da experiência, lido uma vez por sessão */
   if(S.sessao && est==='supabase' && S.conta===undefined && !S.aPedirConta){
     S.aPedirConta=true;
     Nuvem.minhaFrota().then(function(c){ S.conta=c||null; S.aPedirConta=false;
       pintarSePuder(); }); }
-  if(S.ecra!=='entrar' && S.ecra!=='criar') pintarSePuder(); else pintarTopo();
+  if(['entrar','criar','recuperar','guardar-rec'].indexOf(S.ecra)<0) pintarSePuder();
+  else pintarTopo();
 });
 Nuvem.arrancar({
   papel: 'dono',
