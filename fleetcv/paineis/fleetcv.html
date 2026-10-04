@@ -216,8 +216,9 @@ body.condutor .mapa{position:absolute; inset:0; width:100%; height:100%; display
 body.condutor .volante .lugar-mapa{position:absolute; inset:0}
 body.condutor .volante .mapa-vivo{position:absolute; inset:0; z-index:0}
 body.condutor .volante .mapa-vivo.leaflet-container{background:var(--surface2)}
-body.condutor .volante .mapa-vivo .leaflet-tile-pane{filter:var(--mapa-filtro)}
-body.condutor .volante .mapa-vivo .leaflet-tile-container img{width:256.6px!important; height:256.6px!important}
+body.condutor .volante .mapa-vivo.raster .leaflet-tile-pane{filter:var(--mapa-filtro)}
+body.condutor .volante .mapa-vivo.raster .leaflet-tile-container img{width:256.6px!important; height:256.6px!important}
+body.condutor .onde small{display:block; font-size:11px; font-weight:500; opacity:.85; margin-top:1px}
 body.condutor .volante .mapa-vivo .leaflet-bottom{bottom:58px}
 body.condutor .volante .mapa-vivo .leaflet-control-attribution{font-size:9px; opacity:.8}
 body.condutor .volante .hud, body.condutor .volante .baixo{z-index:500}
@@ -455,8 +456,8 @@ body.dono .mapa-vivo{position:relative; z-index:0; height:min(58vh,480px); min-h
   border-radius:12px; overflow:hidden; border:1px solid var(--line); background:#e6ebea}
 body.dono .mapa-vivo .leaflet-control-attribution{font-size:10px}
 body.dono .mapa-vivo.leaflet-container{background:var(--surface2)}
-body.dono .mapa-vivo .leaflet-tile-pane{filter:var(--mapa-filtro)}
-body.dono .mapa-vivo .leaflet-tile-container img{width:256.6px!important; height:256.6px!important}
+body.dono .mapa-vivo.raster .leaflet-tile-pane{filter:var(--mapa-filtro)}
+body.dono .mapa-vivo.raster .leaflet-tile-container img{width:256.6px!important; height:256.6px!important}
 body.dono .carro-vivo{background:none; border:none}
 body.dono .carro-vivo .cv-seta{position:absolute; left:12px; top:12px; width:32px; height:32px;
   transition:transform .8s linear; filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
@@ -999,6 +1000,35 @@ var PRAIA=[14.9195,-23.5087];
 var semQuadrados=false, avisos=[];
 
 function haLeaflet(){ return !!(window.L && window.L.map && window.L.divIcon); }
+
+/* O MAPA DE CABO VERDE, NOSSO
+   Todas as ilhas, com todas as ruas e nomes, num ficheiro só (17 MB,
+   recortado do OpenStreetMap pelo Protomaps — site/mapa/LEIA-ME.md),
+   que o telemóvel lê aos bocadinhos e guarda. Não depende de nenhum
+   servidor de mapas de fora, é para uso comercial sem licença à parte,
+   e tem tema escuro e claro próprios. Sem ele (sem a biblioteca, ou o
+   ficheiro não vem), ficam os quadradinhos do OpenStreetMap. */
+function urlDoMapa(){ var c=window.FLEETCV_CONFIG; return (c && c.mapa) || null; }
+function haVetorial(){ return !!(window.protomapsL && window.protomapsL.leafletLayer && urlDoMapa()); }
+function escuro(){
+  var t=document.documentElement.getAttribute('data-theme');
+  if(t) return t==='dark';
+  return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+}
+/* Na aplicação Android, os pedidos da página vão pela parte nativa
+   (CapacitorHttp, por causa do segundo plano). O mapa lê o ficheiro aos
+   pedaços (Range), em binário: esses vão pelo caminho normal da página,
+   que os entrega como são e os guarda em cache. */
+var desviado=false;
+function desviarMapa(){
+  if(desviado || !window.CapacitorWebFetch) return;
+  desviado=true;
+  var f=window.fetch;
+  window.fetch=function(r, o){
+    var u=typeof r==='string' ? r : ((r && r.url) || '');
+    return /\.pmtiles(\?|#|$)/.test(u) ? window.CapacitorWebFetch(r, o) : f.apply(this, arguments);
+  };
+}
 function pronto(){ return haLeaflet() && !semQuadrados; }
 function quandoFalhar(fn){ avisos.push(fn); }
 function falhou(){
@@ -1035,7 +1065,7 @@ function novo(op){
   op=op||{};
   var caixa=document.createElement('div');
   caixa.className='mapa-vivo';
-  var mapa=null, carros={}, cauda=null, chaveVista=null;
+  var mapa=null, carros={}, cauda=null, chaveVista=null, camada=null;
   var aSeguir=null, largou=false, carregouUm=false, erros=0;
 
   function criar(){
@@ -1050,16 +1080,35 @@ function novo(op){
       boxZoom:!fixo, keyboard:!fixo})
       .setView(PRAIA,13);
     mapa.attributionControl.setPrefix(false);
+    if(haVetorial()) vetorial(); else quadradinhos();
+    /* mexer no mapa com o dedo é querer olhar para outro lado: deixa-se
+       de seguir até o patrão pedir outra vez */
+    mapa.on('dragstart', function(){
+      if(aSeguir && !largou){ largou=true; if(op.largou) op.largou(aSeguir); } });
+  }
+
+  function vetorial(){
+    desviarMapa();
+    try{
+      camada=window.protomapsL.leafletLayer({url:urlDoMapa(), flavor:escuro()?'dark':'light',
+        lang:'pt', maxZoom:19, attribution:'© OpenStreetMap · Protomaps'});
+      camada.addTo(mapa);
+    }catch(e){ camada=null; quadradinhos(); return; }
+    /* o ficheiro tem de vir aos pedaços (206); se não vier, quadradinhos */
+    fetch(urlDoMapa(), {headers:{Range:'bytes=0-126'}}).then(function(r){
+      if(r.status!==206) throw new Error('sem pedaços');
+    }).catch(function(){
+      if(camada){ try{ mapa.removeLayer(camada); }catch(e){} camada=null; }
+      quadradinhos(); });
+  }
+  function quadradinhos(){
+    caixa.classList.add('raster');
     var q=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
       {maxZoom:19, attribution:'© OpenStreetMap'});
     q.on('tileload', function(){ carregouUm=true; });
     /* sem nenhum quadradinho que chegue, é porque não há como os trazer */
     q.on('tileerror', function(){ erros++; if(!carregouUm && erros>=6) falhou(); });
     q.addTo(mapa);
-    /* mexer no mapa com o dedo é querer olhar para outro lado: deixa-se
-       de seguir até o patrão pedir outra vez */
-    mapa.on('dragstart', function(){
-      if(aSeguir && !largou){ largou=true; if(op.largou) op.largou(aSeguir); } });
   }
 
   /* A medida que a biblioteca guardou tem de ser a da caixa na página.
@@ -1158,6 +1207,25 @@ function novo(op){
   return {
     caixa:caixa,
     encaixar:encaixar,
+    vetorial:function(){ return !!camada; },
+    /* O nome da rua onde está um ponto, tirado do próprio mapa (só onde
+       o mapa já está desenhado — o carro seguido está sempre). Sem
+       servidor de moradas nenhum. */
+    rua:function(lat, lon){
+      if(!camada || !mapa || !camada.queryTileFeaturesDebug || lat==null) return null;
+      try{
+        for(var b=6; b<=24; b*=2){
+          var achou=null;
+          camada.queryTileFeaturesDebug(lon, lat, b).forEach(function(lista){
+            (lista||[]).forEach(function(p){
+              var pr=(p.feature && p.feature.props) || {};
+              var n=pr['name:pt'] || pr.name;
+              if(!achou && p.layerName==='roads' && n) achou=String(n); }); });
+          if(achou) return achou;
+        }
+      }catch(e){}
+      return null;
+    },
     aSeguir:function(){ return aSeguir; },
     largou:function(){ return largou; },
     mapa:function(){ return mapa; },
@@ -3803,10 +3871,13 @@ function pintar(){
       '<button class="bt sec pq" data-f="ok-fora" style="margin-top:8px">Percebi</button></div>' : '';
     var ondeAgora=S.ultimaPos||(t.rasto.length?t.rasto[t.rasto.length-1]:null);
     var bairro=ondeAgora?bairroDe(ondeAgora[0],ondeAgora[1]):null;
+    /* a rua, lida no próprio mapa de Cabo Verde (quando o há) */
+    var rua=(ondeAgora && mapaVolante && mapaVolante.rua) ? mapaVolante.rua(ondeAgora[0],ondeAgora[1]) : null;
     h='<div class="volante">'+mapaDoVolante(t)+
       '<div class="hud"><div class="vel"><span class="n num" id="v-num">'+
       Math.round(S.gps.vel)+'</span><span class="u">KM/H</span>'+arco(S.gps.vel)+'</div>'+
-      (bairro?'<div class="onde">'+esc(bairro)+'</div>':'')+'</div>'+
+      (rua ? '<div class="onde">'+esc(rua)+(bairro?'<small>'+esc(bairro)+'</small>':'')+'</div>'
+           : (bairro?'<div class="onde">'+esc(bairro)+'</div>':''))+'</div>'+
       '<div class="baixo">'+
       '<div><b class="num">'+nf(km,1)+'</b><span>km</span></div>'+
       '<div><b class="num">'+hms((Date.now()-t.inicio)/1000)+'</b>'+
@@ -5021,6 +5092,9 @@ function semSinalTexto(t){
 function faixaDoCarro(t){
   var r=t.rasto||[], u=r[r.length-1];
   var onde=u?bairroDe(u[0],u[1]):null;
+  /* a rua, lida no próprio mapa de Cabo Verde, à frente do bairro */
+  var mf=mapasVivos.frota, rua=(u && mf && mf.rua) ? mf.rua(u[0],u[1]) : null;
+  if(rua) onde = onde ? rua+' · '+onde : rua;
   var vel=u&&u[4]!=null?u[4]:0;
   var calado=Date.now()-(t.momento||t.inicio), parado=calado>45000 || !!t.fora;
   var mapaVivo=window.MapaVivo && MapaVivo.pronto();

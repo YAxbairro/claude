@@ -473,6 +473,35 @@ var PRAIA=[14.9195,-23.5087];
 var semQuadrados=false, avisos=[];
 
 function haLeaflet(){ return !!(window.L && window.L.map && window.L.divIcon); }
+
+/* O MAPA DE CABO VERDE, NOSSO
+   Todas as ilhas, com todas as ruas e nomes, num ficheiro só (17 MB,
+   recortado do OpenStreetMap pelo Protomaps — site/mapa/LEIA-ME.md),
+   que o telemóvel lê aos bocadinhos e guarda. Não depende de nenhum
+   servidor de mapas de fora, é para uso comercial sem licença à parte,
+   e tem tema escuro e claro próprios. Sem ele (sem a biblioteca, ou o
+   ficheiro não vem), ficam os quadradinhos do OpenStreetMap. */
+function urlDoMapa(){ var c=window.FLEETCV_CONFIG; return (c && c.mapa) || null; }
+function haVetorial(){ return !!(window.protomapsL && window.protomapsL.leafletLayer && urlDoMapa()); }
+function escuro(){
+  var t=document.documentElement.getAttribute('data-theme');
+  if(t) return t==='dark';
+  return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+}
+/* Na aplicação Android, os pedidos da página vão pela parte nativa
+   (CapacitorHttp, por causa do segundo plano). O mapa lê o ficheiro aos
+   pedaços (Range), em binário: esses vão pelo caminho normal da página,
+   que os entrega como são e os guarda em cache. */
+var desviado=false;
+function desviarMapa(){
+  if(desviado || !window.CapacitorWebFetch) return;
+  desviado=true;
+  var f=window.fetch;
+  window.fetch=function(r, o){
+    var u=typeof r==='string' ? r : ((r && r.url) || '');
+    return /\.pmtiles(\?|#|$)/.test(u) ? window.CapacitorWebFetch(r, o) : f.apply(this, arguments);
+  };
+}
 function pronto(){ return haLeaflet() && !semQuadrados; }
 function quandoFalhar(fn){ avisos.push(fn); }
 function falhou(){
@@ -509,7 +538,7 @@ function novo(op){
   op=op||{};
   var caixa=document.createElement('div');
   caixa.className='mapa-vivo';
-  var mapa=null, carros={}, cauda=null, chaveVista=null;
+  var mapa=null, carros={}, cauda=null, chaveVista=null, camada=null;
   var aSeguir=null, largou=false, carregouUm=false, erros=0;
 
   function criar(){
@@ -524,16 +553,35 @@ function novo(op){
       boxZoom:!fixo, keyboard:!fixo})
       .setView(PRAIA,13);
     mapa.attributionControl.setPrefix(false);
+    if(haVetorial()) vetorial(); else quadradinhos();
+    /* mexer no mapa com o dedo é querer olhar para outro lado: deixa-se
+       de seguir até o patrão pedir outra vez */
+    mapa.on('dragstart', function(){
+      if(aSeguir && !largou){ largou=true; if(op.largou) op.largou(aSeguir); } });
+  }
+
+  function vetorial(){
+    desviarMapa();
+    try{
+      camada=window.protomapsL.leafletLayer({url:urlDoMapa(), flavor:escuro()?'dark':'light',
+        lang:'pt', maxZoom:19, attribution:'© OpenStreetMap · Protomaps'});
+      camada.addTo(mapa);
+    }catch(e){ camada=null; quadradinhos(); return; }
+    /* o ficheiro tem de vir aos pedaços (206); se não vier, quadradinhos */
+    fetch(urlDoMapa(), {headers:{Range:'bytes=0-126'}}).then(function(r){
+      if(r.status!==206) throw new Error('sem pedaços');
+    }).catch(function(){
+      if(camada){ try{ mapa.removeLayer(camada); }catch(e){} camada=null; }
+      quadradinhos(); });
+  }
+  function quadradinhos(){
+    caixa.classList.add('raster');
     var q=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
       {maxZoom:19, attribution:'© OpenStreetMap'});
     q.on('tileload', function(){ carregouUm=true; });
     /* sem nenhum quadradinho que chegue, é porque não há como os trazer */
     q.on('tileerror', function(){ erros++; if(!carregouUm && erros>=6) falhou(); });
     q.addTo(mapa);
-    /* mexer no mapa com o dedo é querer olhar para outro lado: deixa-se
-       de seguir até o patrão pedir outra vez */
-    mapa.on('dragstart', function(){
-      if(aSeguir && !largou){ largou=true; if(op.largou) op.largou(aSeguir); } });
   }
 
   /* A medida que a biblioteca guardou tem de ser a da caixa na página.
@@ -632,6 +680,25 @@ function novo(op){
   return {
     caixa:caixa,
     encaixar:encaixar,
+    vetorial:function(){ return !!camada; },
+    /* O nome da rua onde está um ponto, tirado do próprio mapa (só onde
+       o mapa já está desenhado — o carro seguido está sempre). Sem
+       servidor de moradas nenhum. */
+    rua:function(lat, lon){
+      if(!camada || !mapa || !camada.queryTileFeaturesDebug || lat==null) return null;
+      try{
+        for(var b=6; b<=24; b*=2){
+          var achou=null;
+          camada.queryTileFeaturesDebug(lon, lat, b).forEach(function(lista){
+            (lista||[]).forEach(function(p){
+              var pr=(p.feature && p.feature.props) || {};
+              var n=pr['name:pt'] || pr.name;
+              if(!achou && p.layerName==='roads' && n) achou=String(n); }); });
+          if(achou) return achou;
+        }
+      }catch(e){}
+      return null;
+    },
     aSeguir:function(){ return aSeguir; },
     largou:function(){ return largou; },
     mapa:function(){ return mapa; },

@@ -975,10 +975,13 @@ function pintar(){
       '<button class="bt sec pq" data-f="ok-fora" style="margin-top:8px">Percebi</button></div>' : '';
     var ondeAgora=S.ultimaPos||(t.rasto.length?t.rasto[t.rasto.length-1]:null);
     var bairro=ondeAgora?bairroDe(ondeAgora[0],ondeAgora[1]):null;
+    /* a rua, lida no próprio mapa de Cabo Verde (quando o há) */
+    var rua=(ondeAgora && mapaVolante && mapaVolante.rua) ? mapaVolante.rua(ondeAgora[0],ondeAgora[1]) : null;
     h='<div class="volante">'+mapaDoVolante(t)+
       '<div class="hud"><div class="vel"><span class="n num" id="v-num">'+
       Math.round(S.gps.vel)+'</span><span class="u">KM/H</span>'+arco(S.gps.vel)+'</div>'+
-      (bairro?'<div class="onde">'+esc(bairro)+'</div>':'')+'</div>'+
+      (rua ? '<div class="onde">'+esc(rua)+(bairro?'<small>'+esc(bairro)+'</small>':'')+'</div>'
+           : (bairro?'<div class="onde">'+esc(bairro)+'</div>':''))+'</div>'+
       '<div class="baixo">'+
       '<div><b class="num">'+nf(km,1)+'</b><span>km</span></div>'+
       '<div><b class="num">'+hms((Date.now()-t.inicio)/1000)+'</b>'+

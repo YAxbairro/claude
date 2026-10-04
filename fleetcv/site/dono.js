@@ -629,6 +629,9 @@ function semSinalTexto(t){
 function faixaDoCarro(t){
   var r=t.rasto||[], u=r[r.length-1];
   var onde=u?bairroDe(u[0],u[1]):null;
+  /* a rua, lida no próprio mapa de Cabo Verde, à frente do bairro */
+  var mf=mapasVivos.frota, rua=(u && mf && mf.rua) ? mf.rua(u[0],u[1]) : null;
+  if(rua) onde = onde ? rua+' · '+onde : rua;
   var vel=u&&u[4]!=null?u[4]:0;
   var calado=Date.now()-(t.momento||t.inicio), parado=calado>45000 || !!t.fora;
   var mapaVivo=window.MapaVivo && MapaVivo.pronto();

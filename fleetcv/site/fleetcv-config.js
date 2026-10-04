@@ -15,5 +15,8 @@
    ════════════════════════════════════════════════════════════ */
 window.FLEETCV_CONFIG = {
   supabaseUrl:   'https://jhjtjjyplihabowxkfhs.supabase.co',
-  supabaseChave: 'sb_publishable_wYOl-KJg755TF38iEkq5jA_1K6f1N_R'
+  supabaseChave: 'sb_publishable_wYOl-KJg755TF38iEkq5jA_1K6f1N_R',
+  /* o mapa de Cabo Verde (todas as ilhas), recortado do OpenStreetMap
+     pelo Protomaps — ver site/mapa/LEIA-ME.md */
+  mapa: '/mapa/cabo-verde-2026-10.pmtiles'
 };

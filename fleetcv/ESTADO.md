@@ -187,6 +187,19 @@ Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
   volante do condutor são escuros e limpos (os do OpenStreetMap com um
   filtro), com ruas e sítios; no claro, cores suaves. O volante usa o
   desenho de sempre quando não há rede para o mapa.
+- **O mapa de Cabo Verde, nosso** (04/10): todas as ilhas, com as ruas e
+  os nomes, num ficheiro só (`site/mapa/cabo-verde-2026-10.pmtiles`, 17 MB,
+  recortado do OpenStreetMap pelo Protomaps; como actualizar em
+  `site/mapa/LEIA-ME.md`). A aplicação lê-o aos pedaços (num turno de
+  ensaio, ~500 kB) e guarda-o; desenha-o o `protomaps-leaflet` (128 kB,
+  jsDelivr com impressão digital), com tema escuro e claro próprios — no
+  patrão e no volante do condutor. Não depende de servidor de mapas de
+  fora e é para uso comercial (resolve o "mapas" da lista de lançamento).
+  Sem o ficheiro, ficam os quadradinhos do OpenStreetMap. Na aplicação
+  Android, os pedaços do mapa não passam pela parte nativa (CapacitorHttp
+  estragaria o binário). E **a rua onde o carro está** aparece escrita (no
+  patrão e no volante), tirada do próprio mapa, sem servidor de moradas
+  (`paineis/teste_mapa_cv.mjs`, 9).
 - **Leitura do quadrante, ODO e Trip**: no painel do teste ("ODO
   6140km", por baixo "Trip 137.0km") o leitor propôs 13.701 (o parcial
   mal lido como "137.01"). Agora sabe onde está cada palavra: o número
@@ -259,7 +272,7 @@ ficheiros. Os passos estão em `site/INSTALAR.md`.
 | `supabase/provar.sh` | 73 regras + 9 da passagem de uma base antiga, num Postgres a sério. As provas foram postas à prova estragando as regras de propósito |
 | `paineis/teste_contas.mjs` | 40 — o caminho de um cliente novo, do criar conta ao apagar |
 | `paineis/teste_supabase.mjs` | 25 — as regras vistas pela aplicação, a trava, sem rede |
-| o resto dos `teste_*.mjs` | aplicação Android 30, leitor ODO/Trip 11, mapa cortado 4, consumo 12, fora da aplicação 18, leitor 18, primeiro turno 28, dados 13, câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 33, mapa vivo 26 |
+| o resto dos `teste_*.mjs` | mapa de Cabo Verde 9, aplicação Android 30, leitor ODO/Trip 11, mapa cortado 4, consumo 12, fora da aplicação 18, leitor 18, primeiro turno 28, dados 13, câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 33, mapa vivo 26 |
 
 Os testes que usam o servidor próprio (`teste_clicavel`,
 `teste_formularios`, `teste_servidor`) esperam correr numa pasta com

@@ -421,6 +421,11 @@ CASCA = u"""<!doctype html>
 <!-- o mapa a sério; sem ele, fica o desenho da Praia que vem dentro -->
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"
         onerror="void 0"></script>
+<!-- o mapa de Cabo Verde, nosso (mapa/cabo-verde-*.pmtiles): sem ele,
+     ficam os quadradinhos do OpenStreetMap -->
+<script src="https://cdn.jsdelivr.net/npm/protomaps-leaflet@5.1.0/dist/protomaps-leaflet.js"
+        integrity="sha384-pAKrddYWxjFAIJwatOtmmtq9ebz3ZwluHCEg3pqOMpOporUofLqz/l5hs+0LAWaH"
+        crossorigin="anonymous" onerror="void 0"></script>
 
 <body>
 <script src="./mapa.js?v=%(v)s"></script>
