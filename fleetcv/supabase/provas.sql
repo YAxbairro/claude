@@ -554,6 +554,16 @@ select '81 · o que tem mais de 90 dias sai sozinho do registo de erros: ' ||
   case when not exists (select 1 from erros where onde='velho')
        then 'saiu (certo)' else 'FICOU (MAL)' end;
 
+-- ─── rent-a-car: os clientes da agência são só do gestor ─────
+insert into docs(frota, coleccao, id, corpo)
+  values ('f1', 'frota', 'alugueres', '{"lista":[{"cliente":{"nome":"Cliente","doc":"P123"}}]}'::jsonb)
+  on conflict (frota, coleccao, id) do update set corpo = excluded.corpo;
+set role authenticated;                                  -- ainda o António, condutor da f1
+select '82 · o funcionário não lê os alugueres (os dados dos clientes): ' ||
+  case when (select count(*) from docs where coleccao='frota' and id='alugueres')=0
+       then 'NÃO LÊ (certo)' else 'LÊ (MAL)' end;
+reset role;
+
 -- ─── quem não tem sessão nem bate à porta ────────────────────
 select '74 · sem sessão não se chama o entrar nem o sair (só com sessão): ' ||
   case when not has_function_privilege('anon','public.entrar(text,text)','execute')

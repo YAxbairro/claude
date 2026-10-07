@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="pt">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0B7F8E">
+<meta name="description" content="Controlo dos carros de serviço para câmaras, ministérios, empresas e ONG: guia de marcha digital, uso fora de horas, zona autorizada, departamentos e documentos — com o telemóvel do motorista.">
+<title>FleetCV Instituições</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --ground:#EDF0F0; --surface:#FFFFFF; --surface2:#F4F7F7;
+  --line:#D5DCDC; --line2:#E7ECEC;
+  --ink:#0F1618; --muted:#5C6A6C;
+  --accent:#0B7F8E; --accent-ink:#FFFFFF; --accent-wash:#E3F1F3;
+  --ok:#3E7B22; --ok-wash:#EAF2E4;
+  --warn:#A86A05; --warn-wash:#F8EEDC;
+  --crit:#B02E20; --crit-wash:#F8E6E3;
+  --sombra:0 1px 2px rgba(15,22,24,.06), 0 10px 28px -20px rgba(15,22,24,.45);
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --display:'Archivo',var(--sans);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --ground:#0B1011; --surface:#141A1B; --surface2:#1A2122;
+  --line:#293233; --line2:#212929;
+  --ink:#E3E9E8; --muted:#8A9897;
+  --accent:#3FC0CE; --accent-ink:#06191C; --accent-wash:#122E32;
+  --ok:#77C34B; --ok-wash:#17280F;
+  --warn:#DCA43C; --warn-wash:#2E2310;
+  --crit:#E4776A; --crit-wash:#331714;
+  --sombra:0 1px 2px rgba(0,0,0,.45), 0 10px 28px -20px rgba(0,0,0,.9);
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0B1011; --surface:#141A1B; --surface2:#1A2122;
+  --line:#293233; --line2:#212929;
+  --ink:#E3E9E8; --muted:#8A9897;
+  --accent:#3FC0CE; --accent-ink:#06191C; --accent-wash:#122E32;
+  --ok:#77C34B; --ok-wash:#17280F;
+  --warn:#DCA43C; --warn-wash:#2E2310;
+  --crit:#E4776A; --crit-wash:#331714;
+  --sombra:0 1px 2px rgba(0,0,0,.45), 0 10px 28px -20px rgba(0,0,0,.9);
+}
+
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--sans); font-size:16px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.env{ max-width:1080px; margin:0 auto; padding-inline:20px; }
+h1,h2,h3{ font-family:var(--display); font-weight:700; text-wrap:balance;
+  letter-spacing:-.018em; margin:0; }
+p{ margin:0; }
+a{ color:inherit; }
+.num{ font-family:var(--mono); font-variant-numeric:tabular-nums; }
+
+/* ── cabeçalho ───────────────────────────────────────────── */
+.topo{ position:sticky; top:env(safe-area-inset-top,0px); z-index:9;
+  background:color-mix(in srgb, var(--ground) 88%, transparent);
+  backdrop-filter:blur(10px); border-bottom:1px solid var(--line2); }
+.topo .env{ display:flex; align-items:center; gap:14px;
+  padding-block:13px; }
+.marca{ font-family:var(--display); font-weight:700; font-size:18px;
+  letter-spacing:-.02em; display:flex; align-items:center; gap:8px; }
+.pt{ width:8px; height:8px; border-radius:50%; background:var(--accent);
+  box-shadow:0 0 0 3px var(--accent-wash); }
+.topo nav{ margin-left:auto; display:flex; align-items:center; gap:22px;
+  font-size:14.5px; color:var(--muted); }
+.topo nav a{ text-decoration:none; }
+.topo nav a:hover{ color:var(--ink); }
+@media (max-width:640px){ .topo nav .esconde{ display:none; } }
+
+/* ── botões ──────────────────────────────────────────────── */
+.bt{ display:inline-flex; align-items:center; justify-content:center;
+  gap:8px; padding:12px 20px; border-radius:11px; font:inherit;
+  font-weight:600; font-size:15px; text-decoration:none; cursor:pointer;
+  border:1px solid transparent; white-space:nowrap; }
+.bt.pri{ background:var(--accent); color:var(--accent-ink); }
+.bt.pri:hover{ filter:brightness(1.08); }
+.bt.sec{ background:var(--surface); color:var(--ink);
+  border-color:var(--line); }
+.bt.sec:hover{ border-color:var(--accent); color:var(--accent); }
+.bt:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+/* ── herói ───────────────────────────────────────────────── */
+.heroi{ padding-block:56px 44px; }
+.heroi .env{ display:grid; gap:40px; grid-template-columns:1fr; }
+@media (min-width:900px){
+  .heroi .env{ grid-template-columns:1.05fr .95fr; align-items:center; gap:56px; }
+}
+.selo{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px;
+  font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--accent); background:var(--accent-wash);
+  padding:5px 11px; border-radius:99px; margin-bottom:18px; }
+.heroi h1{ font-size:clamp(34px,6.2vw,52px); line-height:1.08; }
+.heroi h1 em{ font-style:normal; color:var(--accent); }
+.heroi .sub{ margin-top:18px; font-size:17.5px; color:var(--muted);
+  max-width:34em; }
+.accoes{ margin-top:28px; display:flex; flex-wrap:wrap; gap:11px; }
+.pe-heroi{ margin-top:16px; font-size:13.5px; color:var(--muted); }
+
+/* ── a ficha do turno ────────────────────────────────────── */
+.ficha{ background:var(--surface); border:1px solid var(--line);
+  border-radius:16px; box-shadow:var(--sombra); overflow:hidden; }
+.ficha .cab{ padding:14px 18px; border-bottom:1px solid var(--line2);
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.chapa{ font-family:var(--mono); font-weight:600; font-size:13.5px;
+  letter-spacing:.04em; background:var(--surface2); color:var(--ink);
+  border:1px solid var(--line); border-radius:6px; padding:3px 8px; }
+.cab .qm{ font-size:14px; font-weight:600; }
+.cab .qd{ font-size:12.5px; color:var(--muted); margin-left:auto; }
+.linhas{ padding:6px 18px 4px; }
+.lh{ display:flex; align-items:baseline; gap:12px; padding:11px 0;
+  border-bottom:1px solid var(--line2); font-size:14.5px; }
+.lh:last-child{ border-bottom:0; }
+.lh .r{ color:var(--muted); }
+.lh .v{ margin-left:auto; font-family:var(--mono); font-weight:500;
+  font-variant-numeric:tabular-nums; }
+.lh .nota{ display:block; font-size:12.5px; color:var(--muted);
+  font-family:var(--sans); font-weight:400; margin-top:2px; text-align:right; }
+.alerta{ margin:4px 14px 14px; background:var(--crit-wash);
+  border:1px solid color-mix(in srgb, var(--crit) 28%, transparent);
+  border-radius:11px; padding:13px 15px; display:flex;
+  align-items:center; gap:13px; }
+.alerta .n{ font-family:var(--mono); font-weight:600; font-size:23px;
+  color:var(--crit); font-variant-numeric:tabular-nums; }
+.alerta .t{ font-size:13.5px; color:var(--ink); line-height:1.4; }
+.alerta .t b{ color:var(--crit); }
+
+/* ── secções ─────────────────────────────────────────────── */
+section{ padding-block:52px; }
+section.risca{ border-top:1px solid var(--line2); }
+.cabec{ max-width:36em; margin-bottom:34px; }
+.cabec h2{ font-size:clamp(25px,3.6vw,33px); line-height:1.15; }
+.cabec p{ margin-top:12px; color:var(--muted); font-size:16.5px; }
+.olho{ font-size:12.5px; font-weight:600; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--accent); margin-bottom:10px; }
+
+.passos{ display:grid; gap:18px; grid-template-columns:1fr; counter-reset:p; }
+@media (min-width:760px){ .passos{ grid-template-columns:repeat(3,1fr); } }
+.passo{ background:var(--surface); border:1px solid var(--line);
+  border-radius:14px; padding:22px; }
+.passo .n{ counter-increment:p; font-family:var(--mono); font-size:12.5px;
+  font-weight:600; color:var(--accent); letter-spacing:.08em; }
+.passo .n::before{ content:counter(p,decimal-leading-zero); }
+.passo h3{ font-size:17.5px; margin:9px 0 8px; }
+.passo p{ font-size:14.5px; color:var(--muted); }
+
+.provas{ display:grid; gap:18px; grid-template-columns:1fr; }
+@media (min-width:760px){ .provas{ grid-template-columns:repeat(3,1fr); } }
+.prova{ background:var(--surface); border:1px solid var(--line);
+  border-radius:14px; padding:22px; }
+.prova .ic{ width:38px; height:38px; border-radius:10px;
+  background:var(--accent-wash); color:var(--accent);
+  display:grid; place-items:center; margin-bottom:14px; }
+.prova .ic svg{ width:20px; height:20px; }
+.prova h3{ font-size:17px; margin-bottom:7px; }
+.prova p{ font-size:14.5px; color:var(--muted); }
+
+/* ── planos ──────────────────────────────────────────────── */
+.planos{ display:grid; gap:18px; grid-template-columns:1fr; }
+@media (min-width:820px){ .planos{ grid-template-columns:repeat(3,1fr);
+  align-items:start; } }
+.plano{ background:var(--surface); border:1px solid var(--line);
+  border-radius:16px; padding:24px; display:flex; flex-direction:column;
+  gap:14px; }
+.plano.destaque{ border-color:var(--accent); box-shadow:var(--sombra); }
+.plano .nm{ font-family:var(--display); font-weight:700; font-size:18px; }
+.plano .fita{ align-self:flex-start; font-size:11.5px; font-weight:600;
+  letter-spacing:.07em; text-transform:uppercase; color:var(--accent-ink);
+  background:var(--accent); padding:3px 9px; border-radius:99px; }
+.preco{ display:flex; align-items:baseline; gap:6px; }
+.preco .v{ font-family:var(--mono); font-weight:600; font-size:31px;
+  letter-spacing:-.02em; }
+.preco .u{ font-size:13.5px; color:var(--muted); }
+.plano ul{ list-style:none; margin:0; padding:0; display:grid; gap:9px;
+  font-size:14.5px; }
+.plano li{ display:flex; gap:9px; align-items:flex-start; }
+.plano li svg{ width:16px; height:16px; flex:0 0 auto; margin-top:3px;
+  color:var(--ok); }
+.plano .bt{ margin-top:auto; }
+.plano ul.escada{ gap:0; border:1px solid var(--line2); border-radius:10px;
+  overflow:hidden; }
+.plano ul.escada li{ display:flex; justify-content:space-between;
+  align-items:baseline; gap:12px; padding:10px 13px;
+  border-bottom:1px solid var(--line2); }
+.plano ul.escada li:last-child{ border-bottom:0; }
+.plano ul.escada li:nth-child(odd){ background:var(--surface2); }
+.plano ul.escada .num{ font-weight:600; font-variant-numeric:tabular-nums; }
+.plano .mini{ font-size:13.5px; color:var(--muted); }
+.nota-preco{ margin-top:20px; font-size:13.5px; color:var(--muted);
+  max-width:44em; }
+
+/* ── perguntas ───────────────────────────────────────────── */
+.perg{ display:grid; gap:0; max-width:46em; }
+.perg details{ border-bottom:1px solid var(--line2); }
+.perg summary{ cursor:pointer; padding:17px 0; font-weight:600;
+  font-size:16px; list-style:none; display:flex; align-items:center;
+  gap:12px; }
+.perg summary::-webkit-details-marker{ display:none; }
+.perg summary::after{ content:'+'; margin-left:auto; color:var(--accent);
+  font-family:var(--mono); font-size:19px; line-height:1; }
+.perg details[open] summary::after{ content:'\2013'; }
+.perg summary:focus-visible{ outline:2px solid var(--accent);
+  outline-offset:3px; border-radius:4px; }
+.perg .resp{ padding:0 0 18px; color:var(--muted); font-size:15px;
+  max-width:42em; }
+
+/* ── fecho ───────────────────────────────────────────────── */
+.fecho{ background:var(--surface); border:1px solid var(--line);
+  border-radius:18px; padding:clamp(26px,5vw,44px); text-align:center; }
+.fecho h2{ font-size:clamp(24px,3.4vw,31px); }
+.fecho p{ margin:12px auto 0; color:var(--muted); max-width:38em; }
+.fecho .accoes{ justify-content:center; }
+
+footer{ border-top:1px solid var(--line2); padding-block:28px 40px;
+  color:var(--muted); font-size:13.5px; }
+footer .env{ display:flex; flex-wrap:wrap; gap:10px 22px;
+  align-items:center; }
+footer .dir{ margin-left:auto; }
+</style>
+
+<header class="topo">
+  <div class="env">
+    <a class="marca" href="/" style="text-decoration:none"><span class="pt"></span>FleetCV</a>
+    <nav>
+      <a href="#como" class="esconde">Como funciona</a>
+      <a href="#planos" class="esconde">Preços</a>
+      <a href="/app#dono">Entrar</a>
+      <a class="bt pri" href="/app#criar-instituicao">Criar conta</a>
+    </nav>
+  </div>
+</header>
+<div class="heroi"><div class="env"><div><span class="selo"><span class="pt"></span>Câmaras · Ministérios · Empresas · ONG</span><h1>Os carros de serviço,<br><em>ao serviço</em>.</h1><p class="sub">Quem levou o carro, para onde, porquê — e o que andou fora de horas. Sem rastreador: com o telemóvel do motorista e uma guia de marcha digital.</p><div class="accoes"><a class="bt pri" href="/app#criar-instituicao">Criar conta grátis</a><a class="bt sec" href="https://wa.me/2389557882">Pedir uma demonstração</a></div><p class="pe-heroi">30 dias grátis, sem cartão. Os motoristas não precisam de conta.</p></div><div class="ficha"><div class="cab"><span class="chapa">ST-10-CM</span><span class="qm">Rui Tavares</span><span class="qd">sábado · 19h40 — 22h15</span></div><div class="linhas"><div class="lh"><span class="r">Guia de marcha</span><span class="v">Assomada<span class="nota">vistoria da obra da escola</span></span></div><div class="lh"><span class="r">Horário de serviço</span><span class="v">seg–sex, 08:00–18:00</span></div><div class="lh"><span class="r">Percurso medido por GPS</span><span class="v">64,2 km</span></div><div class="lh"><span class="r">Zona autorizada</span><span class="v">Cidade da Praia<span class="nota">chegou a 26 km dela</span></span></div></div><div class="alerta"><span class="n">2</span><span class="t"><b>Alertas importantes:</b> serviço ao sábado e fora da zona. O gestor vê-os no mesmo dia.</span></div></div></div></div><section class="risca"><div class="env"><div class="cabec"><p class="olho">O que fica controlado</p><h2>Seis coisas que deixam de depender da palavra de alguém</h2></div><div class="provas"><div class="prova"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h10v18H7z"/><path d="M10 8h4M10 12h4M10 16h2"/></svg></span><h3>Guia de marcha digital</h3><p>Antes de sair, o motorista escreve para onde vai e porquê. Sem isso, o serviço não começa.</p></div><div class="prova"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><h3>Fora de horas</h3><p>Marque o horário de serviço. Um carro a andar à noite ou ao fim de semana dá alerta no mesmo dia.</p></div><div class="prova"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/><circle cx="12" cy="12" r="2"/></svg></span><h3>Zona autorizada</h3><p>A cidade ou a ilha onde os carros podem andar. Se o GPS os puser mais longe, fica registado.</p></div><div class="prova"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/></svg></span><h3>Departamentos</h3><p>Cada carro no seu departamento, e as contas — km, combustível, serviços — saem separadas.</p></div><div class="prova"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"/><path d="M9 12l2 2 4-4"/></svg></span><h3>Documentos e manutenção</h3><p>Seguro, inspecção, licença e óleo: a aplicação avisa 30 dias antes de caducar.</p></div><div class="prova"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M4 10h16M10 4v16"/></svg></span><h3>Relatório para auditoria</h3><p>Cada serviço numa linha, com motorista, destino, motivo e alertas. Abre no Excel.</p></div></div></div></section><section class="risca" id="como"><div class="env"><div class="cabec"><p class="olho">Como funciona</p><h2>Em três passos, sem instalar nada nos carros</h2></div><div class="passos"><div class="passo"><span class="n"></span><h3>O gestor prepara</h3><p>Junta os carros e os motoristas, marca o horário de serviço, a zona e os departamentos.</p></div><div class="passo"><span class="n"></span><h3>O motorista sai</h3><p>No telemóvel, escolhe o carro, fotografa o conta-quilómetros e escreve o destino e o motivo.</p></div><div class="passo"><span class="n"></span><h3>O gestor vê</h3><p>O carro no mapa ao vivo, os alertas no mesmo dia e, no fim do mês, o relatório para o Excel.</p></div></div></div></section><section class="risca" id="planos"><div class="env"><div class="cabec"><p class="olho">Preços</p><h2>Paga-se por carro, com proposta à medida</h2><p>O motorista não paga nem tem conta. Para instituições públicas, preparamos a proposta e os documentos que o processo de compra pedir.</p></div><div class="planos"><div class="plano"><span class="nm">Experimentar</span><div class="preco"><span class="v">Grátis</span><span class="u">30 dias</span></div><ul><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Com os seus carros verdadeiros</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Sem cartão e sem compromisso</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>No fim, decide se fica</li></ul><a class="bt sec" href="/app#criar-instituicao">Criar conta</a></div><div class="plano destaque"><span class="fita">Proposta</span><span class="nm">Instituição</span><div class="preco"><span class="v">Por carro</span><span class="u">por mês, com factura</span></div><ul><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Diga-nos quantas viaturas tem</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Mandamos a proposta escrita</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Pagamento por transferência ou Vinti4</li></ul><a class="bt pri" href="https://wa.me/2389557882">Pedir proposta no WhatsApp</a></div></div></div></section><section class="risca"><div class="env"><div class="cabec"><p class="olho">Perguntas</p><h2>O que as instituições perguntam primeiro</h2></div><div class="perg"><details open><summary>É preciso rastreador nos carros?</summary><p class="resp">Não. O GPS é o do telemóvel do motorista (ou um telemóvel do serviço que fica no carro). Com a aplicação Android, continua a gravar com o ecrã apagado.</p></details><details><summary>E a privacidade dos funcionários?</summary><p class="resp">A localização só é registada com o serviço aberto, e enquanto grava aparece uma notificação fixa. Na ajuda há um <a href="/ajuda#aviso" style="color:var(--accent)">aviso pronto</a> para cada motorista assinar.</p></details><details><summary>Onde ficam os dados?</summary><p class="resp">Numa base de dados em servidores na União Europeia. Cada instituição fica fechada sobre si: ninguém de fora lhe chega. Pode descarregar tudo e apagar a conta quando quiser.</p></details><details><summary>Podemos ter vários gestores?</summary><p class="resp">Para já, cada instituição tem uma conta de gestor. Os vários gestores com níveis (chefe do parque, direcção, só ver) estão a chegar — diga-nos se é o seu caso.</p></details><details><summary>Funciona em todas as ilhas?</summary><p class="resp">Sim. O mapa é o de Cabo Verde inteiro, com as ruas e os nomes, e a zona autorizada pode ser a cidade ou a ilha.</p></details></div></div></section><section id="falar"><div class="env"><div class="fecho"><h2>Experimente com dois ou três carros</h2><p>Crie a conta, marque o horário, junte um motorista e mande-lhe o acesso pelo WhatsApp. Se preferir, fazemos a demonstração consigo.</p><div class="accoes"><a class="bt pri" href="/app#criar-instituicao">Criar conta grátis</a><a class="bt sec" href="https://wa.me/2389557882">Falar no WhatsApp</a></div><p class="pe-heroi">WhatsApp <a href="https://wa.me/2389557882" style="color:var(--accent)">+238 955 78 82</a> · <a href="/" style="color:var(--accent)">FleetCV para táxis</a></p></div></div></section>
+<footer>
+  <div class="env">
+    <span class="marca" style="font-size:15px"><span class="pt"></span>FleetCV</span>
+    <span>Praia, Cabo Verde</span>
+    <span>WhatsApp <a href="https://wa.me/2389557882" style="color:var(--accent);
+      text-decoration:none">+238 955 78 82</a></span>
+    <span>É condutor? <a href="/app#condutor" style="color:var(--accent);
+      text-decoration:none">Entre aqui</a></span>
+    <span><a href="/ajuda" style="color:inherit">Ajuda</a> ·
+      <a href="/privacidade" style="color:inherit">Privacidade</a> ·
+      <a href="/termos" style="color:inherit">Termos</a></span>
+    <span class="dir">Feito para quem vive de táxis.</span>
+  </div>
+</footer>

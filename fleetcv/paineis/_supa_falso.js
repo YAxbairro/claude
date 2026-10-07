@@ -54,7 +54,7 @@
       var pf=perfil();
       if(!pf || !l || l.frota!==pf.frota) return false;
       if(pf.papel!=='dono' && l.coleccao==='frota'
-         && (l.id==='dono'||l.id==='condutores')) return false;
+         && (l.id==='dono'||l.id==='condutores'||l.id==='alugueres')) return false;
       return true; };
     var podeEscrever=function(f, c, id, corpo){
       var pf=perfil();

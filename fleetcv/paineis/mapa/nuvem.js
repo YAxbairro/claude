@@ -798,6 +798,10 @@ function semearExemplos(op){
   });
 }
 
+/* O que vai no documento da configuração da frota (frota/config):
+   o nome e o preço, e o que cada tipo de frota acrescenta (mapa/tipos.js). */
+var CFG=['tipo','termos','horario','zona','deps','kmDia','precoKmExtra','precoDia'];
+
 /* ─── ficar à escuta ────────────────────────────────────── */
 function escutar(){
   var erro=function(e){ if(e&&e.code==='revoked'){ estado='sozinha'; avisar(); } };
@@ -806,12 +810,13 @@ function escutar(){
     var f=D.frota||{};
     var n={nome:f.nome, precoLitro:f.precoLitro,
            carros:f.carros||[], condutores:f.condutores||[]};
-    if(f.termos) n.termos=f.termos;
+    CFG.forEach(function(k){ if(f[k]!=null) n[k]=f[k]; });
+    if(f.alugueres) n.alugueres=f.alugueres;
     mudar(n); D.frota=n; local('frota', n); avisar(); };
 
   subs.push(loja.verDoc('frota','config', function(d){
     if(d) frotaNova(function(n){ n.precoLitro=d.precoLitro; n.nome=d.nome;
-      if(d.termos) n.termos=d.termos; }); },
+      CFG.forEach(function(k){ if(d[k]!=null) n[k]=d[k]; else delete n[k]; }); }); },
     erro));
 
   subs.push(loja.verDoc('frota','carros', function(d){
@@ -819,6 +824,11 @@ function escutar(){
 
   subs.push(loja.verDoc('frota','condutores', function(d){
     if(d) frotaNova(function(n){ n.condutores=d.lista||[]; }); }, erro));
+
+  /* os alugueres (rent-a-car) são só do painel do gestor */
+  if(opGuardado.papel==='dono')
+    subs.push(loja.verDoc('frota','alugueres', function(d){
+      frotaNova(function(n){ n.alugueres=(d&&d.lista)||[]; }); }, erro));
 
   /* os turnos já fechados: o histórico */
   subs.push(loja.verColeccao('turnos', function(lista){
@@ -1066,6 +1076,8 @@ function posicao(t, extra, jaa){
     bateria: extra?extra.bateria:null,
     onde: extra?extra.onde:null,
     simulado: !!t.simulado,
+    /* instituições: a guia de marcha (para onde e porquê) */
+    destino: t.destino||null, motivo: t.motivo||null,
     rasto:(t.rasto||[]).slice(-CAUDA),
     /* onde começa a cauda no caminho todo: é por aqui que o patrão cose
        os pedaços (a hora dos pontos não serve — no ensaio misturam-se) */
@@ -1158,14 +1170,15 @@ function guardarFrota(f){
      lista velha que o aviso acabou de lá pôr, e a alteração
      perdia-se sem dar erro nenhum. */
   var cfg={precoLitro:f.precoLitro, nome:f.nome||''};
+  CFG.forEach(function(k){ if(f[k]!=null) cfg[k]=f[k]; });
   /* a versão dos termos que o patrão aceitou ao criar a conta */
-  var termos=f.termos||(D.frota&&D.frota.termos);
-  if(termos) cfg.termos=termos;
+  if(!cfg.termos && D.frota && D.frota.termos) cfg.termos=D.frota.termos;
   var carros=(f.carros||[]).slice();
   var conds=(f.condutores||[]).slice();
   D.frota={nome:cfg.nome, precoLitro:cfg.precoLitro,
            carros:carros, condutores:conds};
-  if(termos) D.frota.termos=termos;
+  CFG.forEach(function(k){ if(cfg[k]!=null) D.frota[k]=cfg[k]; });
+  if(f.alugueres) D.frota.alugueres=f.alugueres;
   local('frota', D.frota);
   if(!loja) return Promise.resolve();
   return Promise.all([
@@ -1173,6 +1186,13 @@ function guardarFrota(f){
     loja.por('frota','carros',{lista:carros}),
     loja.por('frota','condutores',{lista:conds})
   ]).catch(function(){});
+}
+/* os alugueres do rent-a-car: uma lista só, no documento frota/alugueres */
+function guardarAlugueres(lista){
+  var l=(lista||[]).slice();
+  if(D.frota){ D.frota.alugueres=l; local('frota', D.frota); }
+  if(!loja) return Promise.resolve();
+  return loja.por('frota','alugueres',{lista:l}).catch(function(){});
 }
 function guardarTurno(t){
   if(!loja) return Promise.resolve();
@@ -1260,6 +1280,7 @@ return {
   rastoDe:rastoDe,
   fotoDe:fotoDe,
   fotosDoTurno:fotosDoTurno,
+  guardarAlugueres:guardarAlugueres,
   /* uma fotografia que sobe já (entra na fila, atrás do turno) */
   enviarFoto:function(chave, turno, dados){
     return guardarFoto(chave, turno, dados).catch(function(){}); },
@@ -1311,10 +1332,11 @@ return {
     return loja.criarConta(d).then(function(j){
       return loja.comecar().then(function(){
         return semear(opGuardado).then(escutar).then(function(){
-          /* fica escrito que aceitou os termos, e que versão */
-          if(d.termos) loja.ler('frota','config').then(function(c){
+          /* fica escrito que aceitou os termos (e que versão) e o tipo da frota */
+          if(d.termos||d.tipo) loja.ler('frota','config').then(function(c){
+            var mais={}; if(d.termos) mais.termos=d.termos; if(d.tipo) mais.tipo=d.tipo;
             return loja.por('frota','config', Object.assign({precoLitro:145,
-              nome:d.frota||'A minha frota'}, c||{}, {termos:d.termos})); }).catch(function(){});
+              nome:d.frota||'A minha frota'}, c||{}, mais)); }).catch(function(){});
           estado='supabase'; avisar();
           return {papel:j.papel, id:j.id, nome:j.nome, frota:j.frota}; }); });
     }).catch(function(x){

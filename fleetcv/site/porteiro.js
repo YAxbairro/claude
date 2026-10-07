@@ -124,6 +124,9 @@
      para um recarregar não voltar a mandar no que o telemóvel já
      escolheu. */
   var pedido=String(location.hash||'').replace(/^#/,'');
+  /* as páginas de venda pedem já o tipo de frota: #criar-instituicao, #criar-rentacar */
+  var tipoPedido=(pedido.match(/^criar-(taxi|instituicao|rentacar)$/)||[])[1];
+  if(tipoPedido){ pedido='criar'; try{ localStorage.setItem('fleetcv-quero-tipo', tipoPedido); }catch(e){} }
   try{
     if(pedido==='condutor'||pedido==='dono'||pedido==='criar'){
       localStorage.removeItem(DEMO); ensaio=null;

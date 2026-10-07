@@ -14,7 +14,7 @@ var PENAL={A04:50,A06:40,A19:30,A15:30,A16:30,A14:30,A13:25,A12:25,A17:20,
            A08:15,A09:15,A11:10,A20:10,A21:5,A07:5,A03:5};
 var DONO={email:'patrao@exemplo.cv', codigo:'9999', nome:'Dona Fátima'};
 /* a versão dos termos e da política que se aceita ao criar conta (site/termos.html) */
-var TERMOS='2026-10-04';
+var TERMOS='2026-10-07';
 /* Os postos são os verdadeiros do OpenStreetMap (ver mapa_praia). */
 var POSTOS=MAPA_PRAIA.postos;
 
@@ -113,8 +113,22 @@ function marcado(id){
    que fazer a seguir. Isto diz: três passos, e cada um leva lá. Some
    sozinho quando já há carro e condutor. */
 function primeirosPassos(){
-  var f=S.frota||{carros:[],condutores:[]};
+  var f=S.frota||{carros:[],condutores:[]}, T=TP();
   var temCarro=(f.carros||[]).length>0, temCond=(f.condutores||[]).length>0;
+  if(T.modulos.alugueres){
+    var temAl=(f.alugueres||[]).length>0;
+    if(temCarro && temAl) return '';
+    return '<div class="cartao passos"><h2>Bem-vindo</h2>'+
+      '<p class="p-nota" style="margin:4px 0 10px">Dois passos e cada aluguer fica com as '+
+      'contas feitas.</p>'+
+      '<div class="passo'+(temCarro?' feito':'')+'"><span class="n">'+(temCarro?'\u2713':1)+'</span>'+
+      '<span style="flex:1"><b>Junte os carros</b><br><span class="s">A matrícula, os km e o preço por dia.'+
+      '</span></span>'+(temCarro?'':'<button class="bt pri pq" data-f="passo-carro">Juntar</button>')+'</div>'+
+      '<div class="passo"><span class="n">2</span><span style="flex:1"><b>Entregue o primeiro carro</b><br>'+
+      '<span class="s">Com as fotografias, os km e o combustível. Na devolução, a conta sai sozinha.'+
+      '</span></span>'+(temCarro?'<button class="bt pri pq" data-f="novo-aluguer">Entregar</button>':'')+
+      '</div></div>';
+  }
   if(temCarro && temCond) return '';
   var passo=function(feito, n, t, d, acc){
     return '<div class="passo'+(feito?' feito':'')+'"><span class="n">'+
@@ -126,7 +140,7 @@ function primeirosPassos(){
     'seus carros a andar.</p>'+
     passo(temCarro,1,'Junte o primeiro carro','A matrícula e os quilómetros de hoje.',
           'passo-carro')+
-    passo(temCond,2,'Junte um condutor','O nome, o e-mail e o telefone. '+
+    passo(temCond,2,'Junte um '+T.condutor,'O nome, o e-mail e o telefone. '+
           'O código é a aplicação que inventa.','passo-cond')+
     passo(false,3,'Mande-lhe o acesso','Na ficha dele há um botão que manda '+
           'tudo pelo WhatsApp: o endereço, o e-mail e o código.',null)+
@@ -170,6 +184,302 @@ function condutorDe(nome){
 /* A frota é do patrão: é ele que a escreve, e os telemóveis dos
    condutores recebem a mudança sozinhos. */
 function guardar(){ Nuvem.guardarFrota(S.frota); Nuvem.local('dono-sessao', S.sessao); }
+
+/* ═══ OS TRÊS TIPOS DE FROTA (mapa/tipos.js) ═══════════════
+   Táxis, instituições e rent-a-car: o mesmo painel, com as palavras,
+   os módulos e as contas de cada um. */
+function TP(){ return FleetTipos.de(S.frota&&S.frota.tipo); }
+function temModulo(m){ return !!TP().modulos[m]; }
+
+/* O que cada tipo acrescenta às contas de um turno: a guia de marcha,
+   o horário e a zona (instituições). Guarda-se o resultado: o horário
+   olha para o percurso todo, e isto corre em cada pintura. */
+var cacheExtras={};
+function extrasDoTipo(t){
+  var f=S.frota||{};
+  if(!f.tipo || f.tipo==='taxi') return {v:[], al:[]};
+  var chave=t.id+'|'+(t.fim||'')+'|'+(t.rasto||[]).length+'|'+(t.destino||'')+'|'+t.lat+','+t.lon+'|'+
+    JSON.stringify([f.tipo, f.horario, f.zona]);
+  if(cacheExtras[t.id] && cacheExtras[t.id].k===chave) return cacheExtras[t.id].r;
+  var v=[], al=[], T=TP();
+  if(temModulo('guia')){
+    if(t.destino||t.motivo)
+      v.push({ok:true, t1:'Guia de marcha', t2:esc(t.destino||'—')+
+        (t.motivo?' · '+esc(t.motivo):''), vl:'escrita'});
+    else {
+      v.push({ok:false, t1:'Guia de marcha', t2:'sem destino nem motivo', vl:'—'});
+      al.push({c:'A42', n:'AVISO', d:T.Turno+' sem destino nem motivo'}); }
+  }
+  if(temModulo('horario') && f.horario){
+    var fh=FleetTipos.foraDoHorario(t, f.horario);
+    if(fh){
+      var foraDosDias=(f.horario.dias||[]).indexOf(new Date(fh.quando).getDay())<0;
+      v.push({ok:false, t1:'Dentro do horário de serviço', t2:fh.dia+' às '+hh(fh.quando)+
+        ' · horário: '+esc(FleetTipos.horarioEmTexto(f.horario)), vl:nf(fh.minutos)+' min fora'});
+      al.push({c:'A40', n:foraDosDias?'CRITICO':'AVISO', d:T.Turno+' fora do horário: '+
+        fh.dia+' às '+hh(fh.quando)+' ('+nf(fh.minutos)+' min)'});
+    } else v.push({ok:true, t1:'Dentro do horário de serviço',
+      t2:esc(FleetTipos.horarioEmTexto(f.horario)), vl:'certo'});
+  }
+  /* o percurso, e no turno ao vivo também onde o carro está agora */
+  var pontos=(t.rasto||[]).concat(t.fim==null && t.lat!=null ? [[t.lat, t.lon, Date.now(), t.precisao]] : []);
+  if(temModulo('zona') && f.zona && pontos.length){
+    var z=FleetTipos.saiuDaZona(pontos, f.zona);
+    if(z){
+      v.push({ok:false, t1:'Ficou dentro da zona autorizada', t2:'chegou a '+nf(z.km,1)+
+        ' km de '+esc(f.zona.nome)+' (limite: '+nf(f.zona.km)+' km)', vl:'saiu'});
+      al.push({c:'A41', n:'CRITICO', d:'Saiu da zona autorizada: chegou a '+nf(z.km,1)+
+        ' km de '+f.zona.nome});
+    } else v.push({ok:true, t1:'Ficou dentro da zona autorizada',
+      t2:esc(f.zona.nome)+' · '+nf(f.zona.km)+' km', vl:'certo'});
+  }
+  var r={v:v, al:al};
+  cacheExtras[t.id]={k:chave, r:r};
+  return r;
+}
+
+/* ─── documentos, manutenção e alugueres atrasados ───────── */
+function avisosDaFrota(){
+  var v=[];
+  ((S.frota&&S.frota.carros)||[]).forEach(function(c){
+    FleetTipos.avisosDoCarro(c).forEach(function(a){ v.push({n:a.n, d:a.d, carro:c}); }); });
+  if(temModulo('alugueres')) ((S.frota&&S.frota.alugueres)||[]).forEach(function(a){
+    if(FleetTipos.atrasado(a)) v.push({n:'CRITICO', aluguer:a,
+      d:'Atrasado: '+((a.cliente||{}).nome||'cliente')+' devia ter entregue '+dt(a.previsto)}); });
+  return v.sort(function(x,y){ return x.n===y.n?0:(x.n==='CRITICO'?-1:1); });
+}
+function cartaoAvisosFrota(){
+  var v=avisosDaFrota(); if(!v.length) return '';
+  var mau=v.some(function(a){ return a.n==='CRITICO'; });
+  return '<div class="cartao '+(mau?'mau':'aviso')+'" id="avisos-frota"><h2>Documentos e manutenção</h2>'+
+    '<div class="linhas" style="margin-top:4px">'+v.map(function(a){
+      var quem=a.carro
+        ? '<button class="lig" data-carro-lig="'+a.carro.id+'" style="padding:0;font-family:var(--mono)">'+
+          esc(a.carro.matricula)+'</button>'
+        : '<button class="lig" data-aluguer="'+a.aluguer.id+'" style="padding:0;font-family:var(--mono)">'+
+          esc(a.aluguer.matricula)+'</button>';
+      return '<div><span class="k">'+quem+'</span><span class="v" style="color:'+
+        (a.n==='CRITICO'?'var(--crit)':'var(--warn)')+'">'+esc(a.d)+'</span></div>'; }).join('')+
+    '</div></div>';
+}
+function cartaoDocsCarro(c){
+  var linhas=FleetTipos.DOCS.map(function(d){
+    if(!c[d.k]) return '<div><span class="k">'+d.nome+'</span><span class="v" style="color:var(--muted)">'+
+      'sem data</span></div>';
+    var av=FleetTipos.avisosDoCarro({seguroAte:d.k==='seguroAte'?c[d.k]:null,
+      inspecaoAte:d.k==='inspecaoAte'?c[d.k]:null, licencaAte:d.k==='licencaAte'?c[d.k]:null})[0];
+    return '<div><span class="k">'+d.nome+'</span><span class="v"'+(av?' style="color:'+
+      (av.n==='CRITICO'?'var(--crit)':'var(--warn)')+'"':'')+'>até '+
+      esc(c[d.k].split('-').reverse().join('/'))+(av?' · '+esc(av.d.replace(d.nome+' ','')):'')+
+      '</span></div>'; }).join('');
+  return '<div class="cartao"><h2>Documentos</h2><div class="linhas" style="margin-top:6px">'+linhas+
+    (c.departamento?'<div><span class="k">Departamento</span><span class="v">'+esc(c.departamento)+
+      '</span></div>':'')+
+    (temModulo('alugueres')&&c.precoDia?'<div><span class="k">Preço por dia</span><span class="v">'+
+      nf(c.precoDia)+' CVE</span></div>':'')+
+    '</div><p class="p-nota" style="margin-top:8px">A aplicação avisa 30 dias antes de cada '+
+    'data. Mudam-se em Editar.</p></div>';
+}
+
+/* ─── as definições de cada tipo ─────────────────────────── */
+function cartaoDefsTipo(){
+  var f=S.frota, T=TP();
+  var r=function(id, se){ return S.r[id]!=null ? S.r[id] : (se==null?'':se); };
+  var h='<div class="cartao" id="defs-tipo"><h2>Tipo de frota</h2>'+
+    '<p class="p-nota" style="margin:4px 0 8px">Muda as palavras e o que a aplicação mostra. '+
+    'Os dados ficam todos.</p><div class="opcoes">'+
+    ['taxi','instituicao','rentacar'].map(function(k){ var K=FleetTipos.de(k);
+      return '<button class="opcao'+(T.id===k?' on':'')+'" data-f="tipo-mudar" data-tipo="'+k+'">'+
+        '<span class="bola"></span><span><span class="t1">'+K.icone+' '+K.nome+'</span>'+
+        '<span class="t2">'+K.frase+'</span></span></button>'; }).join('')+'</div>';
+  var regras='';
+  if(T.modulos.horario){
+    var hr=f.horario||{dias:[1,2,3,4,5], de:'08:00', ate:'18:00'};
+    var dias=S.r['e-h-dias']!=null ? S.r['e-h-dias'].split(',').filter(Boolean).map(Number)
+      : (f.horario ? hr.dias : []);
+    regras+='<h3 style="margin:16px 0 4px">Horário de serviço</h3>'+
+      '<div class="dias">'+[1,2,3,4,5,6,0].map(function(d){
+        return '<button class="dia'+(dias.indexOf(d)>=0?' on':'')+'" data-f="h-dia" data-dia="'+d+'">'+
+          FleetTipos.DIAS[d].slice(0,3)+'</button>'; }).join('')+'</div>'+
+      '<div class="par"><label class="campo"><span class="lb">Das</span><input type="time" id="e-h-de"'+
+      marcado('e-h-de')+' value="'+esc(r('e-h-de', hr.de))+'"></label>'+
+      '<label class="campo"><span class="lb">Às</span><input type="time" id="e-h-ate"'+
+      marcado('e-h-ate')+' value="'+esc(r('e-h-ate', hr.ate))+'"></label></div>'+
+      '<p class="p-nota">Um carro a andar fora disto dá um alerta; nos dias não marcados, '+
+      'é alerta importante. Sem dias marcados, não há horário.</p>';
+  }
+  if(T.modulos.zona){
+    var zid=r('e-z-zona', f.zona?f.zona.id:'');
+    regras+='<h3 style="margin:16px 0 4px">Zona autorizada</h3>'+
+      '<div class="par"><label class="campo" style="flex:2"><span class="lb">Os carros não saem de</span>'+
+      '<select id="e-z-zona"'+marcado('e-z-zona')+'><option value="">Sem limite</option>'+
+      FleetTipos.ZONAS.map(function(z){ return '<option value="'+z.id+'"'+(zid===z.id?' selected':'')+
+        '>'+esc(z.nome)+'</option>'; }).join('')+'</select></label>'+
+      '<label class="campo"><span class="lb">Raio (km)</span><input type="number" inputmode="decimal" '+
+      'id="e-z-km"'+marcado('e-z-km')+' value="'+esc(r('e-z-km', f.zona?f.zona.km:''))+
+      '" placeholder="auto"></label></div>'+
+      '<p class="p-nota">Se o GPS puser um carro mais longe do que isto, é alerta importante.</p>';
+  }
+  if(T.modulos.departamentos)
+    regras+='<h3 style="margin:16px 0 4px">Departamentos</h3>'+
+      '<label class="campo"><textarea id="e-deps"'+marcado('e-deps')+' rows="4" '+
+      'placeholder="Um por linha. Ex.:&#10;Presidência&#10;Obras&#10;Ambiente">'+
+      esc(r('e-deps', (f.deps||[]).join('\n')))+'</textarea>'+
+      '<span class="aj">Cada carro fica num departamento (em Editar), e as contas '+
+      'saem por departamento.</span></label>';
+  if(T.modulos.alugueres)
+    regras+='<h3 style="margin:16px 0 4px">Preços dos alugueres</h3>'+
+      '<div class="par"><label class="campo"><span class="lb">Por dia (CVE)</span>'+
+      '<input type="number" inputmode="numeric" id="e-precoDia"'+marcado('e-precoDia')+' value="'+
+      esc(r('e-precoDia', f.precoDia||''))+'" placeholder="5000"></label>'+
+      '<label class="campo"><span class="lb">Km por dia</span>'+
+      '<input type="number" inputmode="numeric" id="e-kmDia"'+marcado('e-kmDia')+' value="'+
+      esc(r('e-kmDia', f.kmDia||''))+'" placeholder="0 = sem limite"></label></div>'+
+      '<label class="campo"><span class="lb">Cada km a mais (CVE)</span>'+
+      '<input type="number" inputmode="numeric" id="e-precoKmExtra"'+marcado('e-precoKmExtra')+' value="'+
+      esc(r('e-precoKmExtra', f.precoKmExtra||''))+'" placeholder="25"></label>'+
+      '<p class="p-nota">São os preços que aparecem ao entregar um carro; mudam-se em cada '+
+      'aluguer, e cada carro pode ter o seu preço por dia (em Editar).</p>';
+  if(regras) h+=regras+'<button class="bt sec pq" data-f="guardar-tipo" style="margin-top:10px">'+
+    'Guardar as regras</button>';
+  return h+'</div>';
+}
+
+/* ─── rent-a-car: os alugueres ───────────────────────────── */
+function alugueres(){ return (S.frota&&S.frota.alugueres)||[]; }
+function aluguerDe(id){ return alugueres().filter(function(a){ return a.id===id; })[0]; }
+function aluguerDoCarro(cid){ return alugueres().filter(function(a){ return a.carroId===cid && !a.volta; })[0]; }
+function contaDe(a){
+  var c=carroDe(a.carroId)||{};
+  return FleetTipos.contaAluguer(a, c.deposito||45, (S.frota&&S.frota.precoLitro)||145);
+}
+function mesKey(ms){ var d=new Date(ms); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
+function receitaPorMes(){
+  var m={};
+  alugueres().forEach(function(a){ if(!a.volta) return;
+    var k=mesKey(a.volta.quando); m[k]=m[k]||{ms:a.volta.quando, n:0, cve:0, km:0};
+    m[k].n++; m[k].cve+=a.total||contaDe(a).total; m[k].km+=contaDe(a).km; });
+  return m;
+}
+function itemAluguer(a){
+  var atr=FleetTipos.atrasado(a), ct=contaDe(a);
+  return '<button class="item" data-aluguer="'+a.id+'"><span style="flex:1">'+
+    '<span class="p" style="font-family:var(--mono)">'+esc(a.matricula)+'</span> '+
+    (a.volta?'<span class="selo i">devolvido</span>':atr?'<span class="selo c">atrasado</span>'
+      :'<span class="selo n">na rua</span>')+
+    '<br><span class="s">'+esc((a.cliente||{}).nome||'')+' · '+dt(a.saida.quando)+
+    (a.volta?' → '+dt(a.volta.quando):' · até '+dt(a.previsto))+'</span></span>'+
+    '<span class="d"><span class="num" style="font-size:15px">'+nf(a.volta?(a.total||ct.total):ct.total)+
+    '</span><br><span class="s" style="font-size:11px">CVE</span></span></button>';
+}
+function resumoAlugueres(){
+  var cs=(S.frota.carros||[]).filter(function(c){ return c.estado==='ACTIVO'; });
+  var fora=alugueres().filter(function(a){ return !a.volta; });
+  var atr=fora.filter(function(a){ return FleetTipos.atrasado(a); });
+  var rm=receitaPorMes()[mesKey(Date.now())];
+  return '<div class="tiles">'+
+    '<div><b class="num">'+fora.length+'</b><span>na rua</span></div>'+
+    '<div><b class="num">'+Math.max(0, cs.length-fora.length)+'</b><span>disponíveis</span></div>'+
+    '<div><b class="num"'+(atr.length?' style="color:var(--crit)"':'')+'>'+atr.length+
+      '</b><span>atrasados</span></div>'+
+    '<div><b class="num">'+nf(rm?rm.cve:0)+'</b><span>CVE este mês</span></div></div>';
+}
+var fotosAl={}, aBuscarAl={};
+function fotosDoAluguer(a){
+  if(!fotosAl[a.id] && !aBuscarAl[a.id]){
+    aBuscarAl[a.id]=true;
+    Nuvem.fotosDoTurno(a.id).then(function(f){
+      fotosAl[a.id]=f||{}; aBuscarAl[a.id]=false;
+      if(S.ecra==='aluguer' && S.sel===a.id && !aEscrever()) pintar(); }); }
+  var fs=fotosAl[a.id]||{}, q=[];
+  Object.keys(fs).sort().forEach(function(k){
+    q.push(quadroFoto(fs[k], (/_v\d/.test(k)?'Na devolução':'Na entrega')+' · '+k.split('_').pop().replace(/\D/g,''))); });
+  if(!q.length) return '';
+  return '<div class="cartao"><h2>As fotografias do carro</h2>'+
+    '<p class="p-nota" style="margin:2px 0 9px">A prova do estado do carro. Toque para ver em grande.</p>'+
+    '<div class="fotos">'+q.join('')+'</div></div>';
+}
+/* as fotografias de entrega ou devolução, ainda por guardar */
+function fotosPorGuardar(){
+  var l=S.fotosNovas||[];
+  return '<div class="campo"><span class="lb">Fotografias do carro</span>'+
+    '<label class="bt sec pq" style="display:block;text-align:center;cursor:pointer">📷 Tirar fotografias'+
+    '<input type="file" id="f-carro" accept="image/*" capture="environment" multiple '+
+    'style="position:absolute;opacity:0;width:1px;height:1px"></label>'+
+    '<span class="aj">Frente, trás e os dois lados, e o que já tiver riscos. Ficam como prova.</span>'+
+    (l.length?'<div class="fotos" style="margin-top:8px">'+l.map(function(src,i){
+      return quadroFoto(src, 'Fotografia '+(i+1)); }).join('')+'</div>':'')+'</div>';
+}
+function comprimirFoto(ficheiro){
+  return new Promise(function(ok, mal){
+    var r=new FileReader();
+    r.onload=function(){ var img=new Image();
+      img.onload=function(){
+        var s=Math.min(1, 1024/Math.max(img.width, img.height)), c=document.createElement('canvas');
+        c.width=Math.round(img.width*s); c.height=Math.round(img.height*s);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        ok(c.toDataURL('image/jpeg', 0.6)); };
+      img.onerror=mal; img.src=r.result; };
+    r.onerror=mal; r.readAsDataURL(ficheiro); });
+}
+function seletorComb(id, valor){
+  return '<div class="comb" id="'+id+'">'+FleetTipos.COMB.map(function(n,i){
+    return '<button class="dia'+(+valor===i?' on':'')+'" data-f="comb" data-campo="'+id+'" data-v="'+i+'">'+
+      n+'</button>'; }).join('')+'</div>';
+}
+
+/* um ficheiro para o telemóvel ou o computador (a cópia, o Excel) */
+function descarregar(nome, texto, tipo, feito, falhou){
+  var localmente=function(){
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([texto],{type:tipo}));
+    a.download=nome; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000); };
+  try{
+    if(window.claude && claude.use)
+      claude.use('downloads').then(function(d){
+        if(!d){ try{ localmente(); feito(); }catch(e){ falhou(); } return; }
+        d.save({filename:nome, data:texto}).then(feito).catch(falhou);
+      }).catch(function(){ try{ localmente(); feito(); }catch(e){ falhou(); } });
+    else { localmente(); feito(); }
+  }catch(e){ falhou(); }
+}
+/* o relatório para o Excel: um turno (ou aluguer) por linha */
+function relatorioCsv(){
+  var T=TP(), L=[];
+  if(temModulo('alugueres')){
+    L.push(['Saída','Devolução','Matrícula','Cliente','Telefone','Dias','Km','Km a mais',
+            'Combustível em falta (l)','Extras (CVE)','Total (CVE)']);
+    alugueres().slice().sort(function(a,b){ return a.saida.quando-b.saida.quando; }).forEach(function(a){
+      var ct=contaDe(a);
+      L.push([dt(a.saida.quando), a.volta?dt(a.volta.quando):'na rua', a.matricula,
+        (a.cliente||{}).nome, (a.cliente||{}).tel, ct.dias, ct.km, ct.kmExtra,
+        String(ct.litrosFalta).replace('.',','), ct.valorExtras, a.volta?(a.total||ct.total):ct.total]); });
+    L.push([]);
+  }
+  L.push(['Data','Início','Fim','Matrícula',temModulo('departamentos')?'Departamento':'',T.Condutor,
+          temModulo('guia')?'Destino':'', temModulo('guia')?'Motivo':'',
+          'Km','Combustível (CVE)','Alertas por resolver']);
+  S.turnos.filter(function(t){ return t.fim; }).slice().sort(function(a,b){ return a.inicio-b.inicio; })
+    .forEach(function(t){ var c=carroDe(t.carroId)||{};
+      L.push([new Date(t.inicio).toLocaleDateString('pt-PT'), hh(t.inicio), hh(t.fim), t.matricula,
+        temModulo('departamentos')?(c.departamento||''):'', t.condutor,
+        temModulo('guia')?(t.destino||''):'', temModulo('guia')?(t.motivo||''):'',
+        (t.kmFim||0)-t.kmInicio, t.totalCve||0,
+        porResolver(t).map(function(a){ return a.d; }).join(' | ')]); });
+  return FleetTipos.csv(L);
+}
+function textoContaAluguer(a){
+  var ct=contaDe(a);
+  return ((S.frota&&S.frota.nome)||'')+' · aluguer do '+a.matricula+'\n'+
+    'Saída: '+dt(a.saida.quando)+' · '+nf(a.saida.km)+' km · combustível '+FleetTipos.COMB[a.saida.comb]+'\n'+
+    'Devolução: '+dt(a.volta.quando)+' · '+nf(a.volta.km)+' km · combustível '+FleetTipos.COMB[a.volta.comb]+'\n\n'+
+    ct.dias+(ct.dias===1?' dia':' dias')+' × '+nf(a.precoDia)+' = '+nf(ct.valorDias)+' CVE\n'+
+    (ct.kmExtra?nf(ct.kmExtra)+' km a mais × '+nf(a.precoKmExtra)+' = '+nf(ct.valorKm)+' CVE\n':'')+
+    (ct.valorComb?'Combustível em falta ('+nf(ct.litrosFalta,1)+' l) = '+nf(ct.valorComb)+' CVE\n':'')+
+    (a.extras||[]).map(function(e){ return e.d+' = '+nf(e.valor)+' CVE\n'; }).join('')+
+    '\nTotal: '+nf(a.total||ct.total)+' CVE\nObrigado!';
+}
 
 /* ═══ AS CONTAS — as mesmas regras de sempre ═══════════════ */
 /* O talão diz um posto. O GPS diz onde o carro esteve. Isto compara
@@ -327,9 +637,11 @@ function avaliar(t){
     else if(meio) al.push({c:'A17',n:'AVISO',d:'Gasto de '+nf(cons,1)+
       ' litros aos 100 km, acima do normal'});
   }
+  var ex=extrasDoTipo(t); v=v.concat(ex.v); al=al.concat(ex.al);
   return {v:v, al:al, kmQ:kmQ, kmG:kmG, consumo:cons};
 }
-function alertasDe(t){ return (t.alertas&&t.alertas.length!==undefined)?t.alertas:avaliar(t).al; }
+function alertasDe(t){ return (t.alertas&&t.alertas.length!==undefined)
+  ? t.alertas.concat(extrasDoTipo(t).al) : avaliar(t).al; }
 function porResolver(t){ var r=t.resolucoes||{};
   return alertasDe(t).filter(function(a){ return !r[a.c]; }); }
 function dinheiroDe(t){ var r=t.resolucoes||{};
@@ -721,6 +1033,10 @@ function cartaoDoCarro(t){
   h+='<p class="p-nota" style="margin-top:9px">Começou às '+hh(t.inicio)+
     ' com o quadrante nos '+nf(t.kmInicio)+' km'+
     (litros?' · '+nf(litros,2)+' litros até agora':'')+'.</p>';
+  /* instituições: a guia de marcha que o motorista escreveu ao sair */
+  if(t.destino||t.motivo)
+    h+='<p class="p-nota" style="margin-top:6px" id="guia-vivo"><b>Guia de marcha:</b> '+
+      esc(t.destino||'—')+(t.motivo?' · '+esc(t.motivo):'')+'</p>';
 
   /* os alertas, aqui mesmo (antes levavam a outro ecrã, com outro mapa) */
   if(alertas.length)
@@ -820,15 +1136,23 @@ function pintar(){
      e o código com que vai voltar a entrar. */
   else if(S.ecra==='criar'){
     var cc=function(id){ return esc(S.r[id]||''); };
+    var tipoC=S.r['e-c-tipo']||S.tipoPedido||'taxi';
+    var exFrota={taxi:'Ex.: Táxis Tavares', instituicao:'Ex.: Câmara Municipal — parque auto',
+                 rentacar:'Ex.: Praia Rent-a-car'}[tipoC];
     h='<div style="height:10px"></div><h1>Criar conta</h1>'+
       '<p class="sub">30 dias grátis, sem cartão. Depois, se servir, '+
       'fala-se do preço.</p>'+caixaAviso()+
+      '<div class="campo"><span class="lb">Que frota é?</span><div class="opcoes">'+
+      ['taxi','instituicao','rentacar'].map(function(k){ var K=FleetTipos.de(k);
+        return '<button class="opcao'+(tipoC===k?' on':'')+'" data-f="tipo-criar" data-tipo="'+k+'">'+
+          '<span class="bola"></span><span><span class="t1">'+K.icone+' '+K.nome+'</span>'+
+          '<span class="t2">'+K.frase+'</span></span></button>'; }).join('')+'</div></div>'+
       '<label class="campo"><span class="lb">O seu nome</span>'+
       '<input type="text" id="e-c-nome"'+marcado('e-c-nome')+' autocomplete="name" value="'+
       cc('e-c-nome')+'" placeholder="Ex.: Manuel Tavares"></label>'+
       '<label class="campo"><span class="lb">Nome da frota</span>'+
       '<input type="text" id="e-c-frota"'+marcado('e-c-frota')+' value="'+
-      cc('e-c-frota')+'" placeholder="Ex.: Táxis Tavares"></label>'+
+      cc('e-c-frota')+'" placeholder="'+exFrota+'"></label>'+
       '<label class="campo"><span class="lb">E-mail</span>'+
       '<input type="email" id="e-c-email"'+marcado('e-c-email')+' autocomplete="email" value="'+
       cc('e-c-email')+'" placeholder="o.seu@email.cv"></label>'+
@@ -915,6 +1239,132 @@ function pintar(){
     b=false;
   }
 
+  /* ── rent-a-car: os alugueres ───────────────────────── */
+  else if(S.ecra==='alugueres'){
+    var fora=alugueres().filter(function(a){ return !a.volta; })
+      .sort(function(a,b){ return (a.previsto||0)-(b.previsto||0); });
+    var feitos=alugueres().filter(function(a){ return a.volta; })
+      .sort(function(a,b){ return b.volta.quando-a.volta.quando; });
+    h='<h1>Alugueres</h1><p class="sub">Entregar e receber os carros, com as contas feitas.</p>'+
+      caixaAviso()+resumoAlugueres()+
+      '<button class="bt pri" data-f="novo-aluguer" style="margin:6px 0 4px">Entregar um carro</button>'+
+      '<h3>Na rua</h3>'+(fora.length?fora.map(itemAluguer).join('')
+        :'<div class="cartao"><div class="vazio">Nenhum carro na rua.</div></div>')+
+      (feitos.length?'<h3>Devolvidos</h3>'+feitos.slice(0,15).map(itemAluguer).join(''):'');
+  }
+
+  else if(S.ecra==='novo-aluguer'){
+    var livres=S.frota.carros.filter(function(c){ return c.estado==='ACTIVO' && !aluguerDoCarro(c.id); });
+    var ra=function(id, se){ return S.r[id]!=null ? S.r[id] : (se==null?'':se); };
+    var cEsc=carroDe(S.r['e-a-carro']);
+    var amanha=new Date(Date.now()+86400000); amanha.setMinutes(0,0,0);
+    var prev=new Date(amanha.getTime()-amanha.getTimezoneOffset()*60000).toISOString().slice(0,16);
+    h='<h1>Entregar um carro</h1><p class="sub">O que fica escrito agora é a prova do estado '+
+      'em que o carro saiu.</p>'+caixaAviso();
+    h+='<div class="campo"><span class="lb">Que carro</span>'+(livres.length?'<div class="opcoes">'+
+      livres.map(function(c){ return '<button class="opcao'+(cEsc&&cEsc.id===c.id?' on':'')+
+        '" data-f="al-carro" data-carro-al="'+c.id+'"><span class="bola"></span><span>'+
+        '<span class="t1" style="font-family:var(--mono)">'+esc(c.matricula)+'</span>'+
+        '<span class="t2">'+esc((c.marca+' '+c.modelo).trim())+(semKm(c)?'':' · '+nf(c.km)+' km')+
+        (c.precoDia?' · '+nf(c.precoDia)+' CVE/dia':'')+'</span></span></button>'; }).join('')+'</div>'
+      :'<div class="cartao"><div class="vazio">Não há carros livres. Junte um em Viaturas.</div></div>')+'</div>';
+    if(cEsc){
+      h+='<label class="campo"><span class="lb">Nome do cliente</span><input type="text" id="e-a-nome"'+
+        marcado('e-a-nome')+' value="'+esc(ra('e-a-nome'))+'" autocomplete="off"></label>'+
+        '<div class="par"><label class="campo"><span class="lb">Telefone</span><input type="tel" id="e-a-tel"'+
+        marcado('e-a-tel')+' value="'+esc(ra('e-a-tel'))+'" placeholder="991 23 45"></label>'+
+        '<label class="campo"><span class="lb">BI / passaporte</span><input type="text" id="e-a-doc"'+
+        marcado('e-a-doc')+' value="'+esc(ra('e-a-doc'))+'" autocomplete="off"></label></div>'+
+        '<label class="campo"><span class="lb">Carta de condução</span><input type="text" id="e-a-carta"'+
+        marcado('e-a-carta')+' value="'+esc(ra('e-a-carta'))+'" autocomplete="off"></label>'+
+        '<label class="campo"><span class="lb">Devolve em</span><input type="datetime-local" id="e-a-prev"'+
+        marcado('e-a-prev')+' value="'+esc(ra('e-a-prev', prev))+'"></label>'+
+        '<div class="par"><label class="campo"><span class="lb">Preço por dia</span>'+
+        '<input type="number" inputmode="numeric" id="e-a-preco"'+marcado('e-a-preco')+' value="'+
+        esc(ra('e-a-preco', cEsc.precoDia||S.frota.precoDia||''))+'" placeholder="CVE"></label>'+
+        '<label class="campo"><span class="lb">Km por dia</span>'+
+        '<input type="number" inputmode="numeric" id="e-a-kmdia"'+marcado('e-a-kmdia')+' value="'+
+        esc(ra('e-a-kmdia', S.frota.kmDia||0))+'"><span class="aj">0 = sem limite</span></label></div>'+
+        '<label class="campo"><span class="lb">Cada km a mais (CVE)</span>'+
+        '<input type="number" inputmode="numeric" id="e-a-kmextra"'+marcado('e-a-kmextra')+' value="'+
+        esc(ra('e-a-kmextra', S.frota.precoKmExtra||25))+'"></label>'+
+        '<label class="campo"><span class="lb">Km no conta-quilómetros</span>'+
+        '<input type="number" inputmode="numeric" id="e-a-km"'+marcado('e-a-km')+' value="'+
+        esc(ra('e-a-km', semKm(cEsc)?'':cEsc.km))+'"></label>'+
+        '<div class="campo"><span class="lb">Combustível</span>'+
+        seletorComb('e-a-comb', ra('e-a-comb', 8))+'</div>'+
+        fotosPorGuardar()+
+        '<button class="bt pri" data-f="guardar-aluguer">Entregar o carro</button>';
+    }
+  }
+
+  else if(S.ecra==='aluguer'){
+    var al=aluguerDe(S.sel); if(!al){ S.ecra='alugueres'; return pintar(); }
+    var ca=carroDe(al.carroId)||{deposito:45};
+    var cl=al.cliente||{}, aberto=!al.volta;
+    var rb=function(id, se){ return S.r[id]!=null ? S.r[id] : (se==null?'':se); };
+    var ct=FleetTipos.contaAluguer(aberto&&S.r['e-v-km']?Object.assign({}, al,
+      {volta:{quando:Date.now(), km:+S.r['e-v-km'], comb:+rb('e-v-comb', 8)},
+       extras:(+S.r['e-v-extra']>0)?[{d:S.r['e-v-extrad']||'Extras', valor:+S.r['e-v-extra']}]:[]})
+      :al, ca.deposito||45, S.frota.precoLitro);
+    h='<h1 style="font-family:var(--mono)">'+esc(al.matricula)+'</h1>'+
+      '<p class="sub">'+esc(cl.nome||'')+' · saiu '+dt(al.saida.quando)+
+      (aberto?' · devolve '+dt(al.previsto):' · voltou '+dt(al.volta.quando))+'</p>'+caixaAviso();
+    if(aberto && FleetTipos.atrasado(al)) h+='<div class="cartao mau"><h2>Atrasado</h2>'+
+      '<p class="p-nota" style="margin-top:4px">Devia ter sido entregue '+dt(al.previsto)+'.</p></div>';
+    h+='<div class="cartao"><h2>Cliente</h2><div class="linhas" style="margin-top:4px">'+
+      '<div><span class="k">Nome</span><span class="v">'+esc(cl.nome||'—')+'</span></div>'+
+      (cl.tel?'<div><span class="k">Telefone</span><span class="v"><a href="https://wa.me/'+
+        numeroWhats(cl.tel)+'" target="_blank" rel="noopener" style="color:var(--accent)">'+esc(cl.tel)+
+        '</a></span></div>':'')+
+      (cl.doc?'<div><span class="k">BI / passaporte</span><span class="v">'+esc(cl.doc)+'</span></div>':'')+
+      (cl.carta?'<div><span class="k">Carta</span><span class="v">'+esc(cl.carta)+'</span></div>':'')+
+      '</div></div>';
+    h+='<div class="cartao"><h2>'+(aberto?'Saiu assim':'Saída e devolução')+'</h2>'+
+      '<div class="linhas" style="margin-top:4px">'+
+      '<div><span class="k">Km na entrega</span><span class="v">'+nf(al.saida.km)+'</span></div>'+
+      '<div><span class="k">Combustível na entrega</span><span class="v">'+FleetTipos.COMB[al.saida.comb]+'</span></div>'+
+      (aberto?'':'<div><span class="k">Km na devolução</span><span class="v">'+nf(al.volta.km)+'</span></div>'+
+        '<div><span class="k">Combustível na devolução</span><span class="v">'+FleetTipos.COMB[al.volta.comb]+'</span></div>')+
+      '<div><span class="k">Preço</span><span class="v">'+nf(al.precoDia)+' CVE/dia'+
+        (al.kmDia>0?' · '+nf(al.kmDia)+' km/dia':' · km sem limite')+'</span></div>'+
+      '</div></div>';
+    h+='<div class="cartao" id="conta-aluguer"><h2>'+(aberto?'A conta até agora':'A conta')+'</h2>'+
+      '<div class="linhas" style="margin-top:4px">'+
+      '<div><span class="k">'+ct.dias+(ct.dias===1?' dia':' dias')+' × '+nf(al.precoDia)+'</span>'+
+        '<span class="v">'+nf(ct.valorDias)+' CVE</span></div>'+
+      (ct.kmExtra?'<div><span class="k">'+nf(ct.kmExtra)+' km a mais × '+nf(al.precoKmExtra)+'</span>'+
+        '<span class="v">'+nf(ct.valorKm)+' CVE</span></div>':'')+
+      (ct.valorComb?'<div><span class="k">Combustível em falta ('+nf(ct.litrosFalta,1)+' l)</span>'+
+        '<span class="v">'+nf(ct.valorComb)+' CVE</span></div>':'')+
+      ((al.extras&&!aberto?al.extras:(ct.valorExtras?[{d:S.r['e-v-extrad']||'Extras', valor:ct.valorExtras}]:[]))
+        .map(function(e){ return '<div><span class="k">'+esc(e.d)+'</span><span class="v">'+nf(e.valor)+
+          ' CVE</span></div>'; }).join(''))+
+      '<div style="font-weight:700"><span class="k">Total</span><span class="v num" id="total-aluguer">'+
+        nf(ct.total)+' CVE</span></div></div>'+
+      (ct.km?'<p class="p-nota" style="margin-top:6px">'+nf(ct.km)+' km andados'+
+        (ct.incluidos!=null?' de '+nf(ct.incluidos)+' incluídos':'')+'.</p>':'')+'</div>';
+    h+=fotosDoAluguer(al);
+    if(aberto){
+      h+='<h3>Receber o carro</h3>'+
+        '<label class="campo"><span class="lb">Km no conta-quilómetros</span>'+
+        '<input type="number" inputmode="numeric" id="e-v-km"'+marcado('e-v-km')+' value="'+
+        esc(rb('e-v-km'))+'" placeholder="'+nf(al.saida.km)+' ou mais"></label>'+
+        '<div class="campo"><span class="lb">Combustível</span>'+seletorComb('e-v-comb', rb('e-v-comb', 8))+'</div>'+
+        '<div class="par"><label class="campo" style="flex:2"><span class="lb">Danos ou extras</span>'+
+        '<input type="text" id="e-v-extrad"'+marcado('e-v-extrad')+' value="'+esc(rb('e-v-extrad'))+
+        '" placeholder="Ex.: risco na porta"></label>'+
+        '<label class="campo"><span class="lb">Valor (CVE)</span><input type="number" inputmode="numeric" '+
+        'id="e-v-extra"'+marcado('e-v-extra')+' value="'+esc(rb('e-v-extra'))+'"></label></div>'+
+        fotosPorGuardar()+
+        '<button class="bt pri" data-f="fechar-aluguer">Receber e fechar a conta</button>';
+    } else {
+      h+='<a class="bt sec pq" id="mandar-conta" target="_blank" rel="noopener" href="https://wa.me/'+
+        (cl.tel?numeroWhats(cl.tel):'')+'?text='+encodeURIComponent(textoContaAluguer(al))+
+        '">Mandar a conta ao cliente pelo WhatsApp</a>';
+    }
+  }
+
   /* ── mapa da frota ──────────────────────────────────── */
   else if(S.ecra==='mapa'){
     var vivos=emTurno();
@@ -931,7 +1381,10 @@ function pintar(){
     var nAl=S.turnos.reduce(function(s,t){ return s+porResolver(t).length; },0);
     var porExplicar=S.turnos.reduce(function(s,t){ return s+dinheiroDe(t); },0);
 
-    h=primeirosPassos()+avisoDoPlano()+'<h1>A frota agora</h1>'+
+    h=primeirosPassos()+avisoDoPlano()+
+      (temModulo('alugueres') && S.frota.carros.length ? resumoAlugueres()+
+        '<p style="margin:-4px 0 10px"><button class="lig" data-tab="alugueres">Ver os alugueres ›</button></p>' : '')+
+      '<h1>A frota agora</h1>'+
       '<p class="sub">'+(nVivos?'<span class="ponto"></span>'+nVivos+
         (nVivos===1?' carro':' carros')+' em turno neste momento'
         :'Nenhum carro em turno')+
@@ -1004,7 +1457,10 @@ function pintar(){
         (c.estado!=='ACTIVO'?' <span class="selo i">parado</span>':'')+
         '<br><span class="s">'+esc(c.marca+' '+c.modelo)+' · '+
         (semKm(c) ? 'km no 1.º turno' : nf(c.km)+' km')+' · '+
-        ts.length+' turnos</span>'+
+        ts.length+' '+TP().turnos+(c.departamento&&temModulo('departamentos')?' · '+esc(c.departamento):'')+'</span>'+
+        (temModulo('alugueres')&&aluguerDoCarro(c.id)?'<br><span class="selo n" style="margin-top:4px">alugado</span>':'')+
+        FleetTipos.avisosDoCarro(c).filter(function(a){ return a.doc!=='Óleo'; }).slice(0,1).map(function(a){
+          return '<br><span class="selo '+(a.n==='CRITICO'?'c':'n')+'" style="margin-top:4px">'+esc(a.d)+'</span>'; }).join('')+
         (oleo<=1000?'<br><span class="selo n" style="margin-top:4px">óleo em '+
           nf(Math.max(0,oleo))+' km</span>':'')+
         '</span><span class="d"><span class="num" style="font-size:15px">'+
@@ -1047,6 +1503,10 @@ function pintar(){
       '</div>'+
       '<button class="bt sec pq" data-f="oleo-feito" style="margin-top:9px">'+
       'Mudei o óleo agora</button></div>';
+    h+=cartaoDocsCarro(c);
+    if(temModulo('alugueres') && aluguerDoCarro(c.id))
+      h+='<button class="item" data-aluguer="'+aluguerDoCarro(c.id).id+'"><span style="flex:1"><b>Alugado</b> a '+
+        esc(aluguerDoCarro(c.id).cliente.nome)+' até '+dt(aluguerDoCarro(c.id).previsto)+'</span><span class="seta">›</span></button>';
     if(Object.keys(quem).length)
       h+='<div class="cartao"><h2>Quem conduz este carro</h2><div class="linhas" '+
         'style="margin-top:4px">'+Object.keys(quem).map(function(n){
@@ -1111,6 +1571,22 @@ function pintar(){
       '<input type="number" inputmode="numeric" id="e-oleo"'+marcado('e-oleo')+' value="'+
       esc(cp('e-oleo', ec?ec.proxOleoKm:''))+'" placeholder="0"><span class="aj">A aplicação avisa quando faltarem '+
       '1.000 km.</span></label>')+
+      '<h3 style="margin:16px 0 6px">Documentos</h3>'+
+      '<div class="par"><label class="campo"><span class="lb">Seguro até</span><input type="date" id="e-seguro"'+
+      marcado('e-seguro')+' value="'+esc(cp('e-seguro', ec&&ec.seguroAte||''))+'"></label>'+
+      '<label class="campo"><span class="lb">Inspecção até</span><input type="date" id="e-inspecao"'+
+      marcado('e-inspecao')+' value="'+esc(cp('e-inspecao', ec&&ec.inspecaoAte||''))+'"></label></div>'+
+      '<label class="campo"><span class="lb">Licença / alvará até</span><input type="date" id="e-licenca"'+
+      marcado('e-licenca')+' value="'+esc(cp('e-licenca', ec&&ec.licencaAte||''))+'">'+
+      '<span class="aj">A aplicação avisa 30 dias antes. Pode deixar em branco.</span></label>'+
+      (temModulo('departamentos') ? '<label class="campo"><span class="lb">Departamento</span>'+
+        '<select id="e-depto"'+marcado('e-depto')+'><option value="">—</option>'+
+        (S.frota.deps||[]).map(function(dp){ var sel=cp('e-depto', ec&&ec.departamento||'')===dp;
+          return '<option'+(sel?' selected':'')+'>'+esc(dp)+'</option>'; }).join('')+'</select>'+
+        ((S.frota.deps||[]).length?'':'<span class="aj">Os departamentos escrevem-se em Mais.</span>')+'</label>' : '')+
+      (temModulo('alugueres') ? '<label class="campo"><span class="lb">Preço por dia (CVE)</span>'+
+        '<input type="number" inputmode="numeric" id="e-precodia"'+marcado('e-precodia')+' value="'+
+        esc(cp('e-precodia', ec&&ec.precoDia||''))+'" placeholder="'+(S.frota.precoDia||'')+'"></label>' : '')+
       '<button class="bt pri" data-f="guardar-carro">Guardar</button>';
     if(ec) h+='<button class="bt perigo pq" data-f="apagar-carro">Apagar viatura</button>'+
       '<p class="p-nota">Apagar leva os turnos deste carro com ele. Se é só para deixar '+
@@ -1119,7 +1595,7 @@ function pintar(){
 
   /* ── condutores ─────────────────────────────────────── */
   else if(S.ecra==='condutores'){
-    h='<h1>Condutores</h1><p class="sub">'+S.frota.condutores.length+' pessoas</p>';
+    h='<h1>'+TP().Condutores+'</h1><p class="sub">'+S.frota.condutores.length+' pessoas</p>';
     h+=S.frota.condutores.map(function(m){
       var s=score(m.nome);
       var cor=s.valor>=95?'var(--ok)':(s.valor>=80?'var(--warn)':'var(--crit)');
@@ -1130,7 +1606,7 @@ function pintar(){
         '<span class="d"><span class="num" style="font-size:17px;color:'+cor+'">'+
         s.valor+'</span><br><span class="s" style="font-size:11px">'+s.n+' turnos</span>'+
         '</span></button>'; }).join('');
-    h+='<button class="bt sec pq" data-f="novo-cond">+ Acrescentar condutor</button>'+
+    h+='<button class="bt sec pq" data-f="novo-cond">+ Acrescentar '+TP().condutor+'</button>'+
       '<p class="p-nota">O número mede <b>cuidado a registar</b>, não honestidade.</p>';
   }
 
@@ -1223,7 +1699,8 @@ function pintar(){
       alertasDe(t).forEach(function(a){ linhas.push({t:t,a:a,r:r[a.c]}); }); });
     linhas.sort(function(x,y){ if(!!x.r!==!!y.r) return x.r?1:-1;
       if(x.a.n!==y.a.n) return x.a.n==='CRITICO'?-1:1; return y.t.inicio-x.t.inicio; });
-    h='<h1>Para ver</h1><p class="sub">Feche cada um com uma de três respostas.</p>';
+    h='<h1>Para ver</h1><p class="sub">Feche cada um com uma de três respostas.</p>'+
+      cartaoAvisosFrota();
     h+= linhas.length ? linhas.map(function(L){
         var cr=L.a.n==='CRITICO';
         return '<div class="cartao'+(cr?' mau':' aviso')+'"'+(L.r?' style="opacity:.55"':'')+'>'+
@@ -1375,6 +1852,11 @@ function pintar(){
       '<input type="text" id="e-nomefrota"'+marcado('e-nomefrota')+' value="'+
       esc(cfg('e-nomefrota', S.frota.nome||''))+'"></label>'+
       '<button class="bt pri" data-f="guardar-defs">Guardar</button>';
+    h+=cartaoDefsTipo();
+    if(temModulo('alugueres'))
+      h+='<button class="item" data-tab="condutores"><span style="flex:1"><b>'+TP().Condutores+'</b><br>'+
+        '<span class="s">Quem leva os carros com a aplicação (entregas, oficina)</span></span>'+
+        '<span class="seta">›</span></button>';
     var conta=S.conta||{};
     if(Nuvem.podeCriarConta && Nuvem.podeCriarConta() && S.conta===undefined
        && !S.aPedirConta){
@@ -1493,8 +1975,28 @@ function pintar(){
           '<span class="v"'+(d4?' style="color:var(--crit)"':'')+'>'+ts4.length+
           ' turnos · '+nf(d4)+' CVE</span></div>'; }).join('')+'</div></div>';
 
+    if(temModulo('departamentos') && (S.frota.deps||[]).length){
+      var porDep={};
+      S.turnos.filter(function(t){ return t.fim; }).forEach(function(t){
+        var c5=carroDe(t.carroId), k5=(c5&&c5.departamento)||'Sem departamento';
+        porDep[k5]=porDep[k5]||{n:0,km:0,cve:0};
+        porDep[k5].n++; porDep[k5].km+=(t.kmFim||0)-t.kmInicio; porDep[k5].cve+=t.totalCve||0; });
+      h+='<h3>Por departamento</h3><div class="cartao" id="por-dep"><div class="linhas">'+
+        Object.keys(porDep).sort().map(function(k5){ var x=porDep[k5];
+          return '<div><span class="k">'+esc(k5)+'</span><span class="v">'+x.n+' '+TP().turnos+' · '+
+            nf(x.km)+' km · '+nf(x.cve)+' CVE</span></div>'; }).join('')+'</div></div>';
+    }
+    if(temModulo('alugueres')){
+      var rm=receitaPorMes(), rks=Object.keys(rm).sort().reverse();
+      h+='<h3>Alugueres</h3><div class="cartao" id="receita"><div class="linhas">'+
+        (rks.length?rks.map(function(k6){ var x=rm[k6];
+          return '<div><span class="k">'+mesDe(x.ms)+'</span><span class="v">'+x.n+' alugueres · '+
+            nf(x.cve)+' CVE</span></div>'; }).join('')
+          :'<div><span class="k">Ainda sem alugueres fechados</span><span class="v"></span></div>')+'</div></div>';
+    }
     h+='<button class="bt sec pq" data-f="copiar">Copiar o resumo para enviar</button>'+
-      '<p class="p-nota" id="copiado"></p>';
+      '<button class="bt sec pq" data-f="relatorio" style="margin-top:8px">Descarregar para o Excel</button>'+
+      '<p class="p-nota" id="copiado"></p>'+caixaAviso();
   }
 
   if(S.lupa) h+='<div class="lupa" data-f="fechar-lupa">'+
@@ -1510,16 +2012,21 @@ function pintar(){
   pintarNav(); pintarTopo();
 }
 
-var TABS=[{id:'mapa',ic:'🗺️',nm:'Mapa'},{id:'viaturas',ic:'🚕',nm:'Viaturas'},
-          {id:'condutores',ic:'👤',nm:'Condutores'},{id:'alertas',ic:'⚠️',nm:'Ver'},
-          {id:'contas',ic:'📊',nm:'Contas'},{id:'definicoes',ic:'⚙️',nm:'Mais'}];
+function separadores(){
+  var T=TP();
+  return [{id:'mapa',ic:'🗺️',nm:'Mapa'},{id:'viaturas',ic:'🚕',nm:'Viaturas'},
+    T.modulos.alugueres ? {id:'alugueres',ic:'🔑',nm:'Alugueres'}
+                        : {id:'condutores',ic:'👤',nm:T.Condutores},
+    {id:'alertas',ic:'⚠️',nm:'Ver'},{id:'contas',ic:'📊',nm:'Contas'},{id:'definicoes',ic:'⚙️',nm:'Mais'}];
+}
 function pintarNav(){
   if(!S.sessao){ el('nav').innerHTML=''; return; }
-  var nAl=S.turnos.reduce(function(s,t){ return s+porResolver(t).length; },0);
-  el('nav').innerHTML=TABS.map(function(t){
+  var nAl=S.turnos.reduce(function(s,t){ return s+porResolver(t).length; },0)+avisosDaFrota().length;
+  el('nav').innerHTML=separadores().map(function(t){
     var act = S.ecra===t.id ||
       (t.id==='viaturas'&&['carro','editar-carro'].indexOf(S.ecra)>=0) ||
-      (t.id==='condutores'&&['condutor','editar-cond'].indexOf(S.ecra)>=0);
+      (t.id==='condutores'&&['condutor','editar-cond'].indexOf(S.ecra)>=0) ||
+      (t.id==='alugueres'&&['aluguer','novo-aluguer'].indexOf(S.ecra)>=0);
     return '<button data-tab="'+t.id+'"'+(act?' aria-current="page"':'')+'>'+
       '<span class="ic">'+t.ic+'</span>'+t.nm+
       (t.id==='alertas'&&nAl?'<span class="bolha">'+nAl+'</span>':'')+'</button>';
@@ -1634,6 +2141,13 @@ function montarMapas(){
 }
 function pararReplay(){ if(cronoReplay){ clearInterval(cronoReplay); cronoReplay=null; } }
 
+/* as fotografias do carro (rent-a-car), tiradas ou escolhidas */
+document.addEventListener('change', function(e){
+  if(e.target.id!=='f-carro' || !e.target.files) return;
+  var fs=[].slice.call(e.target.files, 0, 8);
+  Promise.all(fs.map(function(f){ return comprimirFoto(f).catch(function(){ return null; }); }))
+    .then(function(l){ S.fotosNovas=(S.fotosNovas||[]).concat(l.filter(Boolean)).slice(0,8); pintar(); });
+});
 document.addEventListener('input', function(e){
   var id=e.target.id;
   if(id==='i-email') S.r.email=e.target.value;
@@ -1642,6 +2156,8 @@ document.addEventListener('input', function(e){
      medida que se escreve, para nada se perder se o ecrã se repintar */
   if(id && id.indexOf('e-')===0){
     S.r[id]= e.target.type==='checkbox' ? (e.target.checked?'1':'') : e.target.value;
+    /* a conta do aluguer refaz-se quando se sai do campo */
+    if(id==='e-v-km'||id==='e-v-extra') pinturaEmEspera=true;
     if(S.aviso && S.aviso.campo===id){ S.aviso=null; pinturaEmEspera=true; } }
 });
 
@@ -1649,7 +2165,7 @@ document.addEventListener('click', function(e){
   var b=e.target.closest('[data-f],[data-tab],[data-turno],[data-carro],[data-cond],'+
     '[data-res],[data-carro-lig],[data-cond-nome],[data-vivo],[data-posto-mapa],'+
     '[data-tile],[data-mes],[data-turnos-de],[data-turnos-cond],[data-abast],[data-ver-abast],'+
-    '[data-foto],'+
+    '[data-foto],[data-aluguer],'+
     '#voltar');
   if(!b) return;
   var d=b.dataset;
@@ -1673,6 +2189,7 @@ document.addEventListener('click', function(e){
 
   if(b.id==='voltar'){ voltar(); return; }
   if(d.tab){ ir(d.tab, null, null); return; }
+  if(d.aluguer){ S.fotosNovas=[]; ir('aluguer', d.aluguer, {ecra:S.ecra==='alertas'?'alertas':'alugueres'}); return; }
   /* um abastecimento do carro seguido: mostra no mapa onde foi (sem o
      mapa a sério, abre o turno, com o desenho e os postos) */
   if(d.verAbast!=null){
@@ -1795,7 +2312,8 @@ document.addEventListener('click', function(e){
     if(!(ac?ac.checked:S.r['e-c-aceito'])) return mau('e-c-aceito',
       'Para criar a conta, leia e aceite os termos e a política de privacidade.');
     S.aviso='a criar a sua frota…'; pintar();
-    Nuvem.criarConta({nome:cn, frota:cf, email:ce, codigo:k1, termos:TERMOS}).then(function(r){
+    var tipoNovo=S.r['e-c-tipo']||S.tipoPedido||'taxi';
+    Nuvem.criarConta({nome:cn, frota:cf, email:ce, codigo:k1, termos:TERMOS, tipo:tipoNovo}).then(function(r){
       if(r.erro){ S.aviso = /e-mail/i.test(r.erro)
           ? {campo:'e-c-email', d:r.erro} : r.erro; pintar(); return; }
       S.sessao=true; S.aviso=null; S.conta=undefined;
@@ -1806,6 +2324,95 @@ document.addEventListener('click', function(e){
         if(q && q.codigo){ S.recNovo=q.codigo; S.recConta=ce; ir('guardar-rec'); }
         else ir('mapa'); });
     });
+    return; }
+  /* ── os tipos de frota ── */
+  if(f==='tipo-criar'){ S.r['e-c-tipo']=d.tipo; pintar(); return; }
+  if(f==='tipo-mudar'){
+    if(S.frota.tipo===d.tipo || (!S.frota.tipo && d.tipo==='taxi')) return;
+    S.frota.tipo=d.tipo; cacheExtras={};
+    S.aviso={d:'Agora é uma frota de '+FleetTipos.de(d.tipo).nome.toLowerCase()+'.'};
+    guardar(); pintar(); return; }
+  if(f==='h-dia'){
+    var ds=(S.r['e-h-dias']!=null ? S.r['e-h-dias'].split(',').filter(Boolean)
+      : (S.frota.horario?S.frota.horario.dias.map(String):[]));
+    var i=ds.indexOf(d.dia); if(i>=0) ds.splice(i,1); else ds.push(d.dia);
+    S.r['e-h-dias']=ds.join(','); pintar(); return; }
+  if(f==='guardar-tipo'){
+    var T=TP(), fr=S.frota, vt=function(id){ var n=el(id); return n?n.value:(S.r[id]||''); };
+    if(T.modulos.horario){
+      var dd=(S.r['e-h-dias']!=null ? S.r['e-h-dias'] : (fr.horario?fr.horario.dias.join(','):''))
+        .split(',').filter(Boolean).map(Number);
+      var hde=vt('e-h-de')||'08:00', hate=vt('e-h-ate')||'18:00';
+      if(dd.length) fr.horario={dias:dd.sort(), de:hde, ate:hate}; else delete fr.horario; }
+    if(T.modulos.zona){
+      var zp=FleetTipos.ZONAS.filter(function(z){ return z.id===vt('e-z-zona'); })[0];
+      var zkm=+String(vt('e-z-km')).replace(',','.');
+      if(zp) fr.zona={id:zp.id, nome:zp.nome, lat:zp.lat, lon:zp.lon, km:zkm>0?zkm:zp.km};
+      else delete fr.zona; }
+    if(T.modulos.departamentos){
+      var deps=vt('e-deps').split('\n').map(function(x){ return x.trim(); }).filter(Boolean);
+      if(deps.length) fr.deps=deps; else delete fr.deps; }
+    if(T.modulos.alugueres){
+      fr.precoDia=+vt('e-precoDia')||0; fr.kmDia=+vt('e-kmDia')||0;
+      fr.precoKmExtra=+vt('e-precoKmExtra')||0; }
+    cacheExtras={}; S.r={}; S.aviso={d:'Regras guardadas.'};
+    guardar(); pintar(); return; }
+  if(f==='relatorio'){
+    var nomeR='fleetcv-'+TP().id+'-'+new Date().toISOString().slice(0,10)+'.csv';
+    descarregar(nomeR, relatorioCsv(), 'text/csv;charset=utf-8',
+      function(){ S.aviso={d:'Relatório descarregado. Abre no Excel.'}; pintar(); },
+      function(){ S.aviso={d:'Não foi possível descarregar aqui. Abra no computador.'}; pintar(); });
+    return; }
+
+  /* ── rent-a-car ── */
+  if(f==='novo-aluguer'){ S.fotosNovas=[]; S.aviso=null; ir('novo-aluguer', null, {ecra:'alugueres'}); return; }
+  if(f==='al-carro'){ S.r['e-a-carro']=d.carroAl; S.r['e-a-km']=null; S.r['e-a-preco']=null; pintar(); return; }
+  if(f==='comb'){ S.r[d.campo]=d.v; pintar(); return; }
+  if(f==='guardar-aluguer'){
+    var va=function(id){ var n=el(id); return (n?n.value:(S.r[id]||'')).trim(); };
+    var car=carroDe(S.r['e-a-carro']);
+    if(!car) return;
+    var nome=va('e-a-nome'), kmS=+va('e-a-km'), prevS=va('e-a-prev');
+    var mauA=function(campo, dd){ S.aviso={campo:campo, d:dd}; pintar(); };
+    if(nome.length<2) return mauA('e-a-nome','Escreva o nome do cliente.');
+    if(!(kmS>0)) return mauA('e-a-km','Escreva os km que o carro marca agora.');
+    var prevMs=new Date(prevS).getTime();
+    if(!(prevMs>Date.now())) return mauA('e-a-prev','A devolução tem de ser depois de agora.');
+    var preco=+va('e-a-preco');
+    if(!(preco>0)) return mauA('e-a-preco','Escreva o preço por dia.');
+    var a={id:uid('al'), carroId:car.id, matricula:car.matricula,
+      cliente:{nome:nome, tel:va('e-a-tel'), doc:va('e-a-doc'), carta:va('e-a-carta')},
+      saida:{quando:Date.now(), km:kmS, comb:+(S.r['e-a-comb']!=null?S.r['e-a-comb']:8),
+             fotos:(S.fotosNovas||[]).length},
+      previsto:prevMs, precoDia:preco, kmDia:+va('e-a-kmdia')||0, precoKmExtra:+va('e-a-kmextra')||0};
+    (S.fotosNovas||[]).forEach(function(src,i){ Nuvem.enviarFoto(a.id+'_s'+(i+1), a.id, src); });
+    fotosAl[a.id]={}; (S.fotosNovas||[]).forEach(function(src,i){ fotosAl[a.id][a.id+'_s'+(i+1)]=src; });
+    if(semKm(car) || kmS>car.km){ car.km=kmS; delete car.kmPorPreencher;
+      if(!(car.proxOleoKm>0)) car.proxOleoKm=kmS+5000; guardar(); }
+    S.frota.alugueres=alugueres().concat([a]); Nuvem.guardarAlugueres(S.frota.alugueres);
+    S.fotosNovas=[]; S.r={};
+    ir('aluguer', a.id, {ecra:'alugueres'});
+    S.aviso={d:'Entregue. Tudo fica escrito: km, combustível e fotografias.'}; pintar();
+    return; }
+  if(f==='fechar-aluguer'){
+    var al2=aluguerDe(S.sel); if(!al2 || al2.volta) return;
+    var vv=function(id){ var n=el(id); return (n?n.value:(S.r[id]||'')).trim(); };
+    var kmV=+vv('e-v-km');
+    if(!(kmV>=al2.saida.km)){ S.aviso={campo:'e-v-km', d:'Escreva os km de agora — não podem ser '+
+      'menos do que na entrega ('+nf(al2.saida.km)+').'}; pintar(); return; }
+    var lista=alugueres().map(function(x){ return x.id===al2.id ? Object.assign({}, x) : x; });
+    var a2=lista.filter(function(x){ return x.id===al2.id; })[0];
+    a2.volta={quando:Date.now(), km:kmV, comb:+(S.r['e-v-comb']!=null?S.r['e-v-comb']:8),
+              fotos:(S.fotosNovas||[]).length};
+    var ex=+vv('e-v-extra'); if(ex>0) a2.extras=[{d:vv('e-v-extrad')||'Extras', valor:ex}];
+    a2.total=contaDe(a2).total;
+    (S.fotosNovas||[]).forEach(function(src,i){ Nuvem.enviarFoto(a2.id+'_v'+(i+1), a2.id, src); });
+    fotosAl[a2.id]=Object.assign({}, fotosAl[a2.id]||{});
+    (S.fotosNovas||[]).forEach(function(src,i){ fotosAl[a2.id][a2.id+'_v'+(i+1)]=src; });
+    var cv=carroDe(a2.carroId); if(cv && kmV>cv.km){ cv.km=kmV; guardar(); }
+    S.frota.alugueres=lista; Nuvem.guardarAlugueres(lista);
+    S.fotosNovas=[]; S.r={};
+    S.aviso={d:'Carro recebido. Total: '+nf(a2.total)+' CVE.'}; pintar();
     return; }
   if(f==='passo-carro'){ ir('viaturas'); setTimeout(function(){
     var bt=document.querySelector('[data-f="novo-carro"]'); if(bt) bt.click(); },0);
@@ -1951,6 +2558,10 @@ document.addEventListener('click', function(e){
     c.matricula=mat.ok || ('Carro '+(S.frota.carros.length));
     c.marca=v('e-marca').trim(); c.modelo=v('e-modelo').trim();
     c.deposito=dep;
+    [['e-seguro','seguroAte'],['e-inspecao','inspecaoAte'],['e-licenca','licencaAte']].forEach(function(q){
+      var x=v(q[0]); if(/^\d{4}-\d{2}-\d{2}$/.test(x)) c[q[1]]=x; else delete c[q[1]]; });
+    if(temModulo('departamentos')){ var dpt=v('e-depto'); if(dpt) c.departamento=dpt; else delete c.departamento; }
+    if(temModulo('alugueres')){ var pdia=+v('e-precodia'); if(pdia>0) c.precoDia=pdia; else delete c.precoDia; }
     if(auto){
       /* os km (e o óleo, que se conta a partir deles) vêm do primeiro
          turno: a base preenche-os quando o condutor abrir o turno */
@@ -2083,6 +2694,8 @@ S.ecra = S.sessao ? 'mapa' : 'entrar';
 try{
   if(!S.sessao && localStorage.getItem('fleetcv-quero-criar')) S.ecra='criar';
   localStorage.removeItem('fleetcv-quero-criar');
+  S.tipoPedido=localStorage.getItem('fleetcv-quero-tipo')||null;
+  localStorage.removeItem('fleetcv-quero-tipo');
 }catch(e){}
 
 /* Um turno que chega sem o preço do litro ou sem o depósito do carro

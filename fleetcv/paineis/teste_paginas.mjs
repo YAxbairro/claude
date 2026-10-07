@@ -14,6 +14,7 @@ const err=[];
 
 /* ── o que se promete é o que se faz ──────────────────────── */
 const priv=fs.readFileSync(path.join(SITE,'privacidade.html'),'utf8');
+const idx0=fs.readFileSync(path.join(SITE,'index.html'),'utf8');
 const cond=fs.readFileSync('painel_condutor.html','utf8');
 const esq=fs.readFileSync('../supabase/esquema.sql','utf8');
 const passo=cond.match(/var PASSO_M=(\d+), PASSO_MS=(\d+);/);
@@ -75,6 +76,22 @@ ok('o aviso para os condutores copia-se com um toque',
    /AVISO SOBRE O USO DA FLEETCV/.test(copiado) && /Tomei conhecimento/.test(copiado));
 ok('e diz que o GPS só regista com o turno aberto', /só enquanto o turno está aberto/.test(copiado));
 await ctx.close();
+
+/* ── as páginas de venda das instituições e do rent-a-car ── */
+const ctxV=await b.newContext({viewport:{width:360,height:740}});
+await ctxV.route('https://fonts.googleapis.com/**', r=>r.fulfill({body:'', contentType:'text/css'}));
+for(const [pg,tipo,frase] of [['instituicoes','instituicao','Guia de marcha'],['rentacar','rentacar','A conta faz-se sozinha']]){
+  const p=await ctxV.newPage(); p.on('pageerror',e=>err.push(pg+': '+e.message));
+  await p.goto('file://'+path.join(SITE,pg+'.html'));
+  const v=await p.evaluate(()=>({larg:document.documentElement.scrollWidth, vista:innerWidth,
+    criar:[...document.querySelectorAll('a[href^="/app#criar"]')].map(a=>a.getAttribute('href'))}));
+  ok(pg+': cabe no telemóvel e os botões de criar conta já levam o tipo',
+     v.larg<=v.vista && v.criar.length>=3 && v.criar.every(h=>h==='/app#criar-'+tipo), v.criar.join(' '));
+  ok(pg+': diz o que faz', (await p.textContent('body')).includes(frase));
+  await p.close();
+}
+await ctxV.close();
+ok('a página principal leva às duas', idx0.includes('href="/instituicoes"') && idx0.includes('href="/rentacar"'));
 
 /* ── a página principal, a do Android e a aplicação ligam a elas ── */
 const idx=fs.readFileSync(path.join(SITE,'index.html'),'utf8');

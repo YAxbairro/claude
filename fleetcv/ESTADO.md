@@ -1,4 +1,4 @@
-# Onde isto está, em 4 de Outubro de 2026
+# Onde isto está, em 7 de Outubro de 2026
 
 Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
 
@@ -241,6 +241,48 @@ Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
   "toque para abrir a câmara" saíam colados numa linha; agora um por baixo
   do outro.
 
+### Três frotas, um FleetCV (07/10)
+
+O mesmo produto para três clientes: **táxis**, **instituições** (câmaras,
+ministérios, empresas, ONG) e **rent-a-car**. Uma base, uma aplicação; o
+tipo da frota (escolhido ao criar a conta, mudável em Mais → Tipo de frota,
+guardado em `frota/config`) muda as palavras, os separadores e os módulos.
+O que é comum e o que é de cada um vive em `paineis/mapa/tipos.js` (contas
+puras, provadas sozinhas). **Nada disto precisou de mudar a base de dados**:
+o gestor já podia escrever estes documentos.
+
+- **Os três**: documentos de cada carro (seguro, inspecção, licença) com aviso
+  30 dias antes e crítico depois de caducar, junto com o óleo, no "Ver" e na
+  lista de viaturas; relatório para o Excel (CSV) nas Contas.
+- **Instituições**: motoristas e serviços em vez de condutores e turnos;
+  **guia de marcha** (o motorista escreve destino e motivo, sem isso o serviço
+  não começa; o gestor vê-os ao vivo e no relatório); **horário de serviço**
+  (fora dele é alerta, fora dos dias é alerta importante); **zona autorizada**
+  (a cidade ou a ilha, com raio; fora dela é alerta importante, também ao
+  vivo); **departamentos** (cada carro num, contas por departamento).
+- **Rent-a-car**: separador **Alugueres** — entregar (carro livre, cliente,
+  BI, carta, data de devolução, preço/dia, km incluídos, km a mais,
+  combustível em oitavos, fotografias), receber (km, combustível, dano,
+  fotografias) e a **conta sai sozinha** (dias com 1 h de tolerância, km a
+  mais, combustível em falta, extras), pronta a mandar ao cliente pelo
+  WhatsApp; atrasados no "Ver"; na rua/disponíveis/receita do mês; receita
+  por mês nas Contas. Os alugueres ficam numa lista em `frota/alugueres` (só
+  o painel do gestor a ouve) e as fotografias na colecção `fotos`.
+- **Páginas de venda**: `/instituicoes` e `/rentacar` (geradas a partir da
+  principal por `paineis/gerar_venda.py`), e a principal com as três portas. Os
+  botões levam a `/app#criar-instituicao` e `/app#criar-rentacar`, que abrem
+  o criar conta com o tipo já escolhido.
+- Provado em `paineis/teste_tipos.mjs` (44): as contas puras, uma instituição
+  de ponta a ponta (com um motorista), uma agência de ponta a ponta, e o táxi
+  igual ao que era.
+
+**O que ainda não está** (precisa da base de dados, por autorizar):
+vários gestores com níveis (chefe do parque, direcção, só ver); o pedido de
+viatura aprovado *antes* de sair; esconder dos funcionários da agência os
+dados dos clientes (hoje um funcionário com a aplicação podia lê-los).
+O GPS dos carros alugados precisa de um aparelho no carro (o cliente não
+usa a aplicação): ligação a rastreadores, mais tarde.
+
 ## Crescer: quanto aguenta e quando pagar (medido a 27 de Setembro)
 
 Contas com os números da base verdadeira (cada ponto do caminho pesa
@@ -303,13 +345,17 @@ ficheiros. Os passos estão em `site/INSTALAR.md`.
 
 | | |
 |---|---|
-| `supabase/provar.sh` | 90 regras (com as da passagem de uma base antiga e o `por_aplicar.sql` carregado duas vezes), num Postgres a sério. As provas foram postas à prova estragando as regras de propósito |
+| `supabase/provar.sh` | 91 regras (com as da passagem de uma base antiga e o `por_aplicar.sql` carregado duas vezes), num Postgres a sério. As provas foram postas à prova estragando as regras de propósito |
 | `paineis/teste_contas.mjs` | 45 — o caminho de um cliente novo, do criar conta (com os termos e o código de recuperação) ao apagar |
 | `paineis/teste_recuperar.mjs` | 31 — o código esquecido, de ponta a ponta, e sem as funções na base |
+| `paineis/teste_tipos.mjs` | 44 — táxis, instituições e rent-a-car: as contas de cada um e um cliente novo de cada, de ponta a ponta |
 | `paineis/teste_supabase.mjs` | 25 — as regras vistas pela aplicação, a trava, sem rede |
-| o resto dos `teste_*.mjs` | mapa de Cabo Verde 9, aplicação Android 30, leitor ODO/Trip 11, mapa cortado 4, consumo 12, fora da aplicação 18, leitor 18, primeiro turno 28, dados 13, câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 35, mapa vivo 26, páginas 20, alojamento 17 |
+| o resto dos `teste_*.mjs` | mapa de Cabo Verde 9, aplicação Android 30, leitor ODO/Trip 11, mapa cortado 4, consumo 12, fora da aplicação 18, leitor 18, primeiro turno 28, dados 13, câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 35, mapa vivo 26, páginas 25, alojamento 17 |
 
-A 04/10, os 29 conjuntos deram 659 de 659 e o `provar.sh` 90 de 90.
+A 07/10, os 30 conjuntos deram 648 de 648 e o `provar.sh` 91 de 91 (a 04/10
+tinham sido 599 em 29 — e não 659, como ficou escrito por engano). O
+`teste_mapa_cv` (a rua escrita por cima do mapa) pode falhar com a máquina
+muito ocupada (três conjuntos ao mesmo tempo); sozinho dá 9 de 9.
 
 Os testes que usam o servidor próprio (`teste_clicavel`,
 `teste_formularios`, `teste_servidor`) esperam correr numa pasta com
@@ -320,7 +366,9 @@ Os testes que usam o servidor próprio (`teste_clicavel`,
 **Do lado do Yanick** (precisa da conta dele, de pagar, ou de um telemóvel):
 
 1. **Autorizar as mudanças da base**: `supabase/por_aplicar.sql` (registo de
-   erros com os 90 dias, entrar/sair só com sessão, código de recuperação).
+   erros com os 90 dias, entrar/sair só com sessão, código de recuperação, e
+   os dados dos clientes do rent-a-car só para o gestor). Se o pedido de
+   autorização não chegar: Supabase → SQL Editor → colar o ficheiro → Run.
    Provado duas vezes por cima da base no `provar.sh`. Sem isto, o
    "Esqueci-me do código" manda para o WhatsApp e o registo de erros fica
    calado.
@@ -338,6 +386,10 @@ Os testes que usam o servidor próprio (`teste_clicavel`,
    fechado com 12 pessoas durante 14 dias (contas pessoais). Tudo o resto
    está pronto em `android/play/`.
 8. Fechar o turno que ficou aberto no ST-20-AA (Táxi silva).
+9. **Uma instituição e uma agência para piloto** (07/10): mostrar
+   `/instituicoes` e `/rentacar`, criar a conta com elas, e ouvir o que pedem
+   — é isso que decide o que se faz a seguir (vários gestores, pedido
+   aprovado antes de sair, rastreadores para o rent-a-car).
 
 **Mais tarde:**
 

@@ -69,7 +69,7 @@ ok('a frota nova está vazia (não herdou a de ninguém)',
 ok('e fica escrito que versão dos termos aceitou',
    await esperar(async()=>(await p.evaluate(()=>{ const k=Object.keys(localStorage).find(k=>/^sb:d\|[^|]+\|frota\|config$/.test(k)
        && JSON.parse(localStorage.getItem(k)).nome==='Táxis Tavares');
-     return k ? JSON.parse(localStorage.getItem(k)).termos : null; }))==='2026-10-04'));
+     return k ? JSON.parse(localStorage.getItem(k)).termos : null; }))==='2026-10-07'));
 ok('e tem o nome que ele escolheu',
    /Táxis Tavares/.test(await p.textContent('#sub-marca')));
 await p.waitForTimeout(1500);

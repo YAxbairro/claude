@@ -666,14 +666,16 @@ create policy frotas_minha on public.frotas
 
 -- LER: quem entrou vê a SUA frota. O patrão precisa de ver os turnos
 -- de todos, e o condutor precisa de ver a frota para escolher o carro.
--- Os segredos ficam de fora para o condutor: a conta do patrão e a
--- lista com os códigos dos colegas (ele lê a 'equipa', sem códigos).
+-- Os segredos ficam de fora para o condutor: a conta do patrão, a
+-- lista com os códigos dos colegas (ele lê a 'equipa', sem códigos) e,
+-- no rent-a-car, os alugueres (os nomes, telefones e documentos dos
+-- clientes da agência).
 drop policy if exists docs_ler on public.docs;
 create policy docs_ler on public.docs
   for select using (
     frota = (select public.minha_frota())
     and ((select public.meu_papel()) = 'dono'
-         or not (coleccao = 'frota' and id in ('dono','condutores')))
+         or not (coleccao = 'frota' and id in ('dono','condutores','alugueres')))
   );
 
 -- ESCREVER: aqui é que está o valor disto. Sempre dentro da frota de

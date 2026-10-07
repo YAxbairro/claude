@@ -1,10 +1,11 @@
 -- ════════════════════════════════════════════════════════════
 -- POR APLICAR NA BASE VERDADEIRA (o Supabase pede aprovação)
 -- Tudo isto já está em esquema.sql e provado por provar.sh (provas
--- 70–80). Pode correr-se mais de uma vez sem estragar nada.
+-- 70–82). Pode correr-se mais de uma vez sem estragar nada.
 --   1. o registo de erros (tabela erros)
 --   2. entrar e sair só com sessão; a regra dos perfis mais leve
 --   3. o código de recuperação (novo_codigo_recuperacao, recuperar_acesso)
+--   4. rent-a-car: os alugueres (dados dos clientes) só o gestor os lê
 -- A aplicação funciona sem isto: sem a tabela não regista erros, e sem
 -- as funções o "esqueci-me do código" manda falar pelo WhatsApp.
 -- ════════════════════════════════════════════════════════════
@@ -194,3 +195,14 @@ revoke execute on function public.novo_codigo_recuperacao(text) from public, ano
 grant  execute on function public.novo_codigo_recuperacao(text) to authenticated;
 revoke execute on function public.recuperar_acesso(text,text,text) from public, anon;
 grant  execute on function public.recuperar_acesso(text,text,text) to authenticated;
+
+-- 4 ─────────────────────────────────────────────────────────
+-- Rent-a-car: os alugueres (nomes, telefones e documentos dos clientes
+-- da agência) só o gestor os lê; os funcionários com a aplicação, não.
+drop policy if exists docs_ler on public.docs;
+create policy docs_ler on public.docs
+  for select using (
+    frota = (select public.minha_frota())
+    and ((select public.meu_papel()) = 'dono'
+         or not (coleccao = 'frota' and id in ('dono','condutores','alugueres')))
+  );

@@ -8,7 +8,7 @@ function appCondutor(){
    às três da tarde, ele aparece nesta lista sem ninguém reinstalar
    nada. Estes valores são só o que se mostra enquanto a nuvem não
    responde. */
-var FROTA = { precoLitro:145, carros:[], condutores:[] };
+var FROTA = { precoLitro:145, carros:[], condutores:[], tipo:'taxi' };
 
 /* Os postos são os verdadeiros do OpenStreetMap (ver mapa_praia). */
 var POSTOS = MAPA_PRAIA.postos;
@@ -938,6 +938,16 @@ function pintar(){
       (dentroDeOutraApp() ? '<div class="cartao mau"><h2>Abra no Chrome</h2><p class="p-nota" '+
         'style="margin-top:4px">Esta página abriu dentro de outra aplicação (Instagram, Facebook…). '+
         'Aí o GPS pára ainda mais depressa. Copie o endereço e abra-o no Chrome.</p></div>' : '');
+    /* instituições: a guia de marcha — para onde e porquê, antes de sair */
+    if(FleetTipos.de(FROTA.tipo).modulos.guia)
+      h+='<div class="cartao" id="guia"><h2>Guia de marcha</h2>'+
+        '<p class="p-nota" style="margin:4px 0 8px">O gestor vê para onde vai e porquê.</p>'+
+        '<label class="campo"><span class="lb">Para onde vai</span><input type="text" id="g-destino" value="'+
+        esc(S.r.destino||'')+'" placeholder="Ex.: Ministério das Finanças"></label>'+
+        '<label class="campo"><span class="lb">Motivo</span><input type="text" id="g-motivo" value="'+
+        esc(S.r.motivo||'')+'" placeholder="Ex.: entrega de documentos"></label>'+
+        (S.avisoGuia?'<p class="p-nota" style="color:var(--crit);margin-top:6px">'+esc(S.avisoGuia)+'</p>':'')+
+        '</div>';
     if(e==='ligado') h+='<div class="cartao bom"><h2>GPS ligado</h2>'+
       '<p class="p-nota" style="margin-top:4px">Encontrou o carro com '+
       (S.gps.precisao||'—')+' metros de precisão.</p></div>';
@@ -959,7 +969,7 @@ function pintar(){
     b = (e==='ligado' && S.bateriaPresa
           ? '<button class="bt pri" data-f="bateria">Tirar da poupança de bateria</button>'+
             '<button class="lig" data-f="comecar">Começar mesmo assim</button>'
-      : e==='ligado' ? '<button class="bt pri" data-f="comecar">Começar turno</button>'
+      : e==='ligado' ? '<button class="bt pri" data-f="comecar">Começar '+FleetTipos.de(FROTA.tipo).turno+'</button>'
       : ((emMoldura()&&e==='recusado')
           ? '<button class="bt pri" data-f="comecar">Começar sem GPS</button>'
           : '<button class="bt pri" data-f="pedir-gps">'+(e==='recusado'
@@ -1230,6 +1240,8 @@ window.addEventListener('pagehide', guardar);
 document.addEventListener('input', function(e){
   var t=e.target, id=t.id;
   if(id==='i-email') S.r.email=t.value;
+  if(id==='g-destino') S.r.destino=t.value;
+  if(id==='g-motivo') S.r.motivo=t.value;
   if(id==='i-cod') S.r.cod=t.value;
   if(id==='i-km'){ S.r.km=+t.value; suave(); }
   if(id==='i-valor'){ S.r.valor=+t.value; suave(); }
@@ -1311,7 +1323,14 @@ document.addEventListener('click', function(e){
     if(S.ecra==='km-inicio' && semKm(S.carro) && !(S.r.km>0)) return;
     S.simular=false; ligarGps(); S.ecra='gps'; pintar(); }
   if(f==='pedir-gps'){ ligarGps(); pintar(); }
-  if(f==='comecar') comecar(false);
+  if(f==='comecar'){
+    /* instituições: sem destino e motivo, o serviço não começa */
+    if(FleetTipos.de(FROTA.tipo).modulos.guia &&
+       !(String(S.r.destino||'').trim() && String(S.r.motivo||'').trim())){
+      S.avisoGuia='Escreva para onde vai e o motivo do serviço.'; pintar();
+      var g=document.getElementById('g-destino'); if(g) g.scrollIntoView({block:'center'});
+      return; }
+    S.avisoGuia=null; comecar(false); }
   if(f==='comecar-sim') comecar(true);
   if(f==='ir-volante'){ S.foto=null; S.r={}; S.ecra='volante'; pintar(); }
   if(f==='ok-fora'){ S.avisoFora=null; pintar(); return; }
@@ -1404,6 +1423,8 @@ function comecar(sim){
     deposito:S.carro.deposito, precoLitro:FROTA.precoLitro, rasto:[], abast:[], totalCve:0,
     fotoInicio:S.foto, simulado:!!sim };
   S.turno.condutorId=S.eu.id;
+  if(String(S.r.destino||'').trim()) S.turno.destino=String(S.r.destino).trim().slice(0,120);
+  if(String(S.r.motivo||'').trim()) S.turno.motivo=String(S.r.motivo).trim().slice(0,160);
   var lido=kmLido('km-inicio'); if(lido) S.turno.kmLidoInicio=lido;
   S.ocr=null; leitor.auto=null;
   if(primeiro){
@@ -1522,6 +1543,7 @@ Nuvem.aoMudar(function(){
   var d=Nuvem.dados();
   if(d.frota){
     FROTA.precoLitro = d.frota.precoLitro || FROTA.precoLitro;
+    FROTA.tipo       = d.frota.tipo || FROTA.tipo;
     FROTA.carros     = d.frota.carros     || FROTA.carros;
     FROTA.condutores = d.frota.condutores || FROTA.condutores;
     /* o patrão pode ter mudado a matrícula ou o preço a meio do turno */

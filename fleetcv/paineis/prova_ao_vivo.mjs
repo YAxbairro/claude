@@ -71,7 +71,7 @@ else console.log(' --   · o código de recuperação ainda não está na base (
 ok('cria a conta e entra na frota nova',
    await ate(async()=>/Bem-vindo à sua frota/.test(await txt())), (await txt()).slice(0,80));
 ok('e fica escrito que aceitou os termos',
-   await ate(async()=>(await p.evaluate(()=>Nuvem.dados().frota.termos))==='2026-10-04', 15));
+   await ate(async()=>(await p.evaluate(()=>Nuvem.dados().frota.termos))==='2026-10-07', 15));
 ok('vazia, sem turnos inventados',
    await p.evaluate(()=>{ const d=Nuvem.dados();
      return d.frota.carros.length===0 && d.turnos.length===0; }));
