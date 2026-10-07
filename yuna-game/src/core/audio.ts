@@ -2,6 +2,7 @@
 // crossfades and automatic ducking while the narrator speaks.
 import { allLines } from '../data/lines.ts';
 import { progress } from './store.ts';
+import VOICE from '../data/voice-index.json';
 
 const BASE = import.meta.env.BASE_URL + 'assets/';
 let ctx: AudioContext | null = null;
@@ -59,9 +60,30 @@ function unlockSilently() {
   if (!ctx) unlock();
 }
 
-export const voicePath = (key: string) => `voice/${key}.mp3`;
 export const preload = (paths: string[]) => paths.forEach((p) => load(p));
-export const preloadVoice = (keys: string[]) => preload(keys.map(voicePath));
+
+// Narration lives in a few "sprites" (one mp3 holding many clips). A clip may
+// exist in several sprites (shared core + the island's own); prefer one that
+// is already loading.
+type Clip = [number, number, number];
+const CLIPS = VOICE.clips as unknown as Record<string, Clip[]>;
+const spritePath = (i: number) => `voice/${VOICE.sprites[i]}.mp3`;
+function clipFor(key: string): Clip | null {
+  const list = CLIPS[key];
+  if (!list?.length) return null;
+  return list.find((c) => cache.has(spritePath(c[0]))) ?? list[list.length - 1];
+}
+export const preloadVoice = (keys: string[]) => {
+  const want = new Set<number>();
+  for (const k of keys) { const c = clipFor(k); if (c) want.add(c[0]); }
+  want.forEach((i) => load(spritePath(i)));
+};
+async function loadClip(key: string): Promise<{ buf: AudioBuffer; start: number; dur: number } | null> {
+  const c = clipFor(key);
+  if (!c) return null;
+  const buf = await load(spritePath(c[0]));
+  return buf ? { buf, start: c[1], dur: c[2] } : null;
+}
 
 // ── Sound effects
 export function sfx(name: string, opts: { rate?: number; vol?: number } = {}) {
@@ -139,7 +161,7 @@ export function stopVoice() {
 
 export const isSpeaking = () => speaking;
 
-function playBuffer(buf: AudioBuffer): Promise<void> {
+function playBuffer(buf: AudioBuffer, start = 0, dur = buf.duration): Promise<void> {
   return new Promise((res) => {
     if (!ctx) return res();
     const src = ctx.createBufferSource();
@@ -151,8 +173,8 @@ function playBuffer(buf: AudioBuffer): Promise<void> {
     src.onended = finish;
     // If audio is suspended (no gesture yet, tab in background) `ended` never
     // fires; never let a game wait forever on the narrator.
-    setTimeout(finish, buf.duration * 1000 + 400);
-    src.start();
+    setTimeout(finish, dur * 1000 + 400);
+    src.start(0, start, dur);
   });
 }
 
@@ -179,11 +201,11 @@ export async function say(keys: string | string[], gap = 90): Promise<void> {
   const token = sayToken;
   speaking = true;
   setDuck(true);
-  const bufs = list.map((k) => load(voicePath(k)));
+  const clips = list.map((k) => loadClip(k));
   for (let i = 0; i < list.length; i++) {
-    const buf = await bufs[i];
+    const clip = await clips[i];
     if (token !== sayToken) return;
-    if (buf) await playBuffer(buf);
+    if (clip) await playBuffer(clip.buf, clip.start, clip.dur);
     else {
       LINES ??= allLines();
       const text = LINES[list[i]];

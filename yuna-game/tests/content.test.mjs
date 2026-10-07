@@ -22,7 +22,10 @@ test('every illustrated item and island has its image', () => {
   for (const pose of ['yuna-wave', 'yuna-cheer', 'yuna-think', 'yuna-point', 'yuna-clap', 'tanha-sit', 'tanha-happy', 'tanha-sleep', 'boat']) assert.ok(fs.existsSync(new URL(`chars/${pose}.webp`, A)), pose);
 });
 
-test('every narrated line has a recorded clip', () => {
-  const missing = Object.keys(allLines()).filter((k) => !fs.existsSync(new URL(`voice/${k}.mp3`, A)));
+test('every narrated line is packed in an existing voice sprite', () => {
+  const idx = JSON.parse(fs.readFileSync(new URL('../src/data/voice-index.json', import.meta.url)));
+  const missing = Object.keys(allLines()).filter((k) => !idx.clips[k]?.length);
   assert.deepEqual(missing, []);
+  for (const name of idx.sprites) assert.ok(fs.existsSync(new URL(`voice/${name}.mp3`, A)), `missing sprite ${name}`);
+  for (const [k, list] of Object.entries(idx.clips)) for (const [, start, dur] of list) assert.ok(start >= 0 && dur > 0.2, `bad clip ${k}`);
 });

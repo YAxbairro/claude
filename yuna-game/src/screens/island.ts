@@ -17,7 +17,7 @@ export function islandScreen(root: HTMLElement, id: number) {
 
   // Warm the caches for this island while the story is told.
   preloadImages(itemImages(isl.items));
-  preloadVoice([...isl.items.flatMap((x) => ['n.' + x, 'c.' + x]), ...isl.mechs.flatMap((m) => MECH_SAY[m].map((_, k) => `i.${m}.${k}`))]);
+  preloadVoice([`s.${id}`, ...isl.items.flatMap((x) => ['n.' + x, 'c.' + x, 'en.' + x]), ...isl.mechs.flatMap((m) => MECH_SAY[m].map((_, k) => `i.${m}.${k}`))]);
 
   const back = h('button.round-btn.back', { 'aria-label': 'Voltar ao mapa' }, '←');
   const hero = h('div.isl-hero', h('div.isl-halo'), h('img.isl-big', { src: islandSrc(id), alt: isl.name, draggable: 'false' }));
