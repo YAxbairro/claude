@@ -305,8 +305,9 @@ function cartaoDefsTipo(){
       marcado('e-h-de')+' value="'+esc(r('e-h-de', hr.de))+'"></label>'+
       '<label class="campo"><span class="lb">Às</span><input type="time" id="e-h-ate"'+
       marcado('e-h-ate')+' value="'+esc(r('e-h-ate', hr.ate))+'"></label></div>'+
-      '<p class="p-nota">Um carro a andar fora disto dá um alerta; nos dias não marcados, '+
-      'é alerta importante. Sem dias marcados, não há horário.</p>';
+      '<p class="p-nota">Um serviço aberto fora disto dá alerta (nos dias não marcados, alerta '+
+      'importante). Um carro usado sem serviço aberto vê-se no serviço seguinte: os km a mais '+
+      'na foto do conta-quilómetros. Sem dias marcados, não há horário.</p>';
   }
   if(T.modulos.zona){
     var zid=r('e-z-zona', f.zona?f.zona.id:'');
@@ -550,7 +551,7 @@ function avaliar(t){
   if(t.gap>LIM.gapKm){
     v.push({ok:false, t1:'O carro não andou fora do turno',
       t2:'estava '+nf(t.gap)+' km à frente de onde ficou', vl:'+'+nf(t.gap)+' km'});
-    al.push({c:'A19',n:'CRITICO',d:'O carro andou '+nf(t.gap)+' km sem turno aberto',
+    al.push({c:'A19',n:'CRITICO',d:'O carro andou '+nf(t.gap)+' km sem '+TP().turno+' aberto',
       dif:Math.round(t.gap*7.5/100*t.precoLitro)});
   } else v.push({ok:true, t1:'O carro não andou fora do turno',
       t2:'o conta-quilómetros continua onde ficou', vl:'bate'});

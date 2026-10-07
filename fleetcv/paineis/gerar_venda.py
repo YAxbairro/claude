@@ -97,7 +97,7 @@ INST = {
  'miolo': '<div class="heroi"><div class="env"><div>'
    '<span class="selo"><span class="pt"></span>Câmaras · Ministérios · Empresas · ONG</span>'
    '<h1>Os carros de serviço,<br><em>ao serviço</em>.</h1>'
-   '<p class="sub">Quem levou o carro, para onde, porquê — e o que andou fora de horas. '
+   '<p class="sub">Quem levou o carro, para onde, porquê — e os km que andou sem serviço aberto. '
    'Sem rastreador: com o telemóvel do motorista e uma guia de marcha digital.</p>'
    '<div class="accoes"><a class="bt pri" href="/app#criar-instituicao">Criar conta grátis</a>'
    '<a class="bt sec" href="https://wa.me/2389557882">Pedir uma demonstração</a></div>'
@@ -113,7 +113,7 @@ INST = {
    '<h2>Seis coisas que deixam de depender da palavra de alguém</h2></div>' +
    provas([
      ('guia', 'Guia de marcha digital', 'Antes de sair, o motorista escreve para onde vai e porquê. Sem isso, o serviço não começa.'),
-     ('relogio', 'Fora de horas', 'Marque o horário de serviço. Um carro a andar à noite ou ao fim de semana dá alerta no mesmo dia.'),
+     ('relogio', 'Fora de horas', 'Um serviço aberto fora do horário dá alerta. E se o carro andar sem serviço aberto, os km a mais aparecem no serviço seguinte, pela foto do conta-quilómetros.'),
      ('zona', 'Zona autorizada', 'A cidade ou a ilha onde os carros podem andar. Se o GPS os puser mais longe, fica registado.'),
      ('deps', 'Departamentos', 'Cada carro no seu departamento, e as contas — km, combustível, serviços — saem separadas.'),
      ('docs', 'Documentos e manutenção', 'Seguro, inspecção, licença e óleo: a aplicação avisa 30 dias antes de caducar.'),
