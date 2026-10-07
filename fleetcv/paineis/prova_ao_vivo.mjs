@@ -32,16 +32,23 @@ const CODIGO=crypto.randomBytes(9).toString('base64url');
 const MAT='PV-'+marca.slice(-4).toUpperCase();
 console.log('site:', SITE, '· conta de prova:', EMAIL);
 
-/* ── a página principal ───────────────────────────────────── */
-const r0=await fetch(SITE+'/');
-const h0=await r0.text();
+/* ── as páginas, pelo navegador (como um cliente as abre) ──── */
+const pv=await b.newPage();
+const abrir=async u=>{ const r=await pv.goto(SITE+u).catch(()=>null);
+  return {ok:!!(r&&r.ok()), h:r?await r.text():''}; };
+const r0=await abrir('/');
 ok('a página principal está no endereço principal',
-   r0.ok && /O condutor diz/.test(h0) && h0.includes('/app#criar'));
-const r1=await fetch(SITE+'/app');
-ok('e a aplicação em /app', r1.ok && /porteiro\.js/.test(await r1.text()));
-const legais=await Promise.all(['/privacidade','/termos','/ajuda'].map(async u=>{
-  const r=await fetch(SITE+u); return r.ok && /FleetCV/.test(await r.text()); }));
+   r0.ok && /O condutor diz/.test(r0.h) && r0.h.includes('/app#criar'));
+const r1=await abrir('/app');
+ok('e a aplicação em /app', r1.ok && /porteiro\.js/.test(r1.h));
+const legais=[];
+for(const u of ['/privacidade','/termos','/ajuda']){ const r=await abrir(u); legais.push(r.ok && /FleetCV/.test(r.h)); }
 ok('e a privacidade, os termos e a ajuda', legais.every(Boolean), legais.join(' '));
+const vendas=[];
+for(const [u,t] of [['/instituicoes','criar-instituicao'],['/rentacar','criar-rentacar']]){
+  const r=await abrir(u); vendas.push(r.ok && r.h.includes('/app#'+t)); }
+ok('e as páginas de venda das instituições e do rent-a-car', vendas.every(Boolean), vendas.join(' '));
+await pv.close();
 
 /* ── o patrão novo ────────────────────────────────────────── */
 const cp=await b.newContext({viewport:{width:430,height:950}});

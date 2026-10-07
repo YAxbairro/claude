@@ -28,7 +28,8 @@ Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
   quilómetros subirem, o carro no mapa, a fotografia do quadrante e a do
   talão (com os litros) durante o turno → turno fecha → apagar a conta
   sem deixar lixo; e as páginas de privacidade, termos e ajuda no ar.
-  34 de 34, a 4 de Outubro.
+  E as páginas de venda das instituições e do rent-a-car. 35 de 35, a 7 de
+  Outubro (as páginas abrem-se pelo navegador, como um cliente as abre).
 
 - **O canal ao vivo (WebSocket), provado de fora** — numa máquina do
   GitHub (`paineis/prova_tempo_real.mjs`, corre sozinho em
