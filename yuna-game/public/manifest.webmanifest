@@ -1,0 +1,22 @@
+{
+ "name": "Yuna & Gata Tanha · Ilhas de Descobertas",
+ "short_name": "Ilhas da Yuna",
+ "start_url": "/",
+ "display": "fullscreen",
+ "orientation": "any",
+ "background_color": "#1fb5d1",
+ "theme_color": "#1fb5d1",
+ "icons": [
+  {
+   "src": "/assets/ui/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "/assets/ui/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any maskable"
+  }
+ ]
+}

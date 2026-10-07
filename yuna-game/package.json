@@ -1,0 +1,26 @@
+{
+  "name": "yuna-ilhas-de-descobertas",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "assets:islands": "node scripts/gen-islands.mjs",
+    "assets:chars": "node scripts/gen-characters.mjs",
+    "assets:items": "node --experimental-strip-types scripts/gen-items.mjs",
+    "assets:voice": "node --experimental-strip-types scripts/gen-voice.mjs",
+    "assets:audio": "node scripts/gen-audio.mjs"
+  },
+  "devDependencies": {
+    "@types/canvas-confetti": "^1.9.0",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.4"
+  },
+  "dependencies": {
+    "canvas-confetti": "^1.9.4",
+    "gsap": "^3.15.0"
+  }
+}
