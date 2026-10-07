@@ -31,7 +31,7 @@ export function spent() {
 }
 
 // Hard stop so a runaway script can never burn the whole balance.
-const BUDGET = Number(process.env.FAL_BUDGET || 9.5);
+const BUDGET = Number(process.env.FAL_BUDGET || 11);
 
 export async function falRun(endpoint, input, { cost = 0, label = '' } = {}) {
   if (spent() + cost > BUDGET) throw new Error(`budget guard: spent ${spent().toFixed(2)} + ${cost} > ${BUDGET}`);

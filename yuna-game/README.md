@@ -22,6 +22,15 @@ npm run build    # gera dist/ (site estático)
 - `src/core/audio.ts` — música, voz e efeitos em Web Audio; a música baixa quando a narradora fala.
 - `public/assets/` — arte, voz, música e efeitos gerados.
 
+## Mundo 3D
+
+Depois de "Jogar" a Yuna entra num mundo 3D (`src/world/`): anda, salta e sobe pequenos degraus sozinha, com a Gata Tanha atrás. Navega de barco entre as ilhas, apanha conchas douradas e entra nos círculos de luz para abrir os mini-jogos.
+
+- Controlo: toca no chão (ou na luz de um círculo) para ir lá; também há comando virtual, botão de salto e o teclado (WASD/setas, Espaço, E).
+- Cada ilha é analisada ao carregar: a área onde se pode andar é calculada e os círculos e as conchas ficam sempre em sítios alcançáveis. O caminho até ao toque é calculado (BFS) e contorna casas e árvores.
+- Modelos em `public/assets/3d/` (Yuna com animações, Tanha, ilhas 0–16). As ilhas 17–19 usam uma ilha simples até haver crédito no fal: `node scripts/gen-islands-3d.mjs` e depois `node scripts/optimize-glb.mjs`.
+- `node scripts/artifact-page.mjs` (depois de `npm run build`) prepara a versão Artifact: os modelos vão como glTF JSON, porque o claude.ai não serve `.glb`.
+
 ## Regenerar arte e áudio (fal.ai)
 
 Chave em `.env` (`FAL_KEY=...`, nunca no git). Os scripts saltam o que já existe.

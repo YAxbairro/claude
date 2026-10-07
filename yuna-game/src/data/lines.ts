@@ -30,6 +30,15 @@ export const UI_LINES: Record<string, string> = {
   meow: 'Miau!',
   lastOne: 'Só falta um!',
   great5: 'Já vamos a meio! Continua assim!',
+  wTap: 'Toca no chão para a Yuna andar! Também podes usar o comando.',
+  wJump: 'Carrega no botão amarelo para saltar!',
+  wBoat: 'Chegámos à água! Vamos de barco?',
+  wSail: 'Usa o comando para levar o barco até outra ilha.',
+  wLand: 'Terra à vista! Vamos desembarcar!',
+  wRing: 'Encontraste uma aventura! Queres jogar?',
+  wShell: 'Uma concha dourada!',
+  wAllShells: 'Encontraste todas as conchas desta ilha! Boa!',
+  wExplore: 'Explora a ilha e procura as conchas douradas!',
 };
 
 export function allLines(): Record<string, string> {

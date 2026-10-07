@@ -14,13 +14,29 @@ const page = `<title>Ilhas da Yuna</title>
 <style>${style}</style>
 <div id="app"></div>
 <div id="boot"><div class="boot-spinner"></div></div>
+<script>window.__MODEL_EXT = 'gltf.json';</script>
 <script type="module">${code}</script>
 `;
 fs.mkdirSync('artifact', { recursive: true });
 fs.writeFileSync('artifact/index.html', page);
+// GLB → self-contained glTF JSON (binary chunk as a base64 data URI).
+for (const f of fs.readdirSync('dist/assets/3d')) {
+  if (!f.endsWith('.glb')) continue;
+  const b = fs.readFileSync('dist/assets/3d/' + f);
+  let o = 12, json = null, bin = null;
+  while (o < b.length) {
+    const len = b.readUInt32LE(o), type = b.readUInt32LE(o + 4);
+    const chunk = b.subarray(o + 8, o + 8 + len);
+    if (type === 0x4e4f534a) json = JSON.parse(chunk.toString('utf8'));
+    else if (type === 0x004e4942) bin = chunk;
+    o += 8 + len;
+  }
+  if (bin) json.buffers[0].uri = 'data:application/octet-stream;base64,' + bin.toString('base64');
+  fs.writeFileSync('dist/assets/3d/' + f.replace(/\.glb$/, '.gltf.json'), JSON.stringify(json));
+}
 const files = [];
 const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).forEach((e) => e.isDirectory() ? walk(d + '/' + e.name) : files.push((d + '/' + e.name).slice(5)));
 walk('dist/assets');
-const assets = files.filter((f) => !/assets\/index-/.test(f));
+const assets = files.filter((f) => !/assets\/index-/.test(f) && !f.endsWith('.glb'));
 fs.writeFileSync('artifact/files.json', JSON.stringify(assets));
 console.log('page KB', Math.round(page.length / 1024), 'assets', assets.length);

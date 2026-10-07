@@ -15,7 +15,8 @@ import { mapScreen } from './map.ts';
 
 const POSES = ['think', 'point', 'cheer', 'clap', 'wave'] as const;
 
-export function playScreen(root: HTMLElement, islandId: number, phase: number, forced?: Mech[]) {
+export function playScreen(root: HTMLElement, islandId: number, phase: number, forced?: Mech[], back?: () => void) {
+  const leave = back ?? (() => go((r) => islandScreen(r, islandId)));
   const isl = ISLANDS[islandId];
   root.classList.add('play-screen');
   root.style.setProperty('--c', isl.color);
@@ -100,7 +101,7 @@ export function playScreen(root: HTMLElement, islandId: number, phase: number, f
 
   onTap(replay, () => { if (lastText) speakBubble(lastKeys, lastText); });
   onTap(yuna, () => { if (lastText) speakBubble(lastKeys, lastText); gsap.fromTo(yuna, { y: 0 }, { y: -16, yoyo: true, repeat: 1, duration: 0.15 }); });
-  onTap(close, () => { closed = true; stopVoice(); go((r) => islandScreen(r, islandId)); });
+  onTap(close, () => { closed = true; stopVoice(); leave(); });
 
   const moveBoat = (k: number) => {
     const steps = track.querySelectorAll('.step');
@@ -158,7 +159,7 @@ export function playScreen(root: HTMLElement, islandId: number, phase: number, f
     const starEls = [0, 1, 2].map((i) => h(`span.res-star${i < earned ? '.on' : ''}`, '★'));
     const next = phase < 2 ? h('button.btn.primary', `${PHASES[phase + 1].icon} ${PHASES[phase + 1].name}`) : null;
     const again = h('button.btn', '↻ Outra vez');
-    const toMap = h('button.btn', '🗺 Mapa');
+    const toMap = h('button.btn', back ? '🏝 Voltar à ilha' : '🗺 Mapa');
     const card = h('div.result-card',
       h('img.res-yuna', { src: charSrc('yuna-cheer'), alt: '' }),
       h('img.res-tanha', { src: charSrc('tanha-happy'), alt: '' }),
@@ -172,9 +173,9 @@ export function playScreen(root: HTMLElement, islandId: number, phase: number, f
     await say('ui.phaseDone');
     if (newSticker) await showSticker();
     if (unlockedNew) { sfx('unlock'); await say('ui.newIsland'); }
-    if (next) onTap(next, () => go((r) => playScreen(r, islandId, phase + 1)));
-    onTap(again, () => go((r) => playScreen(r, islandId, phase)));
-    onTap(toMap, () => go(mapScreen));
+    if (next) onTap(next, () => go((r) => playScreen(r, islandId, phase + 1, undefined, back)));
+    onTap(again, () => go((r) => playScreen(r, islandId, phase, undefined, back)));
+    onTap(toMap, () => (back ? back() : go(mapScreen)));
     music('map');
   }
 

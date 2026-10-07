@@ -10,17 +10,20 @@ export type Progress = {
   voice: number;                 // 0..1
   sfx: number;                   // 0..1
   seenIntro: boolean;
+  shells: string[];              // golden shells collected in the 3D world ("island-index")
+  world: { x: number; y: number; z: number; boat: boolean } | null;
+  visited: number[];             // islands whose story was already told in the world
 };
 
 const KEY = 'yuna-ilhas-v2';
-const DEFAULT: Progress = { stars: {}, stickers: [], played: 0, current: 0, unlockAll: false, music: 0.45, voice: 1, sfx: 0.8, seenIntro: false };
+const DEFAULT: Progress = { stars: {}, stickers: [], played: 0, current: 0, unlockAll: false, music: 0.45, voice: 1, sfx: 0.8, seenIntro: false, shells: [], world: null, visited: [] };
 
 function load(): Progress {
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) return { ...DEFAULT, ...JSON.parse(raw) };
   } catch { /* storage unavailable */ }
-  return { ...DEFAULT, stars: {}, stickers: [] };
+  return { ...DEFAULT, stars: {}, stickers: [], shells: [], visited: [] };
 }
 
 export const progress: Progress = load();
@@ -54,6 +57,6 @@ export function recordPhase(island: number, phase: number, stars: number) {
 }
 
 export function resetProgress() {
-  Object.assign(progress, { ...DEFAULT, stars: {}, stickers: [], music: progress.music, voice: progress.voice, sfx: progress.sfx });
+  Object.assign(progress, { ...DEFAULT, stars: {}, stickers: [], shells: [], visited: [], world: null, music: progress.music, voice: progress.voice, sfx: progress.sfx });
   save();
 }

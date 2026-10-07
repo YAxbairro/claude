@@ -1,6 +1,7 @@
 import './styles/base.css';
 import './styles/screens.css';
 import './styles/games.css';
+import './styles/world.css';
 import gsap from 'gsap';
 import { h } from './core/dom.ts';
 import { stopVoice } from './core/audio.ts';

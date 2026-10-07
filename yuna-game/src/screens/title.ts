@@ -4,7 +4,7 @@ import { ASSET, charSrc } from '../core/art.ts';
 import { unlock, music, say, sfx } from '../core/audio.ts';
 import { progress, save } from '../core/store.ts';
 import { go } from '../main.ts';
-import { mapScreen, setGreeting } from './map.ts';
+import { worldScreen } from '../world/world.ts';
 import { openParents } from './parents.ts';
 
 export function titleScreen(root: HTMLElement) {
@@ -36,8 +36,8 @@ export function titleScreen(root: HTMLElement) {
     progress.seenIntro = true;
     save();
     gsap.to(yuna, { y: -30, yoyo: true, repeat: 1, duration: 0.2, ease: 'power1.out' });
-    setGreeting(first ? 'ui.welcome' : 'ui.welcomeBack');
-    go(mapScreen);
+    say(first ? 'ui.welcome' : 'ui.welcomeBack');
+    go(worldScreen);
   });
   onTap(yuna, () => { unlock(); gsap.fromTo(yuna, { rotation: -6 }, { rotation: 0, duration: 0.6, ease: 'elastic.out' }); say('ui.welcome'); });
   onTap(tanha, () => { unlock(); sfx('meow'); gsap.fromTo(tanha, { y: 0 }, { y: -40, yoyo: true, repeat: 1, duration: 0.2 }); });
