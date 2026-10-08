@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, Audio, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Audio, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { BODY, useFonts } from "./fonts";
 import { Confetti, Flash, Grain, LightLeak, Sparkles, Vignette } from "./fx";
 import { beatPulse } from "./geo";
@@ -164,10 +164,8 @@ export const CaboVerde: React.FC = () => {
       <Vignette />
       <Grain />
 
-      <Audio src={staticFile("trilha.wav")} volume={0.9} />
-      <Sequence from={Math.round(TL.voOffset * fps)}>
-        <Audio src={staticFile("narracao.mp3")} volume={1} />
-      </Sequence>
+      {/* trilha.wav = narração + batuku + efeitos (audio/mix.py) */}
+      <Audio src={staticFile("trilha.wav")} />
     </AbsoluteFill>
   );
 };

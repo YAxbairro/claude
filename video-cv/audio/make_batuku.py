@@ -267,6 +267,22 @@ smooth = int(0.25 * SR)
 active = np.convolve(active, np.ones(smooth) / smooth, mode="same")
 duck = 1 - 0.45 * np.clip(active, 0, 1)
 
+def write(path, x):
+    x = x[:N].copy()
+    x /= max(1e-9, np.max(np.abs(x))) / 0.8
+    pcm = (np.clip(np.stack([x, x], axis=1), -1, 1) * 32767).astype(np.int16)
+    with wave.open(str(path), "wb") as w:
+        w.setnchannels(2)
+        w.setsampwidth(2)
+        w.setframerate(SR)
+        w.writeframes(pcm.tobytes())
+
+
+hits = np.zeros_like(sfx)
+for ti in (rapica_end, S["stamp"], drop, final_hit):
+    place(hits, BOOM, ti, 0.9)
+write(ROOT / "audio" / "sfx.wav", sfx + hits)
+
 mix = music * duck * 0.55 + sfx * 0.5
 mix = mix[: N]
 fade = int(0.8 * SR)

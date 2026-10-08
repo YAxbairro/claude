@@ -8,12 +8,14 @@ Vídeo vertical (1080×1920, 31s) estilo campanha de agência de viagens: o perc
 - `src/timeline.json` — tempos de tudo (cenas, viagens, palavras sincronizadas com a narração)
 - `src/scenes/*` — Intro (nascer do sol na Praia), MapJourney (mapa animado), Plan (passe de aventura + carimbo), EndCard (bandeira)
 - `public/narracao.mp3` — narração ElevenLabs (voz "Adilson", PT europeu)
-- `audio/make_batuku.py` — sintetiza a batida de batuku (6/8, tchabeta 3 contra 2, rapica) + efeitos sonoros → `public/trilha.wav`
+- `audio/batuku.mp3` — batuku gerado na ElevenLabs (Sound Effects, 30s em loop)
+- `audio/make_batuku.py` — gera os efeitos sonoros (`audio/sfx.wav`: aviões, barcos, impactos)
+- `audio/mix.py` — mistura final: narração à frente (-14 LUFS), batuku com ducking, efeitos → `public/trilha.wav`
 
 ## Comandos
 ```bash
 npm install
-python3 audio/make_batuku.py   # precisa de audio/vo.wav (ffmpeg -i public/narracao.mp3 -ac 1 -ar 44100 audio/vo.wav)
+python3 audio/make_batuku.py && python3 audio/mix.py
 npm run studio                 # pré-visualizar/editar
 npx remotion render src/index.ts CaboVerde out/cabo-verde-aventura.mp4 --timeout=120000
 ```
