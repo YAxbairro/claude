@@ -4,9 +4,11 @@ import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 const loader = new GLTFLoader();
 const cache = new Map<string, Promise<GLTF>>();
-// The claude.ai artifact build serves models as plain glTF JSON: it can't serve
-// .glb and its sandbox blocks WebAssembly, so it gets no meshopt decoder.
+// The claude.ai artifact build serves each model as JSON wrapping a plain GLB: it
+// can't serve .glb, and its sandbox blocks WebAssembly and fetch() of data: URLs.
 const EXT = (globalThis as { __MODEL_EXT?: string }).__MODEL_EXT || 'glb';
+// In the artifact, embedded textures load through <img> (blob: URLs), never fetch().
+if (EXT === 'glb.json') loader.register((parser) => { (parser as unknown as { textureLoader: THREE.Loader }).textureLoader = new THREE.TextureLoader(parser.options.manager); return { name: 'img-textures' }; });
 const decoderReady = EXT === 'glb'
   ? import('three/examples/jsm/libs/meshopt_decoder.module.js').then((m) => { loader.setMeshoptDecoder(m.MeshoptDecoder); })
   : Promise.resolve();
@@ -15,7 +17,14 @@ export const MODEL = (name: string) => `${import.meta.env.BASE_URL}assets/3d/${n
 export function loadModel(name: string): Promise<GLTF> {
   let p = cache.get(name);
   if (!p) {
-    p = decoderReady.then(() => loader.loadAsync(MODEL(name)));
+    p = EXT === 'glb.json'
+      ? fetch(MODEL(name)).then((r) => { if (!r.ok) throw new Error(`${name}: HTTP ${r.status}`); return r.json(); }).then((j: { glb: string }) => {
+          const bin = atob(j.glb);
+          const bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          return loader.parseAsync(bytes.buffer, '');
+        })
+      : decoderReady.then(() => loader.loadAsync(MODEL(name)));
     p.catch(() => cache.delete(name));
     cache.set(name, p);
   }

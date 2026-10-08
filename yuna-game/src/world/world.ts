@@ -332,7 +332,7 @@ export function worldScreen(root: HTMLElement) {
     const map = h('button.btn', '🗺 Ir ao mapa');
     onTap(again, () => go(worldScreen));
     onTap(map, () => go(mapScreen));
-    loading.append(h('div.world-load-actions', again, map));
+    loading.append(h('div.world-load-actions', again, map), h('small.world-load-why', String((e as Error)?.message || e).slice(0, 160)));
     return 'failed' as const;
   }).then((r) => {
     if (closed || r === 'failed') return;

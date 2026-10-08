@@ -17,29 +17,22 @@ const page = `<title>Ilhas da Yuna</title>
 <style>${style}</style>
 <div id="app"></div>
 <div id="boot"><div class="boot-spinner"></div></div>
-<script>window.__MODEL_EXT = 'gltf.json';</script>
+<script>window.__MODEL_EXT = 'glb.json';</script>
 <script type="module">${code}</script>
 `;
 fs.mkdirSync('artifact', { recursive: true });
 fs.writeFileSync('artifact/index.html', page);
-// GLB → self-contained glTF JSON with plain (not meshopt) geometry: the artifact
+// GLB → JSON-wrapped GLB with plain (not meshopt) geometry: the artifact
 // sandbox blocks WebAssembly, so the page can't run the meshopt decoder.
 const io = new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({ 'meshopt.decoder': MeshoptDecoder });
 await MeshoptDecoder.ready;
-const MIME = { '.bin': 'application/octet-stream', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
 for (const f of fs.readdirSync('dist/assets/3d')) {
   if (!f.endsWith('.glb')) continue;
   const doc = await io.read('dist/assets/3d/' + f);
   doc.getRoot().listExtensionsUsed().filter((e) => e.extensionName === 'EXT_meshopt_compression').forEach((e) => e.dispose());
-  const { json, resources } = await io.writeJSON(doc, { basename: f.replace(/\.glb$/, '') });
-  const embed = (o) => {
-    if (!o.uri || !resources[o.uri]) return;
-    const ext = o.uri.slice(o.uri.lastIndexOf('.'));
-    o.uri = `data:${o.mimeType || MIME[ext] || 'application/octet-stream'};base64,` + Buffer.from(resources[o.uri]).toString('base64');
-  };
-  (json.buffers || []).forEach(embed);
-  (json.images || []).forEach(embed);
-  fs.writeFileSync('dist/assets/3d/' + f.replace(/\.glb$/, '.gltf.json'), JSON.stringify(json));
+  const glb = await io.writeBinary(doc);
+  // The page decodes this itself: the sandbox refuses fetch() of data: URLs.
+  fs.writeFileSync('dist/assets/3d/' + f.replace(/\.glb$/, '.glb.json'), JSON.stringify({ glb: Buffer.from(glb).toString('base64') }));
 }
 const files = [];
 const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).forEach((e) => e.isDirectory() ? walk(d + '/' + e.name) : files.push((d + '/' + e.name).slice(5)));
