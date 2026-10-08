@@ -1,0 +1,227 @@
+{
+ "fps": 30,
+ "durationSec": 31,
+ "bpm": 108,
+ "voOffset": 0.5,
+ "scenes": {
+  "intro": [
+   0,
+   4.4
+  ],
+  "islands": [
+   4.4,
+   7.4
+  ],
+  "journey": [
+   7.4,
+   20.3
+  ],
+  "plan": [
+   20.3,
+   24.6
+  ],
+  "mochila": [
+   24.6,
+   27.6
+  ],
+  "end": [
+   27.6,
+   31
+  ]
+ },
+ "sections": {
+  "groove": 4.4,
+  "rapica": [
+   17.9,
+   20.3
+  ],
+  "break": [
+   20.3,
+   24.75
+  ],
+  "stamp": 23.82,
+  "drop": 24.75,
+  "finalHit": 27.71
+ },
+ "legs": [
+  {
+   "from": "praia",
+   "to": "sv",
+   "mode": "plane",
+   "start": 7.4,
+   "end": 8.4
+  },
+  {
+   "from": "sv",
+   "to": "sa",
+   "mode": "boat",
+   "start": 8.4,
+   "end": 9.0
+  },
+  {
+   "from": "sa",
+   "to": "sv",
+   "mode": "boat",
+   "start": 9.0,
+   "end": 9.5
+  },
+  {
+   "from": "sv",
+   "to": "sn",
+   "mode": "boat",
+   "start": 9.5,
+   "end": 10.2
+  },
+  {
+   "from": "sn",
+   "to": "sal",
+   "mode": "plane",
+   "start": 10.2,
+   "end": 11.0
+  },
+  {
+   "from": "sal",
+   "to": "bv",
+   "mode": "boat",
+   "start": 11.0,
+   "end": 11.6
+  },
+  {
+   "from": "bv",
+   "to": "fogo",
+   "mode": "plane",
+   "start": 11.6,
+   "end": 12.6
+  },
+  {
+   "from": "fogo",
+   "to": "brava",
+   "mode": "boat",
+   "start": 12.6,
+   "end": 13.3
+  },
+  {
+   "from": "brava",
+   "to": "fogo",
+   "mode": "boat",
+   "start": 13.3,
+   "end": 14.0
+  },
+  {
+   "from": "fogo",
+   "to": "praia",
+   "mode": "boat",
+   "start": 14.0,
+   "end": 15.3
+  },
+  {
+   "from": "praia",
+   "to": "maio",
+   "mode": "boat",
+   "start": 15.3,
+   "end": 16.6
+  },
+  {
+   "from": "maio",
+   "to": "praia",
+   "mode": "boat",
+   "start": 16.6,
+   "end": 17.9
+  }
+ ],
+ "islandPops": [
+  4.6,
+  4.869999999999999,
+  5.14,
+  5.41,
+  5.68,
+  5.949999999999999,
+  6.22,
+  6.49,
+  6.76
+ ],
+ "whooshes": [
+  4.4,
+  20.3,
+  24.6,
+  27.6
+ ],
+ "words": [
+  [
+   "MONTANHAS",
+   7.73,
+   9.35
+  ],
+  [
+   "PRAIAS",
+   9.94,
+   10.85
+  ],
+  [
+   "VULC\u00c3O",
+   11.72,
+   13.27
+  ],
+  [
+   "MORNA",
+   14.04,
+   15.22
+  ],
+  [
+   "BATUKU",
+   15.53,
+   17.04
+  ],
+  [
+   "CACHUPA",
+   17.82,
+   19.69
+  ]
+ ],
+ "phrases": {
+  "aventura": [
+   0.5,
+   2.06
+  ],
+  "casa": [
+   2.73,
+   3.88
+  ],
+  "noveIlhas": [
+   4.53,
+   5.32
+  ],
+  "noveMundos": [
+   5.7,
+   7.08
+  ],
+  "agora": [
+   20.55,
+   20.98
+  ],
+  "sonho": [
+   21.39,
+   23.41
+  ],
+  "plano": [
+   23.82,
+   24.34
+  ],
+  "mochila": [
+   24.75,
+   25.42
+  ],
+  "teu": [
+   26.36,
+   27.3
+  ],
+  "caboVerde": [
+   27.71,
+   28.26
+  ],
+  "inteiro": [
+   28.89,
+   29.85
+  ]
+ }
+}

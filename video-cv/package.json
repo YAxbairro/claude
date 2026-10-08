@@ -1,0 +1,21 @@
+{
+  "name": "cabo-verde-aventura",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render CaboVerde out/cabo-verde-aventura.mp4"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.355",
+    "@remotion/google-fonts": "^4.0.355",
+    "@remotion/media": "^4.0.355",
+    "@remotion/media-utils": "^4.0.355",
+    "@types/react": "^19.3.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.355"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}
