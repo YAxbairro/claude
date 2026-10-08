@@ -10,12 +10,22 @@ const faces: [string, string, string][] = [
   [SCRIPT, "fonts/pacifico.woff2", "400"],
 ];
 
-if (typeof document !== "undefined") {
-  const handle = delayRender("fonts");
-  Promise.all(
-    faces.map(([family, file, weight]) => {
-      const f = new FontFace(family, `url(${staticFile(file)}) format("woff2")`, { weight });
-      return f.load().then((loaded) => document.fonts.add(loaded));
-    }),
-  ).then(() => continueRender(handle));
+if (typeof document !== "undefined" && !document.getElementById("cv-fonts")) {
+  const style = document.createElement("style");
+  style.id = "cv-fonts";
+  style.textContent = faces
+    .map(([family, file, weight]) => `@font-face{font-family:"${family}";src:url("${staticFile(file)}") format("woff2");font-weight:${weight};font-display:block;}`)
+    .join("\n");
+  document.head.appendChild(style);
+  const handle = delayRender("fonts", { timeoutInMilliseconds: 60000 });
+  let done = false;
+  const finish = () => {
+    if (!done) {
+      done = true;
+      continueRender(handle);
+    }
+  };
+  Promise.all(faces.map(([family, , weight]) => document.fonts.load(`${weight.split(" ")[0]} 40px "${family}"`)))
+    .then(finish, finish);
+  setTimeout(finish, 6000);
 }
