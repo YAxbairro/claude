@@ -150,47 +150,53 @@ export const DateBlock: React.FC<{ start: number; tag?: { text: string; at: numb
   );
 };
 
-// ---------- 3. Ballot dropping into the box ----------
+// ---------- 3. Ballot dropping into the box (style of the "Eleição Presidencial 2026" icon) ----------
 
 export const BallotBox: React.FC<{ start: number; dropAt: number; labelAt: number }> = ({ start, dropAt, labelAt }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const out = useOut();
-  const inn = useIn(0, 14);
-  const ballotIn = useIn(4, 12);
-  const drop = spring({ frame: frame - at(dropAt, start), fps, config: { damping: 200 }, durationInFrames: 14 });
-  const xDraw = ramp(frame, 12, 10);
-  const label = ramp(frame, at(labelAt, start), 10);
-  const bump = drop > 0.95 ? spring({ frame: frame - at(dropAt, start) - 12, fps, config: { damping: 8 } }) : 0;
-  const boxScale = 1 + 0.04 * Math.sin(bump * Math.PI);
-  const ballotY = -40 + drop * 260 + (1 - ballotIn) * -60;
+  const lines = ramp(frame, 0, 16);
+  const base = ramp(frame, 4, 16);
+  const card = useIn(8, 13);
+  const xDraw1 = ramp(frame, 18, 7);
+  const xDraw2 = ramp(frame, 24, 7);
+  const d = at(dropAt, start);
+  const drop = spring({ frame: frame - d, fps, config: { damping: 200 }, durationInFrames: 12 });
+  const thud = spring({ frame: frame - d - 10, fps, config: { damping: 9, mass: 0.5 } });
+  const squash = frame > d + 10 ? Math.sin(thud * Math.PI) * 0.035 : 0;
+  const bob = Math.sin(frame / 9) * 5 * (1 - drop);
+  const label = useIn(at(labelAt, start), 14);
+  const cardY = -70 + (1 - card) * -120 + bob + drop * 370;
   return (
     <AbsoluteFill>
-      <div style={{ position: "absolute", right: 200, top: 240, width: 440, opacity: out * inn, transform: `scale(${(0.85 + 0.15 * inn) * boxScale})`, transformOrigin: "50% 80%" }}>
-        <svg width={440} height={440} viewBox="0 0 440 440">
+      <div style={{ position: "absolute", right: 130, top: 230, width: 640, opacity: out, filter: "drop-shadow(0 6px 18px rgba(0,0,0,0.35))" }}>
+        <svg width={640} height={302} viewBox="0 0 700 330" style={{ overflow: "visible" }}>
           <defs>
             <clipPath id="aboveSlot">
-              <rect x="0" y="-400" width="440" height="600" />
+              <rect x="-100" y="-600" width="900" height="837" />
             </clipPath>
           </defs>
           {/* ballot */}
-          <g clipPath="url(#aboveSlot)" opacity={ballotIn}>
-            <g transform={`translate(160 ${ballotY}) rotate(${(1 - drop) * -8} 60 75)`}>
-              <rect width="120" height="150" rx="6" fill={WHITE} stroke={NAVY} strokeWidth="6" />
-              <rect x="18" y="22" width="84" height="8" fill="#C9CED9" />
-              <rect x="18" y="40" width="60" height="8" fill="#C9CED9" />
-              <path d="M38 78 L82 122 M82 78 L38 122" stroke={RED} strokeWidth="12" strokeLinecap="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - xDraw} />
+          <g clipPath="url(#aboveSlot)">
+            <g transform={`translate(0 ${cardY})`} opacity={card > 0.01 ? 1 : 0}>
+              <g transform={`rotate(${-6 + (1 - card) * -10} 357 120)`}>
+                <rect x="235" y="0" width="245" height="230" rx="10" fill={RED} />
+                <path d="M318 82 L392 170" stroke={WHITE} strokeWidth="26" strokeLinecap="round" fill="none" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - xDraw1} />
+                <path d="M410 88 L308 178" stroke={WHITE} strokeWidth="26" strokeLinecap="round" fill="none" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - xDraw2} />
+              </g>
             </g>
           </g>
-          {/* box */}
-          <path d="M70 200 L370 200 L400 240 L40 240 Z" fill={NAVY} />
-          <rect x="140" y="194" width="160" height="12" rx="6" fill={RED} />
-          <rect x="60" y="240" width="320" height="180" rx="8" fill={WHITE} stroke={NAVY} strokeWidth="10" />
-          <rect x="60" y="270" width="320" height="10" fill={RED} />
-          <image href={staticFile("cne.png")} x="95" y="315" width="250" height="65" preserveAspectRatio="xMidYMid meet" />
+          {/* lid + slot */}
+          <g transform={`translate(350 260) scale(${1 + squash} ${1 - squash}) translate(-350 -260)`}>
+            <path d="M8 246 L100 192 L600 192 L692 246" fill="none" stroke={WHITE} strokeWidth="13" strokeLinejoin="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - lines} />
+            <rect x={175 + 160 * (1 - lines)} y="230" width={320 * lines} height="13" rx="2" fill={WHITE} />
+            <rect x={350 - 350 * base} y="262" width={700 * base} height="22" fill={WHITE} />
+            <rect x={350 - 350 * base} y="306" width={700 * base} height="11" fill={RED} />
+          </g>
         </svg>
-        <div style={{ textAlign: "center", marginTop: 14, opacity: label, transform: `translateY(${(1 - label) * 20}px)` }}>
-          <span style={{ ...big(64), background: NAVY, padding: "8px 26px", textShadow: "none" }}>O TEU VOTO</span>
+        <div style={{ textAlign: "center", marginTop: 26 }}>
+          <span style={{ ...big(76), display: "inline-block", opacity: label, transform: `translateY(${(1 - label) * 30}px) scale(${0.9 + 0.1 * label})` }}>O TEU VOTO</span>
         </div>
       </div>
     </AbsoluteFill>
