@@ -4,7 +4,7 @@ import { LogoAnim } from "./LogoAnim";
 import { Overlay } from "./Overlay";
 import { DURATION, FPS } from "./theme";
 
-const LOGO_FRAMES = Math.round(6 * FPS);
+const LOGO_FRAMES = Math.round(7 * FPS);
 
 export const RemotionRoot: React.FC = () => (
   <>
