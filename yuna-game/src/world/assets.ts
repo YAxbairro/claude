@@ -1,19 +1,21 @@
 // GLB loading with meshopt support and a cache that survives screen changes.
 import * as THREE from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 
 const loader = new GLTFLoader();
-loader.setMeshoptDecoder(MeshoptDecoder);
 const cache = new Map<string, Promise<GLTF>>();
-// The claude.ai artifact build serves models as glTF JSON (it can't serve .glb).
+// The claude.ai artifact build serves models as plain glTF JSON: it can't serve
+// .glb and its sandbox blocks WebAssembly, so it gets no meshopt decoder.
 const EXT = (globalThis as { __MODEL_EXT?: string }).__MODEL_EXT || 'glb';
+const decoderReady = EXT === 'glb'
+  ? import('three/examples/jsm/libs/meshopt_decoder.module.js').then((m) => { loader.setMeshoptDecoder(m.MeshoptDecoder); })
+  : Promise.resolve();
 export const MODEL = (name: string) => `${import.meta.env.BASE_URL}assets/3d/${name}.${EXT}`;
 
 export function loadModel(name: string): Promise<GLTF> {
   let p = cache.get(name);
   if (!p) {
-    p = loader.loadAsync(MODEL(name));
+    p = decoderReady.then(() => loader.loadAsync(MODEL(name)));
     p.catch(() => cache.delete(name));
     cache.set(name, p);
   }

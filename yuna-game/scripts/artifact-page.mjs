@@ -1,6 +1,9 @@
 // Builds artifact/index.html: the built game with CSS and JS inlined, for
 // publishing as a claude.ai Artifact (assets are published next to it).
 import fs from 'node:fs';
+import { NodeIO } from '@gltf-transform/core';
+import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
+import { MeshoptDecoder } from 'meshoptimizer';
 const html = fs.readFileSync('dist/index.html', 'utf8');
 const js = html.match(/src="\.\/(assets\/index-[^"]+\.js)"/)[1];
 const css = html.match(/href="\.\/(assets\/index-[^"]+\.css)"/)[1];
@@ -19,19 +22,23 @@ const page = `<title>Ilhas da Yuna</title>
 `;
 fs.mkdirSync('artifact', { recursive: true });
 fs.writeFileSync('artifact/index.html', page);
-// GLB → self-contained glTF JSON (binary chunk as a base64 data URI).
+// GLB → self-contained glTF JSON with plain (not meshopt) geometry: the artifact
+// sandbox blocks WebAssembly, so the page can't run the meshopt decoder.
+const io = new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({ 'meshopt.decoder': MeshoptDecoder });
+await MeshoptDecoder.ready;
+const MIME = { '.bin': 'application/octet-stream', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
 for (const f of fs.readdirSync('dist/assets/3d')) {
   if (!f.endsWith('.glb')) continue;
-  const b = fs.readFileSync('dist/assets/3d/' + f);
-  let o = 12, json = null, bin = null;
-  while (o < b.length) {
-    const len = b.readUInt32LE(o), type = b.readUInt32LE(o + 4);
-    const chunk = b.subarray(o + 8, o + 8 + len);
-    if (type === 0x4e4f534a) json = JSON.parse(chunk.toString('utf8'));
-    else if (type === 0x004e4942) bin = chunk;
-    o += 8 + len;
-  }
-  if (bin) json.buffers[0].uri = 'data:application/octet-stream;base64,' + bin.toString('base64');
+  const doc = await io.read('dist/assets/3d/' + f);
+  doc.getRoot().listExtensionsUsed().filter((e) => e.extensionName === 'EXT_meshopt_compression').forEach((e) => e.dispose());
+  const { json, resources } = await io.writeJSON(doc, { basename: f.replace(/\.glb$/, '') });
+  const embed = (o) => {
+    if (!o.uri || !resources[o.uri]) return;
+    const ext = o.uri.slice(o.uri.lastIndexOf('.'));
+    o.uri = `data:${o.mimeType || MIME[ext] || 'application/octet-stream'};base64,` + Buffer.from(resources[o.uri]).toString('base64');
+  };
+  (json.buffers || []).forEach(embed);
+  (json.images || []).forEach(embed);
   fs.writeFileSync('dist/assets/3d/' + f.replace(/\.glb$/, '.gltf.json'), JSON.stringify(json));
 }
 const files = [];

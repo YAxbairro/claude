@@ -11,6 +11,7 @@ import { ISLANDS, PHASES } from '../data/islands.ts';
 import { burst } from '../core/fx.ts';
 import { go } from '../main.ts';
 import { titleScreen } from '../screens/title.ts';
+import { mapScreen } from '../screens/map.ts';
 import { playScreen } from '../screens/play.ts';
 import { openAlbum } from '../screens/album.ts';
 import { openParents } from '../screens/parents.ts';
@@ -316,9 +317,25 @@ export function worldScreen(root: HTMLElement) {
   const startIsland = islands.list[progress.current] || islands.list[0];
   let started = false;
   const bar = loading.querySelector('.bar i') as HTMLElement;
-  const ticker = setInterval(() => { bar.style.width = Math.min(95, parseFloat(bar.style.width || '5') + 7) + '%'; }, 200);
-  Promise.all([yuna.load(), cat.load(), islands.load(startIsland)]).then(() => {
+  // The bar creeps towards 95% (it slows down as it gets closer).
+  const ticker = setInterval(() => { const w = parseFloat(bar.style.width || '5'); bar.style.width = (w + (95 - w) * 0.04) + '%'; }, 200);
+  const timeout = <T,>(p: Promise<T>, ms: number) => Promise.race([p, new Promise<T>((_, no) => setTimeout(() => no(new Error('timeout')), ms))]);
+  // The cat is nice to have: if she fails to load, Yuna goes on alone.
+  const catReady = timeout(cat.load(), 90000).catch((e) => { console.warn('cat failed', e); cat.root.visible = false; });
+  timeout(Promise.all([yuna.load(), catReady, islands.load(startIsland)]), 90000).catch((e) => {
+    console.warn('world failed to load', e);
     if (closed) return;
+    clearInterval(ticker);
+    loading.querySelector('b')!.textContent = 'Ups! As ilhas não carregaram.';
+    loading.querySelector('.bar')!.remove();
+    const again = h('button.btn.primary', '↻ Tentar outra vez');
+    const map = h('button.btn', '🗺 Ir ao mapa');
+    onTap(again, () => go(worldScreen));
+    onTap(map, () => go(mapScreen));
+    loading.append(h('div.world-load-actions', again, map));
+    return 'failed' as const;
+  }).then((r) => {
+    if (closed || r === 'failed') return;
     const w = progress.world;
     const pos = w && !w.boat && startIsland.group.position.distanceTo(new THREE.Vector3(w.x, 0, w.z)) < ISLAND_RADIUS + 2 ? new THREE.Vector3(w.x, w.y, w.z) : startIsland.spawn.clone();
     yuna.root.position.copy(pos);
