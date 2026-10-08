@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { continueRender, delayRender, staticFile } from "remotion";
 
 export const HEAD = "AntonLocal";
@@ -10,22 +11,33 @@ const faces: [string, string, string][] = [
   [SCRIPT, "fonts/pacifico.woff2", "400"],
 ];
 
-if (typeof document !== "undefined" && !document.getElementById("cv-fonts")) {
-  const style = document.createElement("style");
-  style.id = "cv-fonts";
-  style.textContent = faces
+const css = () =>
+  faces
     .map(([family, file, weight]) => `@font-face{font-family:"${family}";src:url("${staticFile(file)}") format("woff2");font-weight:${weight};font-display:block;}`)
     .join("\n");
-  document.head.appendChild(style);
-  const handle = delayRender("fonts", { timeoutInMilliseconds: 60000 });
-  let done = false;
-  const finish = () => {
-    if (!done) {
-      done = true;
-      continueRender(handle);
+
+// Bloqueia o frame até as fontes locais estarem prontas.
+export const useFonts = () => {
+  const [handle] = useState(() => delayRender("fonts"));
+  useEffect(() => {
+    let done = false;
+    const finish = () => {
+      if (!done) {
+        done = true;
+        continueRender(handle);
+      }
+    };
+    if (!document.getElementById("cv-fonts")) {
+      const style = document.createElement("style");
+      style.id = "cv-fonts";
+      style.textContent = css();
+      document.head.appendChild(style);
     }
-  };
-  Promise.all(faces.map(([family, , weight]) => document.fonts.load(`${weight.split(" ")[0]} 40px "${family}"`)))
-    .then(finish, finish);
-  setTimeout(finish, 6000);
-}
+    Promise.all(faces.map(([family, , weight]) => document.fonts.load(`${weight.split(" ")[0]} 40px "${family}"`))).then(finish, finish);
+    const timer = setTimeout(finish, 5000);
+    return () => {
+      clearTimeout(timer);
+      finish();
+    };
+  }, [handle]);
+};

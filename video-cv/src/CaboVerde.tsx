@@ -1,6 +1,6 @@
 import React from "react";
 import { AbsoluteFill, Audio, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
-import { BODY } from "./fonts";
+import { BODY, useFonts } from "./fonts";
 import { Confetti, Flash, Grain, LightLeak, Sparkles, Vignette } from "./fx";
 import { beatPulse } from "./geo";
 import { EndCard } from "./scenes/EndCard";
@@ -124,6 +124,7 @@ const MochilaOverlay: React.FC = () => (
 );
 
 export const CaboVerde: React.FC = () => {
+  useFonts();
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const f = (s: number) => Math.round(s * fps);
