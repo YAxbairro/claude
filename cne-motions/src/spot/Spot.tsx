@@ -203,28 +203,53 @@ const S5: React.FC<{ start: number; white: boolean }> = ({ start, white }) => {
   );
 };
 
-const S6: React.FC<{ start: number; white: boolean }> = ({ start, white }) => (
-  <Exit>
-    <Disc delay={0} size={920} x={600} y={620} show={white} />
-    <Art src="spot/doente.png" delay={0} from="scale" style={{ left: -10, top: 440, width: 820 }} />
-    <Art src="spot/funcionario.png" delay={L(22.6, start)} from="right" float={3} style={{ left: 690, top: 250, height: 790 }} />
-    <div style={{ position: "absolute", left: 1210, top: 300 }}>
-      <Line delay={L(22.54, start)} size={64} align="left">
-        Com o apoio
-      </Line>
-      <Line delay={L(23.2, start)} size={64} align="left">
-        dos diretores
-      </Line>
-      <Line delay={L(24.08, start)} size={50} align="left" weight={800}>
-        dos respetivos
-      </Line>
-      <div style={{ height: 12 }} />
-      <Line delay={L(24.6, start)} size={56} align="left" box={RED}>
-        estabelecimentos
-      </Line>
+const Tag: React.FC<{ delay: number; children: React.ReactNode; center: number; top: number }> = ({ delay, children, center, top }) => {
+  const frame = useCurrentFrame();
+  const p = ease(frame, delay, delay + 10, Easing.out(Easing.cubic));
+  return (
+    <div style={{ position: "absolute", top, left: center, transform: `translateX(-50%) translateY(${(1 - p) * 20}px)`, opacity: p, background: NAVY, borderRadius: 30, padding: "9px 26px", whiteSpace: "nowrap" }}>
+      <span style={{ fontFamily: SANS, fontWeight: 800, fontSize: 28, color: "#fff", letterSpacing: 1.5 }}>{children}</span>
     </div>
-  </Exit>
-);
+  );
+};
+
+// Support from the directors: the hospital pair hands over to the correctional
+// establishment scene while the sentence stays on the right.
+const S6: React.FC<{ start: number; white: boolean }> = ({ start, white }) => {
+  const frame = useCurrentFrame();
+  const swap = ease(frame, L(23.7, start), L(24.0, start), Easing.in(Easing.cubic));
+  return (
+    <Exit>
+      <Disc delay={0} size={920} x={600} y={620} show={white} />
+      <AbsoluteFill style={{ opacity: 1 - swap, transform: `translateX(${-320 * swap}px)` }}>
+        <Art src="spot/doente.png" delay={0} from="scale" style={{ left: -10, top: 440, width: 820 }} />
+        <Art src="spot/funcionario.png" delay={L(22.6, start)} from="right" float={3} style={{ left: 690, top: 250, height: 790 }} />
+        <Tag delay={L(22.9, start)} center={560} top={985}>
+          HOSPITAIS
+        </Tag>
+      </AbsoluteFill>
+      <Art src="spot/apoio_recluso.png" delay={L(24.02, start)} from="bottom" float={3} style={{ left: 250, top: 200, height: 770 }} />
+      <Tag delay={L(24.45, start)} center={520} top={990}>
+        ESTABELECIMENTOS PRISIONAIS
+      </Tag>
+      <div style={{ position: "absolute", left: 1210, top: 300 }}>
+        <Line delay={L(22.54, start)} size={64} align="left">
+          Com o apoio
+        </Line>
+        <Line delay={L(23.2, start)} size={64} align="left">
+          dos diretores
+        </Line>
+        <Line delay={L(24.08, start)} size={50} align="left" weight={800}>
+          dos respetivos
+        </Line>
+        <div style={{ height: 12 }} />
+        <Line delay={L(24.6, start)} size={56} align="left" box={RED}>
+          estabelecimentos
+        </Line>
+      </div>
+    </Exit>
+  );
+};
 
 const S7: React.FC<{ start: number }> = ({ start }) => (
   <Exit>
