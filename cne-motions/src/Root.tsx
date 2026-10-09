@@ -2,6 +2,8 @@ import React from "react";
 import { Composition } from "remotion";
 import { LogoAnim } from "./LogoAnim";
 import { Overlay } from "./Overlay";
+import { SPOT_DURATION, Spot } from "./spot/Spot";
+import { SPOT_FPS } from "./spot/kit";
 import { DURATION, FPS } from "./theme";
 
 const LOGO_FRAMES = Math.round(7 * FPS);
@@ -29,6 +31,18 @@ export const RemotionRoot: React.FC = () => (
         component={LogoAnim}
         durationInFrames={LOGO_FRAMES}
         fps={FPS}
+        width={1920}
+        height={1080}
+        defaultProps={{ variant }}
+      />
+    ))}
+    {(["branco", "alpha"] as const).map((variant) => (
+      <Composition
+        key={variant}
+        id={`SpotVotoAntecipado-${variant}`}
+        component={Spot}
+        durationInFrames={SPOT_DURATION}
+        fps={SPOT_FPS}
         width={1920}
         height={1080}
         defaultProps={{ variant }}
