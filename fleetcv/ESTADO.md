@@ -369,7 +369,9 @@ ficheiros. Os passos estão em `site/INSTALAR.md`.
 | `paineis/teste_sessao.mjs` | 8 — a sessão que se perde no telemóvel (o iPhone de 10/10): entra na mesma |
 | o resto dos `teste_*.mjs` | mapa de Cabo Verde 9, aplicação Android 30, leitor ODO/Trip 11, mapa cortado 4, consumo 12, fora da aplicação 18, leitor 18, primeiro turno 28, dados 13, câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 35, mapa vivo 26, páginas 25, alojamento 17 |
 
-A 07/10, os 30 conjuntos deram 648 de 648 e o `provar.sh` 91 de 91 (a 04/10
+A 10/10, os 31 conjuntos deram 656 de 656 (com o `teste_sessao`), e a prova
+ao vivo 35 de 35 com a correção do iPhone já no ar. A 07/10, os 30 conjuntos
+tinham dado 648 de 648 e o `provar.sh` 91 de 91 (a 04/10
 tinham sido 599 em 29 — e não 659, como ficou escrito por engano). O
 `teste_mapa_cv` (a rua escrita por cima do mapa) pode falhar com a máquina
 muito ocupada (três conjuntos ao mesmo tempo); sozinho dá 9 de 9.
