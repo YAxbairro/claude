@@ -119,6 +119,23 @@ function lojaDoSupabase(sb){
     return Object.assign(new Error(e.message||'erro'),
       {code:c, porque:e.message, estado:estado||0, recusa:recusa}); };
 
+  /* Entrar, criar conta e recuperar o código pedem uma sessão (anónima)
+     já aberta. Se o telemóvel a perdeu, abre-se outra; e se a base
+     ainda assim responder "sessão por abrir", abre-se outra e tenta-se
+     mais uma vez, em vez de deixar o condutor a carregar em Entrar. */
+  var abrirSessao=function(){
+    return sb.auth.signInAnonymously().catch(function(){}); };
+  var garantirSessao=function(){
+    return sb.auth.getSession().then(function(s){
+      if(s && s.data && s.data.session) return;
+      return abrirSessao(); }).catch(function(){}); };
+  var semSessao=function(r){
+    return !!(r && r.data && r.data.erro==='sessão por abrir'); };
+  var comSessao=function(pedido){
+    return garantirSessao().then(pedido).then(function(r){
+      if(!semSessao(r)) return r;
+      return abrirSessao().then(pedido); }); };
+
   /* O condutor não lê a lista dos condutores — leva os códigos de
      todos, e com eles entrava como qualquer colega. Lê a 'equipa', que
      a base faz sozinha com os nomes e mais nada. Aqui dentro ela passa
@@ -209,7 +226,8 @@ function lojaDoSupabase(sb){
     canalVivo:function(){ return canalVivo; },
 
     entrar:function(email, codigo){
-      return sb.rpc('entrar', {p_email:email, p_codigo:codigo})
+      return comSessao(function(){
+          return sb.rpc('entrar', {p_email:email, p_codigo:codigo}); })
         .then(function(r){
           if(r.error) throw erroDe(r.error);
           if(r.data && r.data.erro) throw Object.assign(new Error(r.data.erro),
@@ -217,8 +235,9 @@ function lojaDoSupabase(sb){
           eu=r.data; return r.data; }); },
     /* criar conta: uma frota nova, e já lá dentro como dono */
     criarConta:function(d){
-      return sb.rpc('criar_frota', {p_nome:d.nome, p_frota_nome:d.frota,
-                                    p_email:d.email, p_codigo:d.codigo})
+      return comSessao(function(){
+          return sb.rpc('criar_frota', {p_nome:d.nome, p_frota_nome:d.frota,
+                                        p_email:d.email, p_codigo:d.codigo}); })
         .then(function(r){
           if(r.error) throw erroDe(r.error);
           if(r.data && r.data.erro) throw Object.assign(new Error(r.data.erro),
@@ -238,7 +257,9 @@ function lojaDoSupabase(sb){
         return r.data||{erro:'Não foi possível apagar.'}; }); },
     /* o código de recuperação (supabase/esquema.sql) */
     recuperar:function(email, rec, novo){
-      return sb.rpc('recuperar_acesso', {p_email:email, p_recuperacao:rec, p_codigo_novo:novo})
+      return comSessao(function(){
+          return sb.rpc('recuperar_acesso', {p_email:email, p_recuperacao:rec,
+                                             p_codigo_novo:novo}); })
         .then(function(r){
           if(r.error) throw erroDe(r.error, r.status);
           if(r.data && r.data.erro) throw Object.assign(new Error(r.data.erro),
@@ -648,8 +669,31 @@ function ligarSupabase(papel){
         localStorage.setItem(chave, localStorage.getItem(velha));
         localStorage.removeItem(velha); }
     }catch(e){}
+    /* A sessão guarda-se no navegador e também na memória da página.
+       Num iPhone (Safari), a 10 de Outubro de 2026, a sessão criada
+       às 12:02:07 já não estava lá 40 segundos depois: os nove "Entrar"
+       seguintes chegaram à base sem ela, e a base respondeu "sessão
+       por abrir". Com a cópia na memória, se o navegador a deixar cair
+       a página continua com ela, e volta a escrevê-la no navegador. */
+    var mem={};
+    var guarda={
+      getItem:function(k){
+        var v=null;
+        try{ v=localStorage.getItem(k); }catch(e){}
+        if(v!=null){ mem[k]=v; return v; }
+        if(!Object.prototype.hasOwnProperty.call(mem,k)) return null;
+        try{ localStorage.setItem(k, mem[k]); }catch(e){}
+        return mem[k]; },
+      setItem:function(k,v){
+        mem[k]=String(v);
+        try{ localStorage.setItem(k, mem[k]); }catch(e){} },
+      removeItem:function(k){
+        delete mem[k];
+        try{ localStorage.removeItem(k); }catch(e){} }
+    };
     var sb = window.supabase.createClient(c.supabaseUrl, c.supabaseChave, {
-      auth:{ persistSession:true, autoRefreshToken:true, storageKey:chave } });
+      auth:{ persistSession:true, autoRefreshToken:true, storageKey:chave,
+             storage:guarda } });
     /* Cada telemóvel entra sem conta nenhuma; quem ele é diz-se
        depois, com o email e o código que o patrão deu. */
     return sb.auth.getSession().then(function(s){

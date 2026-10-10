@@ -242,6 +242,8 @@
       entrar:function(a){
         var em=String(a.p_email||'').trim().toLowerCase();
         var co=String(a.p_codigo||'').trim();
+        /* como o esquema.sql: sem sessão (auth.uid() vazio) não entra */
+        if(!sessao) return {erro:'sessão por abrir'};
         /* a trava do esquema.sql: cinco enganos e fica de castigo */
         var QUARTO=15*60*1000;
         var t=ler('trava:'+em);
@@ -377,6 +379,10 @@
       },
       rpc:function(nome, args){
         var f=rpcs[nome];
+        /* window.__recusarUmaVez='entrar': a base responde uma vez como
+           se a sessão não tivesse chegado (o iPhone de 10/10/2026) */
+        if(window.__recusarUmaVez===nome){ window.__recusarUmaVez=null;
+          return Promise.resolve({data:{erro:'sessão por abrir'}, error:null}); }
         /* como o Supabase: uma função que não existe dá 404 (PGRST202);
            window.__semFuncoes:[...] faz de base onde ainda não estão */
         if(!f || (window.__semFuncoes||[]).indexOf(nome)>=0)
@@ -389,13 +395,18 @@
           ouvintes.push({cliente:cli, fn:fn, crivo:op&&op.filter}); return this; },
         subscribe:function(cb){ if(cb) setTimeout(function(){ cb('SUBSCRIBED'); },0);
           return this; } }; },
-      _entregar:entregar
+      _entregar:entregar,
+      /* o telemóvel perde a sessão que tinha (window.__esquecerSessoes) */
+      _esquecer:function(){ sessao=null;
+        try{ localStorage.removeItem(chaveSessao); }catch(e){} }
     };
     clientes.push(cli);
     return cli;
   }
 
   var clientes=[];
+  window.__esquecerSessoes=function(){
+    clientes.forEach(function(c){ c._esquecer(); }); };
   /* para os testes medirem o que cada telemóvel manda, recebe e lê */
   function contar(onde, c, bytes){
     var m=window[onde]=window[onde]||{};

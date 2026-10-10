@@ -326,7 +326,7 @@ saida = u'''<meta charset="utf-8">
      No Claude não existem e a aplicação passa aos outros motores
      sem dar erro nenhum: repare no "onerror". -->
 <script src="./fleetcv-config.js" onerror="void 0"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"
         onerror="void 0"></script>
 
 <style>
@@ -419,7 +419,7 @@ CASCA = u"""<!doctype html>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 
 <script src="./fleetcv-config.js" onerror="void 0"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"
         onerror="void 0"></script>
 <!-- o mapa a sério; sem ele, fica o desenho da Praia que vem dentro -->
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"

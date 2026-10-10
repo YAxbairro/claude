@@ -1,4 +1,4 @@
-# Onde isto está, em 7 de Outubro de 2026
+# Onde isto está, em 10 de Outubro de 2026
 
 Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
 
@@ -30,6 +30,21 @@ Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
   sem deixar lixo; e as páginas de privacidade, termos e ajuda no ar.
   E as páginas de venda das instituições e do rent-a-car. 35 de 35, a 7 de
   Outubro (as páginas abrem-se pelo navegador, como um cliente as abre).
+
+- **A sessão que o iPhone perdia (10/10).** Um condutor novo, num iPhone
+  (Safari, iOS 18.6), não conseguia entrar: "sessão por abrir". Os
+  registos do Supabase mostram a sessão anónima criada às 12:02:07 e
+  usada às 12:02:08; os nove "Entrar" a seguir (12:02:48–12:04:11)
+  chegaram à base sem ela. O nosso código não a apaga e no Chromium não
+  acontece; a causa no Safari ficou por saber. Agora a sessão fica
+  também na memória da página (e volta a ser escrita no navegador se
+  ele a perder), e entrar, criar conta e recuperar o código conferem a
+  sessão antes, abrem outra se faltar, e tentam mais uma vez se a base
+  responder "sessão por abrir". A biblioteca do Supabase passou a ir
+  numa versão fixa (2.117.3) em vez da última que houver. Provado com a
+  biblioteca verdadeira e uma base de mentira na rede: o código antigo
+  dá "sessão por abrir", o novo entra (`paineis/teste_sessao.mjs` faz o
+  mesmo com a base de mentira de sempre).
 
 - **O canal ao vivo (WebSocket), provado de fora** — numa máquina do
   GitHub (`paineis/prova_tempo_real.mjs`, corre sozinho em
@@ -351,6 +366,7 @@ ficheiros. Os passos estão em `site/INSTALAR.md`.
 | `paineis/teste_recuperar.mjs` | 31 — o código esquecido, de ponta a ponta, e sem as funções na base |
 | `paineis/teste_tipos.mjs` | 44 — táxis, instituições e rent-a-car: as contas de cada um e um cliente novo de cada, de ponta a ponta |
 | `paineis/teste_supabase.mjs` | 25 — as regras vistas pela aplicação, a trava, sem rede |
+| `paineis/teste_sessao.mjs` | 8 — a sessão que se perde no telemóvel (o iPhone de 10/10): entra na mesma |
 | o resto dos `teste_*.mjs` | mapa de Cabo Verde 9, aplicação Android 30, leitor ODO/Trip 11, mapa cortado 4, consumo 12, fora da aplicação 18, leitor 18, primeiro turno 28, dados 13, câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 35, mapa vivo 26, páginas 25, alojamento 17 |
 
 A 07/10, os 30 conjuntos deram 648 de 648 e o `provar.sh` 91 de 91 (a 04/10
