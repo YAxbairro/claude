@@ -7,8 +7,8 @@ precisa da conta dele ou de pagamento.
 
 | | |
 |---|---|
-| Pacote para a Play | `site/teste/FleetCV-1.1.0.aab` (https://fleetcv.vercel.app/teste/FleetCV-1.1.0.aab), versão 1.1.0 (código 3), Android 16 (API 36), assinado com a chave de sempre |
-| O mesmo, para instalar à mão e testar | `site/teste/FleetCV-1.1.0.apk` |
+| Pacote para a Play | `site/teste/FleetCV-1.2.0.aab` (https://fleetcv.vercel.app/teste/FleetCV-1.2.0.aab), versão 1.2.0 (código 4), Android 16 (API 36), assinado com a chave de sempre |
+| O mesmo, para instalar à mão e testar | `site/teste/FleetCV-1.2.0.apk` |
 | Ícone 512×512 | `icone-512.png` |
 | Gráfico de destaque 1024×500 | `grafico-1024x500.png` |
 | Capturas do telemóvel (1080×1920) | `captura-1.png` … `captura-4.png` (refazem-se com `imagens.mjs`) |
@@ -19,13 +19,16 @@ Porquê a 1.1.0: desde 31 de Agosto de 2026 a Play só aceita aplicações
 novas feitas para o Android 16 (API 36). A 1.0.1 (a do piloto) é para o
 Android 15. A 1.1.0 também ajusta o ecrã às barras do sistema (o Android 15
 e 16 desenham a aplicação por baixo da barra de cima e da de baixo; agora a
-página fica entre elas).
+página fica entre elas). A 1.2.0 (10/10) leva tudo isso e mais o envio
+das posições pelo lado nativo: no teste de um Galaxy A02 o envio parava 2 a
+3 minutos depois de o ecrã apagar, porque o Android adormecia a página
+(ver `../LEIA-ME.md`).
 
-## 1. Antes de enviar: testar a 1.1.0 num telemóvel  **[Yanick]**
+## 1. Antes de enviar: testar a 1.2.0 num telemóvel  **[Yanick]**
 
 Ainda não correu num telemóvel verdadeiro. Num Android (de preferência o
 Samsung do teste), instalar por cima da que lá está:
-https://fleetcv.vercel.app/teste/FleetCV-1.1.0.apk
+https://fleetcv.vercel.app/teste/FleetCV-1.2.0.apk
 
 - [ ] A barra de cima da FleetCV não fica por baixo da hora e da bateria.
 - [ ] Os botões de baixo ("Abastecer", "Terminar") não ficam por baixo dos botões do Android.
@@ -177,7 +180,7 @@ efémera? Não (ficam guardados para o proprietário).
 
 1. Criar a aplicação na Play Console (nome, português, aplicação, grátis).
 2. Preencher a ficha (ponto 4) e os formulários (ponto 5).
-3. *Teste interno*: enviar o `FleetCV-1.1.0.aab`, juntar o próprio e-mail, instalar pela Play.
+3. *Teste interno*: enviar o `FleetCV-1.2.0.aab`, juntar o próprio e-mail, instalar pela Play.
 4. *Teste fechado* (contas pessoais): convidar as 12+ pessoas, esperar os 14 dias.
 5. *Produção*: pedir acesso, enviar para revisão (alguns dias).
 6. Quando estiver publicada: trocar o botão do `site/android.html` pelo link da Play.

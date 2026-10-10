@@ -273,6 +273,8 @@ function pedirNotificacoes(){
   return quando(LN.requestPermissions()).catch(function(){});
 }
 function desligarGpsNativo(){
+  var B=pluginNativo('Bateria');
+  if(B && B.fim && vigiaNativa!=null){ try{ quando(B.fim()).catch(function(){}); }catch(e){} }
   var BG=pluginNativo('BackgroundGeolocation');
   if(BG && vigiaNativa!=null){ try{ quando(BG.removeWatcher({id:vigiaNativa})).catch(function(){}); }catch(e){} }
   if(vigiaNativa!=null) segurarTelemovel(false);
@@ -286,7 +288,8 @@ function verBateria(){
   var B=pluginNativo('Bateria'); if(!B) return Promise.resolve();
   return quando(B.estado()).then(function(r){
     S.bateriaPresa = !(r && r.semRestricoes);
-    S.app = {versao:(r&&r.versao)||'1.0.0', fabricante:(r&&r.fabricante)||'', trava:!!B.segurar};
+    S.app = {versao:(r&&r.versao)||'1.0.0', fabricante:(r&&r.fabricante)||'', trava:!!B.segurar,
+             envio:!!B.turno};
     pintar(); }).catch(function(){});
 }
 /* Durante o turno, o telemóvel não adormece por baixo do GPS (só a
@@ -294,6 +297,72 @@ function verBateria(){
 function segurarTelemovel(sim){
   var B=pluginNativo('Bateria'); if(!B || !B.segurar) return;
   try{ quando(sim ? B.segurar() : B.largar()).catch(function(){}); }catch(e){}
+}
+
+/* A aplicação 1.2.0 manda as posições pelo lado nativo quando a página
+   adormece (android/.../EnvioNativo.java): no teste de 10/10, num Galaxy
+   A02, a página parava 2 a 3 minutos depois de o ecrã apagar, e com ela
+   o envio. A cada posição que a página põe na base, passa ao lado
+   nativo o turno, a base e a chave da sessão (de 5 em 5 s, no máximo). */
+var ultimoAoNativo=0;
+function passarAoNativo(p){
+  var B=pluginNativo('Bateria');
+  if(!B || !B.turno || vigiaNativa==null || !p || !p.id) return;
+  var agora=Date.now();
+  if(agora-ultimoAoNativo<5000) return;
+  ultimoAoNativo=agora;
+  Nuvem.acesso().then(function(a){
+    if(!a) return;
+    return quando(B.turno({id:p.id, url:a.url, chave:a.chave, token:a.token, frota:a.frota,
+      corpo:p, precisaoMax:LIM.precisaoMax, velMax:LIM.velMax}));
+  }).catch(function(){});
+}
+if(Nuvem.aoSubirVivo) Nuvem.aoSubirVivo(passarAoNativo);
+/* Os pontos que o lado nativo guardou enquanto a página dormia (ou
+   depois de o Android a fechar) entram no percurso, pela hora, com a
+   mesma regra do guardarPonto: o percurso e os km ficam sem buracos. */
+var aJuntar=false, juntarOutraVez=false;
+function juntarPontos(rasto, ps){
+  var tem={};
+  rasto.forEach(function(x){ tem[Math.round(x[2]/1000)]=1; });
+  var novos=ps.filter(function(x){ return x && x.length>=4 && !tem[Math.round(x[2]/1000)]; })
+              .map(function(x){ return [x[0], x[1], x[2], x[3], x[4]||0, 'n']; });
+  if(!novos.length) return null;
+  var todos=rasto.concat(novos).sort(function(a,b){ return a[2]-b[2]; });
+  var fica=[], n=0;
+  todos.forEach(function(x){
+    if(x[5]!=='n'){ fica.push(x); return; }
+    var u=fica[fica.length-1];
+    if(u && x[2]-u[2]<PASSO_MS && dist(u[0],u[1],x[0],x[1])<Math.max(PASSO_M, x[3]||0)) return;
+    fica.push(x.slice(0,5)); n++; });
+  return n ? fica : null;
+}
+function juntarNativos(){
+  var B=pluginNativo('Bateria');
+  if(!B || !B.pontos || !S.turno || S.turno.fim || S.simular) return;
+  /* já está a juntar: volta a correr no fim (podem ter chegado mais) */
+  if(aJuntar){ juntarOutraVez=true; return; }
+  var id=S.turno.id, inicio=S.turno.inicio||0;
+  aJuntar=true;
+  var acabou=function(){ aJuntar=false;
+    if(juntarOutraVez){ juntarOutraVez=false; setTimeout(juntarNativos, 0); } };
+  quando(B.pontos({turno:id, desde:0})).then(function(r){
+    acabou();
+    if(!S.turno || S.turno.id!==id || S.turno.fim) return;
+    var ps=((r&&r.pontos)||[]).filter(function(x){ return x && x[2]>=inicio; });
+    var ate=0; ps.forEach(function(x){ if(x[2]>ate) ate=x[2]; });
+    var novo=ps.length ? juntarPontos(S.turno.rasto||[], ps) : null;
+    if(novo){
+      var antes=(S.turno.rasto||[]).length;
+      /* um percurso novo (e não o mesmo a crescer): os km recontam-se */
+      S.turno.rasto=novo;
+      registar('info', 'gps-nativo-juntou', (novo.length-antes)+' pontos', {pontos:novo.length-antes});
+      guardar();
+      Nuvem.posicao(S.turno, extraVivo(), true);
+      if(S.ecra==='volante') pintar();
+    }
+    if(ate) quando(B.esquecer({ate:ate})).catch(function(){});
+  }).catch(acabou);
 }
 
 function ligarGps(){
@@ -335,6 +404,9 @@ function aceitarGps(pos){
   var c=pos.coords, antes=S.gps.estado, chegou=Date.now();
   /* mais de um minuto sem posição nenhuma, com o turno aberto: o
      telemóvel parou o GPS (ou adormeceu a aplicação). Fica registado. */
+  /* a página esteve parada (o lado nativo guardou os pontos desse tempo) */
+  if(S.turno && !S.turno.fim && S.gps.ultimaChegada && chegou-S.gps.ultimaChegada>20000)
+    setTimeout(juntarNativos, 0);
   if(S.turno && !S.turno.fim && S.gps.ultimaChegada && chegou-S.gps.ultimaChegada>60000)
     registar('aviso', 'gps-parou', Math.round((chegou-S.gps.ultimaChegada)/1000)+' s sem posições'+
       (S.gps.escondidaDesde && S.gps.escondidaDesde<S.gps.ultimaChegada+5000 ? ', com o ecrã apagado' : ''),
@@ -934,7 +1006,7 @@ function pintar(){
             '<a class="bt sec pq" href="/android" style="margin-top:8px;display:inline-block;'+
             'text-decoration:none">Instalar a aplicação</a></div>' : ''))+
       (S.bateriaPresa ? cartaoBateria() : '')+
-      (nativo() && S.app && !S.app.trava ? cartaoAtualizar() : '')+
+      (nativo() && S.app && !(S.app.trava && S.app.envio) ? cartaoAtualizar() : '')+
       (dentroDeOutraApp() ? '<div class="cartao mau"><h2>Abra no Chrome</h2><p class="p-nota" '+
         'style="margin-top:4px">Esta página abriu dentro de outra aplicação (Instagram, Facebook…). '+
         'Aí o GPS pára ainda mais depressa. Copie o endereço e abra-o no Chrome.</p></div>' : '');
@@ -1408,7 +1480,7 @@ function voltou(){
 document.addEventListener('visibilitychange', function(){
   S.gps.escondidaDesde = document.hidden ? Date.now() : null;
   if(document.hidden) saiu();
-  else { voltou(); if(S.ecra==='volante') pintar();
+  else { voltou(); juntarNativos(); if(S.ecra==='volante') pintar();
     /* volta das definições do telemóvel (bateria, licenças): ver outra vez */
     if(vigiaNativa!=null) verBateria(); } });
 window.addEventListener('pagehide', saiu);
@@ -1510,6 +1582,7 @@ function retomar(){
     S.carro=acha(FROTA.carros, L.turno.carroId)||S.carro;
     S.simular=!!L.turno.simulado;
     S.ecra='volante';
+    if(!S.simular) juntarNativos();
     if(S.simular) simular(); else ligarGps();
     if(!tic) tic=setInterval(function(){ if(S.ecra==='volante') pintar(); },1000);
     if(!pulso) pulso=setInterval(function(){ if(S.ecra==='volante') pulsarVel(); },100);

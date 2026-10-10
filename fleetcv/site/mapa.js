@@ -1272,6 +1272,12 @@ function lojaDoSupabase(sb){
       try{ localStorage.removeItem(COPIA); }catch(e){}
       return sb.rpc('sair').then(function(){ eu=null; }); },
     eu:function(){ return eu; },
+    /* a chave da sessão, para a aplicação Android mandar posições
+       sozinha quando a página adormecer (EnvioNativo, desde a 1.2.0) */
+    token:function(){
+      return sb.auth.getSession().then(function(s){
+        return (s && s.data && s.data.session) ? s.data.session.access_token : null;
+      }).catch(function(){ return null; }); },
 
     /* traz tudo de uma vez e depois fica à escuta */
     comecar:function(){
@@ -2044,8 +2050,13 @@ function gravarRasto(id, pts){
   var novas=[];
   for(var i=0, n=0; i<pts.length; i+=PARTE_MAX, n++){
     var tam=Math.min(PARTE_MAX, pts.length-i);
-    if(subido.partes[n]===tam) continue;
-    subido.partes[n]=tam;
+    /* conhece-se cada pedaço pelo tamanho e pelas horas do primeiro e
+       do último ponto: a aplicação Android pode juntar pontos no meio
+       (os que guardou com a página a dormir), e um pedaço com o mesmo
+       tamanho já não é o mesmo pedaço */
+    var sinal=tam+':'+pts[i][2]+':'+pts[i+tam-1][2];
+    if(subido.partes[n]===sinal) continue;
+    subido.partes[n]=sinal;
     novas.push({n:n, pts:pts.slice(i, i+tam)});
   }
   if(!novas.length) return Promise.resolve();
@@ -2074,7 +2085,7 @@ function rastoDe(id){
 /* ─── a posição ao vivo ─────────────────────────────────── */
 /* Chamada a cada ponto de GPS, mas só sobe de 4 em 4 segundos e só se
    o carro mexeu. É este travão que faz caber um dia de trabalho. */
-var pendente=null, relogioVivo=null, ultimaSubida=0, aEscrever=false;
+var pendente=null, relogioVivo=null, ultimaSubida=0, aEscrever=false, aoSubirVivo=null;
 var caudaInteira=0, enviados=0, turnoDaCauda=null;
 var ondeUltima=null, mexeu=true;
 
@@ -2146,6 +2157,7 @@ function subir(jaa){
   loja.por('vivo', p.id, p).then(function(){
     aEscrever=false;
     if(ritmo>RITMO_VIVO) ritmo=Math.max(RITMO_VIVO, ritmo-2000);
+    if(aoSubirVivo) try{ aoSubirVivo(p); }catch(e){}
   }).catch(function(e){
     aEscrever=false;
     /* não chegou: a próxima leva a cauda inteira, para não ficar buraco */
@@ -2296,6 +2308,16 @@ return {
   abrirTurno:abrirTurno,
   guardandoRasto:guardandoRasto,
   posicao:posicao,
+  /* chamada depois de cada posição que chega à base (a aplicação
+     Android passa-a ao lado nativo) */
+  aoSubirVivo:function(fn){ aoSubirVivo=fn; },
+  /* o endereço da base, a chave pública e a da sessão, e a frota */
+  acesso:function(){
+    if(!(loja && loja.supabase && loja.token)) return Promise.resolve(null);
+    var c=window.FLEETCV_CONFIG||{}, e=loja.eu&&loja.eu();
+    return loja.token().then(function(t){
+      return t ? {url:c.supabaseUrl, chave:c.supabaseChave, token:t,
+                  frota:(e&&e.frota)||null} : null; }); },
   fecharTurno:fecharTurno,
   guardarFrota:guardarFrota,
   guardarTurno:guardarTurno,

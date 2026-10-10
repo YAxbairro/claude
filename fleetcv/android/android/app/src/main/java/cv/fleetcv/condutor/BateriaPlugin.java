@@ -25,6 +25,44 @@ public class BateriaPlugin extends Plugin {
 
     private PowerManager.WakeLock trava;
 
+    @Override
+    public void load() {
+        super.load();
+        EnvioNativo.um(getContext()).ouvir();
+    }
+
+    /**
+     * A página está viva e acabou de mandar a posição: dá ao lado nativo
+     * o turno, a base e a chave, para ele continuar se ela adormecer
+     * (ver EnvioNativo). Desde a 1.2.0.
+     */
+    @PluginMethod
+    public void turno(PluginCall call) {
+        EnvioNativo.um(getContext()).pagina(call.getData());
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void fim(PluginCall call) {
+        EnvioNativo.um(getContext()).fim();
+        call.resolve();
+    }
+
+    /** Os pontos do percurso que o lado nativo guardou desde um instante. */
+    @PluginMethod
+    public void pontos(PluginCall call) {
+        JSObject r = new JSObject();
+        r.put("pontos", EnvioNativo.um(getContext()).pontos(
+            call.getString("turno"), call.getLong("desde", 0L)));
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void esquecer(PluginCall call) {
+        EnvioNativo.um(getContext()).esquecer(call.getLong("ate", 0L));
+        call.resolve();
+    }
+
     @PluginMethod
     public void estado(PluginCall call) {
         JSObject r = new JSObject();

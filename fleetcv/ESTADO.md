@@ -31,6 +31,20 @@ Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
   E as páginas de venda das instituições e do rent-a-car. 35 de 35, a 7 de
   Outubro (as páginas abrem-se pelo navegador, como um cliente as abre).
 
+- **O GPS que parava em segundo plano (10/10), aplicação 1.2.0.** Num Samsung
+  Galaxy A02 (Android 11, pouca memória), com a bateria já "Não optimizada",
+  as posições pararam 2 a 3 minutos depois de o ecrã apagar (13:47–13:49:56,
+  e depois nada, com o turno aberto). O serviço do GPS é do Android, mas
+  quem mandava as posições era a página, e o Android adormece-a ou mata-a.
+  Na 1.2.0 o lado nativo (`EnvioNativo.java`) guarda os pontos e, com a
+  página calada há mais de 20 s, manda ele a posição; quando a página volta
+  junta os pontos ao percurso. E se o processo da página for abaixo a
+  aplicação já não fecha (fechava, com o GPS). Provado: banco de ensaio do
+  código nativo (`android/banco/correr.sh`, 22 de 22), a aplicação imitada
+  (`teste_app_android`), e ao vivo o mesmo pedido aceite pela base com a
+  página do condutor fechada e recebido pelo patrão. **Falta o teste no
+  telemóvel.** O `/FleetCV.apk` passou a ser a 1.2.0.
+
 - **A sessão que o iPhone perdia (10/10).** Um condutor novo, num iPhone
   (Safari, iOS 18.6), não conseguia entrar: "sessão por abrir". Os
   registos do Supabase mostram a sessão anónima criada às 12:02:07 e
@@ -391,10 +405,10 @@ Os testes que usam o servidor próprio (`teste_clicavel`,
    Provado duas vezes por cima da base no `provar.sh`. Sem isto, o
    "Esqueci-me do código" manda para o WhatsApp e o registo de erros fica
    calado.
-2. **Piloto com a 1.0.1** (`/FleetCV.apk`): bateria "Permitir", ver a
-   notificação fixa, 30 min de ecrã apagado a andar.
-3. **Testar a 1.1.0** (`/teste/FleetCV-1.1.0.apk`) num telemóvel: as barras
-   do sistema, um turno com o ecrã apagado (lista em `android/play/LEIA-ME.md`).
+2. **Testar a 1.2.0** (`/FleetCV.apk`, instala por cima): um turno de 30 min
+   com o ecrã apagado no Galaxy A02 — o patrão tem de continuar a ver o carro
+   andar. E as barras do sistema (lista em `android/play/LEIA-ME.md`). A
+   1.0.1 ficou em `/teste/FleetCV-1.0.1.apk`, para voltar atrás se for preciso.
 4. **Jurista**: rever `/privacidade` e `/termos`, completar empresa, NIF e
    morada; ver se o uso pelos clientes pede comunicação à CNPD.
 5. **Domínio e casa comercial**: comprar o domínio e criar o Cloudflare

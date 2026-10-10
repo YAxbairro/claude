@@ -28,7 +28,7 @@ const daVercel=p=>{ const h={};
     if(new RegExp('^'+r.source+'$').test(p)) for(const x of r.headers) h[x.key.toLowerCase()]=x.value; }
   return h; };
 
-const caminhos=['/','/app','/privacidade','/FleetCV.apk','/teste/FleetCV-1.1.0.apk','/teste/FleetCV-1.1.0.aab',
+const caminhos=['/','/app','/privacidade','/FleetCV.apk','/teste/FleetCV-1.2.0.apk','/teste/FleetCV-1.2.0.aab','/teste/FleetCV-1.0.1.apk',
   '/fleetcv-config.js','/mapa.js','/condutor.js','/dono.js','/porteiro.js','/estilo.css',
   '/mapa/'+fs.readdirSync(path.join(SITE,'mapa')).find(f=>f.endsWith('.pmtiles'))];
 for(const p of caminhos){

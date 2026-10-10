@@ -371,7 +371,7 @@
       auth:{
         getSession:function(){
           sessao = sessao || localStorage.getItem(chaveSessao);
-          return Promise.resolve({data:{session: sessao?{user:{id:sessao}}:null}}); },
+          return Promise.resolve({data:{session: sessao?{user:{id:sessao}, access_token:'jwt-'+sessao}:null}}); },
         signInAnonymously:function(){
           sessao='anon-'+Math.random().toString(36).slice(2);
           localStorage.setItem(chaveSessao, sessao);

@@ -41,15 +41,22 @@ const ANDROID='Mozilla/5.0 (Linux; Android 16; SM-A245F) AppleWebKit/537.36 (KHT
 const capacitor=(op)=>{
   op=op||{};
   window.__nat={watchers:0, removidos:0, bateriaPedida:0, definicoes:0, opcoes:null, cb:null,
-                ordem:[], seguras:0, largadas:0, licenca:'prompt', aPedir:false};
+                ordem:[], seguras:0, largadas:0, licenca:'prompt', aPedir:false,
+                turnos:[], fins:0, buffer:[], esquecido:0};
   const P=v=>new Promise(r=>setTimeout(()=>r(v), 30));
   const bateria={
     estado(){ return P(Object.assign({semRestricoes: __nat.bateriaPedida>0, fabricante:'samsung'},
-                                     op.antiga ? {} : {versao:'1.0.1'})); },
+                                     op.antiga ? {} : {versao: op.semEnvio ? '1.0.1' : '1.2.0'})); },
     pedir(){ __nat.bateriaPedida++; return P(); } };
   if(!op.antiga){
     bateria.segurar=function(){ __nat.seguras++; return P(); };
     bateria.largar=function(){ __nat.largadas++; return P(); }; }
+  /* 1.2.0: o lado nativo guarda e manda as posições se a página adormecer */
+  if(!op.antiga && !op.semEnvio){
+    bateria.turno=function(o){ __nat.turnos.push(JSON.parse(JSON.stringify(o))); return P(); };
+    bateria.fim=function(){ __nat.fins++; return P(); };
+    bateria.pontos=function(o){ return P({pontos: __nat.buffer.filter(x=>x[2]>(o.desde||0))}); };
+    bateria.esquecer=function(o){ __nat.esquecido=o.ate; __nat.buffer=__nat.buffer.filter(x=>x[2]>o.ate); return P(); }; }
   window.Capacitor={ isNativePlatform:()=>true, Plugins:{
     BackgroundGeolocation:{
       checkPermissions(){ __nat.ordem.push('ver'); return P({location:__nat.licenca}); },
@@ -140,6 +147,14 @@ const v1=await vivoNaBase(c);
 ok('com o ecrã apagado, o condutor NÃO é dado como fora da aplicação', v1 && !v1.fora, JSON.stringify({fora:v1&&v1.fora}));
 ok('e as posições continuam a chegar à base', v1 && v0 && v1.lat>v0.lat && v1.momento>v0.momento,
    (v0&&v0.lat)+' → '+(v1&&v1.lat));
+const nt=await c.evaluate(()=>__nat.turnos);
+const ultT=nt[nt.length-1]||{};
+ok('a cada envio, a página passa ao lado nativo o turno, a base e a chave da sessão',
+   nt.length>=1 && /^t\d+/.test(ultT.id||'') && ultT.url==='https://x.supabase.co' &&
+   ultT.chave==='anon-de-mentira' && /^jwt-/.test(ultT.token||'') && ultT.frota==='f1' &&
+   ultT.corpo && ultT.corpo.id===ultT.id && ultT.corpo.lat!=null && ultT.precisaoMax===50,
+   JSON.stringify({n:nt.length, id:ultT.id, url:ultT.url, token:(ultT.token||'').slice(0,4), frota:ultT.frota}));
+ok('mas sem gastar: no máximo de 5 em 5 segundos', nt.length<=3, nt.length+' em ~6 s');
 /* o Android adormece a aplicação minuto e meio: quando volta, fica registado */
 await c.evaluate(()=>{ const antes=Date.now; Date.now=()=>antes()+90000; window.__antes=antes; });
 await posicao(c); await c.waitForTimeout(300);
@@ -159,11 +174,32 @@ await c.evaluate(()=>{
   Object.defineProperty(document,'hidden',{configurable:true,get:()=>false});
   Object.defineProperty(document,'visibilityState',{configurable:true,get:()=>'visible'});
   document.dispatchEvent(new Event('visibilitychange')); });
+const vAntes=await vivoNaBase(c);
+await c.evaluate(v=>{
+  /* o caminho que só o lado nativo viu (a página dormia): doze pontos,
+     a cem metros e dez segundos uns dos outros (36 km/h), depois do
+     último que a página tem */
+  const r=v.rasto||[], t0=(r.length?r[r.length-1][2]:Date.now())+1000;
+  for(let i=0;i<12;i++) __nat.buffer.push([+(14.93+i*0.0009).toFixed(6), +(-23.50+i*0.0006).toFixed(6), t0+i*10000, 5, 36]);
+  document.dispatchEvent(new Event('visibilitychange')); }, vAntes);
+await c.waitForTimeout(1500);
+const vDepois=await vivoNaBase(c);
+ok('ao voltar, os pontos que o lado nativo guardou entram no percurso (e nos km)',
+   vDepois && vAntes && vDepois.nPontos>=vAntes.nPontos+10 && vDepois.kmGps>vAntes.kmGps+0.8,
+   JSON.stringify({pontos:[vAntes&&vAntes.nPontos, vDepois&&vDepois.nPontos], km:[vAntes&&vAntes.kmGps, vDepois&&vDepois.kmGps]}));
+ok('e o lado nativo esquece-os, para não entrarem duas vezes',
+   await c.evaluate(()=>__nat.esquecido>0 && __nat.buffer.length===0));
+await c.evaluate(()=>document.dispatchEvent(new Event('visibilitychange')));
+await c.waitForTimeout(800);
+const vOutra=await vivoNaBase(c);
+ok('voltar outra vez não os junta de novo', vOutra && vOutra.nPontos<=vDepois.nPontos+1,
+   (vDepois&&vDepois.nPontos)+' → '+(vOutra&&vOutra.nPontos));
 await c.click('[data-f="ir-fim"]'); await c.waitForTimeout(600);
 await c.click('[data-f="terminar"]'); await c.waitForTimeout(1500);
 ok('o turno fecha', /Turno terminado/.test(await txt()));
 ok('e o serviço do GPS desliga-se (a notificação some), e o telemóvel fica livre para dormir',
    await c.evaluate(()=>__nat.removidos>=1 && __nat.largadas>=1));
+ok('e o lado nativo deixa de guardar e de mandar posições', await c.evaluate(()=>__nat.fins>=1));
 
 /* ── a licença tirada nas definições, a meio ──────────────── */
 await c.locator('[data-f="novo-turno"], [data-f="ir-carro"]').first().click().catch(()=>{});
@@ -204,6 +240,17 @@ await a.waitForTimeout(400);
 ok('com a aplicação antiga, o GPS liga na mesma e pede para instalar a versão nova',
    await a.evaluate(()=>__nat.watchers)===1 && /versão nova da aplicação/.test(await a.textContent('#ecra')) &&
    (await a.getAttribute('a[href="/FleetCV.apk"]','href'))==='/FleetCV.apk');
+
+const ctxB=await b.newContext({viewport:{width:390,height:844}, userAgent:ANDROID});
+const a2=await ctxB.newPage();
+a2.on('pageerror',e=>err.push('1.0.1: '+e.message));
+await a2.addInitScript(capacitor, {semEnvio:true});
+await entrarComCarro(a2);
+await a2.click('[data-f="ir-gps"]'); await a2.waitForTimeout(900);
+await a2.evaluate(()=>__nat.cb && __nat.cb({latitude:14.9177, longitude:-23.5092, accuracy:6, speed:0, time:Date.now()}));
+await a2.waitForTimeout(400);
+ok('com a 1.0.1 (sem o envio nativo), também pede para instalar a versão nova',
+   /versão nova da aplicação/.test(await a2.textContent('#ecra')));
 
 /* ── no navegador de um Android: sugere a aplicação ───────── */
 const ctx2=await b.newContext({viewport:{width:390,height:844}, userAgent:ANDROID,

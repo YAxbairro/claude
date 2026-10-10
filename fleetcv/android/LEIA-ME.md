@@ -22,7 +22,20 @@ directório).
   aplicações em segundo plano); segura o telemóvel acordado durante o
   turno (`segurar`/`largar`, desde a 1.0.1) e diz a versão da aplicação
   (a página pede para actualizar quem tiver uma anterior);
-- licenças: localização, notificações, câmara, ecrã aceso.
+- licenças: localização, notificações, câmara, ecrã aceso;
+- desde a 1.2.0, `EnvioNativo.java`: ouve as posições do serviço do GPS e
+  guarda-as num ficheiro, e se a página estiver calada há mais de 20 s
+  manda ela própria a posição ao vivo para a base (o mesmo pedido que a
+  página faz, com a chave da sessão que a página lhe passa a cada envio).
+  Quando a página volta, junta ao percurso os pontos guardados. No teste
+  de 10/10 (Samsung Galaxy A02, Android 11) o envio parava 2 a 3 minutos
+  depois de o ecrã apagar, com a bateria já sem restrições: o Android
+  adormecia ou matava a página. E `MainActivity`: o processo da página
+  fica com a importância da aplicação, e se mesmo assim for abaixo a
+  aplicação não fecha (antes fechava, com o GPS) — a página volta quando
+  o condutor a abrir. Provado fora do Android num banco de ensaio
+  (servidor de mentira) e, ao vivo, o mesmo pedido aceite pela base
+  verdadeira com a página do condutor fechada.
 
 A página sabe que está dentro da aplicação (`window.Capacitor`) e usa o GPS
 nativo em vez do do navegador (`paineis/painel_condutor.html`, `nativo()`).
