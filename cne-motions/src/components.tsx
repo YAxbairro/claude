@@ -36,9 +36,11 @@ export const Tag: React.FC<{ text: string; delay: number; size?: number; color?:
 // Word that rises from behind a mask
 export const Rise: React.FC<{ children: React.ReactNode; delay: number; style?: React.CSSProperties }> = ({ children, delay, style }) => {
   const p = useIn(delay, 18);
+  // Fully hidden until the word starts moving; the extra top padding keeps accents
+  // (Ã, É, Ó…) inside the mask, and 160% travel pushes everything below it.
   return (
-    <div style={{ overflow: "hidden", paddingBottom: 8 }}>
-      <div style={{ transform: `translateY(${(1 - p) * 110}%)`, ...style }}>{children}</div>
+    <div style={{ overflow: "hidden", paddingTop: 14, marginTop: -14, paddingBottom: 8 }}>
+      <div style={{ transform: `translateY(${(1 - p) * 160}%)`, visibility: p < 0.004 ? "hidden" : "visible", ...style }}>{children}</div>
     </div>
   );
 };
