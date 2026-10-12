@@ -4,7 +4,7 @@ import { LogoAnim } from "../LogoAnim";
 import { SANS } from "../theme";
 import { Art, RED, ease, sec } from "./kit";
 import { DEEP, Flag, Kicker, LIGHT, TEAL } from "./devices";
-import { Halo, T, Wipe } from "./Spot2";
+import { Halo, ParticipaPill, T, Wipe } from "./Spot2";
 
 // Three alternative endings for "Cada voto conta. O teu também. Participa!" (voice 33.5s–36.0s).
 // Each option plays the same slice of the voice-over, 33.0s → 38.2s of the spot.
@@ -38,35 +38,6 @@ const Fade: React.FC<{ from: number; to: number; children: React.ReactNode; dy?:
 };
 
 // ---------- Option 1: one continuous card, the sentence builds up next to the voter ----------
-const ParticipaPill: React.FC<{ delay: number }> = ({ delay }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const p = spring({ frame: frame - delay, fps, config: { damping: 10, mass: 0.6 } });
-  const tick = ease(frame, delay + 6, delay + 14);
-  return (
-    <div
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 26,
-        background: RED,
-        borderRadius: 90,
-        padding: "22px 54px 22px 30px",
-        boxShadow: "0 20px 40px rgba(120,10,20,0.35)",
-        transform: `scale(${p})`,
-        transformOrigin: "left center",
-        visibility: p < 0.01 ? "hidden" : "visible",
-      }}
-    >
-      <svg width="76" height="76" viewBox="0 0 100 100">
-        <circle cx="50" cy="50" r="46" fill="#fff" />
-        <path d="M28 52 L44 67 L73 35" fill="none" stroke={RED} strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - tick} />
-      </svg>
-      <span style={{ fontFamily: SANS, fontWeight: 800, fontSize: 92, color: W, letterSpacing: 2 }}>PARTICIPA!</span>
-    </div>
-  );
-};
-
 const Option1: React.FC = () => (
   <AbsoluteFill style={{ background: TEAL }}>
     <Halo x={560} y={640} size={900} />

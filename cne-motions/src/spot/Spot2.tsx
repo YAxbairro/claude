@@ -4,7 +4,7 @@ import { LogoAnim } from "../LogoAnim";
 import { SANS } from "../theme";
 import { Art, Line, RED, Underline, ease, sec, useExit } from "./kit";
 import { BallotIcon, Calendar, DatePage, HospitalIcon, InstitutionIcon } from "./vectors";
-import { BRIGHT, DEEP, Depth, Flag, INDIGO, Kicker, LIGHT, Laptop, Phone, SearchBar, TEAL } from "./devices";
+import { BRIGHT, DEEP, Depth, INDIGO, Kicker, LIGHT, Laptop, Phone, SearchBar, TEAL } from "./devices";
 
 // Spot "Voto antecipado" v2 – same script and timing as v1, restyled after the
 // CNE "cadernos de recenseamento" spot: flat colour fields, white type, real website.
@@ -337,56 +337,57 @@ const S8: React.FC<{ start: number }> = ({ start }) => {
 };
 
 // Closing beats, as in the reference: three quick cards
-const S9a: React.FC<{ start: number }> = ({ start }) => (
+// Chosen ending (option 1): one continuous card, the sentence builds next to the voter
+export const ParticipaPill: React.FC<{ delay: number }> = ({ delay }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const p = spring({ frame: frame - delay, fps, config: { damping: 10, mass: 0.6 } });
+  const tick = ease(frame, delay + 6, delay + 14);
+  return (
+    <div
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 26,
+        background: RED,
+        borderRadius: 90,
+        padding: "22px 54px 22px 30px",
+        boxShadow: "0 20px 40px rgba(120,10,20,0.35)",
+        transform: `scale(${p})`,
+        transformOrigin: "left center",
+        visibility: p < 0.01 ? "hidden" : "visible",
+      }}
+    >
+      <svg width="76" height="76" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="46" fill="#fff" />
+        <path d="M28 52 L44 67 L73 35" fill="none" stroke={RED} strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - tick} />
+      </svg>
+      <span style={{ fontFamily: SANS, fontWeight: 800, fontSize: 92, color: W, letterSpacing: 2 }}>PARTICIPA!</span>
+    </div>
+  );
+};
+
+const S9: React.FC<{ start: number }> = ({ start }) => (
   <AbsoluteFill>
     <Halo x={560} y={640} size={900} />
     <Art src="spot/idoso.png" delay={L(33.4, start)} from="left" style={{ left: 120, top: 220, height: 860 }} />
-    <div style={{ position: "absolute", left: 1150, top: 360 }}>
-      <Kicker delay={L(33.52, start)} size={70}>
+    <div style={{ position: "absolute", left: 980, top: 250 }}>
+      <Kicker delay={L(33.52, start)} size={64}>
         Cada voto
       </Kicker>
-      <div style={{ height: 14 }} />
-      <T d={L(33.96, start)} size={170}>
+      <div style={{ height: 6 }} />
+      <T d={L(33.96, start)} size={150}>
         conta.
       </T>
-      <Underline delay={L(34.2, start)} width={260} align="left" />
+      <div style={{ height: 26 }} />
+      <T d={L(34.74, start)} size={78} box={DEEP}>
+        O teu também.
+      </T>
+      <div style={{ height: 46 }} />
+      <ParticipaPill delay={L(35.28, start)} />
     </div>
   </AbsoluteFill>
 );
-
-const Punch: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const p = spring({ frame, fps, config: { damping: 14, mass: 0.5 } });
-  return <AbsoluteFill style={{ alignItems: "center", justifyContent: "center", transform: `scale(${1.25 - 0.25 * p})`, opacity: Math.min(1, p * 2) }}>{children}</AbsoluteFill>;
-};
-
-const S9b: React.FC = () => (
-  <Punch>
-    <div style={{ textAlign: "center", fontFamily: SANS, fontWeight: 800, color: W, textTransform: "uppercase", lineHeight: 1.02 }}>
-      <div style={{ fontSize: 150 }}>O teu</div>
-      <div style={{ fontSize: 190 }}>também.</div>
-    </div>
-  </Punch>
-);
-
-const S9c: React.FC<{ withFlag: boolean }> = ({ withFlag }) => {
-  const frame = useCurrentFrame();
-  const track = interpolate(frame, [0, 30], [0.32, 0.12], clamp);
-  return (
-    <AbsoluteFill>
-      {withFlag && (
-        <AbsoluteFill style={{ transform: "scale(1.15)" }}>
-          <Flag width={1920} height={1080} />
-          <AbsoluteFill style={{ background: "rgba(20,30,80,0.45)" }} />
-        </AbsoluteFill>
-      )}
-      <Punch>
-        <div style={{ fontFamily: SANS, fontWeight: 800, fontSize: 200, color: W, letterSpacing: `${track}em`, textShadow: "0 10px 40px rgba(0,0,0,0.35)" }}>PARTICIPA!</div>
-      </Punch>
-    </AbsoluteFill>
-  );
-};
 
 // CNE logo in the corner, as in the reference spot
 const Bug: React.FC = () => {
@@ -434,14 +435,8 @@ export const Spot2: React.FC<Spot2Props> = ({ variant }) => {
         <Scene from={30.1} to={33.35} name="08 Linha gratuita" bg={TEAL}>
           <S8 start={30.1} />
         </Scene>
-        <Scene from={33.35} to={34.7} name="09a Cada voto conta" bg={TEAL}>
-          <S9a start={33.35} />
-        </Scene>
-        <Scene from={34.7} to={35.25} name="09b O teu tambem" bg={DEEP}>
-          <S9b />
-        </Scene>
-        <Scene from={35.25} to={36.45} name="09c Participa (bandeira)" bg={DEEP}>
-          <S9c withFlag />
+        <Scene from={33.35} to={36.45} name="09 Cada voto conta. O teu também. Participa!" bg={TEAL}>
+          <S9 start={33.35} />
         </Scene>
         <Sequence from={sec(36.45)} name="10 Logo final">
           {withBg && <AbsoluteFill style={{ background: LIGHT }} />}
