@@ -32,7 +32,7 @@ const Exit: React.FC<{ children: React.ReactNode; len?: number }> = ({ children,
 };
 
 // Same colour wipe as v1 (approved), in the new navy
-const Wipe: React.FC = () => {
+export const Wipe: React.FC = () => {
   const frame = useCurrentFrame();
   const p = ease(frame, 0, 16, Easing.inOut(Easing.quad));
   const x = interpolate(p, [0, 1], [-2700, 2300]);
@@ -46,7 +46,7 @@ const Wipe: React.FC = () => {
 const WIPES = [6.9, 11.5, 15.2, 22.25, 33.35, 36.45];
 
 // Soft translucent disc behind illustrations
-const Halo: React.FC<{ x: number; y: number; size: number; delay?: number }> = ({ x, y, size, delay = 0 }) => {
+export const Halo: React.FC<{ x: number; y: number; size: number; delay?: number }> = ({ x, y, size, delay = 0 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const p = spring({ frame: frame - delay, fps, config: { damping: 18, mass: 0.8 } });
@@ -54,7 +54,7 @@ const Halo: React.FC<{ x: number; y: number; size: number; delay?: number }> = (
 };
 
 // White line helper (all type is white on the colour fields)
-const T: React.FC<{ d: number; size: number; box?: string; children: React.ReactNode; align?: "left" | "center" | "right"; weight?: number; spacing?: number }> = ({
+export const T: React.FC<{ d: number; size: number; box?: string; children: React.ReactNode; align?: "left" | "center" | "right"; weight?: number; spacing?: number }> = ({
   d,
   size,
   box,

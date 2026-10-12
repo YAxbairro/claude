@@ -6,6 +6,7 @@ import { Capa } from "./ep2/Capa";
 import { EP2_DURATION, Overlay2 } from "./ep2/Overlay2";
 import { SPOT_DURATION, Spot } from "./spot/Spot";
 import { SPOT2_DURATION, Spot2 } from "./spot/Spot2";
+import { FINALS_DURATION, FinalsReel } from "./spot/Finals";
 import { SPOT_FPS } from "./spot/kit";
 import { DURATION, FPS } from "./theme";
 
@@ -65,5 +66,6 @@ export const RemotionRoot: React.FC = () => (
         defaultProps={{ variant }}
       />
     ))}
+    <Composition id="SpotFinaisOpcoes" component={FinalsReel} durationInFrames={FINALS_DURATION} fps={SPOT_FPS} width={1920} height={1080} />
   </>
 );
