@@ -50,42 +50,113 @@ const Mandate: React.FC<{ start: number; numberAt: number }> = ({ start, numberA
   );
 };
 
+// ---------- Constitution of Cabo Verde (2020 edition), redrawn as a clean vector cover ----------
+const Star: React.FC<{ x: number; y: number; r: number }> = ({ x, y, r }) => {
+  const pts = Array.from({ length: 10 })
+    .map((_, k) => {
+      const a = (k / 10) * Math.PI * 2 - Math.PI / 2;
+      const rr = k % 2 === 0 ? r : r * 0.42;
+      return `${(x + Math.cos(a) * rr).toFixed(2)},${(y + Math.sin(a) * rr).toFixed(2)}`;
+    })
+    .join(" ");
+  return <polygon points={pts} fill="#F7C51E" />;
+};
+
+export const ConstitutionBook: React.FC<{ enter: number; sheen: number; shadow?: boolean; tilt?: number }> = ({ enter, sheen, shadow = true, tilt = -3 }) => {
+  const W = 300;
+  const H = 420;
+  // flag band (proportions as printed on the cover)
+  const fy = 64;
+  const fh = 174;
+  const u = fh / 12;
+  const cx = 103;
+  const cy = fy + 7.5 * u;
+  const ink = "#2E2E33";
+  const font = "Montserrat";
+  return (
+    <svg
+      width={W + 22}
+      height={H + 18}
+      viewBox={`0 0 ${W + 22} ${H + 18}`}
+      style={{
+        transform: `translateY(${(1 - enter) * 130}px) rotate(${(1 - enter) * 10 + tilt}deg)`,
+        opacity: enter > 0.01 ? 1 : 0,
+        filter: shadow ? "drop-shadow(0 22px 34px rgba(0,0,0,0.38))" : undefined,
+        overflow: "visible",
+      }}
+    >
+      <defs>
+        <linearGradient id="coverLight" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0" stopColor="#FFFFFF" stopOpacity="0.35" />
+          <stop offset="0.5" stopColor="#FFFFFF" stopOpacity="0" />
+          <stop offset="1" stopColor="#000000" stopOpacity="0.08" />
+        </linearGradient>
+        <linearGradient id="spine" x1="0" x2="1">
+          <stop offset="0" stopColor="#000" stopOpacity="0.22" />
+          <stop offset="1" stopColor="#000" stopOpacity="0" />
+        </linearGradient>
+        <linearGradient id="sheen" x1="0" x2="1" y1="0" y2="0.4">
+          <stop offset={sheen * 1.4 - 0.3} stopColor="#fff" stopOpacity="0" />
+          <stop offset={sheen * 1.4 - 0.15} stopColor="#fff" stopOpacity="0.55" />
+          <stop offset={sheen * 1.4} stopColor="#fff" stopOpacity="0" />
+        </linearGradient>
+        <clipPath id="coverClip">
+          <rect width={W} height={H} rx="6" />
+        </clipPath>
+      </defs>
+      {/* page block */}
+      <rect x="14" y="10" width={W} height={H} rx="6" fill="#E9E4D8" />
+      {Array.from({ length: 6 }).map((_, i) => (
+        <rect key={i} x={W + 2 + i * 2} y={12 + i} width="1" height={H - 4} fill="#CFC8B8" />
+      ))}
+      {/* cover */}
+      <g clipPath="url(#coverClip)">
+        <rect width={W} height={H} fill="#F6F5F1" />
+        <text x={W / 2} y="28" textAnchor="middle" fontFamily={font} fontWeight={700} fontSize="12.5" fill={ink} letterSpacing="0.3">
+          MINISTÉRIO DA JUSTIÇA E TRABALHO
+        </text>
+        <text x={W / 2} y="54" textAnchor="middle" fontFamily={font} fontWeight={800} fontSize="18" fill={ink} letterSpacing="0.5">
+          CABO VERDE
+        </text>
+        {/* flag of Cabo Verde */}
+        <rect y={fy} width={W} height={fh} fill="#2F4CA0" />
+        <rect y={fy + 6 * u} width={W} height={u} fill="#FFFFFF" />
+        <rect y={fy + 7 * u} width={W} height={u} fill="#D62532" />
+        <rect y={fy + 8 * u} width={W} height={u} fill="#FFFFFF" />
+        {Array.from({ length: 10 }).map((_, i) => {
+          const a = (i / 10) * Math.PI * 2 - Math.PI / 2;
+          return <Star key={i} x={cx + Math.cos(a) * 4.4 * u} y={cy + Math.sin(a) * 4.4 * u} r={0.95 * u} />;
+        })}
+        <text x={W / 2} y="290" textAnchor="middle" fontFamily={font} fontWeight={800} fontSize="17.5" fill={ink} letterSpacing="0.2">
+          CONSTITUIÇÃO DA REPÚBLICA
+        </text>
+        <text x={W / 2} y="314" textAnchor="middle" fontFamily={font} fontWeight={800} fontSize="17.5" fill={ink} letterSpacing="0.2">
+          DE CABO VERDE
+        </text>
+        <text x={W / 2} y="386" textAnchor="middle" fontFamily={font} fontWeight={700} fontSize="10.5" fill={ink} letterSpacing="1">
+          EDIÇÃO
+        </text>
+        <text x={W / 2} y="400" textAnchor="middle" fontFamily={font} fontWeight={700} fontSize="10.5" fill={ink} letterSpacing="1">
+          2020
+        </text>
+        <rect width={W} height={H} fill="url(#coverLight)" />
+        <rect width="16" height={H} fill="url(#spine)" />
+        <rect width={W} height={H} fill="url(#sheen)" />
+      </g>
+    </svg>
+  );
+};
+
 // ---------- Constitution book + articles ----------
 const Constitution: React.FC<{ start: number; artAt: number; art2At: number }> = ({ start, artAt, art2At }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const out = useOut();
   const book = spring({ frame, fps, config: { damping: 13, mass: 0.7 } });
-  const open = ramp(frame, 8, 16);
   return (
     <AbsoluteFill>
-      <div style={{ position: "absolute", right: 120, top: 210, opacity: out, display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-        <svg width={300} height={330} viewBox="0 0 300 330" style={{ transform: `translateY(${(1 - book) * 120}px) rotate(${(1 - book) * 10 - 4}deg)`, opacity: book > 0.01 ? 1 : 0, filter: "drop-shadow(0 14px 30px rgba(0,0,0,0.35))", overflow: "visible" }}>
-          {/* pages */}
-          <rect x="36" y="22" width="240" height="296" rx="10" fill="#F3F1EA" />
-          {/* cover, swinging open a little */}
-          <g transform={`translate(30 16) skewY(${-6 * open}) scale(${1 - 0.12 * open} 1)`}>
-            <rect width="240" height="300" rx="12" fill={NAVY} />
-            <rect x="0" y="0" width="22" height="300" rx="10" fill="#141E33" />
-            {/* Cape Verde flag stripes */}
-            <rect x="22" y="210" width="218" height="14" fill={WHITE} />
-            <rect x="22" y="224" width="218" height="10" fill={RED} />
-            <rect x="22" y="234" width="218" height="14" fill={WHITE} />
-            <text x="131" y="92" textAnchor="middle" fontFamily="Montserrat" fontWeight={900} fontSize="24" fill={WHITE} letterSpacing="1">
-              CONSTITUIÇÃO
-            </text>
-            <text x="131" y="122" textAnchor="middle" fontFamily="Montserrat" fontWeight={700} fontSize="14" fill="#C9D2E6" letterSpacing="2">
-              DA REPÚBLICA
-            </text>
-            <text x="131" y="142" textAnchor="middle" fontFamily="Montserrat" fontWeight={700} fontSize="14" fill="#C9D2E6" letterSpacing="2">
-              DE CABO VERDE
-            </text>
-            {Array.from({ length: 10 }).map((_, i) => {
-              const a = (i / 10) * Math.PI * 2;
-              return <circle key={i} cx={131 + Math.cos(a) * 26} cy={176 + Math.sin(a) * 26} r="3.6" fill="#F2C94C" />;
-            })}
-          </g>
-        </svg>
+      <div style={{ position: "absolute", right: 120, top: 140, opacity: out, display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+        <ConstitutionBook enter={book} sheen={ramp(frame, 18, 22)} />
         <div style={{ marginTop: 26, textAlign: "right" }}>
           <Rise delay={at(artAt, start) - 3}>
             <span style={{ ...big(44), letterSpacing: 4 }}>ARTIGOS</span>
