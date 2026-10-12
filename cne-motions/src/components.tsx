@@ -6,7 +6,7 @@ import { NAVY, RED, SANS, SERIF, SHADOW, WHITE } from "./theme";
 // ---------- Shared building blocks ----------
 
 // Navy label with red left bar (same language as the "Jussara Évora" lower third)
-const Tag: React.FC<{ text: string; delay: number; size?: number; color?: string }> = ({
+export const Tag: React.FC<{ text: string; delay: number; size?: number; color?: string }> = ({
   text,
   delay,
   size = 40,
@@ -34,7 +34,7 @@ const Tag: React.FC<{ text: string; delay: number; size?: number; color?: string
 };
 
 // Word that rises from behind a mask
-const Rise: React.FC<{ children: React.ReactNode; delay: number; style?: React.CSSProperties }> = ({ children, delay, style }) => {
+export const Rise: React.FC<{ children: React.ReactNode; delay: number; style?: React.CSSProperties }> = ({ children, delay, style }) => {
   const p = useIn(delay, 18);
   return (
     <div style={{ overflow: "hidden", paddingBottom: 8 }}>
@@ -43,7 +43,7 @@ const Rise: React.FC<{ children: React.ReactNode; delay: number; style?: React.C
   );
 };
 
-const big = (size: number): React.CSSProperties => ({
+export const big = (size: number): React.CSSProperties => ({
   fontFamily: SANS,
   fontWeight: 900,
   fontSize: size,
@@ -60,6 +60,13 @@ export const CheckIcon: React.FC<{ size: number; draw: number }> = ({ size, draw
   <svg width={size} height={size} viewBox="0 0 100 100">
     <circle cx="50" cy="50" r="46" fill={RED} transform={`scale(${draw > 0 ? 1 : 0})`} style={{ transformOrigin: "50px 50px" }} />
     <path d="M28 52 L44 67 L73 35" fill="none" stroke={WHITE} strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - draw} />
+  </svg>
+);
+
+export const CrossIcon: React.FC<{ size: number; draw: number }> = ({ size, draw }) => (
+  <svg width={size} height={size} viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="46" fill="#8A93A8" transform={`scale(${draw > 0 ? 1 : 0})`} style={{ transformOrigin: "50px 50px" }} />
+    <path d="M33 33 L67 67 M67 33 L33 67" fill="none" stroke={WHITE} strokeWidth="10" strokeLinecap="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - draw} />
   </svg>
 );
 
@@ -298,23 +305,32 @@ export const TodayFlash: React.FC = () => {
 
 // ---------- 7. Who can vote: requirements ----------
 
-export const Requirements: React.FC<{ start: number; items: { text: string; at: number }[] }> = ({ start, items }) => {
+export const Requirements: React.FC<{
+  start: number;
+  items: { text: string; at: number; no?: boolean }[];
+  header?: string;
+  side?: "left" | "right";
+  size?: number;
+  top?: number;
+  headerSize?: number;
+}> = ({ start, items, header = "QUEM PODE VOTAR?", side = "right", size = 64, top = 300, headerSize = 42 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const out = useOut();
+  const align = side === "right" ? "flex-end" : "flex-start";
   return (
     <AbsoluteFill>
-      <div style={{ position: "absolute", right: 110, top: 300, opacity: out, transform: `translateX(${(1 - out) * 50}px)`, display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-        <Tag text="QUEM PODE VOTAR?" delay={0} size={42} />
-        <div style={{ marginTop: 50, display: "flex", flexDirection: "column", gap: 24, alignItems: "flex-end" }}>
+      <div style={{ position: "absolute", [side]: 110, top, opacity: out, transform: `translateX(${(1 - out) * (side === "right" ? 50 : -50)}px)`, display: "flex", flexDirection: "column", alignItems: align }}>
+        <Tag text={header} delay={0} size={headerSize} />
+        <div style={{ marginTop: 50, display: "flex", flexDirection: "column", gap: 24, alignItems: align }}>
           {items.map((it, i) => {
             const d = at(it.at, start);
             const p = spring({ frame: frame - d, fps, config: { damping: 11, mass: 0.6 } });
             const draw = ramp(frame, d + 5, 9);
             return (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 22, background: "rgba(31,43,69,0.92)", padding: "18px 34px 18px 22px", transform: `scale(${p})`, transformOrigin: "right center", opacity: p > 0.01 ? 1 : 0 }}>
-                <CheckIcon size={78} draw={draw} />
-                <span style={{ ...big(64), textShadow: "none" }}>{it.text}</span>
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 22, background: "rgba(31,43,69,0.92)", padding: "18px 34px 18px 22px", transform: `scale(${p})`, transformOrigin: `${side} center`, opacity: p > 0.01 ? 1 : 0 }}>
+                {it.no ? <CrossIcon size={size * 1.22} draw={draw} /> : <CheckIcon size={size * 1.22} draw={draw} />}
+                <span style={{ ...big(size), textShadow: "none" }}>{it.text}</span>
               </div>
             );
           })}
@@ -372,7 +388,7 @@ export const Votum: React.FC<{ start: number; wordAt: number; meanings: { text: 
 
 // ---------- 9. Next episode teaser ----------
 
-export const NextEpisode: React.FC = () => {
+export const NextEpisode: React.FC<{ eyebrow?: string; title?: string }> = ({ eyebrow = "CNE Explica · Ep. 2", title = "O que faz o Presidente da República?" }) => {
   const frame = useCurrentFrame();
   const out = useOut();
   const card = ramp(frame, 6, 14);
@@ -383,8 +399,8 @@ export const NextEpisode: React.FC = () => {
           <span style={{ fontFamily: SANS, fontWeight: 900, fontSize: 34, color: WHITE, letterSpacing: 2 }}>PRÓXIMO EPISÓDIO</span>
         </div>
         <div style={{ background: NAVY, padding: "26px 34px", clipPath: `inset(0 0 ${100 - card * 100}% 0)`, maxWidth: 720 }}>
-          <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 32, color: "#C9D2E6" }}>CNE Explica · Ep. 2</div>
-          <div style={{ fontFamily: SANS, fontWeight: 800, fontSize: 54, color: WHITE, lineHeight: 1.1, marginTop: 8 }}>O que faz o Presidente da República?</div>
+          <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 32, color: "#C9D2E6" }}>{eyebrow}</div>
+          <div style={{ fontFamily: SANS, fontWeight: 800, fontSize: 54, color: WHITE, lineHeight: 1.1, marginTop: 8 }}>{title}</div>
         </div>
       </div>
     </AbsoluteFill>

@@ -2,6 +2,7 @@ import React from "react";
 import { Composition } from "remotion";
 import { LogoAnim } from "./LogoAnim";
 import { Overlay } from "./Overlay";
+import { EP2_DURATION, Overlay2 } from "./ep2/Overlay2";
 import { SPOT_DURATION, Spot } from "./spot/Spot";
 import { SPOT_FPS } from "./spot/kit";
 import { DURATION, FPS } from "./theme";
@@ -24,6 +25,7 @@ export const RemotionRoot: React.FC = () => (
         defaultProResProfile: "4444",
       })}
     />
+    <Composition id="CneExplicaEp2" component={Overlay2} durationInFrames={EP2_DURATION} fps={FPS} width={1920} height={1080} />
     {(["cor", "branco"] as const).map((variant) => (
       <Composition
         key={variant}
