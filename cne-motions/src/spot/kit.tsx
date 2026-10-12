@@ -64,12 +64,12 @@ export const Line: React.FC<{
   return (
     <div style={{ display: "flex", justifyContent: align === "center" ? "center" : align === "left" ? "flex-start" : "flex-end" }}>
       {box ? (
-        <div style={{ background: box, padding: `${size * 0.06}px ${size * 0.22}px ${size * 0.02}px`, clipPath: `inset(0 ${100 - wipe * 100}% 0 0)` }}>
+        <div style={{ background: box, padding: `${size * 0.06}px ${size * 0.22}px ${size * 0.02}px`, clipPath: `inset(0 ${100 - wipe * 100}% 0 0)`, visibility: wipe <= 0 ? "hidden" : "visible" }}>
           <div style={{ transform: `translateX(${(1 - p) * -30}px)` }}>{text}</div>
         </div>
       ) : (
-        <div style={{ overflow: "hidden", paddingBottom: size * 0.08 }}>
-          <div style={{ transform: `translateY(${(1 - p) * 135}%)` }}>{text}</div>
+        <div style={{ overflow: "hidden", paddingTop: size * 0.22, marginTop: -size * 0.22, paddingBottom: size * 0.08 }}>
+          <div style={{ transform: `translateY(${(1 - p) * 170}%)`, visibility: p < 0.004 ? "hidden" : "visible" }}>{text}</div>
         </div>
       )}
     </div>

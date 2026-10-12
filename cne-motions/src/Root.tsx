@@ -4,6 +4,7 @@ import { LogoAnim } from "./LogoAnim";
 import { Overlay } from "./Overlay";
 import { EP2_DURATION, Overlay2 } from "./ep2/Overlay2";
 import { SPOT_DURATION, Spot } from "./spot/Spot";
+import { SPOT2_DURATION, Spot2 } from "./spot/Spot2";
 import { SPOT_FPS } from "./spot/kit";
 import { DURATION, FPS } from "./theme";
 
@@ -44,6 +45,18 @@ export const RemotionRoot: React.FC = () => (
         id={`SpotVotoAntecipado-${variant}`}
         component={Spot}
         durationInFrames={SPOT_DURATION}
+        fps={SPOT_FPS}
+        width={1920}
+        height={1080}
+        defaultProps={{ variant }}
+      />
+    ))}
+    {(["cor", "alpha"] as const).map((variant) => (
+      <Composition
+        key={`v2-${variant}`}
+        id={`SpotVotoAntecipadoV2-${variant}`}
+        component={Spot2}
+        durationInFrames={SPOT2_DURATION}
         fps={SPOT_FPS}
         width={1920}
         height={1080}
