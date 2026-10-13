@@ -364,7 +364,7 @@ window.renderFrame = function (t) {
     whiteMat.opacity = Math.max(1 - eOutCubic(p(t, 6.3, 6.95)), eInOut(p(t, 14.1, 14.8)));
     const k = eInOut(p(t, 6.25, 10.0));
     // aproxima-se de Cabo Verde vindo das nuvens e recua para ver o mundo
-    const dist = lerp(1.65, 5.6, k);
+    const dist = lerp(2.7, 5.6, k);
     const fin = eInOut(p(t, 13.7, 14.95));
     camB.position.set(0, 0.32 * k * (1 - fin), dist * (1 - fin * 0.55));
     camB.lookAt(0, 0.32 * k * (1 - fin), 0);
