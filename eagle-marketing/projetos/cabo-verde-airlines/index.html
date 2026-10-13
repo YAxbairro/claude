@@ -310,7 +310,7 @@ hubLab.innerHTML = `<div class="box" style="top:18px"><div class="n" style="font
 $('labels').appendChild(hubLab);
 
 const sceneO = new THREE.Scene();
-const whiteMat = new THREE.MeshBasicMaterial({ color: 0xfff6ec, transparent: true, opacity: 0, depthTest: false });
+const whiteMat = new THREE.MeshBasicMaterial({ color: 0xe6eeff, transparent: true, opacity: 0, depthTest: false });
 const whiteQ = new THREE.Mesh(new THREE.PlaneGeometry(W, H), whiteMat); whiteQ.position.set(W / 2, H / 2, 0); sceneO.add(whiteQ);
 const composer = new EffectComposer(renderer);
 const passA = new RenderPass(sceneA, camA), passB = new RenderPass(sceneB, camB);
@@ -361,7 +361,7 @@ window.renderFrame = function (t) {
   $('B').style.display = inB && !inA ? 'block' : 'none';
   if (inB && !inA) {
     bloom.strength = 1.0; bloom.threshold = 0.55; bloom.radius = 0.6;
-    whiteMat.opacity = Math.max(1 - eOutCubic(p(t, 6.3, 7.3)), eInOut(p(t, 14.1, 14.8)));
+    whiteMat.opacity = Math.max(1 - eOutCubic(p(t, 6.3, 6.95)), eInOut(p(t, 14.1, 14.8)));
     const k = eInOut(p(t, 6.25, 10.0));
     // aproxima-se de Cabo Verde vindo das nuvens e recua para ver o mundo
     const dist = lerp(1.65, 5.6, k);

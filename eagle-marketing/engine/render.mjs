@@ -51,13 +51,13 @@ const total = Math.round((to - from) * comp.fps);
 const ffArgs = ['-y', '-f', 'image2pipe', '-framerate', String(comp.fps), '-i', '-'];
 // pós-produção: grão de filme + marca d'água (fora do browser, evita bugs de composição sobre WebGL)
 const overlay = args.includes('--no-watermark') ? null : new URL('./watermark.png', import.meta.url).pathname;
-const grain = Number(opt('--grain') ?? 5);
+const grain = Number(opt('--grain') ?? 3);
 if (overlay) ffArgs.push('-i', overlay);
 if (audio) ffArgs.push('-ss', String(from), '-i', audio);
 const vf = `[0:v]${grain > 0 ? `noise=alls=${grain}:allf=t,` : ''}format=yuv420p[base]` + (overlay ? `;[base][1:v]overlay=0:0:format=auto,format=yuv420p[v]` : '');
 ffArgs.push('-filter_complex', vf, '-map', overlay ? '[v]' : '[base]');
 if (audio) ffArgs.push('-map', `${overlay ? 2 : 1}:a`);
-ffArgs.push('-c:v', 'libx264', '-preset', 'slow', '-crf', '17', '-movflags', '+faststart');
+ffArgs.push('-c:v', 'libx264', '-preset', 'slow', '-crf', '21', '-maxrate', '12M', '-bufsize', '24M', '-movflags', '+faststart');
 if (audio) ffArgs.push('-c:a', 'aac', '-b:a', '192k', '-shortest');
 ffArgs.push(outPath);
 const ff = spawn('ffmpeg', ffArgs, { stdio: ['pipe', 'ignore', 'inherit'] });
