@@ -4,7 +4,7 @@ Departamento de motion graphics com IA. Marca comercial da **Afroberdiano Image*
 Este ficheiro é a memória oficial do departamento: cada sessão lê isto antes de trabalhar.
 
 ## Missão
-1 campanha analisada → 1 motion exemplar → 1 instituição contactada, por dia úteis.
+1 campanha analisada → 1 motion exemplar → 1 instituição contactada, por dia útil.
 Alvo inicial: empresas e instituições de Cabo Verde com campanhas estáticas (sem versão em movimento) e assets gráficos públicos.
 
 ## Preços (CVE)
