@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<title>Cabo Verde Airlines — Ir mais longe (exemplar Eagle Marketing)</title>
+<style>
+  @font-face { font-family: 'Outfit'; src: url('assets/outfit.woff2') format('woff2'); font-weight: 100 900; }
+  :root { --deep: #003a8c; --deep2: #002a6b; --teal: #62D6C2; --purple: #6B4AA8; --yellow: #F6CB6B; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--deep); }
+  body { font-family: 'Outfit', sans-serif; color: #fff; position: relative; }
+  .abs { position: absolute; }
+  .layer { position: absolute; inset: 0; }
+  .center-x { left: 0; right: 0; text-align: center; }
+  .mask { overflow: hidden; display: inline-block; vertical-align: top; padding: 0 8px 6px; }
+  .mask > span { display: inline-block; }
+  .chip { display: inline-block; background: var(--yellow); color: var(--deep2); font-weight: 700; border-radius: 16px; padding: 14px 30px; }
+  .city { position: absolute; transform-origin: 0 50%; white-space: nowrap; }
+  .city .n { font-size: 50px; font-weight: 700; line-height: 1; }
+  .city .pr { font-size: 30px; font-weight: 500; color: var(--teal); margin-top: 6px; }
+  .city .pr b { font-size: 40px; font-weight: 800; color: #fff; }
+  .wm-pill { position: absolute; top: 56px; right: 56px; padding: 14px 26px; border-radius: 40px; background: rgba(0,0,0,.45);
+             color: #fff; font-size: 24px; font-weight: 600; letter-spacing: 3px; z-index: 50; }
+  .wm-pill b { color: var(--yellow); }
+  .wm-big { position: absolute; inset: -400px; display: flex; flex-wrap: wrap; align-content: center; justify-content: center;
+            transform: rotate(-28deg); z-index: 49; pointer-events: none; opacity: .06; gap: 160px 200px; }
+  .wm-big span { font-size: 64px; font-weight: 900; letter-spacing: 8px; color: #fff; white-space: nowrap; }
+</style>
+<script src="../../engine/motion-lib.js"></script>
+</head>
+<body>
+  <div id="bg" class="layer" style="background: radial-gradient(120% 80% at 50% 30%, #0a4fb0 0%, #003a8c 45%, #00245c 100%)"></div>
+
+  <!-- Cena 1: avião + headline -->
+  <div id="s1" class="layer">
+    <img id="plane" class="abs" src="assets/plane.jpg"
+         style="width:1500px;left:-300px;top:260px;-webkit-mask-image:radial-gradient(70% 62% at 45% 48%, #000 55%, transparent 100%);">
+    <div id="s1-a" class="abs center-x" style="top:1260px;font-size:100px;font-weight:300"><span class="mask"><span>É hora de</span></span></div>
+    <div id="s1-b" class="abs center-x" style="top:1370px;font-size:148px;font-weight:800;color:var(--teal);letter-spacing:-3px"><span class="mask"><span>ir mais longe.</span></span></div>
+  </div>
+
+  <!-- Cena 2: mapa de rotas -->
+  <div id="s2" class="layer">
+    <svg id="map" class="layer" width="1080" height="1920" viewBox="0 0 1080 1920">
+      <defs>
+        <pattern id="dots" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="18" cy="18" r="2.2" fill="rgba(255,255,255,.13)"/></pattern>
+        <radialGradient id="glow"><stop offset="0" stop-color="#62D6C2" stop-opacity=".55"/><stop offset="1" stop-color="#62D6C2" stop-opacity="0"/></radialGradient>
+      </defs>
+      <rect id="dotsRect" width="1080" height="1920" fill="url(#dots)"/>
+      <g id="arcs"></g>
+      <circle id="hubGlow" cx="430" cy="1290" r="160" fill="url(#glow)"/>
+      <g id="hub"></g>
+      <g id="planes"></g>
+    </svg>
+    <div id="cities"></div>
+    <div id="s2-head" class="abs center-x" style="top:170px;font-size:92px;font-weight:800;line-height:1.02">
+      <div><span class="mask"><span>Cabo Verde</span></span></div>
+      <div style="color:var(--teal)"><span class="mask"><span>ligado ao mundo.</span></span></div>
+    </div>
+    <div id="hub-label" class="abs" style="left:300px;top:1360px;font-size:34px;font-weight:700;letter-spacing:6px;color:var(--yellow)">CABO VERDE</div>
+  </div>
+
+  <!-- Cena 3: nova rota Recife ⇄ Sal -->
+  <div id="s3" class="layer" style="overflow:hidden">
+    <img id="sal" class="abs" src="assets/sal.jpg" style="width:1080px;height:1920px;object-fit:cover;left:0;top:0">
+    <div class="layer" style="background:linear-gradient(180deg, rgba(0,36,92,.0) 40%, rgba(0,36,92,.55) 100%)"></div>
+    <div id="s3-chip" class="abs" style="top:250px;left:90px"><span class="chip" style="font-size:34px;letter-spacing:4px">NOVA ROTA</span></div>
+    <div id="s3-t1" class="abs" style="top:340px;left:80px;font-size:150px;font-weight:600;color:#1a3fa8;line-height:1"><span class="mask"><span>RECIFE</span></span></div>
+    <div id="s3-arrow" class="abs" style="top:490px;left:92px;width:96px;height:96px;border-radius:50%;background:var(--yellow);display:flex;align-items:center;justify-content:center">
+      <svg width="54" height="54" viewBox="0 0 24 24"><path d="M4 8h14l-4-4M20 16H6l4 4" stroke="#1a3fa8" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div id="s3-t2" class="abs" style="top:470px;left:205px;font-size:230px;font-weight:900;color:#1a3fa8;line-height:1;letter-spacing:-6px"><span class="mask"><span>SAL</span></span></div>
+    <div id="s3-sub" class="abs" style="top:720px;left:90px"><span class="chip" style="font-size:44px">Conexão com Lisboa</span></div>
+    <div id="s3-price" class="abs" style="left:90px;bottom:250px;padding:40px 54px;border-radius:36px;background:rgba(0,42,107,.82);backdrop-filter:blur(8px)">
+      <div style="font-size:36px;font-weight:500;color:var(--teal);letter-spacing:3px">IDA E VOLTA DESDE</div>
+      <div style="font-size:120px;font-weight:800;line-height:1.05">33.519<span style="font-size:70px">$</span></div>
+    </div>
+  </div>
+
+  <!-- Cena 4: assinatura -->
+  <div id="s4" class="layer">
+    <img id="logo" class="abs" src="assets/logo.svg" style="width:760px;left:160px;top:560px">
+    <div id="s4-from" class="abs center-x" style="top:1010px;font-size:44px;font-weight:400;color:#cfe0ff"><span class="mask"><span>Tarifas desde</span></span></div>
+    <div id="s4-price" class="abs center-x" style="top:1070px;font-size:150px;font-weight:800;line-height:1"><span class="mask"><span>299,18 €<sup style="font-size:60px;color:var(--teal)">*</sup></span></span></div>
+    <div id="s4-cta" class="abs" style="top:1290px;left:50%;transform:translateX(-50%);white-space:nowrap"><span class="chip" style="font-size:52px;padding:30px 70px;border-radius:70px">Reserve já</span></div>
+    <div id="s4-url" class="abs center-x" style="top:1460px;font-size:44px;font-weight:500;letter-spacing:1px">caboverdeairlines.com</div>
+    <div id="s4-note" class="abs center-x" style="top:1760px;font-size:24px;font-weight:300;color:#a9bde6;padding:0 120px">*Tarifas ida e volta da campanha de outubro de 2026, apresentadas a título ilustrativo.</div>
+  </div>
+
+  <!-- transição -->
+  <svg id="iris" class="layer" width="1080" height="1920" viewBox="0 0 1080 1920"><circle id="iris-c" cx="540" cy="960" r="0"/></svg>
+
+  <div class="wm-big" id="wm-big"></div>
+  <div class="wm-pill">EXEMPLAR · <b>EAGLE</b> MARKETING</div>
+
+<script>
+window.COMP = { width: 1080, height: 1920, fps: 30, duration: 18 };
+const { p, lerp, set, easeOutCubic, easeInCubic, easeInOutCubic, easeOutExpo, easeInExpo, easeInOutExpo, easeOutBack, spring } = M;
+const $ = (id) => document.getElementById(id);
+const TEAL = '#62D6C2', YELLOW = '#F6CB6B';
+$('wm-big').innerHTML = Array.from({ length: 40 }, () => '<span>EAGLE MARKETING</span>').join('');
+
+function rev(el, k, o = 0) {
+  const y = (1 - easeOutExpo(k)) * 110 - easeInExpo(o) * 110;
+  el.style.transform = `translateY(${y}%)`;
+}
+const R = (sel) => document.querySelector(sel + ' .mask>span');
+
+// ---- rotas ----
+const HUB = [430, 1290];
+const ROUTES = [
+  { name: 'Lisboa', price: '32.991', to: [640, 830], bend: -0.25, t: 3.9, lx: 30, ly: -40 },
+  { name: 'Paris', price: '36.537', to: [730, 640], bend: -0.2, t: 4.7, lx: 30, ly: -40 },
+  { name: 'Providence', price: '63.416', to: [120, 760], bend: 0.25, t: 5.5, lx: -20, ly: -120 },
+  { name: 'Recife', price: '33.519', to: [250, 1730], bend: 0.3, t: 6.3, lx: 40, ly: -30 },
+];
+const NS = 'http://www.w3.org/2000/svg';
+const planeD = 'M-22 0 L-8 -3 L-2 -16 L3 -16 L0 -3 L12 -3 L16 -8 L20 -8 L18 0 L20 8 L16 8 L12 3 L0 3 L3 16 L-2 16 L-8 3 Z';
+ROUTES.forEach((r, i) => {
+  const [x0, y0] = HUB, [x1, y1] = r.to;
+  const mx = (x0 + x1) / 2, my = (y0 + y1) / 2, dx = x1 - x0, dy = y1 - y0;
+  const cx = mx - dy * r.bend, cy = my + dx * r.bend;
+  const path = document.createElementNS(NS, 'path');
+  path.setAttribute('d', `M${x0} ${y0} Q${cx} ${cy} ${x1} ${y1}`);
+  path.setAttribute('fill', 'none'); path.setAttribute('stroke', TEAL); path.setAttribute('stroke-width', 5);
+  path.setAttribute('stroke-linecap', 'round');
+  $('arcs').appendChild(path);
+  r.path = path; r.len = path.getTotalLength();
+  path.setAttribute('stroke-dasharray', `${r.len}`);
+  const dot = document.createElementNS(NS, 'g');
+  dot.innerHTML = `<circle r="34" fill="${TEAL}" opacity=".18"/><circle r="13" fill="#fff"/><circle r="7" fill="${TEAL}"/>`;
+  dot.setAttribute('transform', `translate(${x1} ${y1}) scale(0)`);
+  $('hub').appendChild(dot); r.dot = dot;
+  const pl = document.createElementNS(NS, 'path');
+  pl.setAttribute('d', planeD); pl.setAttribute('fill', '#fff');
+  $('planes').appendChild(pl); r.plane = pl;
+  const c = document.createElement('div');
+  c.className = 'city';
+  c.innerHTML = `<div class="n">${r.name}</div><div class="pr">desde <b>${r.price}$</b></div>`;
+  c.style.left = (x1 + r.lx) + 'px'; c.style.top = (y1 + r.ly) + 'px';
+  if (r.name === 'Providence') c.style.left = (x1 - 20) + 'px';
+  $('cities').appendChild(c); r.card = c;
+});
+const hubG = document.createElementNS(NS, 'g');
+hubG.innerHTML = `<circle r="24" fill="${YELLOW}"/><circle r="10" fill="#002a6b"/>`;
+hubG.setAttribute('transform', `translate(${HUB[0]} ${HUB[1]})`);
+$('hub').appendChild(hubG);
+
+window.renderFrame = function (t) {
+  // ---------- cena 1 ----------
+  const s1on = t < 3.9;
+  $('s1').style.display = s1on ? 'block' : 'none';
+  if (s1on) {
+    const k = easeOutExpo(p(t, 0, 1.6));
+    const out = easeInExpo(p(t, 2.9, 3.8));
+    set($('plane'), {
+      transform: `translate(${lerp(-700, 0, k) + out * 1400}px, ${lerp(380, 0, k) - out * 900}px) rotate(${lerp(8, 0, k) - out * 8}deg) scale(${1 + t * 0.03 + out * 0.4})`,
+      opacity: Math.min(1, t * 3)
+    });
+    rev(R('#s1-a'), p(t, 0.7, 1.3), p(t, 2.9, 3.3));
+    rev(R('#s1-b'), p(t, 0.95, 1.6), p(t, 2.95, 3.35));
+  }
+
+  // ---------- cena 2 ----------
+  const s2on = t >= 3.2 && t < 10.6;
+  $('s2').style.display = s2on ? 'block' : 'none';
+  if (s2on) {
+    const ink = easeOutCubic(p(t, 3.2, 4.0));
+    const out = easeInCubic(p(t, 9.9, 10.5));
+    const zoom = 1 + (t - 3.2) * 0.012;
+    $('s2').style.opacity = ink * (1 - out);
+    $('map').style.transform = `scale(${zoom})`;
+    $('cities').style.transform = `scale(${zoom})`;
+    $('cities').style.transformOrigin = '540px 960px';
+    $('map').style.transformOrigin = '540px 960px';
+    $('dotsRect').style.opacity = 0.6 + 0.4 * Math.sin(t * 1.5);
+    $('hubGlow').setAttribute('r', 140 + Math.sin(t * 4) * 25);
+    const hs = spring(p(t, 3.4, 4.4));
+    hubG.setAttribute('transform', `translate(${HUB[0]} ${HUB[1]}) scale(${hs})`);
+    $('hub-label').style.opacity = easeOutCubic(p(t, 3.7, 4.2));
+    rev(R('#s2-head div:nth-child(1)'), p(t, 3.5, 4.1));
+    rev(R('#s2-head div:nth-child(2)'), p(t, 3.7, 4.3));
+    ROUTES.forEach((r) => {
+      const d = easeInOutCubic(p(t, r.t, r.t + 1.2));
+      r.path.setAttribute('stroke-dashoffset', r.len * (1 - d));
+      // avião ao longo do arco
+      const L = r.len * d;
+      const pt = r.path.getPointAtLength(L), pt2 = r.path.getPointAtLength(Math.min(r.len, L + 2));
+      const ang = Math.atan2(pt2.y - pt.y, pt2.x - pt.x) * 180 / Math.PI;
+      const vis = d > 0 && d < 1 ? 1 : 0;
+      r.plane.setAttribute('transform', `translate(${pt.x} ${pt.y}) rotate(${ang}) scale(1.6)`);
+      r.plane.style.opacity = vis;
+      const ds = spring(p(t, r.t + 1.1, r.t + 2.0));
+      r.dot.setAttribute('transform', `translate(${r.to[0]} ${r.to[1]}) scale(${ds})`);
+      const ck = easeOutExpo(p(t, r.t + 1.15, r.t + 1.8));
+      set(r.card, { opacity: ck, transform: `translateX(${(1 - ck) * 40}px)` });
+    });
+  }
+
+  // iris para a praia (teal) e de volta (azul)
+  const iris = $('iris-c');
+  if (t >= 10.2 && t < 10.75) { iris.setAttribute('r', easeInOutExpo(p(t, 10.2, 10.7)) * 1150); iris.setAttribute('fill', TEAL); $('iris').style.display = 'block'; $('iris').style.opacity = 1; }
+  else if (t >= 10.75 && t < 11.1) { $('iris').style.display = 'block'; $('iris').style.opacity = 1 - easeOutCubic(p(t, 10.75, 11.05)); }
+  else if (t >= 14.2 && t < 14.75) { iris.setAttribute('r', easeInOutExpo(p(t, 14.2, 14.7)) * 1150); iris.setAttribute('fill', '#003a8c'); $('iris').style.display = 'block'; $('iris').style.opacity = 1; }
+  else $('iris').style.display = 'none';
+
+  // ---------- cena 3 ----------
+  const s3on = t >= 10.7 && t < 14.75;
+  $('s3').style.display = s3on ? 'block' : 'none';
+  if (s3on) {
+    $('sal').style.transform = `scale(${lerp(1.15, 1.0, easeOutCubic(p(t, 10.7, 14.7)))})`;
+    const cs = easeOutBack(p(t, 11.0, 11.4));
+    $('s3-chip').style.transform = `scale(${cs})`;
+    rev(R('#s3-t1'), p(t, 11.15, 11.75));
+    $('s3-arrow').style.transform = `scale(${spring(p(t, 11.4, 12.3))}) rotate(${(1 - easeOutCubic(p(t, 11.4, 12.2))) * -180}deg)`;
+    rev(R('#s3-t2'), p(t, 11.45, 12.1));
+    const sk = easeOutExpo(p(t, 11.9, 12.5));
+    set($('s3-sub'), { opacity: sk, transform: `translateX(${(1 - sk) * -60}px)` });
+    const pk = easeOutExpo(p(t, 12.4, 13.1));
+    set($('s3-price'), { opacity: pk, transform: `translateY(${(1 - pk) * 120}px)` });
+  }
+
+  // ---------- cena 4 ----------
+  const s4on = t >= 14.6;
+  $('s4').style.display = s4on ? 'block' : 'none';
+  if (s4on) {
+    const lk = easeOutExpo(p(t, 14.8, 15.6));
+    set($('logo'), { opacity: lk, transform: `translateY(${(1 - lk) * 60}px) scale(${lerp(0.92, 1, lk)})` });
+    rev(R('#s4-from'), p(t, 15.4, 15.9));
+    rev(R('#s4-price'), p(t, 15.55, 16.15));
+    $('s4-cta').style.transform = `translateX(-50%) scale(${easeOutBack(p(t, 16.2, 16.6))})`;
+    $('s4-url').style.opacity = easeOutCubic(p(t, 16.5, 16.9));
+    $('s4-note').style.opacity = easeOutCubic(p(t, 16.7, 17.1)) * 0.9;
+  }
+};
+window.renderFrame(0);
+</script>
+</body>
+</html>
