@@ -15,7 +15,7 @@
 | Google Calendar | RP / Financeiro | prazos, follow-ups, reuniões |
 | Higgsfield | Motion | vídeo IA, upscale, remover fundo, reframe |
 | ElevenLabs | Motion | locução em português |
-| Epidemic Sound | Motion | música e efeitos sonoros licenciados |
+| Epidemic Sound | Motion | só pesquisa: a conta não tem licença de download |
 | HyperFrames (HeyGen) | Motion | leitura de projetos HTML-vídeo |
 | Figma | Motion | layouts, frames de storyboard |
 | Gamma | RP | propostas/apresentações bonitas |
@@ -26,10 +26,7 @@
 - Canva: adaptar assets de campanhas e criar peças estáticas.
 
 ## Skills
-- `remotion-best-practices` (instalada): motion em código React.
-- Instalar: `npx skills add heygen-com/hyperframes` (HTML/GSAP → MP4).
-- Avaliar: Vincentwei1021/video-shotcraft (receitas de planos para promo em Remotion),
-  JJenglert1/remotion-claude-video, digitalsamba/claude-code-video-toolkit.
+- Motor próprio: `engine/render.mjs` (HTML → Chromium frame a frame → ffmpeg) + `engine/music.py` (música própria, sem licenças). Sem Remotion/HyperFrames, por decisão do Yanick.
 
 ## Já no repositório
 - Playwright MCP: navegar páginas públicas (Facebook/Instagram) à procura de campanhas.

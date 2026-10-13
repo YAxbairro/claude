@@ -46,3 +46,8 @@ temp/
 # OS
 .DS_Store
 Thumbs.db
+
+# Eagle Marketing: assets de clientes e renders não vão para o git
+eagle-marketing/projetos/*/assets/
+eagle-marketing/projetos/*/out/
+eagle-marketing/engine/node_modules/
