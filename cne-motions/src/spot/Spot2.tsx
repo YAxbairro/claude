@@ -4,7 +4,8 @@ import { LogoAnim } from "../LogoAnim";
 import { SANS } from "../theme";
 import { Art, Line, RED, Underline, ease, sec, useExit } from "./kit";
 import { BallotIcon, Calendar, DatePage, HospitalIcon, InstitutionIcon } from "./vectors";
-import { BRIGHT, DEEP, Depth, INDIGO, Kicker, LIGHT, Laptop, Phone, SearchBar, TEAL } from "./devices";
+import { BRIGHT, DEEP, INDIGO, Kicker, LIGHT, TEAL } from "./devices";
+import { Bars, BgTexture, BrowserWindow, Burst, FlipGroup, Handset, Iris } from "./fx";
 
 // Spot "Voto antecipado" v2 – same script and timing as v1, restyled after the
 // CNE "cadernos de recenseamento" spot: flat colour fields, white type, real website.
@@ -21,6 +22,7 @@ const Scene: React.FC<{ from: number; to: number; name: string; bg: string; chil
   return (
     <Sequence from={sec(from)} durationInFrames={sec(to) - sec(from)} name={name}>
       {withBg && <AbsoluteFill style={{ background: bg }} />}
+      {withBg && <BgTexture seed={name} />}
       {children}
     </Sequence>
   );
@@ -43,7 +45,15 @@ export const Wipe: React.FC = () => {
     </AbsoluteFill>
   );
 };
-const WIPES = [6.9, 11.5, 15.2, 22.25, 33.35, 36.45];
+// Alternating transitions so the cuts don't all look the same
+const TRANSITIONS: { at: number; kind: "wipe" | "iris" | "bars"; cx?: number; cy?: number }[] = [
+  { at: 6.9, kind: "wipe" },
+  { at: 11.5, kind: "iris", cx: 1450, cy: 520 },
+  { at: 15.2, kind: "bars" },
+  { at: 22.25, kind: "wipe" },
+  { at: 33.35, kind: "iris", cx: 470, cy: 540 },
+  { at: 36.45, kind: "bars" },
+];
 
 // Soft translucent disc behind illustrations
 export const Halo: React.FC<{ x: number; y: number; size: number; delay?: number }> = ({ x, y, size, delay = 0 }) => {
@@ -185,6 +195,7 @@ const S4: React.FC<{ start: number }> = ({ start }) => (
     <div style={{ position: "absolute", left: 1220, top: 200 }}>
       <Calendar delay={L(11.7, start)} markAt={[13.42, 13.62, 13.78, 13.9].map((s) => L(s, start))} />
     </div>
+    <Burst at={L(13.9, start) + 6} x={1600} y={440} size={90} />
   </AbsoluteFill>
 );
 
@@ -225,6 +236,7 @@ const S5: React.FC<{ start: number }> = ({ start }) => {
           </T>
         </div>
       </div>
+      <Burst at={L(20.6, start) + 8} x={1265} y={800} size={130} />
     </AbsoluteFill>
   );
 };
@@ -278,60 +290,56 @@ const S6: React.FC<{ start: number }> = ({ start }) => {
 };
 
 // "Consulte o formulário em www.cne.cv": search bar types the address, the real site opens on a laptop
+const Url: React.FC<{ delay: number }> = ({ delay }) => {
+  const frame = useCurrentFrame();
+  const p = ease(frame, delay, delay + 12, Easing.out(Easing.cubic));
+  return (
+    <div style={{ clipPath: `inset(0 ${100 - p * 100}% 0 0)`, visibility: p <= 0 ? "hidden" : "visible", fontFamily: SANS, fontWeight: 800, fontSize: 104, color: W, letterSpacing: -1, whiteSpace: "nowrap" }}>www.cne.cv</div>
+  );
+};
+
+// "Consulte o formulário em www.cne.cv": the address is written big on the left and typed in a
+// tilted browser window on the right, where the real CNE site loads
 const S7: React.FC<{ start: number }> = ({ start }) => (
   <Exit>
-    <AbsoluteFill style={{ alignItems: "center" }}>
-      <div style={{ marginTop: 100, textAlign: "center" }}>
-        <Kicker delay={L(25.54, start)} size={44} align="center">
-          Consulte o formulário em
-        </Kicker>
-      </div>
-      <div style={{ marginTop: 34 }}>
-        <SearchBar delay={L(26.4, start)} text="WWW.CNE.CV" />
-      </div>
-      <div style={{ marginTop: 40 }}>
-        <Laptop delay={L(27.4, start)} width={1000} screen="spot/cne_site.png" scrollFrom={L(28.6, start)} />
-      </div>
-    </AbsoluteFill>
+    <div style={{ position: "absolute", left: 130, top: 360 }}>
+      <Kicker delay={L(25.54, start)} size={33}>
+        Consulte o formulário em
+      </Kicker>
+      <div style={{ height: 14 }} />
+      <Url delay={L(26.9, start)} />
+      <Underline delay={L(27.3, start)} width={240} align="left" />
+    </div>
+    <div style={{ position: "absolute", left: 940, top: 250 }}>
+      <BrowserWindow delay={L(25.7, start)} typeAt={L(26.6, start)} loadAt={L(27.8, start)} width={870} url="www.cne.cv" screen="spot/cne_site.png" />
+    </div>
   </Exit>
 );
 
-// Free line: the website drifts back out of focus, the phone calls, number lands on the right
+// Free line: a handset badge on the left, the number flips in tile by tile on the right
 const S8: React.FC<{ start: number }> = ({ start }) => {
   const frame = useCurrentFrame();
-  const groups = [
-    { t: "800", at: 31.6 },
-    { t: "10", at: 32.3 },
-    { t: "14", at: 32.74 },
-  ];
+  const pill = ease(frame, L(30.6, start), L(30.6, start) + 10, Easing.out(Easing.cubic));
   return (
     <AbsoluteFill>
-      <Depth from={0} style={{ left: 30, top: 300 }} dx={-40}>
-        <div style={{ transform: "scale(0.55)", transformOrigin: "top left" }}>
-          <SearchBar delay={-60} text="WWW.CNE.CV" />
-          <div style={{ height: 40 }} />
-          <Laptop delay={-60} width={820} screen="spot/cne_site.png" />
-        </div>
-      </Depth>
-      <div style={{ position: "absolute", left: 560, top: 150 }}>
-        <Phone delay={L(30.2, start)} height={780} number="800 10 14" dialAt={L(31.0, start)} />
+      <div style={{ position: "absolute", left: 230, top: 320 }}>
+        <Handset delay={L(30.2, start)} size={420} />
       </div>
-      <div style={{ position: "absolute", left: 1080, top: 380 }}>
-        <Kicker delay={L(30.72, start)} size={70}>
-          Linha gratuita
+      <div style={{ position: "absolute", left: 860, top: 300 }}>
+        <div style={{ display: "inline-block", background: RED, borderRadius: 40, padding: "12px 30px", clipPath: `inset(0 ${100 - pill * 100}% 0 0 round 40px)`, visibility: pill <= 0 ? "hidden" : "visible" }}>
+          <span style={{ fontFamily: SANS, fontWeight: 500, fontSize: 34, color: W, letterSpacing: "0.2em" }}>LINHA VERDE GRATUITA</span>
+        </div>
+        <div style={{ display: "flex", gap: 30, marginTop: 34 }}>
+          <FlipGroup text="800" at={L(31.6, start)} size={150} />
+          <FlipGroup text="10" at={L(32.3, start)} size={150} />
+          <FlipGroup text="14" at={L(32.74, start)} size={150} />
+        </div>
+        <div style={{ height: 34 }} />
+        <Kicker delay={L(30.94, start)} size={38}>
+          Ligue gratuitamente
         </Kicker>
-        <div style={{ display: "flex", gap: 34, marginTop: 10 }}>
-          {groups.map((g) => {
-            const d = L(g.at, start);
-            const p = ease(frame, d, d + 7, Easing.out(Easing.back(2)));
-            return (
-              <span key={g.t} style={{ display: "inline-block", fontFamily: SANS, fontWeight: 800, fontSize: 190, color: W, lineHeight: 1, transform: `translateY(${(1 - p) * 60}px) scale(${0.7 + 0.3 * p})`, opacity: p, visibility: p <= 0 ? "hidden" : "visible" }}>
-                {g.t}
-              </span>
-            );
-          })}
-        </div>
       </div>
+      <Burst at={L(32.74, start) + 10} x={1622} y={500} size={130} />
     </AbsoluteFill>
   );
 };
@@ -386,6 +394,7 @@ const S9: React.FC<{ start: number }> = ({ start }) => (
       <div style={{ height: 46 }} />
       <ParticipaPill delay={L(35.28, start)} />
     </div>
+    <Burst at={L(35.28, start) + 7} x={1030} y={712} size={120} />
   </AbsoluteFill>
 );
 
@@ -445,9 +454,9 @@ export const Spot2: React.FC<Spot2Props> = ({ variant }) => {
 
         <Bug />
 
-        {WIPES.map((w) => (
-          <Sequence key={w} from={sec(w) - 8} durationInFrames={17} name={`wipe ${w}`}>
-            <Wipe />
+        {TRANSITIONS.map((tr) => (
+          <Sequence key={tr.at} from={sec(tr.at) - 8} durationInFrames={17} name={`${tr.kind} ${tr.at}`}>
+            {tr.kind === "wipe" ? <Wipe /> : tr.kind === "iris" ? <Iris cx={tr.cx} cy={tr.cy} /> : <Bars />}
           </Sequence>
         ))}
 
