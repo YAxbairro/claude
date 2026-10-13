@@ -56,18 +56,20 @@ export const RemotionRoot: React.FC = () => (
         defaultProps={{ variant }}
       />
     ))}
-    {(["cor", "alpha"] as const).map((variant) => (
-      <Composition
-        key={`v2-${variant}`}
-        id={`SpotVotoAntecipadoV2-${variant}`}
-        component={Spot2}
-        durationInFrames={SPOT2_DURATION}
-        fps={SPOT_FPS}
-        width={1920}
-        height={1080}
-        defaultProps={{ variant }}
-      />
-    ))}
+    {(["cor", "alpha"] as const).flatMap((variant) =>
+      (["mono", "cor"] as const).map((logos) => (
+        <Composition
+          key={`v2-${variant}-${logos}`}
+          id={`SpotVotoAntecipadoV2-${variant}${logos === "cor" ? "-logocor" : ""}`}
+          component={Spot2}
+          durationInFrames={SPOT2_DURATION}
+          fps={SPOT_FPS}
+          width={1920}
+          height={1080}
+          defaultProps={{ variant, logos }}
+        />
+      )),
+    )}
     <Composition id="SpotFinaisOpcoes" component={FinalsReel} durationInFrames={FINALS_DURATION} fps={SPOT_FPS} width={1920} height={1080} />
   </>
 );

@@ -9,7 +9,7 @@ import { Bars, BgTexture, BrowserWindow, Burst, FlipGroup, Handset, Iris } from 
 
 // Spot "Voto antecipado" v2 – same script and timing as v1, restyled after the
 // CNE "cadernos de recenseamento" spot: flat colour fields, white type, real website.
-export type Spot2Props = { variant: "cor" | "alpha" };
+export type Spot2Props = { variant: "cor" | "alpha"; logos?: "cor" | "mono" };
 
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const L = (abs: number, start: number) => sec(abs) - sec(start);
@@ -126,10 +126,11 @@ export const T: React.FC<{ d: number; size: number; box?: string; children: Reac
   box,
   children,
   align = "left",
-  weight = 800,
+  weight = 700,
   spacing = 0,
 }) => (
-  <Line delay={d} size={size} color={W} box={box} align={align} weight={weight} spacing={spacing}>
+  // headlines a touch lighter and smaller so they sit in balance with the kickers
+  <Line delay={d} size={Math.round(size * (size > 100 ? 0.86 : 0.93))} color={W} box={box} align={align} weight={weight} spacing={spacing}>
     {children}
   </Line>
 );
@@ -148,7 +149,7 @@ const S1: React.FC = () => {
           Eleições Presidenciais
         </Kicker>
         <div style={{ height: 30 }} />
-        <div style={{ fontFamily: SANS, fontWeight: 800, fontSize: 260, lineHeight: 0.9, color: W, transform: `scale(${0.6 + 0.4 * pop})`, opacity: pop > 0.01 ? 1 : 0 }}>{count}</div>
+        <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 240, lineHeight: 0.9, color: W, transform: `scale(${0.6 + 0.4 * pop})`, opacity: pop > 0.01 ? 1 : 0 }}>{count}</div>
         <div style={{ height: 18 }} />
         <T d={L(1.75, 0)} size={84} box={DEEP} align="center" spacing={6}>
           Novembro
@@ -455,20 +456,21 @@ const S9: React.FC<{ start: number }> = ({ start }) => (
 );
 
 // CNE logo in the corner, as in the reference spot
-const Bug: React.FC = () => {
+const Bug: React.FC<{ logos: "cor" | "mono" }> = ({ logos }) => {
   const frame = useCurrentFrame();
   const o = interpolate(frame, [sec(0.3), sec(0.9), sec(33.2), sec(33.4)], [0, 1, 1, 0], clamp);
+  const mono = logos === "mono";
   return (
     <AbsoluteFill style={{ opacity: o }}>
-      <Img src={staticFile("eleicao-branco.png")} style={{ position: "absolute", left: 60, top: 40, height: 96 }} />
-      <Img src={staticFile("cne.png")} style={{ position: "absolute", right: 60, top: 52, height: 66, filter: "brightness(0) invert(1)" }} />
+      <Img src={staticFile(mono ? "eleicao-branco.png" : "eleicao-cor.png")} style={{ position: "absolute", left: 60, top: 40, height: 96 }} />
+      <Img src={staticFile("cne.png")} style={{ position: "absolute", right: 60, top: 52, height: 66, filter: mono ? "brightness(0) invert(1)" : undefined }} />
     </AbsoluteFill>
   );
 };
 
 export const SPOT2_DURATION = sec(42);
 
-export const Spot2: React.FC<Spot2Props> = ({ variant }) => {
+export const Spot2: React.FC<Spot2Props> = ({ variant, logos = "mono" }) => {
   const withBg = variant === "cor";
   return (
     <BgCtx.Provider value={withBg}>
@@ -509,7 +511,7 @@ export const Spot2: React.FC<Spot2Props> = ({ variant }) => {
           <LogoAnim variant="cor" />
         </Sequence>
 
-        <Bug />
+        <Bug logos={logos} />
 
         {TRANSITIONS.map((tr) => (
           <Sequence key={tr.at} from={sec(tr.at) - 8} durationInFrames={17} name={`${tr.kind} ${tr.at}`}>

@@ -31,10 +31,11 @@ export const Kicker: React.FC<{ delay: number; size: number; children: React.Rea
     <div
       style={{
         fontFamily: SANS,
-        fontWeight: 300,
-        fontSize: size,
+        // medium weight, slightly larger and tighter: balances against the bold headlines
+        fontWeight: 500,
+        fontSize: Math.round(size * 1.12),
         color,
-        letterSpacing: `${0.32 - 0.16 * p}em`,
+        letterSpacing: `${0.22 - 0.12 * p}em`,
         opacity: p,
         visibility: p <= 0 ? "hidden" : "visible",
         textAlign: align,
