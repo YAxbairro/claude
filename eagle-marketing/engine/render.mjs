@@ -21,10 +21,14 @@ if (!compPath || !outPath) {
 
 const browser = await chromium.launch({
   executablePath: process.env.CHROMIUM_PATH || undefined,
-  args: ['--allow-file-access-from-files', '--disable-web-security'],
+  args: ['--allow-file-access-from-files', '--disable-web-security', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
 });
 const page = await browser.newPage();
+page.on('pageerror', (e) => console.error('pageerror:', e.message));
+page.on('console', (m) => m.type() === 'error' && console.error('console:', m.text()));
 await page.goto(pathToFileURL(path.resolve(compPath)).href);
+// composições com WebGL/texturas assinalam window.READY = true quando prontas
+await page.waitForFunction(() => typeof window.renderFrame === 'function' && window.READY !== false, null, { timeout: 60000 });
 await page.evaluate(() => document.fonts.ready);
 const comp = await page.evaluate(() => window.COMP);
 await page.setViewportSize({ width: comp.width, height: comp.height });
@@ -45,8 +49,15 @@ const audio = opt('--audio');
 const total = Math.round((to - from) * comp.fps);
 
 const ffArgs = ['-y', '-f', 'image2pipe', '-framerate', String(comp.fps), '-i', '-'];
+// pós-produção: grão de filme + marca d'água (fora do browser, evita bugs de composição sobre WebGL)
+const overlay = args.includes('--no-watermark') ? null : new URL('./watermark.png', import.meta.url).pathname;
+const grain = Number(opt('--grain') ?? 5);
+if (overlay) ffArgs.push('-i', overlay);
 if (audio) ffArgs.push('-ss', String(from), '-i', audio);
-ffArgs.push('-c:v', 'libx264', '-preset', 'slow', '-crf', '17', '-pix_fmt', 'yuv420p', '-movflags', '+faststart');
+const vf = `[0:v]${grain > 0 ? `noise=alls=${grain}:allf=t,` : ''}format=yuv420p[base]` + (overlay ? `;[base][1:v]overlay=0:0:format=auto,format=yuv420p[v]` : '');
+ffArgs.push('-filter_complex', vf, '-map', overlay ? '[v]' : '[base]');
+if (audio) ffArgs.push('-map', `${overlay ? 2 : 1}:a`);
+ffArgs.push('-c:v', 'libx264', '-preset', 'slow', '-crf', '17', '-movflags', '+faststart');
 if (audio) ffArgs.push('-c:a', 'aac', '-b:a', '192k', '-shortest');
 ffArgs.push(outPath);
 const ff = spawn('ffmpeg', ffArgs, { stdio: ['pipe', 'ignore', 'inherit'] });

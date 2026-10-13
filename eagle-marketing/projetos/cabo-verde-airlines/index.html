@@ -2,237 +2,463 @@
 <html lang="pt">
 <head>
 <meta charset="utf-8">
-<title>Cabo Verde Airlines — Ir mais longe (exemplar Eagle Marketing)</title>
+<title>Cabo Verde Airlines — Ir mais longe v2 (exemplar Eagle Marketing)</title>
 <style>
   @font-face { font-family: 'Outfit'; src: url('assets/outfit.woff2') format('woff2'); font-weight: 100 900; }
-  :root { --deep: #003a8c; --deep2: #002a6b; --teal: #62D6C2; --purple: #6B4AA8; --yellow: #F6CB6B; }
+  :root { --deep: #04215e; --teal: #62D6C2; --purple: #6B4AA8; --yellow: #F6CB6B; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--deep); }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #020b24; }
   body { font-family: 'Outfit', sans-serif; color: #fff; position: relative; }
+  canvas#gl { position: absolute; inset: 0; width: 1080px; height: 1920px; }
   .abs { position: absolute; }
   .layer { position: absolute; inset: 0; }
   .center-x { left: 0; right: 0; text-align: center; }
-  .mask { overflow: hidden; display: inline-block; vertical-align: top; padding: 0 8px 6px; }
-  .mask > span { display: inline-block; }
-  .chip { display: inline-block; background: var(--yellow); color: var(--deep2); font-weight: 700; border-radius: 16px; padding: 14px 30px; }
-  .city { position: absolute; transform-origin: 0 50%; white-space: nowrap; }
-  .city .n { font-size: 50px; font-weight: 700; line-height: 1; }
-  .city .pr { font-size: 30px; font-weight: 500; color: var(--teal); margin-top: 6px; }
-  .city .pr b { font-size: 40px; font-weight: 800; color: #fff; }
-  .wm-pill { position: absolute; top: 56px; right: 56px; padding: 14px 26px; border-radius: 40px; background: rgba(0,0,0,.45);
+  .ltr { display: inline-block; will-change: transform, filter, opacity; white-space: pre; }
+  .shadowed { text-shadow: 0 6px 40px rgba(20, 20, 60, .35); }
+  .label { position: absolute; white-space: nowrap; }
+  .label .line { position: absolute; left: 0; top: 0; height: 2px; background: rgba(255,255,255,.85); transform-origin: 0 50%; }
+  .label .box { position: absolute; left: 0; top: -58px; overflow: hidden; }
+  .label .n { font-size: 46px; font-weight: 700; line-height: 1; }
+  .label .pr { font-size: 26px; font-weight: 400; color: var(--teal); margin-top: 6px; }
+  .label .pr b { font-size: 34px; font-weight: 700; color: #fff; }
+  .chip { display: inline-block; background: var(--yellow); color: #082a6e; font-weight: 700; border-radius: 14px; padding: 12px 26px; }
+  .wm-pill { position: absolute; top: 56px; right: 56px; padding: 14px 26px; border-radius: 40px; background: rgba(0,0,0,.4);
              color: #fff; font-size: 24px; font-weight: 600; letter-spacing: 3px; z-index: 50; }
   .wm-pill b { color: var(--yellow); }
   .wm-big { position: absolute; inset: -400px; display: flex; flex-wrap: wrap; align-content: center; justify-content: center;
-            transform: rotate(-28deg); z-index: 49; pointer-events: none; opacity: .06; gap: 160px 200px; }
+            transform: rotate(-28deg); z-index: 49; pointer-events: none; opacity: .05; gap: 160px 200px; }
   .wm-big span { font-size: 64px; font-weight: 900; letter-spacing: 8px; color: #fff; white-space: nowrap; }
+  #grain { position: absolute; inset: 0; z-index: 48; opacity: .06; mix-blend-mode: overlay; pointer-events: none; }
 </style>
-<script src="../../engine/motion-lib.js"></script>
+<script>window.COMP = { width: 1080, height: 1920, fps: 30, duration: 21 }; window.READY = false;</script>
+<script src="assets/land.js"></script>
+<script type="importmap">
+{ "imports": { "three": "../../engine/node_modules/three/build/three.module.js",
+               "three/addons/": "../../engine/node_modules/three/examples/jsm/" } }
+</script>
 </head>
 <body>
-  <div id="bg" class="layer" style="background: radial-gradient(120% 80% at 50% 30%, #0a4fb0 0%, #003a8c 45%, #00245c 100%)"></div>
+  <canvas id="gl" width="1080" height="1920"></canvas>
 
-  <!-- Cena 1: avião + headline -->
-  <div id="s1" class="layer">
-    <img id="plane" class="abs" src="assets/plane.jpg"
-         style="width:1500px;left:-300px;top:260px;-webkit-mask-image:radial-gradient(70% 62% at 45% 48%, #000 55%, transparent 100%);">
-    <div id="s1-a" class="abs center-x" style="top:1260px;font-size:100px;font-weight:300"><span class="mask"><span>É hora de</span></span></div>
-    <div id="s1-b" class="abs center-x" style="top:1370px;font-size:148px;font-weight:800;color:var(--teal);letter-spacing:-3px"><span class="mask"><span>ir mais longe.</span></span></div>
+  <!-- Cena A: texto sobre o céu -->
+  <div id="A" class="layer">
+    <div id="A1" class="abs center-x shadowed" style="top:1380px;font-size:66px;font-weight:300">É hora de</div>
+    <div id="A2" class="abs center-x shadowed" style="top:1450px;font-size:158px;font-weight:800;letter-spacing:-4px">ir mais longe</div>
   </div>
 
-  <!-- Cena 2: mapa de rotas -->
-  <div id="s2" class="layer">
-    <svg id="map" class="layer" width="1080" height="1920" viewBox="0 0 1080 1920">
-      <defs>
-        <pattern id="dots" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="18" cy="18" r="2.2" fill="rgba(255,255,255,.13)"/></pattern>
-        <radialGradient id="glow"><stop offset="0" stop-color="#62D6C2" stop-opacity=".55"/><stop offset="1" stop-color="#62D6C2" stop-opacity="0"/></radialGradient>
-      </defs>
-      <rect id="dotsRect" width="1080" height="1920" fill="url(#dots)"/>
-      <g id="arcs"></g>
-      <circle id="hubGlow" cx="430" cy="1290" r="160" fill="url(#glow)"/>
-      <g id="hub"></g>
-      <g id="planes"></g>
-    </svg>
-    <div id="cities"></div>
-    <div id="s2-head" class="abs center-x" style="top:170px;font-size:92px;font-weight:800;line-height:1.02">
-      <div><span class="mask"><span>Cabo Verde</span></span></div>
-      <div style="color:var(--teal)"><span class="mask"><span>ligado ao mundo.</span></span></div>
-    </div>
-    <div id="hub-label" class="abs" style="left:300px;top:1360px;font-size:34px;font-weight:700;letter-spacing:6px;color:var(--yellow)">CABO VERDE</div>
+  <!-- Cena B: globo -->
+  <div id="B" class="layer">
+    <div id="B1" class="abs center-x" style="top:170px;font-size:88px;font-weight:300;line-height:1">Cabo Verde,</div>
+    <div id="B2" class="abs center-x" style="top:262px;font-size:96px;font-weight:800;color:var(--teal);line-height:1.05">ligado ao mundo.</div>
+    <div id="labels"></div>
   </div>
 
-  <!-- Cena 3: nova rota Recife ⇄ Sal -->
-  <div id="s3" class="layer" style="overflow:hidden">
-    <img id="sal" class="abs" src="assets/sal.jpg" style="width:1080px;height:1920px;object-fit:cover;left:0;top:0">
-    <div class="layer" style="background:linear-gradient(180deg, rgba(0,36,92,.0) 40%, rgba(0,36,92,.55) 100%)"></div>
-    <div id="s3-chip" class="abs" style="top:250px;left:90px"><span class="chip" style="font-size:34px;letter-spacing:4px">NOVA ROTA</span></div>
-    <div id="s3-t1" class="abs" style="top:340px;left:80px;font-size:150px;font-weight:600;color:#1a3fa8;line-height:1"><span class="mask"><span>RECIFE</span></span></div>
-    <div id="s3-arrow" class="abs" style="top:490px;left:92px;width:96px;height:96px;border-radius:50%;background:var(--yellow);display:flex;align-items:center;justify-content:center">
-      <svg width="54" height="54" viewBox="0 0 24 24"><path d="M4 8h14l-4-4M20 16H6l4 4" stroke="#1a3fa8" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    <div id="s3-t2" class="abs" style="top:470px;left:205px;font-size:230px;font-weight:900;color:#1a3fa8;line-height:1;letter-spacing:-6px"><span class="mask"><span>SAL</span></span></div>
-    <div id="s3-sub" class="abs" style="top:720px;left:90px"><span class="chip" style="font-size:44px">Conexão com Lisboa</span></div>
-    <div id="s3-price" class="abs" style="left:90px;bottom:250px;padding:40px 54px;border-radius:36px;background:rgba(0,42,107,.82);backdrop-filter:blur(8px)">
-      <div style="font-size:36px;font-weight:500;color:var(--teal);letter-spacing:3px">IDA E VOLTA DESDE</div>
-      <div style="font-size:120px;font-weight:800;line-height:1.05">33.519<span style="font-size:70px">$</span></div>
+  <!-- Cena C: nova rota -->
+  <div id="C" class="layer" style="overflow:hidden">
+    <img id="sal" class="abs" src="assets/sal.jpg" style="width:1080px;height:1920px;object-fit:cover">
+    <div class="layer" style="background:linear-gradient(180deg, rgba(4,33,94,.15) 0%, rgba(4,33,94,0) 35%, rgba(4,33,94,.0) 60%, rgba(4,33,94,.75) 100%)"></div>
+    <div id="leak" class="layer" style="background:radial-gradient(60% 40% at 85% 10%, rgba(255,190,120,.55), rgba(255,190,120,0) 70%);mix-blend-mode:screen"></div>
+    <div id="C0" class="abs" style="top:260px;left:86px"><span class="chip" style="font-size:30px;letter-spacing:5px">NOVA ROTA</span></div>
+    <div id="C1" class="abs" style="top:335px;left:80px;font-size:140px;font-weight:300;color:#0f3a9e;line-height:1">Recife</div>
+    <div id="Carrow" class="abs" style="top:480px;left:86px;font-size:90px;font-weight:300;color:#0f3a9e;line-height:1">⇄</div>
+    <div id="C2" class="abs" style="top:455px;left:200px;font-size:220px;font-weight:900;color:#0f3a9e;line-height:1;letter-spacing:-6px">Sal</div>
+    <div id="C3" class="abs" style="top:705px;left:88px;font-size:36px;font-weight:500;color:#0f3a9e">com conexão a Lisboa</div>
+    <div id="Cprice" class="abs" style="left:86px;bottom:260px;padding:38px 50px;border-radius:34px;background:rgba(4,33,94,.55);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.18)">
+      <div style="font-size:30px;font-weight:500;color:var(--teal);letter-spacing:4px">IDA E VOLTA DESDE</div>
+      <div style="font-size:116px;font-weight:800;line-height:1.05">33.519<span style="font-size:64px;font-weight:600">$</span></div>
     </div>
   </div>
 
-  <!-- Cena 4: assinatura -->
-  <div id="s4" class="layer">
-    <img id="logo" class="abs" src="assets/logo.svg" style="width:760px;left:160px;top:560px">
-    <div id="s4-from" class="abs center-x" style="top:1010px;font-size:44px;font-weight:400;color:#cfe0ff"><span class="mask"><span>Tarifas desde</span></span></div>
-    <div id="s4-price" class="abs center-x" style="top:1070px;font-size:150px;font-weight:800;line-height:1"><span class="mask"><span>299,18 €<sup style="font-size:60px;color:var(--teal)">*</sup></span></span></div>
-    <div id="s4-cta" class="abs" style="top:1290px;left:50%;transform:translateX(-50%);white-space:nowrap"><span class="chip" style="font-size:52px;padding:30px 70px;border-radius:70px">Reserve já</span></div>
-    <div id="s4-url" class="abs center-x" style="top:1460px;font-size:44px;font-weight:500;letter-spacing:1px">caboverdeairlines.com</div>
-    <div id="s4-note" class="abs center-x" style="top:1760px;font-size:24px;font-weight:300;color:#a9bde6;padding:0 120px">*Tarifas ida e volta da campanha de outubro de 2026, apresentadas a título ilustrativo.</div>
+  <!-- Cena D: assinatura -->
+  <div id="D" class="layer">
+    <div id="logoWrap" class="abs" style="left:150px;top:560px;width:780px;height:360px"></div>
+    <div id="D1" class="abs center-x" style="top:1010px;font-size:40px;font-weight:300;color:#cfe0ff;letter-spacing:2px">Tarifas desde</div>
+    <div id="D2" class="abs center-x" style="top:1065px;font-size:150px;font-weight:800;line-height:1">299,18 €<sup style="font-size:56px;color:var(--teal)">*</sup></div>
+    <div id="Dcta" class="abs" style="top:1300px;left:50%;transform:translateX(-50%);white-space:nowrap">
+      <span class="chip" id="ctaChip" style="font-size:50px;padding:28px 72px;border-radius:70px;position:relative;overflow:hidden;display:inline-block">Reserve já<span id="shine" style="position:absolute;top:0;bottom:0;width:120px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);transform:skewX(-20deg)"></span></span></div>
+    <div id="Durl" class="abs center-x" style="top:1470px;font-size:42px;font-weight:400;letter-spacing:1px">caboverdeairlines.com</div>
+    <div id="Dnote" class="abs center-x" style="top:1770px;font-size:23px;font-weight:300;color:#a9bde6;padding:0 120px">*Tarifas ida e volta da campanha de outubro de 2026, apresentadas a título ilustrativo.</div>
   </div>
 
-  <!-- transição -->
-  <svg id="iris" class="layer" width="1080" height="1920" viewBox="0 0 1080 1920"><circle id="iris-c" cx="540" cy="960" r="0"/></svg>
 
-  <div class="wm-big" id="wm-big"></div>
-  <div class="wm-pill">EXEMPLAR · <b>EAGLE</b> MARKETING</div>
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
-<script>
-window.COMP = { width: 1080, height: 1920, fps: 30, duration: 18 };
-const { p, lerp, set, easeOutCubic, easeInCubic, easeInOutCubic, easeOutExpo, easeInExpo, easeInOutExpo, easeOutBack, spring } = M;
+const W = 1080, H = 1920;
 const $ = (id) => document.getElementById(id);
-const TEAL = '#62D6C2', YELLOW = '#F6CB6B';
-$('wm-big').innerHTML = Array.from({ length: 40 }, () => '<span>EAGLE MARKETING</span>').join('');
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const p = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const eOutExpo = (k) => (k >= 1 ? 1 : 1 - Math.pow(2, -10 * k));
+const eInExpo = (k) => (k <= 0 ? 0 : Math.pow(2, 10 * k - 10));
+const eInOut = (k) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+const eOutCubic = (k) => 1 - Math.pow(1 - k, 3);
+const eInCubic = (k) => k * k * k;
+const eInOutExpo = (k) => (k <= 0 ? 0 : k >= 1 ? 1 : k < 0.5 ? Math.pow(2, 20 * k - 10) / 2 : (2 - Math.pow(2, -20 * k + 10)) / 2);
+const eOutBack = (k, s = 1.4) => 1 + (s + 1) * Math.pow(k - 1, 3) + s * Math.pow(k - 1, 2);
 
-function rev(el, k, o = 0) {
-  const y = (1 - easeOutExpo(k)) * 110 - easeInExpo(o) * 110;
-  el.style.transform = `translateY(${y}%)`;
+
+// ---------- tipografia: letras com blur, escala e tracking ----------
+function splitLetters(el) {
+  const txt = el.textContent; el.textContent = '';
+  return [...txt].map((ch) => { const s = document.createElement('span'); s.className = 'ltr'; s.textContent = ch; el.appendChild(s); return s; });
 }
-const R = (sel) => document.querySelector(sel + ' .mask>span');
+// entrada por letra a partir do centro; saída com blur para cima
+function letters(arr, t, t0, { stagger = 0.032, dur = 0.9, out = 99, outDur = 0.5, rise = 40, blur = 18, center = true } = {}) {
+  const n = arr.length, mid = (n - 1) / 2;
+  arr.forEach((s, i) => {
+    const order = center ? Math.abs(i - mid) : i;
+    const k = eOutExpo(p(t, t0 + order * stagger, t0 + order * stagger + dur));
+    const o = eInCubic(p(t, out + order * stagger * 0.5, out + order * stagger * 0.5 + outDur));
+    const b = (1 - k) * blur + o * blur;
+    s.style.opacity = k * (1 - o);
+    s.style.filter = b > 0.05 ? `blur(${b.toFixed(2)}px)` : 'none';
+    s.style.transform = `translate3d(0, ${((1 - k) * rise - o * rise).toFixed(2)}px, 0) scale(${(1 + (1 - k) * 0.25 + o * 0.1).toFixed(3)})`;
+  });
+}
+const A1 = splitLetters($('A1')), A2 = splitLetters($('A2'));
+const B1 = splitLetters($('B1')), B2 = splitLetters($('B2'));
+const C1 = splitLetters($('C1')), C2 = splitLetters($('C2')), C3 = splitLetters($('C3'));
+const D1 = splitLetters($('D1'));
 
-// ---- rotas ----
-const HUB = [430, 1290];
-const ROUTES = [
-  { name: 'Lisboa', price: '32.991', to: [640, 830], bend: -0.25, t: 3.9, lx: 30, ly: -40 },
-  { name: 'Paris', price: '36.537', to: [730, 640], bend: -0.2, t: 4.7, lx: 30, ly: -40 },
-  { name: 'Providence', price: '63.416', to: [120, 760], bend: 0.25, t: 5.5, lx: -20, ly: -120 },
-  { name: 'Recife', price: '33.519', to: [250, 1730], bend: 0.3, t: 6.3, lx: 40, ly: -30 },
-];
-const NS = 'http://www.w3.org/2000/svg';
-const planeD = 'M-22 0 L-8 -3 L-2 -16 L3 -16 L0 -3 L12 -3 L16 -8 L20 -8 L18 0 L20 8 L16 8 L12 3 L0 3 L3 16 L-2 16 L-8 3 Z';
-ROUTES.forEach((r, i) => {
-  const [x0, y0] = HUB, [x1, y1] = r.to;
-  const mx = (x0 + x1) / 2, my = (y0 + y1) / 2, dx = x1 - x0, dy = y1 - y0;
-  const cx = mx - dy * r.bend, cy = my + dx * r.bend;
-  const path = document.createElementNS(NS, 'path');
-  path.setAttribute('d', `M${x0} ${y0} Q${cx} ${cy} ${x1} ${y1}`);
-  path.setAttribute('fill', 'none'); path.setAttribute('stroke', TEAL); path.setAttribute('stroke-width', 5);
-  path.setAttribute('stroke-linecap', 'round');
-  $('arcs').appendChild(path);
-  r.path = path; r.len = path.getTotalLength();
-  path.setAttribute('stroke-dasharray', `${r.len}`);
-  const dot = document.createElementNS(NS, 'g');
-  dot.innerHTML = `<circle r="34" fill="${TEAL}" opacity=".18"/><circle r="13" fill="#fff"/><circle r="7" fill="${TEAL}"/>`;
-  dot.setAttribute('transform', `translate(${x1} ${y1}) scale(0)`);
-  $('hub').appendChild(dot); r.dot = dot;
-  const pl = document.createElementNS(NS, 'path');
-  pl.setAttribute('d', planeD); pl.setAttribute('fill', '#fff');
-  $('planes').appendChild(pl); r.plane = pl;
-  const c = document.createElement('div');
-  c.className = 'city';
-  c.innerHTML = `<div class="n">${r.name}</div><div class="pr">desde <b>${r.price}$</b></div>`;
-  c.style.left = (x1 + r.lx) + 'px'; c.style.top = (y1 + r.ly) + 'px';
-  if (r.name === 'Providence') c.style.left = (x1 - 20) + 'px';
-  $('cities').appendChild(c); r.card = c;
+// ---------- logótipo: cada letra do SVG entra em separado ----------
+const logoSvgText = await (await fetch('assets/logo.svg')).text();
+$('logoWrap').innerHTML = logoSvgText;
+const logoSvg = $('logoWrap').querySelector('svg');
+logoSvg.setAttribute('width', '780'); logoSvg.setAttribute('height', '360');
+const logoPaths = [...logoSvg.querySelectorAll('path')].map((pth) => {
+  const bb = pth.getBBox(); pth.style.transformBox = 'fill-box'; pth.style.transformOrigin = '50% 100%';
+  return { el: pth, x: bb.x };
+}).sort((a, b) => a.x - b.x);
+
+// grão de filme e marca d'água são aplicados em pós-produção (engine/render.mjs)
+
+// ---------- WebGL ----------
+const renderer = new THREE.WebGLRenderer({ canvas: $('gl'), antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1); renderer.setSize(W, H, false);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+// ===== Cena A: céu golden hour + nuvens procedimentais + avião =====
+const sceneA = new THREE.Scene();
+const camA = new THREE.OrthographicCamera(0, W, H, 0, -10, 10);
+const NOISE = `
+  float hash(vec2 p){ p = fract(p*vec2(123.34, 456.21)); p += dot(p, p+45.32); return fract(p.x*p.y); }
+  float noise(vec2 p){ vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.-2.*f);
+    return mix(mix(hash(i),hash(i+vec2(1,0)),u.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x), u.y); }
+  float fbm(vec2 p){ float v=0., a=.5; mat2 m=mat2(1.6,1.2,-1.2,1.6); for(int i=0;i<6;i++){ v+=a*noise(p); p=m*p; a*=.5; } return v; }
+`;
+const skyMat = new THREE.ShaderMaterial({
+  uniforms: { uT: { value: 0 }, uSun: { value: new THREE.Vector2(0.80, 0.80) } },
+  vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+  fragmentShader: `varying vec2 vUv; uniform float uT; uniform vec2 uSun; ${NOISE}
+    void main(){
+      vec2 uv=vUv; float y=uv.y;
+      vec3 top=vec3(.05,.17,.45), mid=vec3(.30,.48,.80), hor=vec3(1.0,.70,.45), low=vec3(1.0,.84,.62);
+      vec3 col = mix(low, hor, smoothstep(.0,.30,y)); col = mix(col, mid, smoothstep(.30,.62,y)); col = mix(col, top, smoothstep(.62,1.,y));
+      vec2 d = (uv-uSun)*vec2(1.,1.777); float r=length(d);
+      col += vec3(1.,.72,.45)*exp(-r*4.5)*.55 + vec3(1.,.93,.8)*exp(-r*22.)*.6 + vec3(1.,.98,.92)*smoothstep(.028,.018,r);
+      col += vec3(1.,.85,.65)*exp(-abs(d.y)*70.)*exp(-abs(d.x)*2.5)*.35;
+      // cirros altos
+      vec2 ci = vec2(uv.x*1.2 - uT*.02, uv.y*9.);
+      col = mix(col, vec3(1.,.9,.8), smoothstep(.55,.85,fbm(ci))*smoothstep(.55,.8,y)*smoothstep(1.,.85,y)*.35);
+      // mar de nuvens em perspetiva (voamos por cima dele)
+      float hz = .47;
+      if (y < hz + .02) {
+        float yy = max(hz - y, .001);
+        float depth = .11 / (yy + .015);
+        vec2 cp = vec2((uv.x - .5) * depth * 1.6 - uT*.05, depth + uT*.55);
+        float n = fbm(cp * 1.4);
+        float n2 = fbm(cp * 1.4 + vec2(.05, .09));
+        float dens = smoothstep(.36, .56, n);
+        float lit = clamp(.55 + (n - n2) * 5.5, 0., 1.);
+        vec3 shade = mix(vec3(.36,.37,.56), vec3(1.,.82,.62), lit);
+        shade = mix(shade, vec3(1.,.95,.86), pow(lit, 5.) * .7);
+        float haze = exp(-yy * 9.);
+        shade = mix(shade, hor * 1.05, haze * .85);
+        float m = dens * smoothstep(hz + .02, hz - .02, y);
+        col = mix(col, shade, m);
+        col = mix(col, mix(vec3(.62,.58,.72), hor, haze), (1. - dens) * smoothstep(hz, hz - .05, y) * .55);
+      }
+      gl_FragColor = vec4(col,1.);
+    }`,
+  depthWrite: false,
 });
-const hubG = document.createElementNS(NS, 'g');
-hubG.innerHTML = `<circle r="24" fill="${YELLOW}"/><circle r="10" fill="#002a6b"/>`;
-hubG.setAttribute('transform', `translate(${HUB[0]} ${HUB[1]})`);
-$('hub').appendChild(hubG);
+const sky = new THREE.Mesh(new THREE.PlaneGeometry(W, H), skyMat); sky.position.set(W / 2, H / 2, -5); sceneA.add(sky);
+
+function cloudLayer(z, scale, speed, cover, alpha, band) {
+  const m = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false,
+    uniforms: { uT: { value: 0 }, uCover: { value: cover }, uAlpha: { value: alpha }, uWhite: { value: 0 } },
+    vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+    fragmentShader: `varying vec2 vUv; uniform float uT, uCover, uAlpha, uWhite; ${NOISE}
+      void main(){
+        vec2 uv=vUv;
+        vec2 q = vec2(uv.x*${scale.toFixed(2)} + uT*${speed.toFixed(3)}, uv.y*${(scale * 1.777).toFixed(2)} + uT*${(speed * 0.42).toFixed(3)});
+        float n = fbm(q);
+        float band = ${band};
+        float cov = uCover + uWhite*.9;
+        float d = smoothstep(1.-cov, 1.-cov+.22, n) * band;
+        d = max(d, uWhite*smoothstep(.0,1.,n+.25));
+        float lit = clamp(.5 + (n - fbm(q + vec2(.025,.045)))*7., 0., 1.);
+        vec3 shadow = vec3(.55,.53,.68), light = vec3(1.,.88,.72), rim = vec3(1.,.97,.9);
+        vec3 col = mix(shadow, light, lit); col = mix(col, rim, pow(lit,6.)*.6);
+        col = mix(col, vec3(1.,.95,.88), uWhite);
+        gl_FragColor = vec4(col, clamp(d*uAlpha,0.,1.));
+      }`,
+  });
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(W, H), m); mesh.position.set(W / 2, H / 2, z); sceneA.add(mesh);
+  return m;
+}
+// as nuvens correm para a esquerda/baixo: a câmara acompanha o avião que sobe para a direita
+const cloudMid = cloudLayer(-3, 2.0, -0.10, 0.25, 0.55, 'smoothstep(.62,.5,uv.y)*smoothstep(.3,.45,uv.y)');
+const planeTex = await new THREE.TextureLoader().loadAsync('assets/plane_cut.png');
+planeTex.colorSpace = THREE.SRGBColorSpace; planeTex.anisotropy = 8;
+const PW = 1200, PH = PW * 728 / 1000;
+const planeMat = new THREE.MeshBasicMaterial({ map: planeTex, transparent: true, depthWrite: false });
+const plane = new THREE.Mesh(new THREE.PlaneGeometry(PW, PH), planeMat); sceneA.add(plane);
+// leve névoa atmosférica sobre o avião para o integrar no céu
+const hazeMat = new THREE.MeshBasicMaterial({ map: planeTex, transparent: true, depthWrite: false, color: new THREE.Color(1.0, .8, .6), opacity: .10, blending: THREE.AdditiveBlending });
+const haze = new THREE.Mesh(new THREE.PlaneGeometry(PW, PH), hazeMat); sceneA.add(haze);
+const cloudNear = cloudLayer(1, 1.5, -0.55, 0.30, 0.85, 'max(smoothstep(.32,.0,uv.y), smoothstep(.86,1.,uv.y))');
+const cloudWisp = cloudLayer(2, 2.2, -1.5, 0.30, 0.7, 'smoothstep(.0,.25,uv.y)*smoothstep(1.,.75,uv.y)');
+
+// ===== Cena B: globo pontilhado =====
+const sceneB = new THREE.Scene();
+const camB = new THREE.PerspectiveCamera(32, W / H, 0.01, 100);
+{ const c = document.createElement('canvas'); c.width = 540; c.height = 960; const x = c.getContext('2d');
+  const g = x.createRadialGradient(270, 560, 40, 270, 560, 700); g.addColorStop(0, '#0b3a8a'); g.addColorStop(.55, '#05194a'); g.addColorStop(1, '#010818');
+  x.fillStyle = g; x.fillRect(0, 0, 540, 960); const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.SRGBColorSpace; sceneB.background = tx; }
+const globe = new THREE.Group(); sceneB.add(globe);
+const ll2v = (lon, lat, r = 1) => {
+  const phi = (90 - lat) * Math.PI / 180, th = (lon + 180) * Math.PI / 180;
+  return new THREE.Vector3(-r * Math.sin(phi) * Math.cos(th), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(th));
+};
+globe.add(new THREE.Mesh(new THREE.SphereGeometry(0.995, 96, 96), new THREE.MeshBasicMaterial({ color: 0x041a4a })));
+{
+  const L = window.LAND, pos = new Float32Array(L.length / 2 * 3);
+  for (let i = 0; i < L.length; i += 2) { const v = ll2v(L[i], L[i + 1], 1.0015); pos.set([v.x, v.y, v.z], i / 2 * 3); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const m = new THREE.ShaderMaterial({
+    transparent: true, uniforms: { uSize: { value: 5.5 }, uAlpha: { value: 1 } },
+    vertexShader: `uniform float uSize; varying float vF;
+      void main(){ vec4 mv = modelViewMatrix*vec4(position,1.); vec3 n = normalize(normalMatrix*position);
+        vF = clamp(dot(n, normalize(-mv.xyz)), 0., 1.); gl_PointSize = uSize*(2.4/-mv.z); gl_Position = projectionMatrix*mv; }`,
+    fragmentShader: `uniform float uAlpha; varying float vF;
+      void main(){ vec2 c=gl_PointCoord-.5; float d=length(c); if(d>.5) discard;
+        vec3 col = mix(vec3(.25,.55,.85), vec3(.62,.95,.88), vF);
+        gl_FragColor = vec4(col, smoothstep(.5,.2,d)*(.25+.75*vF)*uAlpha); }`,
+  });
+  globe.add(new THREE.Points(g, m));
+}
+const atmo = new THREE.Mesh(new THREE.SphereGeometry(1.045, 64, 64), new THREE.ShaderMaterial({
+  side: THREE.BackSide, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
+  vertexShader: `varying vec3 vN; varying vec3 vV; void main(){ vec4 mv=modelViewMatrix*vec4(position,1.); vN=normalize(normalMatrix*normal); vV=normalize(-mv.xyz); gl_Position=projectionMatrix*mv; }`,
+  fragmentShader: `varying vec3 vN; varying vec3 vV; void main(){ float f = pow(clamp(-dot(vN, vV) / .32, 0., 1.), 1.6); gl_FragColor = vec4(vec3(.38,.85,1.)*f*.9, f); }`,
+}));
+sceneB.add(atmo);
+// estrelas subtis
+{
+  const n = 900, pos = new Float32Array(n * 3);
+  let s = 7; const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
+  for (let i = 0; i < n; i++) { const v = new THREE.Vector3(rnd() - .5, rnd() - .5, rnd() - .5).normalize().multiplyScalar(30 + rnd() * 10); pos.set([v.x, v.y, v.z], i * 3); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  sceneB.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0xbfd6ff, size: 0.06, transparent: true, opacity: .55 })));
+}
+const CV = { lon: -23.6, lat: 15.1 };
+const DEST = [
+  { name: 'Lisboa', price: '32.991', lon: -9.14, lat: 38.72, t: 8.0, side: 1 },
+  { name: 'Paris', price: '36.537', lon: 2.35, lat: 48.86, t: 8.55, side: 0 },
+  { name: 'Providence', price: '63.416', lon: -71.41, lat: 41.82, t: 9.1, side: 0 },
+  { name: 'Recife', price: '33.519', lon: -34.88, lat: -8.05, t: 9.65, side: -1 },
+];
+const glowTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d');
+  const g = x.createRadialGradient(64, 64, 0, 64, 64, 64); g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(.25, 'rgba(160,255,235,.9)'); g.addColorStop(1, 'rgba(98,214,194,0)');
+  x.fillStyle = g; x.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c); })();
+const a0 = ll2v(CV.lon, CV.lat);
+DEST.forEach((d) => {
+  const b = ll2v(d.lon, d.lat), ang = a0.angleTo(b), N = 160, pts = [];
+  for (let i = 0; i <= N; i++) {
+    const s = i / N, v = new THREE.Vector3().copy(a0).lerp(b, s).normalize();
+    // slerp exato
+    const sa = Math.sin(ang), w0 = Math.sin((1 - s) * ang) / sa, w1 = Math.sin(s * ang) / sa;
+    v.copy(a0).multiplyScalar(w0).add(b.clone().multiplyScalar(w1));
+    pts.push(v.multiplyScalar(1 + (0.06 + ang * 0.22) * Math.sin(Math.PI * s)));
+  }
+  const curve = new THREE.CatmullRomCurve3(pts);
+  const tube = new THREE.TubeGeometry(curve, 240, 0.0045, 8, false);
+  const mesh = new THREE.Mesh(tube, new THREE.MeshBasicMaterial({ color: 0x8ff3e0, transparent: true, opacity: .95 }));
+  globe.add(mesh);
+  const head = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+  head.scale.setScalar(0.06); globe.add(head);
+  const ring = new THREE.Mesh(new THREE.RingGeometry(0.018, 0.024, 48), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, side: THREE.DoubleSide }));
+  ring.position.copy(b.clone().multiplyScalar(1.004)); ring.lookAt(b.clone().multiplyScalar(2)); globe.add(ring);
+  const dot = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+  dot.position.copy(b.clone().multiplyScalar(1.006)); dot.scale.setScalar(0.05); globe.add(dot);
+  Object.assign(d, { curve, mesh, head, ring, dot, count: tube.index.count, end: b });
+  const lab = document.createElement('div'); lab.className = 'label';
+  lab.innerHTML = `<div class="line"></div><div class="box"><div class="n">${d.name}</div><div class="pr">desde <b>${d.price}$</b></div></div>`;
+  $('labels').appendChild(lab); d.lab = lab;
+});
+const hubSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffd27a, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+hubSprite.position.copy(a0.clone().multiplyScalar(1.01)); globe.add(hubSprite);
+const hubLab = document.createElement('div'); hubLab.className = 'label';
+hubLab.innerHTML = `<div class="box" style="top:18px"><div class="n" style="font-size:30px;letter-spacing:7px;color:#F6CB6B;font-weight:700">CABO VERDE</div></div>`;
+$('labels').appendChild(hubLab);
+
+const sceneO = new THREE.Scene();
+const whiteMat = new THREE.MeshBasicMaterial({ color: 0xfff6ec, transparent: true, opacity: 0, depthTest: false });
+const whiteQ = new THREE.Mesh(new THREE.PlaneGeometry(W, H), whiteMat); whiteQ.position.set(W / 2, H / 2, 0); sceneO.add(whiteQ);
+const composer = new EffectComposer(renderer);
+const passA = new RenderPass(sceneA, camA), passB = new RenderPass(sceneB, camB);
+composer.addPass(passA); composer.addPass(passB);
+const passO = new RenderPass(sceneO, camA); passO.clear = false; passO.clearDepth = true;
+const bloom = new UnrealBloomPass(new THREE.Vector2(W / 2, H / 2), 0.9, 0.55, 0.62); composer.addPass(bloom);
+composer.insertPass(passO, 2);
+composer.addPass(new OutputPass());
+composer.setSize(W, H);
+
+// orientação: Cabo Verde ligeiramente abaixo do centro, Atlântico Norte à vista
+function aimGlobe(lon, lat) {
+  const q1 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -(lon + 90) * Math.PI / 180);
+  const q2 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), lat * Math.PI / 180);
+  globe.quaternion.copy(q2.multiply(q1));
+}
+const tmp = new THREE.Vector3();
+function project(v3) { tmp.copy(v3).applyMatrix4(globe.matrixWorld).project(camB); return [(tmp.x + 1) / 2 * W, (1 - tmp.y) / 2 * H, tmp.z]; }
 
 window.renderFrame = function (t) {
-  // ---------- cena 1 ----------
-  const s1on = t < 3.9;
-  $('s1').style.display = s1on ? 'block' : 'none';
-  if (s1on) {
-    const k = easeOutExpo(p(t, 0, 1.6));
-    const out = easeInExpo(p(t, 2.9, 3.8));
-    set($('plane'), {
-      transform: `translate(${lerp(-700, 0, k) + out * 1400}px, ${lerp(380, 0, k) - out * 900}px) rotate(${lerp(8, 0, k) - out * 8}deg) scale(${1 + t * 0.03 + out * 0.4})`,
-      opacity: Math.min(1, t * 3)
+  const inA = t < 6.3, inB = t >= 5.9 && t < 15.0;
+
+  // ---------------- Cena A ----------------
+  passA.enabled = inA; passB.enabled = !inA && inB; bloom.enabled = !inA; passB.clear = true; passA.clear = true;
+  $('A').style.display = inA ? 'block' : 'none';
+  if (inA) {
+    skyMat.uniforms.uT.value = t; cloudMid.uniforms.uT.value = t; cloudNear.uniforms.uT.value = t; cloudWisp.uniforms.uT.value = t;
+    const push = eInCubic(p(t, 4.7, 6.3));
+    const white = eInOut(p(t, 5.0, 6.25));
+    cloudNear.uniforms.uWhite.value = white; cloudWisp.uniforms.uWhite.value = eInOut(p(t, 4.6, 6.0)) * .9;
+    const enter = eOutExpo(p(t, 0, 2.2));
+    // o avião fica sempre com a cauda fora do quadro (lado esquerdo)
+    const bobY = Math.sin(t * 1.6) * 10 + Math.sin(t * 3.7) * 4;
+    const sc = lerp(0.82, 1.0, enter) * (1 + push * 1.6) * (1 + eInOut(p(t, 1.2, 5.2)) * 0.09);
+    // borda esquerda da imagem (onde o recorte corta a asa) sempre fora do quadro
+    const leftEdge = lerp(-760, -40, enter) - push * 380 - eInOut(p(t, 1.2, 5.2)) * 70;
+    const py = H - lerp(1180, 900, enter) + bobY + push * 160;
+    plane.position.set(leftEdge + (PW * sc) / 2, py, 0);
+    plane.scale.setScalar(sc); plane.rotation.z = (Math.sin(t * 1.1) * 0.7 + (1 - enter) * 6 + eInOut(p(t, 1.5, 5.5)) * 2.2) * Math.PI / 180;
+    haze.position.copy(plane.position); haze.scale.copy(plane.scale); haze.rotation.z = plane.rotation.z;
+    whiteMat.opacity = eInCubic(p(t, 5.85, 6.3));
+    letters(A1, t, 1.6, { stagger: 0.03, dur: 1.1, out: 4.7, rise: 30, blur: 16 });
+    letters(A2, t, 1.95, { stagger: 0.04, dur: 1.2, out: 4.8, rise: 50, blur: 24 });
+    $('A2').style.letterSpacing = lerp(18, -4, eOutExpo(p(t, 1.95, 3.6))) + 'px';
+  }
+
+  // ---------------- Cena B ----------------
+  $('B').style.display = inB && !inA ? 'block' : 'none';
+  if (inB && !inA) {
+    bloom.strength = 1.0; bloom.threshold = 0.55; bloom.radius = 0.6;
+    whiteMat.opacity = Math.max(1 - eOutCubic(p(t, 6.3, 7.3)), eInOut(p(t, 14.1, 14.8)));
+    const k = eInOut(p(t, 6.25, 10.0));
+    // aproxima-se de Cabo Verde vindo das nuvens e recua para ver o mundo
+    const dist = lerp(1.65, 5.6, k);
+    const fin = eInOut(p(t, 13.7, 14.95));
+    camB.position.set(0, 0.32 * k * (1 - fin), dist * (1 - fin * 0.55));
+    camB.lookAt(0, 0.32 * k * (1 - fin), 0);
+    aimGlobe(lerp(lerp(CV.lon, -36 + (t - 9) * 0.8, k), CV.lon, fin), lerp(lerp(CV.lat, 22, k), CV.lat, fin));
+    globe.updateMatrixWorld(true);
+    const intro = eOutCubic(p(t, 6.0, 6.8));
+    $('B').style.opacity = intro * (1 - eInCubic(p(t, 14.2, 14.9)));
+    letters(B1, t, 7.0, { stagger: 0.03, dur: 1.0, out: 13.6, rise: 26, blur: 14 });
+    letters(B2, t, 7.3, { stagger: 0.03, dur: 1.1, out: 13.65, rise: 36, blur: 20 });
+    hubSprite.scale.setScalar((0.012 + Math.sin(t * 5) * 0.002) * camB.position.z);
+    const [hx, hy] = project(a0.clone().multiplyScalar(1.01));
+    hubLab.style.left = (hx - 112) + 'px'; hubLab.style.top = hy + 'px';
+    hubLab.style.opacity = eOutCubic(p(t, 7.6, 8.2)) * (1 - eInCubic(p(t, 13.6, 14.1)));
+    DEST.forEach((d) => {
+      const g = eInOut(p(t, d.t, d.t + 1.25));
+      d.mesh.geometry.setDrawRange(0, Math.floor(d.count * g / 6) * 6);
+      d.mesh.visible = g > 0;
+      const hp = d.curve.getPointAt(Math.min(0.999, g));
+      d.head.position.copy(hp); d.head.material.opacity = g > 0 && g < 1 ? 1 : 0;
+      const arrive = p(t, d.t + 1.2, d.t + 2.2);
+      const pulse = (t - d.t - 1.2) % 1.4 / 1.4;
+      d.ring.scale.setScalar(arrive > 0 ? 1 + pulse * 2.2 : 0.001); d.ring.material.opacity = arrive > 0 ? (1 - pulse) * .8 : 0;
+      d.dot.material.opacity = eOutCubic(arrive);
+      const [x, y, z] = project(d.end.clone().multiplyScalar(1.006));
+      const lk = eOutExpo(p(t, d.t + 1.25, d.t + 2.1)), lo = eInCubic(p(t, 13.5, 14.0));
+      const len = 70 * lk;
+      const line = d.lab.querySelector('.line'), box = d.lab.querySelector('.box');
+      const reveal = 1 - eOutExpo(p(t, d.t + 1.45, d.t + 2.3));
+      if (d.side === 0) {
+        // etiqueta por cima do ponto, com linha vertical
+        d.lab.style.left = x + 'px'; d.lab.style.top = (y - 16) + 'px';
+        line.style.width = '2px'; line.style.height = '46px'; line.style.top = '-46px';
+        line.style.transformOrigin = '50% 100%'; line.style.transform = `scaleY(${lk})`;
+        box.style.left = '0'; box.style.right = 'auto'; box.style.top = '-150px'; box.style.textAlign = 'center';
+        box.style.transform = 'translateX(-50%)';
+        box.style.clipPath = `inset(0 0 ${reveal * 100}% 0)`;
+      } else {
+        d.lab.style.left = (d.side > 0 ? x + 14 : x - 14 - 70) + 'px'; d.lab.style.top = y + 'px';
+        line.style.width = '70px'; line.style.transform = `scaleX(${lk})`;
+        line.style.transformOrigin = d.side > 0 ? '0 50%' : '100% 50%';
+        if (d.side > 0) { box.style.left = '84px'; box.style.right = 'auto'; box.style.textAlign = 'left'; }
+        else { box.style.left = 'auto'; box.style.right = '84px'; box.style.textAlign = 'right'; }
+        box.style.clipPath = `inset(0 ${d.side > 0 ? reveal * 100 : 0}% 0 ${d.side < 0 ? reveal * 100 : 0}%)`;
+      }
+      d.lab.style.opacity = (z < 1 ? 1 : 0) * (1 - lo);
     });
-    rev(R('#s1-a'), p(t, 0.7, 1.3), p(t, 2.9, 3.3));
-    rev(R('#s1-b'), p(t, 0.95, 1.6), p(t, 2.95, 3.35));
   }
 
-  // ---------- cena 2 ----------
-  const s2on = t >= 3.2 && t < 10.6;
-  $('s2').style.display = s2on ? 'block' : 'none';
-  if (s2on) {
-    const ink = easeOutCubic(p(t, 3.2, 4.0));
-    const out = easeInCubic(p(t, 9.9, 10.5));
-    const zoom = 1 + (t - 3.2) * 0.012;
-    $('s2').style.opacity = ink * (1 - out);
-    $('map').style.transform = `scale(${zoom})`;
-    $('cities').style.transform = `scale(${zoom})`;
-    $('cities').style.transformOrigin = '540px 960px';
-    $('map').style.transformOrigin = '540px 960px';
-    $('dotsRect').style.opacity = 0.6 + 0.4 * Math.sin(t * 1.5);
-    $('hubGlow').setAttribute('r', 140 + Math.sin(t * 4) * 25);
-    const hs = spring(p(t, 3.4, 4.4));
-    hubG.setAttribute('transform', `translate(${HUB[0]} ${HUB[1]}) scale(${hs})`);
-    $('hub-label').style.opacity = easeOutCubic(p(t, 3.7, 4.2));
-    rev(R('#s2-head div:nth-child(1)'), p(t, 3.5, 4.1));
-    rev(R('#s2-head div:nth-child(2)'), p(t, 3.7, 4.3));
-    ROUTES.forEach((r) => {
-      const d = easeInOutCubic(p(t, r.t, r.t + 1.2));
-      r.path.setAttribute('stroke-dashoffset', r.len * (1 - d));
-      // avião ao longo do arco
-      const L = r.len * d;
-      const pt = r.path.getPointAtLength(L), pt2 = r.path.getPointAtLength(Math.min(r.len, L + 2));
-      const ang = Math.atan2(pt2.y - pt.y, pt2.x - pt.x) * 180 / Math.PI;
-      const vis = d > 0 && d < 1 ? 1 : 0;
-      r.plane.setAttribute('transform', `translate(${pt.x} ${pt.y}) rotate(${ang}) scale(1.6)`);
-      r.plane.style.opacity = vis;
-      const ds = spring(p(t, r.t + 1.1, r.t + 2.0));
-      r.dot.setAttribute('transform', `translate(${r.to[0]} ${r.to[1]}) scale(${ds})`);
-      const ck = easeOutExpo(p(t, r.t + 1.15, r.t + 1.8));
-      set(r.card, { opacity: ck, transform: `translateX(${(1 - ck) * 40}px)` });
-    });
+  // ---------------- Cena C ----------------
+  const inC = t >= 14.95 && t < 18.45;
+  $('C').style.display = inC ? 'block' : 'none';
+  if (inC) {
+    const ink = eOutCubic(p(t, 14.95, 15.6)), out = eInCubic(p(t, 17.8, 18.3));
+    $('C').style.opacity = 1;
+    $('C').style.filter = `brightness(${(1 + (1 - ink) * 1.6).toFixed(2)})`;
+    $('sal').style.transform = `scale(${lerp(1.22, 1.04, eOutCubic(p(t, 14.6, 18.3)))}) translateY(${lerp(30, 0, p(t, 14.6, 18.3))}px)`;
+    $('leak').style.opacity = 0.6 + 0.4 * Math.sin(t * 2);
+    $('C0').style.transform = `scale(${eOutBack(p(t, 15.0, 15.4))})`;
+    letters(C1, t, 15.15, { stagger: 0.035, dur: 0.9, out: 17.7, center: false, rise: 30, blur: 14 });
+    const ar = eOutExpo(p(t, 15.5, 16.2));
+    $('Carrow').style.opacity = ar; $('Carrow').style.transform = `rotate(${(1 - ar) * -180}deg)`;
+    letters(C2, t, 15.55, { stagger: 0.06, dur: 1.0, out: 17.75, center: false, rise: 60, blur: 22 });
+    letters(C3, t, 16.0, { stagger: 0.015, dur: 0.8, out: 17.75, center: false, rise: 16, blur: 8 });
+    const pk = eOutExpo(p(t, 16.3, 17.1));
+    $('Cprice').style.opacity = pk * (1 - out); $('Cprice').style.transform = `translateY(${(1 - pk) * 80}px)`;
   }
 
-  // iris para a praia (teal) e de volta (azul)
-  const iris = $('iris-c');
-  if (t >= 10.2 && t < 10.75) { iris.setAttribute('r', easeInOutExpo(p(t, 10.2, 10.7)) * 1150); iris.setAttribute('fill', TEAL); $('iris').style.display = 'block'; $('iris').style.opacity = 1; }
-  else if (t >= 10.75 && t < 11.1) { $('iris').style.display = 'block'; $('iris').style.opacity = 1 - easeOutCubic(p(t, 10.75, 11.05)); }
-  else if (t >= 14.2 && t < 14.75) { iris.setAttribute('r', easeInOutExpo(p(t, 14.2, 14.7)) * 1150); iris.setAttribute('fill', '#003a8c'); $('iris').style.display = 'block'; $('iris').style.opacity = 1; }
-  else $('iris').style.display = 'none';
+  // ---------------- Cena D ----------------
+  const inD = t >= 17.9;
+  $('D').style.display = inD ? 'block' : 'none';
+  if (inD || (t >= 14.95 && t < 17.9)) { passA.enabled = false; passB.enabled = false; }
+  if (inD) {
+    document.body.style.background = '#04215e';
+    $('D').style.background = 'radial-gradient(120% 70% at 50% 35%, #0b4fb0 0%, #04215e 55%, #021338 100%)';
+    const cur = eInOutExpo(p(t, 17.9, 18.45)); $('D').style.clipPath = `inset(${((1 - cur) * 100).toFixed(2)}% 0 0 0)`;
+    // logótipo revelado por uma varredura de luz da esquerda para a direita
+    const lw = eOutExpo(p(t, 18.3, 19.4));
+    $('logoWrap').style.clipPath = `inset(-20px ${((1 - lw) * 100).toFixed(2)}% -20px 0)`;
+    $('logoWrap').style.filter = lw < 1 ? `blur(${((1 - eOutCubic(p(t, 18.3, 19.0))) * 8).toFixed(2)}px)` : 'none';
+    $('logoWrap').style.transform = `translateX(${((1 - lw) * -30).toFixed(1)}px)`;
+    letters(D1, t, 18.9, { stagger: 0.02, dur: 0.8, rise: 14, blur: 8 });
+    const pk = eOutExpo(p(t, 19.05, 19.8));
+    $('D2').style.opacity = pk; $('D2').style.filter = `blur(${((1 - pk) * 16).toFixed(1)}px)`; $('D2').style.transform = `scale(${lerp(1.12, 1, pk)})`;
+    $('Dcta').style.transform = `translateX(-50%) scale(${eOutBack(p(t, 19.6, 20.1))})`;
+    $('shine').style.left = lerp(-160, 520, eInOut(p(t, 20.1, 20.8))) + 'px';
+    $('Durl').style.opacity = eOutCubic(p(t, 19.9, 20.4));
+    $('Dnote').style.opacity = eOutCubic(p(t, 20.1, 20.6)) * .9;
+  } else { document.body.style.background = '#020b24'; }
 
-  // ---------- cena 3 ----------
-  const s3on = t >= 10.7 && t < 14.75;
-  $('s3').style.display = s3on ? 'block' : 'none';
-  if (s3on) {
-    $('sal').style.transform = `scale(${lerp(1.15, 1.0, easeOutCubic(p(t, 10.7, 14.7)))})`;
-    const cs = easeOutBack(p(t, 11.0, 11.4));
-    $('s3-chip').style.transform = `scale(${cs})`;
-    rev(R('#s3-t1'), p(t, 11.15, 11.75));
-    $('s3-arrow').style.transform = `scale(${spring(p(t, 11.4, 12.3))}) rotate(${(1 - easeOutCubic(p(t, 11.4, 12.2))) * -180}deg)`;
-    rev(R('#s3-t2'), p(t, 11.45, 12.1));
-    const sk = easeOutExpo(p(t, 11.9, 12.5));
-    set($('s3-sub'), { opacity: sk, transform: `translateX(${(1 - sk) * -60}px)` });
-    const pk = easeOutExpo(p(t, 12.4, 13.1));
-    set($('s3-price'), { opacity: pk, transform: `translateY(${(1 - pk) * 120}px)` });
-  }
-
-  // ---------- cena 4 ----------
-  const s4on = t >= 14.6;
-  $('s4').style.display = s4on ? 'block' : 'none';
-  if (s4on) {
-    const lk = easeOutExpo(p(t, 14.8, 15.6));
-    set($('logo'), { opacity: lk, transform: `translateY(${(1 - lk) * 60}px) scale(${lerp(0.92, 1, lk)})` });
-    rev(R('#s4-from'), p(t, 15.4, 15.9));
-    rev(R('#s4-price'), p(t, 15.55, 16.15));
-    $('s4-cta').style.transform = `translateX(-50%) scale(${easeOutBack(p(t, 16.2, 16.6))})`;
-    $('s4-url').style.opacity = easeOutCubic(p(t, 16.5, 16.9));
-    $('s4-note').style.opacity = easeOutCubic(p(t, 16.7, 17.1)) * 0.9;
-  }
+  if (passA.enabled || passB.enabled) { $('gl').style.display = 'block'; composer.render(); }
+  else $('gl').style.display = 'none';
 };
 window.renderFrame(0);
+window.READY = true;
 </script>
 </body>
 </html>
