@@ -17,13 +17,71 @@ const W = "#FFFFFF";
 
 const BgCtx = React.createContext(true);
 
-const Scene: React.FC<{ from: number; to: number; name: string; bg: string; children: React.ReactNode }> = ({ from, to, name, bg, children }) => {
-  const withBg = React.useContext(BgCtx);
+// Camera moves between scenes: the outgoing scene can recede like a card (zoomOut) or the camera
+// can dive into a point of it (zoomIn); the incoming scene can settle from a slight push.
+type Cam = {
+  exit?: { kind: "zoomOut"; len?: number } | { kind: "zoomIn"; ox: number; oy: number; len?: number };
+  enter?: { flash?: boolean; len?: number };
+};
+
+const SceneBody: React.FC<{ cam?: Cam; bg: string; name: string; withBg: boolean; children: React.ReactNode }> = ({ cam, bg, name, withBg, children }) => {
+  const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
+  let transform = "";
+  let filter = "";
+  let radius = 0;
+  let origin = "50% 50%";
+  let opacity = 1;
+  if (cam?.exit) {
+    const len = cam.exit.len ?? 10;
+    const k = ease(frame, durationInFrames - len, durationInFrames, Easing.in(Easing.cubic));
+    if (cam.exit.kind === "zoomOut") {
+      // the card keeps receding into the distance until it is gone
+      transform += ` scale(${1 - 0.9 * k}) rotate(${-6 * k}deg)`;
+      radius = 80 * k;
+      filter += ` blur(${k * 4}px)`;
+      opacity = interpolate(k, [0.55, 1], [1, 0], clamp);
+    } else {
+      origin = `${cam.exit.ox}px ${cam.exit.oy}px`;
+      transform += ` scale(${1 + 16 * k * k})`;
+      filter += ` blur(${k * 4}px)`;
+    }
+  }
+  let flash = 0;
+  if (cam?.enter) {
+    const len = cam.enter.len ?? 14;
+    const k = ease(frame, 0, len, Easing.out(Easing.cubic));
+    transform += ` scale(${1.22 - 0.22 * k})`;
+    filter += ` blur(${(1 - k) * 10}px)`;
+    if (cam.enter.flash) flash = interpolate(frame, [0, 9], [1, 0], clamp);
+  }
   return (
-    <Sequence from={sec(from)} durationInFrames={sec(to) - sec(from)} name={name}>
+    <AbsoluteFill
+      style={{
+        transform: transform || undefined,
+        transformOrigin: origin,
+        opacity,
+        filter: filter || undefined,
+        borderRadius: radius,
+        overflow: radius ? "hidden" : undefined,
+        boxShadow: radius ? "0 40px 90px rgba(5,15,50,0.45)" : undefined,
+      }}
+    >
       {withBg && <AbsoluteFill style={{ background: bg }} />}
       {withBg && <BgTexture seed={name} />}
       {children}
+      {flash > 0 && <AbsoluteFill style={{ background: "#FFFFFF", opacity: flash }} />}
+    </AbsoluteFill>
+  );
+};
+
+const Scene: React.FC<{ from: number; to: number; name: string; bg: string; cam?: Cam; children: React.ReactNode }> = ({ from, to, name, bg, cam, children }) => {
+  const withBg = React.useContext(BgCtx);
+  return (
+    <Sequence from={sec(from)} durationInFrames={sec(to) - sec(from)} name={name}>
+      <SceneBody cam={cam} bg={bg} name={name} withBg={withBg}>
+        {children}
+      </SceneBody>
     </Sequence>
   );
 };
@@ -49,9 +107,7 @@ export const Wipe: React.FC = () => {
 const TRANSITIONS: { at: number; kind: "wipe" | "iris" | "bars"; cx?: number; cy?: number }[] = [
   { at: 6.9, kind: "wipe" },
   { at: 11.5, kind: "iris", cx: 1450, cy: 520 },
-  { at: 15.2, kind: "bars" },
   { at: 22.25, kind: "wipe" },
-  { at: 33.35, kind: "iris", cx: 470, cy: 540 },
   { at: 36.45, kind: "bars" },
 ];
 
@@ -205,7 +261,7 @@ const S5: React.FC<{ start: number }> = ({ start }) => {
   return (
     <AbsoluteFill>
       <Halo x={620 - 40 * shift} y={600} size={980} />
-      <Art src="spot/camara.png" delay={L(15.3, start)} from="scale" float={3} style={{ left: 60 - 40 * shift, top: 320, width: 1080 }} />
+      <Art src="spot/camara.png" delay={L(14.95, start)} from="scale" float={3} style={{ left: 60 - 40 * shift, top: 320, width: 1080 }} />
       <div style={{ position: "absolute", left: 1150, top: 200 }}>
         <Kicker delay={L(15.96, start)} size={32}>
           Requeira o voto antecipado
@@ -429,11 +485,12 @@ export const Spot2: React.FC<Spot2Props> = ({ variant }) => {
         <Scene from={9.3} to={11.5} name="03b Estabelecimento prisional" bg={INDIGO}>
           <S3b start={9.3} />
         </Scene>
-        <Scene from={11.5} to={15.2} name="04 Calendario 2-5 Nov" bg={TEAL}>
-          <S4 start={11.5} />
+        {/* the Câmara scene sits underneath while the calendar recedes (zoom out) */}
+        <Scene from={14.8} to={22.25} name="05 Camara Municipal" bg={BRIGHT} cam={{ enter: { len: 14 } }}>
+          <S5 start={14.8} />
         </Scene>
-        <Scene from={15.2} to={22.25} name="05 Camara Municipal" bg={BRIGHT}>
-          <S5 start={15.2} />
+        <Scene from={11.5} to={15.2} name="04 Calendario 2-5 Nov" bg={TEAL} cam={{ exit: { kind: "zoomOut", len: 13 } }}>
+          <S4 start={11.5} />
         </Scene>
         <Scene from={22.25} to={25.5} name="06 Apoio dos diretores" bg={TEAL}>
           <S6 start={22.25} />
@@ -441,10 +498,10 @@ export const Spot2: React.FC<Spot2Props> = ({ variant }) => {
         <Scene from={25.35} to={30.25} name="07 Site www.cne.cv" bg={TEAL}>
           <S7 start={25.35} />
         </Scene>
-        <Scene from={30.1} to={33.35} name="08 Linha gratuita" bg={TEAL}>
+        <Scene from={30.1} to={33.35} name="08 Linha gratuita" bg={TEAL} cam={{ exit: { kind: "zoomIn", ox: 440, oy: 690, len: 9 } }}>
           <S8 start={30.1} />
         </Scene>
-        <Scene from={33.35} to={36.45} name="09 Cada voto conta. O teu também. Participa!" bg={TEAL}>
+        <Scene from={33.35} to={36.45} name="09 Cada voto conta. O teu também. Participa!" bg={TEAL} cam={{ enter: { flash: true, len: 14 } }}>
           <S9 start={33.35} />
         </Scene>
         <Sequence from={sec(36.45)} name="10 Logo final">
