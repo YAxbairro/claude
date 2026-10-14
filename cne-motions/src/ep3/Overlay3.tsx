@@ -37,7 +37,7 @@ const StepCard: React.FC<{ start: number; n: number; title: string; titleAt: num
       <div style={{ position: "absolute", right: 110, top, width: 560, opacity: out, transform: `translateX(${(1 - out) * 50}px)`, display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <Rise delay={2}>
-            <span style={whitePasso ? { fontFamily: SANS, fontWeight: 300, fontSize: 38, color: WHITE, letterSpacing: "0.22em", textShadow: SHADOW } : { fontFamily: SANS, fontWeight: 600, fontSize: 38, color: NAVY, letterSpacing: "0.22em" }}>PASSO</span>
+            <span style={whitePasso ? { fontFamily: SANS, fontWeight: 600, fontSize: 38, color: WHITE, letterSpacing: "0.22em" } : { fontFamily: SANS, fontWeight: 600, fontSize: 38, color: NAVY, letterSpacing: "0.22em" }}>PASSO</span>
           </Rise>
           <div
             style={{
@@ -355,7 +355,7 @@ export const Overlay3: React.FC = () => (
     <Seg from={67.9} to={79.2} name="13 Passo 4 Escolha">
       <StepCard start={67.9} n={4} title="Marque uma cruz no seu candidato" titleAt={73.72} top={270} whitePasso>
         <div style={{ marginTop: 26 }}>
-          <Ballot width={250} enterAt={at(69.9, 67.9)} marks={[{ row: 2, at: at(75.54, 67.9) }]} />
+          <Ballot width={250} enterAt={at(69.9, 67.9)} zoom={{ at: at(74.7, 67.9), markAt: at(75.54, 67.9) }} />
         </div>
       </StepCard>
     </Seg>
