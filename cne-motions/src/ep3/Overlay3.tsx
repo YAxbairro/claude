@@ -5,7 +5,7 @@ import { Keyword, NextEpisode, Requirements, Rise, Tag } from "../components";
 import { SearchBar } from "../spot/devices";
 import { NAVY, RED, SANS, SHADOW, WHITE, t } from "../theme";
 
-// "CNE Explica – Ep. 3: como votar, passo a passo". Timestamps from the word-level transcript.
+// "CNE Explica – Ep. 4: sabe onde e como votar, passo a passo". Timestamps from the word-level transcript.
 const FPS = 24000 / 1001;
 export const EP3_DURATION = Math.ceil(121.955 * FPS);
 
@@ -36,7 +36,7 @@ const StepCard: React.FC<{ start: number; n: number; title: string; titleAt: num
       <div style={{ position: "absolute", right: 110, top, width: 560, opacity: out, transform: `translateX(${(1 - out) * 50}px)`, display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <Rise delay={2}>
-            <span style={{ fontFamily: SANS, fontWeight: 300, fontSize: 38, color: WHITE, letterSpacing: "0.22em", textShadow: SHADOW }}>PASSO</span>
+            <span style={{ fontFamily: SANS, fontWeight: 600, fontSize: 38, color: NAVY, letterSpacing: "0.22em" }}>PASSO</span>
           </Rise>
           <div
             style={{
@@ -88,12 +88,12 @@ const Note: React.FC<{ delay: number; children: React.ReactNode; red?: boolean }
         ...(red ? { background: RED, padding: "8px 18px" } : {}),
       }}
     >
-      <span style={{ fontFamily: SANS, fontWeight: red ? 900 : 700, fontSize: red ? 40 : 30, lineHeight: 1.25, color: WHITE, textShadow: red ? "none" : SHADOW, textTransform: "uppercase" }}>{children}</span>
+      <span style={{ fontFamily: SANS, fontWeight: red ? 900 : 800, fontSize: red ? 40 : 30, lineHeight: 1.25, color: red ? WHITE : NAVY, textTransform: "uppercase" }}>{children}</span>
     </div>
   );
 };
 
-// ---------- Generic ballot paper (no real candidates: numbered rows with silhouettes) ----------
+// ---------- Generic ballot paper: identical anonymous rows, so no candidate is ever singled out ----------
 const Cross: React.FC<{ x: number; y: number; s: number; draw: number }> = ({ x, y, s, draw }) => (
   <g>
     <path d={`M${x - s} ${y - s} L${x + s} ${y + s}`} stroke={RED} strokeWidth={s * 0.42} strokeLinecap="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - Math.min(1, draw * 2)} />
@@ -101,7 +101,15 @@ const Cross: React.FC<{ x: number; y: number; s: number; draw: number }> = ({ x,
   </g>
 );
 
-const Ballot: React.FC<{ width: number; marks: { row: number; at: number }[]; enterAt?: number; label?: { text: string; at: number } }> = ({ width, marks, enterAt = 0, label }) => {
+const Ballot: React.FC<{
+  width: number;
+  enterAt?: number;
+  label?: { text: string; at: number };
+  // voto nulo: one big cross over the whole sheet (two strokes, each with its own cue)
+  spoil?: [number, number];
+  // "marque uma cruz": a magnifier shows a single square being crossed, detached from any row
+  zoom?: { at: number; markAt: number };
+}> = ({ width, enterAt = 0, label, spoil, zoom }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const p = spring({ frame: frame - enterAt, fps, config: { damping: 14, mass: 0.7 } });
@@ -110,9 +118,14 @@ const Ballot: React.FC<{ width: number; marks: { row: number; at: number }[]; en
   const H = 500;
   const rowH = 62;
   const lab = label ? spring({ frame: frame - label.at, fps, config: { damping: 11, mass: 0.6 } }) : 0;
+  const s1 = spoil ? ramp(frame, spoil[0], 9) : 0;
+  const s2 = spoil ? ramp(frame, spoil[1], 9) : 0;
+  const lens = zoom ? spring({ frame: frame - zoom.at, fps, config: { damping: 12, mass: 0.6 } }) : 0;
+  const mark = zoom ? ramp(frame, zoom.markAt, 12) : 0;
+  const L = width * 0.62;
   return (
     <div style={{ position: "relative", width, transform: `translateY(${(1 - p) * 120}px) rotate(${(1 - p) * 8 + 2}deg)`, opacity: interpolate(p, [0, 0.3], [0, 1], clamp), visibility: p < 0.01 ? "hidden" : "visible" }}>
-      <svg width={width} height={(width * H) / W} viewBox={`0 0 ${W} ${H}`} style={{ filter: "drop-shadow(0 16px 30px rgba(0,0,0,0.35))" }}>
+      <svg width={width} height={(width * H) / W} viewBox={`0 0 ${W} ${H}`} style={{ filter: "drop-shadow(0 16px 30px rgba(0,0,0,0.35))", overflow: "visible" }}>
         <rect width={W} height={H} rx="8" fill="#FBFAF6" />
         <rect x="24" y="22" width="200" height="12" rx="6" fill={NAVY} />
         <rect x="24" y="42" width="140" height="8" rx="4" fill="#B9C0CF" />
@@ -120,23 +133,30 @@ const Ballot: React.FC<{ width: number; marks: { row: number; at: number }[]; en
           const y = 80 + i * rowH;
           return (
             <g key={i}>
-              <rect x="20" y={y} width={W - 40} height={rowH - 8} rx="6" fill={i % 2 ? "#F0EEE8" : "#F6F4EF"} />
-              <text x="38" y={y + 36} fontFamily={SANS} fontWeight={800} fontSize="20" fill={NAVY}>
-                {i + 1}
-              </text>
-              <circle cx="82" cy={y + 27} r="17" fill="#C9CED9" />
-              <circle cx="82" cy={y + 22} r="6.5" fill="#F6F4EF" />
-              <path d={`M70 ${y + 40} C 72 ${y + 31}, 92 ${y + 31}, 94 ${y + 40}`} fill="#F6F4EF" />
-              <rect x="112" y={y + 18} width={140 - (i % 3) * 18} height="10" rx="5" fill="#AEB5C4" />
-              <rect x="112" y={y + 33} width="70" height="7" rx="3.5" fill="#D3D7E0" />
+              <rect x="20" y={y} width={W - 40} height={rowH - 8} rx="6" fill="#F4F2EC" />
+              <rect x="38" y={y + 18} width="200" height="10" rx="5" fill="#C3C8D3" />
+              <rect x="38" y={y + 33} width="120" height="7" rx="3.5" fill="#DADDE4" />
               <rect x={W - 82} y={y + 8} width="40" height="40" rx="4" fill="#fff" stroke={NAVY} strokeWidth="3" />
             </g>
           );
         })}
-        {marks.map((m, i) => (
-          <Cross key={i} x={W - 62} y={80 + m.row * rowH + 28} s={13} draw={ramp(frame, m.at, 10)} />
-        ))}
+        {spoil && (
+          <g>
+            <path d={`M40 70 L${W - 40} ${H - 30}`} stroke={RED} strokeWidth="16" strokeLinecap="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - s1} />
+            <path d={`M${W - 40} 70 L40 ${H - 30}`} stroke={RED} strokeWidth="16" strokeLinecap="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - s2} />
+          </g>
+        )}
       </svg>
+      {zoom && (
+        <div style={{ position: "absolute", left: -L * 0.55, bottom: -L * 0.35, width: L, height: L, transform: `scale(${lens})`, visibility: lens < 0.01 ? "hidden" : "visible" }}>
+          <svg width={L} height={L} viewBox="0 0 200 200" style={{ overflow: "visible", filter: "drop-shadow(0 10px 22px rgba(0,0,0,0.35))" }}>
+            <line x1="168" y1="168" x2="212" y2="212" stroke={NAVY} strokeWidth="16" strokeLinecap="round" />
+            <circle cx="100" cy="100" r="92" fill="#FBFAF6" stroke={NAVY} strokeWidth="10" />
+            <rect x="58" y="58" width="84" height="84" rx="8" fill="#fff" stroke={NAVY} strokeWidth="7" />
+            <Cross x={100} y={100} s={28} draw={mark} />
+          </svg>
+        </div>
+      )}
       {label && (
         <div style={{ position: "absolute", left: "50%", bottom: -34, transform: `translateX(-50%) scale(${lab})`, visibility: lab < 0.01 ? "hidden" : "visible", background: RED, padding: "8px 20px", whiteSpace: "nowrap" }}>
           <span style={{ fontFamily: SANS, fontWeight: 900, fontSize: 26, color: WHITE }}>{label.text}</span>
@@ -160,9 +180,9 @@ const FoldAndDrop: React.FC<{ foldAt: number; dropAt: number }> = ({ foldAt, dro
         </clipPath>
       </defs>
       <g opacity={urn} transform={`translate(0 ${(1 - urn) * 30})`}>
-        <path d="M30 262 L100 222 L320 222 L390 262" fill="none" stroke={WHITE} strokeWidth="11" strokeLinejoin="round" />
-        <rect x="140" y="246" width="140" height="11" rx="3" fill={WHITE} />
-        <rect x="20" y="282" width="380" height="18" fill={WHITE} />
+        <path d="M30 262 L100 222 L320 222 L390 262" fill="none" stroke={NAVY} strokeWidth="11" strokeLinejoin="round" />
+        <rect x="140" y="246" width="140" height="11" rx="3" fill={NAVY} />
+        <rect x="20" y="282" width="380" height="18" fill={NAVY} />
         <rect x="20" y="316" width="380" height="9" fill={RED} />
       </g>
       <g clipPath="url(#aboveSlot3)">
@@ -201,6 +221,7 @@ const Simple: React.FC<{ start: number }> = ({ start }) => (
     start={start}
     pos={{ right: 130, top: 420 }}
     align="right"
+    ink={NAVY}
     lines={[
       { text: "É SIMPLES", at: 100.92, size: 90 },
       { text: "E FÁCIL VOTAR", at: 101.7, size: 64, red: true },
@@ -215,6 +236,7 @@ export const Overlay3: React.FC = () => (
         start={6.6}
         pos={{ right: 130, top: 430 }}
         align="right"
+        ink={NAVY}
         lines={[
           { text: "SABE", at: 6.7, size: 70 },
           { text: "ONDE VOTA?", at: 7.2, size: 96, red: true },
@@ -227,6 +249,7 @@ export const Overlay3: React.FC = () => (
         start={8.55}
         pos={{ right: 130, top: 400 }}
         align="right"
+        ink={NAVY}
         lines={[
           { text: "NA MESA DE VOTO,", at: 9.34, size: 52 },
           { text: "SABE O QUE", at: 10.2, size: 84 },
@@ -235,13 +258,14 @@ export const Overlay3: React.FC = () => (
       />
     </Seg>
 
-    <Seg from={14.3} to={17.4} name="03 Episodio 3">
+    <Seg from={14.3} to={17.4} name="03 Episodio 4">
       <Keyword
         start={14.3}
         pos={{ right: 130, top: 420 }}
         align="right"
+        ink={NAVY}
         lines={[
-          { text: "3.º EPISÓDIO", at: 14.64, size: 96 },
+          { text: "4.º EPISÓDIO", at: 14.64, size: 96 },
           { text: "CNE EXPLICA", at: 15.3, size: 64, red: true },
         ]}
       />
@@ -252,6 +276,7 @@ export const Overlay3: React.FC = () => (
         start={17.5}
         pos={{ right: 130, top: 400 }}
         align="right"
+        ink={NAVY}
         underlineAt={19.9}
         lines={[
           { text: "PASSO A PASSO", at: 17.78, size: 90 },
@@ -265,8 +290,8 @@ export const Overlay3: React.FC = () => (
       <Requirements start={20.9} header="SABE O LOCAL DE VOTO?" headerSize={34} size={40} top={360} items={[{ text: "PROCURE A SUA MESA", at: 22.72 }]} />
     </Seg>
 
-    <Seg from={24.3} to={28.1} name="06 Nao sabe - Camara">
-      <Requirements start={24.3} header="NÃO SABE ONDE VOTA?" headerSize={34} size={40} top={360} items={[{ text: "CÂMARA MUNICIPAL", at: 26.82 }]} />
+    <Seg from={24.3} to={28.1} name="06 Nao sabe - CRE">
+      <Requirements start={24.3} header="NÃO SABE ONDE VOTA?" headerSize={34} size={40} top={360} items={[{ text: "CRE DO CONCELHO", sub: "COMISSÃO DE RECENSEAMENTO ELEITORAL", at: 26.82 }]} />
     </Seg>
 
     <Seg from={28.1} to={34.5} name="07 Sites">
@@ -292,6 +317,7 @@ export const Overlay3: React.FC = () => (
         start={43.76}
         pos={{ right: 130, top: 420 }}
         align="right"
+        ink={NAVY}
         lines={[
           { text: "NO LOCAL DE VOTO,", at: 43.9, size: 44 },
           { text: "DIRIJA-SE À", at: 46.24, size: 60 },
@@ -322,7 +348,7 @@ export const Overlay3: React.FC = () => (
     <Seg from={67.9} to={79.2} name="13 Passo 4 Escolha">
       <StepCard start={67.9} n={4} title="Marque uma cruz no seu candidato" titleAt={73.72} top={270}>
         <div style={{ marginTop: 26 }}>
-          <Ballot width={250} enterAt={at(69.9, 67.9)} marks={[{ row: 2, at: at(75.54, 67.9) }]} />
+          <Ballot width={250} enterAt={at(69.9, 67.9)} zoom={{ at: at(74.7, 67.9), markAt: at(75.54, 67.9) }} />
         </div>
       </StepCard>
     </Seg>
@@ -360,7 +386,7 @@ export const Overlay3: React.FC = () => (
     </Seg>
 
     <Seg from={114.0} to={121.9} name="18 Proximo episodio">
-      <NextEpisode eyebrow="CNE Explica · Ep. 4" title="Voto válido, em branco e nulo: qual a diferença?" />
+      <NextEpisode eyebrow="CNE Explica · Ep. 5" title="Voto válido, em branco e nulo: qual a diferença?" />
     </Seg>
   </AbsoluteFill>
 );
@@ -373,16 +399,8 @@ function AttentionBallots({ start }: { start: number }) {
       <div style={{ position: "absolute", right: 110, top: 250, opacity: out, display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
         <Tag text="ATENÇÃO" delay={at(79.58, start)} size={40} />
         <div style={{ display: "flex", gap: 70, marginTop: 50 }}>
-          <Ballot
-            width={210}
-            enterAt={at(80.4, start)}
-            marks={[
-              { row: 1, at: at(81.06, start) },
-              { row: 4, at: at(82.0, start) },
-            ]}
-            label={{ text: "VOTO NULO", at: at(85.26, start) }}
-          />
-          <Ballot width={210} enterAt={at(86.06, start)} marks={[]} label={{ text: "VOTO EM BRANCO", at: at(89.18, start) }} />
+          <Ballot width={210} enterAt={at(80.4, start)} spoil={[at(81.06, start), at(82.0, start)]} label={{ text: "VOTO NULO", at: at(85.26, start) }} />
+          <Ballot width={210} enterAt={at(86.06, start)} label={{ text: "VOTO EM BRANCO", at: at(89.18, start) }} />
         </div>
       </div>
     </AbsoluteFill>

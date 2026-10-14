@@ -101,7 +101,8 @@ export const Keyword: React.FC<{
   pos: React.CSSProperties;
   align?: "left" | "right";
   underlineAt?: number;
-}> = ({ start, lines, pos, align = "left", underlineAt }) => {
+  ink?: string; // colour of the unboxed lines (white by default; navy on light walls)
+}> = ({ start, lines, pos, align = "left", underlineAt, ink }) => {
   const frame = useCurrentFrame();
   const out = useOut();
   const ul = underlineAt !== undefined ? ramp(frame, at(underlineAt, start), 10) : 0;
@@ -115,7 +116,7 @@ export const Keyword: React.FC<{
               {l.red ? (
                 <span style={{ ...big(l.size), background: RED, padding: "4px 18px", display: "inline-block", textShadow: "none" }}>{l.text}</span>
               ) : (
-                <span style={big(l.size)}>{l.text}</span>
+                <span style={ink ? { ...big(l.size), color: ink, textShadow: "none" } : big(l.size)}>{l.text}</span>
               )}
             </Rise>
           );
@@ -309,7 +310,7 @@ export const TodayFlash: React.FC = () => {
 
 export const Requirements: React.FC<{
   start: number;
-  items: { text: string; at: number; no?: boolean }[];
+  items: { text: string; at: number; no?: boolean; sub?: string }[];
   header?: string;
   side?: "left" | "right";
   size?: number;
@@ -332,7 +333,14 @@ export const Requirements: React.FC<{
             return (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 22, background: "rgba(31,43,69,0.92)", padding: "18px 34px 18px 22px", transform: `scale(${p})`, transformOrigin: `${side} center`, opacity: p > 0.01 ? 1 : 0 }}>
                 {it.no ? <CrossIcon size={size * 1.22} draw={draw} /> : <CheckIcon size={size * 1.22} draw={draw} />}
-                <span style={{ ...big(size), textShadow: "none" }}>{it.text}</span>
+                {it.sub ? (
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <span style={{ ...big(size), textShadow: "none" }}>{it.text}</span>
+                    <span style={{ fontFamily: SANS, fontWeight: 600, fontSize: size * 0.5, color: WHITE, letterSpacing: "0.04em", marginTop: 4 }}>{it.sub}</span>
+                  </div>
+                ) : (
+                  <span style={{ ...big(size), textShadow: "none" }}>{it.text}</span>
+                )}
               </div>
             );
           })}
