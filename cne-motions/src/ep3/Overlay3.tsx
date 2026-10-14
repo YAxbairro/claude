@@ -18,13 +18,14 @@ const Seg: React.FC<{ from: number; to: number; name: string; children: React.Re
 );
 
 // ---------- Step card: "PASSO n" + instruction, always on the right ----------
-const StepCard: React.FC<{ start: number; n: number; title: string; titleAt: number; children?: React.ReactNode; top?: number }> = ({
+const StepCard: React.FC<{ start: number; n: number; title: string; titleAt: number; children?: React.ReactNode; top?: number; whitePasso?: boolean }> = ({
   start,
   n,
   title,
   titleAt,
   children,
   top = 300,
+  whitePasso = false,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -36,7 +37,7 @@ const StepCard: React.FC<{ start: number; n: number; title: string; titleAt: num
       <div style={{ position: "absolute", right: 110, top, width: 560, opacity: out, transform: `translateX(${(1 - out) * 50}px)`, display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <Rise delay={2}>
-            <span style={{ fontFamily: SANS, fontWeight: 600, fontSize: 38, color: NAVY, letterSpacing: "0.22em" }}>PASSO</span>
+            <span style={whitePasso ? { fontFamily: SANS, fontWeight: 300, fontSize: 38, color: WHITE, letterSpacing: "0.22em", textShadow: SHADOW } : { fontFamily: SANS, fontWeight: 600, fontSize: 38, color: NAVY, letterSpacing: "0.22em" }}>PASSO</span>
           </Rise>
           <div
             style={{
@@ -105,11 +106,13 @@ const Ballot: React.FC<{
   width: number;
   enterAt?: number;
   label?: { text: string; at: number };
+  // crosses drawn inside the squares of these (anonymous) rows
+  marks?: { row: number; at: number }[];
   // voto nulo: one big cross over the whole sheet (two strokes, each with its own cue)
   spoil?: [number, number];
   // "marque uma cruz": a magnifier shows a single square being crossed, detached from any row
   zoom?: { at: number; markAt: number };
-}> = ({ width, enterAt = 0, label, spoil, zoom }) => {
+}> = ({ width, enterAt = 0, label, marks = [], spoil, zoom }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const p = spring({ frame: frame - enterAt, fps, config: { damping: 14, mass: 0.7 } });
@@ -140,6 +143,9 @@ const Ballot: React.FC<{
             </g>
           );
         })}
+        {marks.map((m, i) => (
+          <Cross key={i} x={W - 62} y={80 + m.row * rowH + 28} s={13} draw={ramp(frame, m.at, 10)} />
+        ))}
         {spoil && (
           <g>
             <path d={`M40 70 L${W - 40} ${H - 30}`} stroke={RED} strokeWidth="16" strokeLinecap="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - s1} />
@@ -347,9 +353,9 @@ export const Overlay3: React.FC = () => (
     </Seg>
 
     <Seg from={67.9} to={79.2} name="13 Passo 4 Escolha">
-      <StepCard start={67.9} n={4} title="Marque uma cruz no seu candidato" titleAt={73.72} top={270}>
+      <StepCard start={67.9} n={4} title="Marque uma cruz no seu candidato" titleAt={73.72} top={270} whitePasso>
         <div style={{ marginTop: 26 }}>
-          <Ballot width={250} enterAt={at(69.9, 67.9)} zoom={{ at: at(74.7, 67.9), markAt: at(75.54, 67.9) }} />
+          <Ballot width={250} enterAt={at(69.9, 67.9)} marks={[{ row: 2, at: at(75.54, 67.9) }]} />
         </div>
       </StepCard>
     </Seg>
@@ -400,7 +406,10 @@ function AttentionBallots({ start }: { start: number }) {
       <div style={{ position: "absolute", right: 110, top: 250, opacity: out, display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
         <Tag text="ATENÇÃO" delay={at(79.58, start)} size={40} />
         <div style={{ display: "flex", gap: 70, marginTop: 50 }}>
-          <Ballot width={210} enterAt={at(80.4, start)} spoil={[at(81.06, start), at(82.0, start)]} label={{ text: "VOTO NULO", at: at(85.26, start) }} />
+          <Ballot width={210} enterAt={at(80.4, start)} marks={[
+              { row: 1, at: at(81.06, start) },
+              { row: 4, at: at(82.0, start) },
+            ]} label={{ text: "VOTO NULO", at: at(85.26, start) }} />
           <Ballot width={210} enterAt={at(86.06, start)} label={{ text: "VOTO EM BRANCO", at: at(89.18, start) }} />
         </div>
       </div>
