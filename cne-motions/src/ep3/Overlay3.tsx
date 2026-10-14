@@ -231,15 +231,16 @@ const Simple: React.FC<{ start: number }> = ({ start }) => (
 
 export const Overlay3: React.FC = () => (
   <AbsoluteFill>
-    <Seg from={6.6} to={8.5} name="01 Sabe onde vota">
+    <Seg from={6.15} to={8.5} name="01 Sabe onde e como votar">
       <Keyword
-        start={6.6}
-        pos={{ right: 130, top: 430 }}
+        start={6.15}
+        pos={{ right: 130, top: 400 }}
         align="right"
         ink={NAVY}
         lines={[
-          { text: "SABE", at: 6.7, size: 70 },
-          { text: "ONDE VOTA?", at: 7.2, size: 96, red: true },
+          { text: "SABE", at: 6.2, size: 70 },
+          { text: "ONDE E COMO", at: 6.8, size: 76, box: "rgba(31,43,69,0.92)" },
+          { text: "VOTAR?", at: 7.75, size: 96, red: true },
         ]}
       />
     </Seg>

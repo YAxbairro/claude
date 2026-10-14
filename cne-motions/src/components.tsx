@@ -97,7 +97,7 @@ const LockIcon: React.FC<{ size: number }> = ({ size }) => (
 
 export const Keyword: React.FC<{
   start: number;
-  lines: { text: string; at: number; size: number; red?: boolean }[];
+  lines: { text: string; at: number; size: number; red?: boolean; box?: string }[];
   pos: React.CSSProperties;
   align?: "left" | "right";
   underlineAt?: number;
@@ -113,8 +113,8 @@ export const Keyword: React.FC<{
           const d = at(l.at, start);
           return (
             <Rise key={i} delay={d}>
-              {l.red ? (
-                <span style={{ ...big(l.size), background: RED, padding: "4px 18px", display: "inline-block", textShadow: "none" }}>{l.text}</span>
+              {l.red || l.box ? (
+                <span style={{ ...big(l.size), background: l.red ? RED : l.box, padding: "4px 18px", display: "inline-block", textShadow: "none" }}>{l.text}</span>
               ) : (
                 <span style={ink ? { ...big(l.size), color: ink, textShadow: "none" } : big(l.size)}>{l.text}</span>
               )}
