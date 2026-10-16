@@ -8,6 +8,7 @@ import { EP3_DURATION, Overlay3 } from "./ep3/Overlay3";
 import { SPOT_DURATION, Spot } from "./spot/Spot";
 import { SPOT2_DURATION, Spot2 } from "./spot/Spot2";
 import { FINALS_DURATION, FinalsReel } from "./spot/Finals";
+import { SPOT3_DURATION, Spot3 } from "./spot/Spot3";
 import { SPOT_FPS } from "./spot/kit";
 import { DURATION, FPS } from "./theme";
 
@@ -70,6 +71,18 @@ export const RemotionRoot: React.FC = () => (
         />
       )),
     )}
+    {(["cor", "alpha"] as const).map((variant) => (
+      <Composition
+        key={`v3-${variant}`}
+        id={`SpotPresosDoentes-${variant}`}
+        component={Spot3}
+        durationInFrames={SPOT3_DURATION}
+        fps={SPOT_FPS}
+        width={1920}
+        height={1080}
+        defaultProps={{ variant }}
+      />
+    ))}
     <Composition id="SpotFinaisOpcoes" component={FinalsReel} durationInFrames={FINALS_DURATION} fps={SPOT_FPS} width={1920} height={1080} />
   </>
 );
