@@ -24,6 +24,7 @@ const BgCtx = React.createContext(true);
 type Cam = {
   exit?: { kind: "zoomOut"; len?: number } | { kind: "zoomIn"; ox: number; oy: number; len?: number };
   enter?: { flash?: boolean; len?: number };
+  push?: boolean; // slow, subtle push-in across the whole scene
 };
 
 const SceneBody: React.FC<{ cam?: Cam; bg: string; name: string; withBg: boolean; children: React.ReactNode }> = ({ cam, bg, name, withBg, children }) => {
@@ -49,6 +50,7 @@ const SceneBody: React.FC<{ cam?: Cam; bg: string; name: string; withBg: boolean
       filter += ` blur(${k * 4}px)`;
     }
   }
+  if (cam?.push) transform += ` scale(${1 + 0.045 * (frame / durationInFrames)})`;
   let flash = 0;
   if (cam?.enter) {
     const len = cam.enter.len ?? 14;
@@ -110,6 +112,7 @@ const TRANSITIONS: { at: number; kind: "wipe" | "iris" | "bars"; cx?: number; cy
   { at: 8.6, kind: "wipe" },
   { at: 16.7, kind: "iris", cx: 1450, cy: 520 },
   { at: 33.4, kind: "wipe" },
+  { at: 44.7, kind: "iris", cx: 440, cy: 530 },
   { at: 53.75, kind: "bars" },
 ];
 
@@ -145,7 +148,7 @@ const S1: React.FC = () => {
   const pop = spring({ frame: frame - L(1.6, 0), fps, config: { damping: 12, mass: 0.7 } });
   const count = Math.max(1, Math.min(15, Math.round(interpolate(frame, [L(1.6, 0), L(1.6, 0) + 12], [1, 15], clamp))));
   return (
-    <Exit>
+    <AbsoluteFill>
       <AbsoluteFill style={{ alignItems: "center", justifyContent: "center" }}>
         <Kicker delay={L(0.2, 0)} size={54} align="center">
           Eleição Presidencial
@@ -157,7 +160,7 @@ const S1: React.FC = () => {
           Novembro
         </T>
       </AbsoluteFill>
-    </Exit>
+    </AbsoluteFill>
   );
 };
 
@@ -201,10 +204,10 @@ const S2: React.FC<{ start: number }> = ({ start }) => (
 );
 
 const S3: React.FC<{ start: number }> = ({ start }) => (
-  <Exit len={7}>
+  <AbsoluteFill>
     <Halo x={640} y={620} size={940} />
     <Art src="spot/doente.png" delay={L(8.65, start)} from="left" float={4} style={{ left: 90, top: 320, width: 1080 }} />
-    <div style={{ position: "absolute", left: 1220, top: 250 }}>
+    <div style={{ position: "absolute", left: 1220, top: 170 }}>
       <HospitalIcon delay={L(9.0, start)} size={170} />
       <div style={{ height: 36 }} />
       <Kicker delay={L(9.37, start)} size={56}>
@@ -224,7 +227,7 @@ const S3: React.FC<{ start: number }> = ({ start }) => (
         equiparados
       </Kicker>
     </div>
-  </Exit>
+  </AbsoluteFill>
 );
 
 const S3b: React.FC<{ start: number }> = ({ start }) => (
@@ -267,51 +270,58 @@ const S4: React.FC<{ start: number }> = ({ start }) => (
       </Kicker>
       <Underline delay={L(20.9, start)} width={260} align="left" />
     </div>
-    <div style={{ position: "absolute", left: 1220, top: 200 }}>
+    <div style={{ position: "absolute", left: 1220, top: 150, transform: "scale(0.88)", transformOrigin: "top left" }}>
       <Calendar delay={L(16.9, start)} markAt={[19.45, 19.78, 20.1, 20.43].map((s) => L(s, start))} />
     </div>
-    <Burst at={L(20.43, start) + 6} x={1600} y={440} size={90} />
+    <Burst at={L(20.43, start) + 6} x={1560} y={380} size={90} />
   </AbsoluteFill>
 );
 
 const S5: React.FC<{ start: number }> = ({ start }) => {
   const frame = useCurrentFrame();
-  const shift = ease(frame, L(29.9, start), L(30.5, start));
+  const back = ease(frame, L(29.9, start), L(30.5, start), Easing.inOut(Easing.cubic));
   return (
     <AbsoluteFill>
-      <Halo x={620 - 40 * shift} y={600} size={980} />
-      <Art src="spot/camara.png" delay={L(21.45, start)} from="scale" float={3} style={{ left: 60 - 40 * shift, top: 320, width: 1080 }} />
-      <div style={{ position: "absolute", left: 1150, top: 200 }}>
-        <Kicker delay={L(24.75, start)} size={32}>
-          Requeira o voto antecipado
-        </Kicker>
-        <div style={{ height: 18 }} />
-        <T d={L(27.13, start)} size={84}>
-          na Câmara
-        </T>
-        <T d={L(27.39, start)} size={92} box={DEEP}>
-          Municipal
-        </T>
-        <div style={{ height: 22 }} />
-        <Kicker delay={L(28.05, start)} size={24}>
-          do concelho onde está recenseado
-        </Kicker>
-      </div>
-      <div style={{ position: "absolute", left: 1150, top: 690, display: "flex", alignItems: "center", gap: 36 }}>
-        <DatePage delay={L(30.6, start)} day="29" month="OUT" />
-        <div>
-          <Kicker delay={L(30.33, start)} size={44}>
-            até
+      <AbsoluteFill style={{ transform: `scale(${1 - 0.07 * back})`, filter: back > 0 ? `blur(${7 * back}px) brightness(${1 - 0.22 * back})` : undefined }}>
+        <Halo x={620} y={600} size={980} />
+        <Art src="spot/camara.png" delay={L(21.45, start)} from="scale" float={3} style={{ left: 60, top: 320, width: 1080 }} />
+        <div style={{ position: "absolute", left: 1150, top: 200 }}>
+          <Kicker delay={L(24.75, start)} size={32}>
+            Requeira o voto antecipado
           </Kicker>
-          <T d={L(30.99, start)} size={66}>
-            29 de
+          <div style={{ height: 18 }} />
+          <T d={L(27.13, start)} size={84}>
+            na Câmara
           </T>
-          <T d={L(32.03, start)} size={66}>
-            outubro
+          <T d={L(27.39, start)} size={92} box={DEEP}>
+            Municipal
           </T>
+          <div style={{ height: 22 }} />
+          <Kicker delay={L(28.05, start)} size={24}>
+            do concelho onde está recenseado
+          </Kicker>
         </div>
-      </div>
-      <Burst at={L(30.6, start) + 8} x={1265} y={800} size={130} />
+      </AbsoluteFill>
+      <AbsoluteFill style={{ background: `rgba(10,30,90,${0.28 * back})` }} />
+      <AbsoluteFill style={{ alignItems: "center", justifyContent: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 40 }}>
+          <div style={{ transform: "scale(1.75)", margin: "0 110px" }}>
+            <DatePage delay={L(30.6, start)} day="29" month="OUT" />
+          </div>
+          <div>
+            <Kicker delay={L(30.33, start)} size={64}>
+              até
+            </Kicker>
+            <T d={L(30.99, start)} size={110}>
+              29 de
+            </T>
+            <T d={L(32.03, start)} size={110} box={RED}>
+              outubro
+            </T>
+          </div>
+        </div>
+      </AbsoluteFill>
+      <Burst at={L(30.6, start) + 8} x={700} y={330} size={160} />
     </AbsoluteFill>
   );
 };
@@ -459,7 +469,7 @@ const S9: React.FC<{ start: number }> = ({ start }) => (
   <AbsoluteFill>
     <Halo x={560} y={640} size={900} />
     <Art src="spot/idoso.png" delay={L(49.85, start)} from="left" style={{ left: 120, top: 220, height: 860 }} />
-    <div style={{ position: "absolute", left: 980, top: 250 }}>
+    <div style={{ position: "absolute", left: 980, top: 170 }}>
       <Kicker delay={L(49.94, start)} size={64}>
         Cada voto
       </Kicker>
@@ -474,7 +484,7 @@ const S9: React.FC<{ start: number }> = ({ start }) => (
       <div style={{ height: 46 }} />
       <ParticipaPill delay={L(52.57, start)} />
     </div>
-    <Burst at={L(52.57, start) + 7} x={1030} y={712} size={120} />
+    <Burst at={L(52.57, start) + 7} x={1030} y={632} size={120} />
   </AbsoluteFill>
 );
 
@@ -498,17 +508,18 @@ export const Spot3: React.FC<Spot3Props> = ({ variant, logos = "mono" }) => {
   return (
     <BgCtx.Provider value={withBg}>
       <AbsoluteFill>
-        <Scene from={0} to={3.0} name="01 15 de Novembro" bg={TEAL}>
+        <Scene from={0} to={2.9} name="01 15 de Novembro" bg={TEAL} cam={{ exit: { kind: "zoomIn", ox: 960, oy: 540, len: 9 } }}>
           <S1 />
         </Scene>
-        <Scene from={2.85} to={8.6} name="02 Nenhum eleitor perde o direito de votar" bg={DEEP}>
-          <S2 start={2.85} />
+        <Scene from={2.9} to={8.6} name="02 Nenhum eleitor perde a possibilidade de votar" bg={DEEP} cam={{ enter: { len: 12 } }}>
+          <S2 start={2.9} />
         </Scene>
-        <Scene from={8.6} to={12.55} name="03 Hospitais" bg={TEAL}>
+        {/* the prison scene sits underneath while the hospital recedes (zoom out) */}
+        <Scene from={12.1} to={16.7} name="03b Estabelecimentos prisionais" bg={INDIGO} cam={{ enter: { len: 14 }, push: true }}>
+          <S3b start={12.1} />
+        </Scene>
+        <Scene from={8.6} to={12.55} name="03 Hospitais" bg={TEAL} cam={{ exit: { kind: "zoomOut", len: 13 }, push: true }}>
           <S3 start={8.6} />
-        </Scene>
-        <Scene from={12.4} to={16.7} name="03b Estabelecimentos prisionais" bg={INDIGO}>
-          <S3b start={12.4} />
         </Scene>
         {/* the Câmara scene sits underneath while the calendar recedes (zoom out) */}
         <Scene from={21.3} to={33.4} name="05 Camara Municipal ate 29 out" bg={BRIGHT} cam={{ enter: { len: 14 } }}>
@@ -517,7 +528,7 @@ export const Spot3: React.FC<Spot3Props> = ({ variant, logos = "mono" }) => {
         <Scene from={16.7} to={21.7} name="04 Calendario 2-5 Nov" bg={TEAL} cam={{ exit: { kind: "zoomOut", len: 13 } }}>
           <S4 start={16.7} />
         </Scene>
-        <Scene from={33.4} to={44.7} name="06 Formulario com o diretor" bg={TEAL}>
+        <Scene from={33.4} to={44.7} name="06 Formulario com o diretor" bg={TEAL} cam={{ push: true }}>
           <S6 start={33.4} />
         </Scene>
         <Scene from={44.7} to={49.8} name="08 Linha gratuita" bg={TEAL} cam={{ exit: { kind: "zoomIn", ox: 440, oy: 690, len: 9 } }}>
