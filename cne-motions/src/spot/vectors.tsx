@@ -221,3 +221,33 @@ export const BallotIcon: React.FC<{ delay: number; size: number }> = ({ delay, s
     </svg>
   );
 };
+
+// Neutral vote symbol: a clean ballot box, a blank folded ballot slides into the slot (no X, no tick)
+export const VoteBox: React.FC<{ delay: number; size: number }> = ({ delay, size }) => {
+  const frame = useCurrentFrame();
+  const p = useSpring(delay, 12, 0.6);
+  const drop = ease(frame, delay + 10, delay + 26, Easing.inOut(Easing.cubic));
+  return (
+    <svg width={size} height={size * 1.2} viewBox="0 0 200 240" style={{ overflow: "visible", transform: `translateY(${(1 - p) * 80}px)`, opacity: interpolate(p, [0, 0.3], [0, 1], clamp), filter: "drop-shadow(0 18px 30px rgba(0,0,0,0.22))" }}>
+      <defs>
+        <clipPath id="voteboxAboveSlot">
+          <rect x="-50" y="-200" width="300" height="320" />
+        </clipPath>
+      </defs>
+      {/* blank ballot, slides down into the slot */}
+      <g clipPath="url(#voteboxAboveSlot)">
+        <g transform={`translate(0 ${-10 + drop * 52})`}>
+          <rect x="62" y="10" width="76" height="96" rx="6" fill="#FFFFFF" stroke="#C9CED9" strokeWidth="3" />
+          <rect x="74" y="26" width="44" height="7" rx="3.5" fill={NAVY} />
+          <rect x="74" y="42" width="52" height="5" rx="2.5" fill="#D3D7E0" />
+          <rect x="74" y="54" width="40" height="5" rx="2.5" fill="#D3D7E0" />
+        </g>
+      </g>
+      {/* box */}
+      <path d="M22 120 L48 100 L152 100 L178 120 Z" fill="#E6ECF5" />
+      <rect x="22" y="120" width="156" height="104" rx="10" fill="#FFFFFF" />
+      <rect x="62" y="108" width="76" height="8" rx="4" fill={NAVY} />
+      <rect x="22" y="196" width="156" height="10" fill={RED} />
+    </svg>
+  );
+};

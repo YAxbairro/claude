@@ -3,8 +3,8 @@ import { AbsoluteFill, Audio, Easing, Img, Sequence, interpolate, spring, static
 import { LogoAnim } from "../LogoAnim";
 import { SANS } from "../theme";
 import { Art, Line, RED, Underline, ease, sec, useExit } from "./kit";
-import { BallotIcon, Calendar, DatePage, FormDoc } from "./vectors";
-import { BRIGHT, DEEP, Kicker, LIGHT, TEAL } from "./devices";
+import { VoteBox, Calendar, DatePage, FormDoc } from "./vectors";
+import { BRIGHT, DEEP, Kicker, LIGHT, OCEAN, TEAL } from "./devices";
 import { Bars, BgTexture, BrowserWindow, Burst, FlipGroup, Handset, Iris } from "./fx";
 
 // Spot "Voto antecipado – categorias profissionais" (Oct 2026). Same look and devices as
@@ -169,7 +169,7 @@ const S1: React.FC = () => {
 const S2: React.FC<{ start: number }> = ({ start }) => (
   <AbsoluteFill>
     <div style={{ position: "absolute", left: 250, top: 300 }}>
-      <BallotIcon delay={L(1.9, start)} size={330} />
+      <VoteBox delay={L(1.9, start)} size={380} />
     </div>
     <Sequence from={0} durationInFrames={L(2.95, start)} layout="none">
       <Exit len={6}>
@@ -229,8 +229,8 @@ const CREW: Pro[] = [
   { src: "spot/servico/bombeiro.png", at: 13.71, kick: "Profissionais da", title: "proteção civil" },
   { src: "spot/servico/maritima.png", at: 14.83, kick: "Trabalhadores", title: "marítimos" },
   { src: "spot/servico/piloto.png", at: 16.29, kick: "Trabalhadores", title: "aeronáuticos" },
-  { src: "spot/servico/membro_mesa.png", at: 17.57, title: "Membros de mesa", sub: { text: "inscritos noutra assembleia de voto", at: 18.17 } },
-  { src: "spot/servico/jornalista.png", at: 20.41, title: "Jornalistas", sub: { text: "deslocados para outro concelho", at: 20.99 } },
+  { src: "spot/servico/membro_mesa.png", at: 17.57, title: "Membros de mesa", sub: { text: "inscritos noutra|assembleia de voto", at: 18.17 } },
+  { src: "spot/servico/jornalista.png", at: 20.41, title: "Jornalistas", sub: { text: "deslocados para|outro concelho", at: 20.99 } },
 ];
 
 const FG_H = 900; // figure height on stage
@@ -292,9 +292,13 @@ const Label: React.FC<{ p: Pro; i: number; start: number }> = ({ p, i, start }) 
           {p.sub && (
             <>
               <div style={{ height: 16 }} />
-              <Kicker delay={L(p.sub.at, start) - e} size={26}>
-                {p.sub.text}
-              </Kicker>
+              {p.sub.text.split("|").map((line, k) => (
+                <div key={k} style={{ marginTop: k ? 6 : 0 }}>
+                  <Kicker delay={L(p.sub!.at, start) - e + k * 4} size={36}>
+                    {line}
+                  </Kicker>
+                </div>
+              ))}
             </>
           )}
         </Phase>
@@ -347,8 +351,12 @@ const S6: React.FC<{ start: number }> = ({ start }) => {
         <Halo x={620} y={600} size={980} />
         <Art src="spot/camara.png" delay={L(28.95, start)} from="scale" float={3} style={{ left: 60, top: 320, width: 1080 }} />
         <div style={{ position: "absolute", left: 1150, top: 200 }}>
-          <Kicker delay={L(30.27, start)} size={32}>
-            Apresente o requerimento
+          <Kicker delay={L(30.27, start)} size={40}>
+            Apresente o
+          </Kicker>
+          <div style={{ height: 6 }} />
+          <Kicker delay={L(30.6, start)} size={40}>
+            requerimento
           </Kicker>
           <div style={{ height: 18 }} />
           <T d={L(32.25, start)} size={84}>
@@ -358,8 +366,12 @@ const S6: React.FC<{ start: number }> = ({ start }) => {
             Municipal
           </T>
           <div style={{ height: 22 }} />
-          <Kicker delay={L(33.15, start)} size={24}>
-            do concelho onde está recenseado
+          <Kicker delay={L(33.15, start)} size={36}>
+            do concelho onde
+          </Kicker>
+          <div style={{ height: 6 }} />
+          <Kicker delay={L(33.5, start)} size={36}>
+            está recenseado
           </Kicker>
         </div>
       </AbsoluteFill>
@@ -398,7 +410,7 @@ const Place: React.FC<{ delay: number; children: React.ReactNode }> = ({ delay, 
         <circle cx="50" cy="50" r="46" fill={RED} />
         <path d="M28 52 L44 67 L73 35" fill="none" stroke="#fff" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - tick} />
       </svg>
-      <span style={{ fontFamily: SANS, fontWeight: 700, fontSize: 36, color: W, whiteSpace: "nowrap" }}>{children}</span>
+      <span style={{ fontFamily: SANS, fontWeight: 700, fontSize: 40, color: W, whiteSpace: "nowrap" }}>{children}</span>
     </div>
   );
 };
@@ -409,8 +421,8 @@ const S7: React.FC<{ start: number }> = ({ start }) => (
     <div style={{ position: "absolute", left: 230, top: 280 }}>
       <FormDoc delay={L(38.45, start)} />
     </div>
-    <div style={{ position: "absolute", left: 820, top: 170 }}>
-      <Kicker delay={L(38.45, start)} size={36}>
+    <div style={{ position: "absolute", left: 790, top: 150 }}>
+      <Kicker delay={L(38.45, start)} size={42}>
         O formulário está
       </Kicker>
       <div style={{ height: 8 }} />
@@ -441,8 +453,8 @@ const Url: React.FC<{ delay: number; text: string }> = ({ delay, text }) => {
 const S8: React.FC<{ start: number }> = ({ start }) => (
   <Exit>
     <div style={{ position: "absolute", left: 130, top: 300 }}>
-      <Kicker delay={L(47.43, start)} size={33}>
-        Obtenha o formulário em
+      <Kicker delay={L(47.43, start)} size={38}>
+        Obtenha o formulário
       </Kicker>
       <div style={{ height: 18 }} />
       <Url delay={L(51.43, start)} text="www.cne.cv" />
@@ -475,7 +487,7 @@ const S9: React.FC<{ start: number }> = ({ start }) => {
           <FlipGroup text="14" at={L(57.3, start)} size={150} />
         </div>
         <div style={{ height: 34 }} />
-        <Kicker delay={L(54.71, start)} size={38}>
+        <Kicker delay={L(54.71, start)} size={42}>
           Ligue gratuitamente
         </Kicker>
       </div>
@@ -568,7 +580,7 @@ export const Spot4: React.FC<Spot4Props> = ({ variant, logos = "mono" }) => {
         <Scene from={0} to={1.95} name="01 15 de Novembro" bg={TEAL} cam={{ exit: { kind: "zoomIn", ox: 960, oy: 540, len: 9 } }}>
           <S1 />
         </Scene>
-        <Scene from={1.95} to={6.1} name="02 De servico?" bg={DEEP} cam={{ enter: { len: 12 } }}>
+        <Scene from={1.95} to={6.1} name="02 De servico?" bg={OCEAN} cam={{ enter: { len: 12 } }}>
           <S2 start={1.95} />
         </Scene>
         {/* the professions sit underneath while "a solução" recedes (zoom out) */}
@@ -588,7 +600,7 @@ export const Spot4: React.FC<Spot4Props> = ({ variant, logos = "mono" }) => {
         <Scene from={38.3} to={47.3} name="07 Formulario disponivel" bg={TEAL} cam={{ push: true, exit: { kind: "zoomIn", ox: 440, oy: 560, len: 10 } }}>
           <S7 start={38.3} />
         </Scene>
-        <Scene from={47.3} to={52.9} name="08 Sites CNE e DGAPE" bg={DEEP} cam={{ enter: { flash: true, len: 14 } }}>
+        <Scene from={47.3} to={52.9} name="08 Sites CNE e DGAPE" bg={OCEAN} cam={{ enter: { flash: true, len: 14 } }}>
           <S8 start={47.3} />
         </Scene>
         <Scene from={52.9} to={58.35} name="09 Linha gratuita" bg={TEAL} cam={{ exit: { kind: "zoomIn", ox: 440, oy: 690, len: 9 } }}>

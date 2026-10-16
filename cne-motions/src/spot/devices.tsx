@@ -10,6 +10,7 @@ export const TEAL = "#22A9CD";
 export const BRIGHT = "#0AA2F5";
 export const INDIGO = "#485BB2";
 export const DEEP = "#212F6F";
+export const OCEAN = "#1679C6"; // medium blue for scene fields (replaces the violet/indigo fields)
 export const LIGHT = "#D3EAF3";
 export const FLAG_BLUE = "#003893";
 export const FLAG_RED = "#CF2027";
