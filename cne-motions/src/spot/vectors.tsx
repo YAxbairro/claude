@@ -7,10 +7,10 @@ const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const card: React.CSSProperties = { background: "#fff", borderRadius: 28, boxShadow: "0 24px 60px rgba(20,36,94,0.16)" };
 
 // ---------- November 2026 calendar: days 2-5 get marked one by one ----------
-export const Calendar: React.FC<{ delay: number; markAt: number[] }> = ({ delay, markAt }) => {
+export const Calendar: React.FC<{ delay: number; markAt: number[]; days?: number[] }> = ({ delay, markAt, days = [2, 3, 4, 5] }) => {
   const frame = useCurrentFrame();
   const p = useSpring(delay, 13, 0.7);
-  const days = ["D", "S", "T", "Q", "Q", "S", "S"];
+  const week = ["D", "S", "T", "Q", "Q", "S", "S"];
   // 1 Nov 2026 is a Sunday
   const cells = Array.from({ length: 30 }, (_, i) => i + 1);
   return (
@@ -22,13 +22,13 @@ export const Calendar: React.FC<{ delay: number; markAt: number[] }> = ({ delay,
         <span style={{ fontFamily: SANS, fontWeight: 900, fontSize: 52, color: "#fff", letterSpacing: 2 }}>NOVEMBRO 2026</span>
       </div>
       <div style={{ padding: "22px 30px 30px", display: "grid", gridTemplateColumns: "repeat(7, 1fr)", rowGap: 10 }}>
-        {days.map((d, i) => (
+        {week.map((d, i) => (
           <div key={i} style={{ textAlign: "center", fontFamily: SANS, fontWeight: 800, fontSize: 26, color: INK_SOFT, paddingBottom: 6 }}>
             {d}
           </div>
         ))}
         {cells.map((n) => {
-          const idx = [2, 3, 4, 5].indexOf(n);
+          const idx = days.indexOf(n);
           const m = idx >= 0 ? ease(frame, markAt[idx], markAt[idx] + 6, Easing.out(Easing.back(2))) : 0;
           const in15 = n === 15;
           return (
