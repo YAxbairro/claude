@@ -111,6 +111,7 @@ const Wipe: React.FC = () => {
 const TRANSITIONS: { at: number; kind: "wipe" | "iris" | "bars"; cx?: number; cy?: number }[] = [
   { at: 8.6, kind: "wipe" },
   { at: 16.7, kind: "iris", cx: 1450, cy: 520 },
+  { at: 25.1, kind: "wipe" },
   { at: 33.4, kind: "wipe" },
   { at: 44.7, kind: "iris", cx: 440, cy: 530 },
   { at: 53.75, kind: "bars" },
@@ -277,6 +278,23 @@ const S4: React.FC<{ start: number }> = ({ start }) => (
   </AbsoluteFill>
 );
 
+// "Para beneficiar dessa modalidade de voto" – its own beat, so the Câmara only arrives with "devem requerer"
+const S4b: React.FC<{ start: number }> = ({ start }) => (
+  <AbsoluteFill style={{ alignItems: "center", justifyContent: "center" }}>
+    <Kicker delay={L(21.91, start)} size={60} align="center">
+      Para beneficiar
+    </Kicker>
+    <div style={{ height: 20 }} />
+    <T d={L(22.95, start)} size={120} align="center">
+      desta modalidade
+    </T>
+    <T d={L(23.95, start)} size={150} box={RED} align="center">
+      de voto
+    </T>
+    <Burst at={L(23.95, start) + 7} x={1290} y={690} size={120} />
+  </AbsoluteFill>
+);
+
 const S5: React.FC<{ start: number }> = ({ start }) => {
   const frame = useCurrentFrame();
   const back = ease(frame, L(29.9, start), L(30.5, start), Easing.inOut(Easing.cubic));
@@ -284,9 +302,9 @@ const S5: React.FC<{ start: number }> = ({ start }) => {
     <AbsoluteFill>
       <AbsoluteFill style={{ transform: `scale(${1 - 0.07 * back})`, filter: back > 0 ? `blur(${7 * back}px) brightness(${1 - 0.22 * back})` : undefined }}>
         <Halo x={620} y={600} size={980} />
-        <Art src="spot/camara.png" delay={L(21.45, start)} from="scale" float={3} style={{ left: 60, top: 320, width: 1080 }} />
+        <Art src="spot/camara.png" delay={L(25.15, start)} from="scale" float={3} style={{ left: 60, top: 320, width: 1080 }} />
         <div style={{ position: "absolute", left: 1150, top: 200 }}>
-          <Kicker delay={L(24.75, start)} size={32}>
+          <Kicker delay={L(25.25, start)} size={32}>
             Requeira o voto antecipado
           </Kicker>
           <div style={{ height: 18 }} />
@@ -522,8 +540,11 @@ export const Spot3: React.FC<Spot3Props> = ({ variant, logos = "mono" }) => {
           <S3 start={8.6} />
         </Scene>
         {/* the Câmara scene sits underneath while the calendar recedes (zoom out) */}
-        <Scene from={21.3} to={33.4} name="05 Camara Municipal ate 29 out" bg={BRIGHT} cam={{ enter: { len: 14 } }}>
-          <S5 start={21.3} />
+        <Scene from={21.3} to={25.1} name="04b Para beneficiar desta modalidade de voto" bg={DEEP} cam={{ enter: { len: 14 } }}>
+          <S4b start={21.3} />
+        </Scene>
+        <Scene from={25.1} to={33.4} name="05 Camara Municipal ate 29 out" bg={BRIGHT} cam={{ enter: { len: 12 } }}>
+          <S5 start={25.1} />
         </Scene>
         <Scene from={16.7} to={21.7} name="04 Calendario 2-5 Nov" bg={TEAL} cam={{ exit: { kind: "zoomOut", len: 13 } }}>
           <S4 start={16.7} />
