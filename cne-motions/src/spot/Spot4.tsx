@@ -3,7 +3,7 @@ import { AbsoluteFill, Audio, Easing, Img, Sequence, interpolate, spring, static
 import { LogoAnim } from "../LogoAnim";
 import { SANS } from "../theme";
 import { Art, Line, RED, Underline, ease, sec, useExit } from "./kit";
-import { VoteBox, Calendar, DatePage, FormDoc } from "./vectors";
+import { ServiceBadge, Calendar, DatePage, FormDoc } from "./vectors";
 import { BRIGHT, DEEP, Kicker, LIGHT, OCEAN, TEAL } from "./devices";
 import { Bars, BgTexture, BrowserWindow, Burst, FlipGroup, Handset, Iris } from "./fx";
 
@@ -168,8 +168,8 @@ const S1: React.FC = () => {
 // "Vai estar de serviço e não poderá deslocar-se à sua mesa de voto?"
 const S2: React.FC<{ start: number }> = ({ start }) => (
   <AbsoluteFill>
-    <div style={{ position: "absolute", left: 250, top: 300 }}>
-      <VoteBox delay={L(1.9, start)} size={380} />
+    <div style={{ position: "absolute", left: 270, top: 250 }}>
+      <ServiceBadge delay={L(1.95, start)} size={330} />
     </div>
     <Sequence from={0} durationInFrames={L(2.95, start)} layout="none">
       <Exit len={6}>

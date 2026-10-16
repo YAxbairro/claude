@@ -251,3 +251,37 @@ export const VoteBox: React.FC<{ delay: number; size: number }> = ({ delay, size
     </svg>
   );
 };
+
+// "De serviço": a work ID badge on a lanyard drops in and swings to rest (neutral, no marks)
+export const ServiceBadge: React.FC<{ delay: number; size: number }> = ({ delay, size }) => {
+  const frame = useCurrentFrame();
+  const p = useSpring(delay, 12, 0.6);
+  const t = Math.max(0, frame - delay);
+  const swing = 14 * Math.exp(-t / 14) * Math.cos(t / 4.2);
+  const photo = ease(frame, delay + 10, delay + 18, Easing.out(Easing.cubic));
+  const lines = ease(frame, delay + 14, delay + 26, Easing.out(Easing.cubic));
+  return (
+    <svg width={size} height={size * 1.3} viewBox="0 0 200 260" style={{ overflow: "visible", opacity: interpolate(p, [0, 0.3], [0, 1], clamp), transform: `translateY(${(1 - p) * -160}px)` }}>
+      <g transform={`rotate(${swing} 100 -40)`}>
+        {/* lanyard */}
+        <path d="M70 -60 L92 58 M130 -60 L108 58" stroke={NAVY} strokeWidth="12" strokeLinecap="round" />
+        <rect x="88" y="50" width="24" height="18" rx="4" fill="#C9CED9" />
+        {/* card */}
+        <g style={{ filter: "drop-shadow(0 18px 30px rgba(0,0,0,0.25))" }}>
+          <rect x="30" y="64" width="140" height="188" rx="14" fill="#FFFFFF" />
+          <rect x="30" y="64" width="140" height="40" rx="14" fill={NAVY} />
+          <rect x="30" y="90" width="140" height="14" fill={NAVY} />
+          <rect x="80" y="74" width="40" height="8" rx="4" fill="#FFFFFF" opacity="0.8" />
+          <g transform={`translate(100 146) scale(${photo})`}>
+            <circle r="30" fill="#DDE3EE" />
+            <circle cy="-8" r="11" fill="#9AA6BD" />
+            <path d="M-18 20 C -16 4, 16 4, 18 20 Z" fill="#9AA6BD" />
+          </g>
+          <rect x={100 - 44 * lines} y="190" width={88 * lines} height="10" rx="5" fill={NAVY} />
+          <rect x={100 - 30 * lines} y="208" width={60 * lines} height="8" rx="4" fill="#C3C8D3" />
+          <rect x="30" y="232" width="140" height="10" fill={RED} />
+        </g>
+      </g>
+    </svg>
+  );
+};
