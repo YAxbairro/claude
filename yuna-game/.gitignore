@@ -5,3 +5,8 @@ dist
 art-cache/
 artifact/
 dev/
+dist-app
+release/
+# Release signing key: kept out of git (the owner keeps a copy)
+android/yuna-release.jks
+android/keystore.properties

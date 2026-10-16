@@ -22,6 +22,17 @@ npm run build    # gera dist/ (site estático)
 - `src/core/audio.ts` — música, voz e efeitos em Web Audio; a música baixa quando a narradora fala.
 - `public/assets/` — arte, voz, música e efeitos gerados.
 
+## App Android (APK)
+
+O jogo vai dentro da app (funciona sem internet). Ecrã inteiro, sem barras, e o ecrã não se apaga a meio do jogo.
+
+```bash
+npm run app:apk        # build web + cópia para dist-app + APK assinado
+# → android/app/build/outputs/apk/release/app-release.apk
+```
+
+Precisa de Java 21 e do Android SDK (`android/local.properties` com `sdk.dir=...`). A chave que assina a app (`android/yuna-release.jks` + `android/keystore.properties`) não está no git: guarda a cópia que recebeste e põe os dois ficheiros em `android/` antes de gerar uma atualização. As atualizações têm de ser assinadas com a mesma chave para instalarem por cima sem perder o progresso. Para uma nova versão, sobe `versionCode` em `android/app/build.gradle`.
+
 ## Mundo 3D
 
 Depois de "Jogar" a Yuna entra num mundo 3D (`src/world/`): anda, salta e sobe pequenos degraus sozinha, com a Gata Tanha atrás. Navega de barco entre as ilhas, apanha conchas douradas e entra nos círculos de luz para abrir os mini-jogos.

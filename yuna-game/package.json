@@ -12,9 +12,12 @@
     "assets:chars": "node scripts/gen-characters.mjs",
     "assets:items": "node --experimental-strip-types scripts/gen-items.mjs",
     "assets:voice": "node --experimental-strip-types scripts/gen-voice.mjs",
-    "assets:audio": "node scripts/gen-audio.mjs"
+    "assets:audio": "node scripts/gen-audio.mjs",
+    "app:prepare": "npm run build && node scripts/prepare-app.mjs && npx cap sync android",
+    "app:apk": "npm run app:prepare && cd android && ./gradlew assembleRelease"
   },
   "devDependencies": {
+    "@capacitor/cli": "^7.6.9",
     "@gltf-transform/core": "^4.5.1",
     "@gltf-transform/extensions": "^4.5.1",
     "@gltf-transform/functions": "^4.5.1",
@@ -26,6 +29,8 @@
     "vite": "^6.4.4"
   },
   "dependencies": {
+    "@capacitor/android": "^7.6.9",
+    "@capacitor/core": "^7.6.9",
     "canvas-confetti": "^1.9.4",
     "gsap": "^3.15.0",
     "three": "^0.170.0",

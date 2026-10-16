@@ -1,0 +1,8 @@
+{
+  "appId": "cv.yuna.ilhas",
+  "appName": "Ilhas da Yuna",
+  "webDir": "dist-app",
+  "android": {
+    "backgroundColor": "#1fb5d1"
+  }
+}

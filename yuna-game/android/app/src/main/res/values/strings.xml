@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Ilhas da Yuna</string>
+    <string name="title_activity_main">Ilhas da Yuna</string>
+    <string name="package_name">cv.yuna.ilhas</string>
+    <string name="custom_url_scheme">cv.yuna.ilhas</string>
+</resources>
