@@ -110,12 +110,12 @@ const Wipe: React.FC = () => {
 };
 // Alternating transitions so the cuts don't all look the same
 const TRANSITIONS: { at: number; kind: "wipe" | "iris" | "bars"; cx?: number; cy?: number }[] = [
-  { at: 8.6, kind: "wipe" },
-  { at: 16.7, kind: "iris", cx: 1450, cy: 520 },
-  { at: 25.1, kind: "wipe" },
-  { at: 33.4, kind: "wipe" },
-  { at: 44.7, kind: "iris", cx: 440, cy: 530 },
-  { at: 53.75, kind: "bars" },
+  { at: 8.14, kind: "wipe" },
+  { at: 15.87, kind: "iris", cx: 1450, cy: 520 },
+  { at: 23.4, kind: "wipe" },
+  { at: 30.3, kind: "wipe" },
+  { at: 41.07, kind: "iris", cx: 440, cy: 530 },
+  { at: 49.8, kind: "bars" },
 ];
 
 // Soft translucent disc behind illustrations
@@ -147,18 +147,18 @@ const T: React.FC<{ d: number; size: number; box?: string; children: React.React
 const S1: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const pop = spring({ frame: frame - L(1.6, 0), fps, config: { damping: 12, mass: 0.7 } });
-  const count = Math.max(1, Math.min(15, Math.round(interpolate(frame, [L(1.6, 0), L(1.6, 0) + 12], [1, 15], clamp))));
+  const pop = spring({ frame: frame - L(1.59, 0), fps, config: { damping: 12, mass: 0.7 } });
+  const count = Math.max(1, Math.min(15, Math.round(interpolate(frame, [L(1.59, 0), L(1.59, 0) + 12], [1, 15], clamp))));
   return (
     <AbsoluteFill>
       <AbsoluteFill style={{ alignItems: "center", justifyContent: "center" }}>
-        <Kicker delay={L(0.2, 0)} size={54} align="center">
+        <Kicker delay={L(0.21, 0)} size={54} align="center">
           Eleição Presidencial
         </Kicker>
         <div style={{ height: 30 }} />
         <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 240, lineHeight: 0.9, color: W, transform: `scale(${0.6 + 0.4 * pop})`, opacity: pop > 0.01 ? 1 : 0 }}>{count}</div>
         <div style={{ height: 18 }} />
-        <T d={L(2.05, 0)} size={84} box={DEEP} align="center" spacing={6}>
+        <T d={L(2.06, 0)} size={84} box={DEEP} align="center" spacing={6}>
           Novembro
         </T>
       </AbsoluteFill>
@@ -168,44 +168,44 @@ const S1: React.FC = () => {
 
 // "Nenhum eleitor perde a possibilidade de votar por se encontrar internado ou preso"
 const S2: React.FC<{ start: number; opener: NonNullable<Spot3Props["opener"]> }> = ({ start, opener }) => {
-  const cues = { a: L(2.95, start), b: L(5.6, start), c: L(6.1, start), d: L(6.9, start) };
+  const cues = { a: L(2.98, start), b: L(5.73, start), c: L(6.29, start), d: L(6.97, start) };
   if (opener === "tipografia") return <KineticOpener cues={cues} />;
   return (
   <AbsoluteFill>
     {opener === "urna" && (
       <div style={{ position: "absolute", left: 250, top: 300 }}>
-        <VoteBox delay={L(2.95, start)} size={380} />
+        <VoteBox delay={L(2.98, start)} size={380} />
       </div>
     )}
     {opener === "multidao" && <CrowdOpener cues={cues} />}
     {opener === "aviao" && <PlaneOpener cues={cues} />}
     {opener === "cartao" && <CardOpener cues={cues} />}
-    <Sequence from={0} durationInFrames={L(5.6, start)} layout="none">
+    <Sequence from={0} durationInFrames={L(5.73, start)} layout="none">
       <Exit len={6}>
         <div style={{ position: "absolute", left: 760, top: 360 }}>
-          <Kicker delay={L(3.0, start)} size={60}>
+          <Kicker delay={L(3.03, start)} size={60}>
             Nenhum eleitor perde
           </Kicker>
           <div style={{ height: 22 }} />
-          <T d={L(4.25, start)} size={120}>
+          <T d={L(4.48, start)} size={120}>
             a possibilidade
           </T>
-          <T d={L(5.0, start)} size={150} box={RED}>
+          <T d={L(5.13, start)} size={150} box={RED}>
             de votar
           </T>
         </div>
       </Exit>
     </Sequence>
-    <Sequence from={L(5.6, start)} layout="none">
+    <Sequence from={L(5.73, start)} layout="none">
       <div style={{ position: "absolute", left: 760, top: 380 }}>
         <Kicker delay={0} size={60}>
           Por estar
         </Kicker>
         <div style={{ height: 18 }} />
-        <T d={L(6.1, start) - L(5.6, start)} size={140}>
+        <T d={L(6.29, start) - L(5.73, start)} size={140}>
           internado
         </T>
-        <T d={L(6.9, start) - L(5.6, start)} size={140} box={RED}>
+        <T d={L(6.97, start) - L(5.73, start)} size={140} box={RED}>
           ou preso
         </T>
       </div>
@@ -217,24 +217,24 @@ const S2: React.FC<{ start: number; opener: NonNullable<Spot3Props["opener"]> }>
 const S3: React.FC<{ start: number }> = ({ start }) => (
   <AbsoluteFill>
     <Halo x={640} y={620} size={940} />
-    <Art src="spot/doente.png" delay={L(8.65, start)} from="left" float={4} style={{ left: 90, top: 320, width: 1080 }} />
+    <Art src="spot/doente.png" delay={L(8.18, start)} from="left" float={4} style={{ left: 90, top: 320, width: 1080 }} />
     <div style={{ position: "absolute", left: 1170, top: 170 }}>
-      <HospitalIcon delay={L(9.0, start)} size={170} />
+      <HospitalIcon delay={L(8.39, start)} size={170} />
       <div style={{ height: 36 }} />
-      <Kicker delay={L(9.37, start)} size={56}>
+      <Kicker delay={L(8.74, start)} size={56}>
         Internados em
       </Kicker>
       <div style={{ height: 10 }} />
-      <T d={L(10.09, start)} size={120}>
+      <T d={L(9.52, start)} size={120}>
         hospitais
       </T>
-      <Underline delay={L(10.4, start)} width={220} align="left" />
+      <Underline delay={L(9.81, start)} width={220} align="left" />
       <div style={{ height: 26 }} />
-      <Kicker delay={L(10.95, start)} size={36}>
+      <Kicker delay={L(10.26, start)} size={36}>
         ou estabelecimentos
       </Kicker>
       <div style={{ height: 6 }} />
-      <Kicker delay={L(11.4, start)} size={36}>
+      <Kicker delay={L(10.69, start)} size={36}>
         equiparados
       </Kicker>
     </div>
@@ -244,20 +244,20 @@ const S3: React.FC<{ start: number }> = ({ start }) => (
 const S3b: React.FC<{ start: number }> = ({ start }) => (
   <AbsoluteFill style={{ alignItems: "center", justifyContent: "center" }}>
     <div style={{ display: "flex", alignItems: "center", gap: 90 }}>
-      <InstitutionIcon delay={L(12.75, start)} size={380} />
+      <InstitutionIcon delay={L(12.08, start)} size={380} />
       <div>
-        <Kicker delay={L(13.31, start)} size={54}>
+        <Kicker delay={L(12.58, start)} size={54}>
           Presos em
         </Kicker>
         <div style={{ height: 18 }} />
-        <T d={L(13.81, start)} size={96}>
+        <T d={L(13.1, start)} size={96}>
           estabelecimentos
         </T>
-        <T d={L(14.37, start)} size={110} box={DEEP}>
+        <T d={L(13.66, start)} size={110} box={DEEP}>
           prisionais
         </T>
         <div style={{ height: 26 }} />
-        <Kicker delay={L(15.43, start)} size={38}>
+        <Kicker delay={L(14.6, start)} size={38}>
           ou centros equiparados
         </Kicker>
       </div>
@@ -268,72 +268,72 @@ const S3b: React.FC<{ start: number }> = ({ start }) => (
 const S4: React.FC<{ start: number }> = ({ start }) => (
   <AbsoluteFill>
     <div style={{ position: "absolute", left: 150, top: 330 }}>
-      <Kicker delay={L(16.83, start)} size={58}>
+      <Kicker delay={L(16, start)} size={58}>
         Podem votar
       </Kicker>
       <div style={{ height: 14 }} />
-      <T d={L(17.59, start)} size={88} box={DEEP}>
+      <T d={L(16.72, start)} size={88} box={DEEP}>
         antecipadamente
       </T>
       <div style={{ height: 40 }} />
-      <Kicker delay={L(18.9, start)} size={40}>
+      <Kicker delay={L(18.03, start)} size={40}>
         de 2 a 5 de novembro
       </Kicker>
-      <Underline delay={L(20.9, start)} width={260} align="left" />
+      <Underline delay={L(19.65, start)} width={260} align="left" />
     </div>
     <div style={{ position: "absolute", left: 1220, top: 150, transform: "scale(0.88)", transformOrigin: "top left" }}>
-      <Calendar delay={L(16.9, start)} markAt={[19.45, 19.78, 20.1, 20.43].map((s) => L(s, start))} />
+      <Calendar delay={L(16.07, start)} markAt={[18.18, 18.74, 19.03, 19.26].map((s) => L(s, start))} />
     </div>
-    <Burst at={L(20.43, start) + 6} x={1560} y={380} size={90} />
+    <Burst at={L(19.26, start) + 6} x={1560} y={380} size={90} />
   </AbsoluteFill>
 );
 
 // "Para beneficiar dessa modalidade de voto" – its own beat, so the Câmara only arrives with "devem requerer"
 const S4b: React.FC<{ start: number }> = ({ start }) => (
   <AbsoluteFill style={{ alignItems: "center", justifyContent: "center" }}>
-    <Kicker delay={L(21.91, start)} size={60} align="center">
+    <Kicker delay={L(20.62, start)} size={60} align="center">
       Para beneficiar
     </Kicker>
     <div style={{ height: 20 }} />
-    <T d={L(22.95, start)} size={120} align="center">
+    <T d={L(21.35, start)} size={120} align="center">
       desta modalidade
     </T>
-    <T d={L(23.95, start)} size={150} box={RED} align="center">
+    <T d={L(22.22, start)} size={150} box={RED} align="center">
       de voto
     </T>
-    <Burst at={L(23.95, start) + 7} x={1290} y={690} size={120} />
+    <Burst at={L(22.22, start) + 7} x={1290} y={690} size={120} />
   </AbsoluteFill>
 );
 
 const S5: React.FC<{ start: number }> = ({ start }) => {
   const frame = useCurrentFrame();
-  const back = ease(frame, L(29.9, start), L(30.5, start), Easing.inOut(Easing.cubic));
+  const back = ease(frame, L(27.51, start), L(28.02, start), Easing.inOut(Easing.cubic));
   return (
     <AbsoluteFill>
       <AbsoluteFill style={{ transform: `scale(${1 - 0.07 * back})`, filter: back > 0 ? `blur(${7 * back}px) brightness(${1 - 0.22 * back})` : undefined }}>
         <Halo x={620} y={600} size={980} />
-        <Art src="spot/camara.png" delay={L(25.15, start)} from="scale" float={3} style={{ left: 60, top: 320, width: 1080 }} />
+        <Art src="spot/camara.png" delay={L(23.44, start)} from="scale" float={3} style={{ left: 60, top: 320, width: 1080 }} />
         <div style={{ position: "absolute", left: 1150, top: 200 }}>
-          <Kicker delay={L(25.25, start)} size={40}>
+          <Kicker delay={L(23.53, start)} size={40}>
             Requeira o voto
           </Kicker>
           <div style={{ height: 6 }} />
-          <Kicker delay={L(25.6, start)} size={40}>
+          <Kicker delay={L(23.84, start)} size={40}>
             antecipado
           </Kicker>
           <div style={{ height: 18 }} />
-          <T d={L(27.13, start)} size={84}>
+          <T d={L(25.04, start)} size={84}>
             na Câmara
           </T>
-          <T d={L(27.39, start)} size={92} box={DEEP}>
+          <T d={L(25.3, start)} size={92} box={DEEP}>
             Municipal
           </T>
           <div style={{ height: 22 }} />
-          <Kicker delay={L(28.05, start)} size={36}>
+          <Kicker delay={L(25.9, start)} size={36}>
             do concelho onde
           </Kicker>
           <div style={{ height: 6 }} />
-          <Kicker delay={L(28.4, start)} size={36}>
+          <Kicker delay={L(26.22, start)} size={36}>
             está recenseado
           </Kicker>
         </div>
@@ -342,22 +342,22 @@ const S5: React.FC<{ start: number }> = ({ start }) => {
       <AbsoluteFill style={{ alignItems: "center", justifyContent: "center" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 40 }}>
           <div style={{ transform: "scale(1.75)", margin: "0 110px" }}>
-            <DatePage delay={L(30.6, start)} day="26" month="OUT" />
+            <DatePage delay={L(28.09, start)} day="26" month="OUT" />
           </div>
           <div>
-            <Kicker delay={L(30.33, start)} size={64}>
+            <Kicker delay={L(27.88, start)} size={64}>
               até
             </Kicker>
-            <T d={L(30.99, start)} size={110}>
+            <T d={L(28.39, start)} size={110}>
               26 de
             </T>
-            <T d={L(32.03, start)} size={110} box={RED}>
+            <T d={L(29.24, start)} size={110} box={RED}>
               outubro
             </T>
           </div>
         </div>
       </AbsoluteFill>
-      <Burst at={L(30.6, start) + 8} x={700} y={330} size={160} />
+      <Burst at={L(28.09, start) + 8} x={700} y={330} size={160} />
     </AbsoluteFill>
   );
 };
@@ -383,61 +383,61 @@ const Phase: React.FC<{ until?: number; children: React.ReactNode }> = ({ until,
 // a sua disponibilização em tempo útil aos eleitores internados ou detidos"
 const S6: React.FC<{ start: number }> = ({ start }) => {
   const frame = useCurrentFrame();
-  const swap = ease(frame, L(38.0, start), L(38.3, start), Easing.in(Easing.cubic));
-  const B2 = L(38.17, start);
+  const swap = ease(frame, L(34.78, start), L(35.14, start), Easing.in(Easing.cubic));
+  const B2 = L(34.98, start);
   return (
     <Exit>
       <Halo x={600} y={620} size={920} />
       <AbsoluteFill style={{ opacity: 1 - swap, transform: `translateX(${-320 * swap}px)` }}>
         <Art src="spot/doente.png" delay={0} from="scale" style={{ left: -10, top: 440, width: 820 }} />
-        <Art src="spot/funcionario.png" delay={L(33.7, start)} from="right" float={3} style={{ left: 690, top: 250, height: 790 }} />
-        <Tag delay={L(34.0, start)} center={560} top={985}>
+        <Art src="spot/funcionario.png" delay={L(30.35, start)} from="right" float={3} style={{ left: 690, top: 250, height: 790 }} />
+        <Tag delay={L(30.53, start)} center={560} top={985}>
           HOSPITAIS
         </Tag>
       </AbsoluteFill>
-      <Art src="spot/apoio_recluso.png" delay={L(38.32, start)} from="bottom" float={3} style={{ left: 250, top: 200, height: 770 }} />
-      <Tag delay={L(38.75, start)} center={520} top={990}>
+      <Art src="spot/apoio_recluso.png" delay={L(35.16, start)} from="bottom" float={3} style={{ left: 250, top: 200, height: 770 }} />
+      <Tag delay={L(35.65, start)} center={520} top={990}>
         ESTABELECIMENTOS PRISIONAIS
       </Tag>
       <div style={{ position: "absolute", left: 1180, top: 300 }}>
         <Phase until={B2}>
-          <Kicker delay={L(33.85, start)} size={40}>
+          <Kicker delay={L(30.38, start)} size={40}>
             Solicite
           </Kicker>
           <div style={{ height: 6 }} />
-          <Kicker delay={L(34.2, start)} size={40}>
+          <Kicker delay={L(30.73, start)} size={40}>
             o formulário
           </Kicker>
           <div style={{ height: 10 }} />
-          <T d={L(36.03, start)} size={78}>
+          <T d={L(32.48, start)} size={78}>
             ao diretor
           </T>
           <div style={{ height: 18 }} />
-          <Kicker delay={L(36.63, start)} size={40}>
+          <Kicker delay={L(33.2, start)} size={40}>
             do respetivo
           </Kicker>
           <div style={{ height: 8 }} />
-          <T d={L(37.13, start)} size={60} box={DEEP}>
+          <T d={L(33.74, start)} size={60} box={DEEP}>
             estabelecimento
           </T>
         </Phase>
         <Phase>
-          <Kicker delay={L(39.43, start)} size={40}>
+          <Kicker delay={L(36.14, start)} size={40}>
             Disponível
           </Kicker>
           <div style={{ height: 10 }} />
-          <T d={L(40.89, start)} size={78}>
+          <T d={L(37.42, start)} size={78}>
             em tempo útil
           </T>
           <div style={{ height: 18 }} />
-          <Kicker delay={L(41.97, start)} size={40}>
+          <Kicker delay={L(38.58, start)} size={40}>
             aos eleitores
           </Kicker>
           <div style={{ height: 8 }} />
-          <T d={L(42.4, start)} size={60} box={DEEP}>
+          <T d={L(39.03, start)} size={60} box={DEEP}>
             internados
           </T>
-          <T d={L(43.55, start)} size={60} box={RED}>
+          <T d={L(39.94, start)} size={60} box={RED}>
             ou detidos
           </T>
         </Phase>
@@ -449,27 +449,27 @@ const S6: React.FC<{ start: number }> = ({ start }) => {
 // Free line: a handset badge on the left, the number flips in tile by tile on the right
 const S8: React.FC<{ start: number }> = ({ start }) => {
   const frame = useCurrentFrame();
-  const pill = ease(frame, L(45.2, start), L(45.2, start) + 10, Easing.out(Easing.cubic));
+  const pill = ease(frame, L(41.44, start), L(41.44, start) + 10, Easing.out(Easing.cubic));
   return (
     <AbsoluteFill>
       <div style={{ position: "absolute", left: 230, top: 320 }}>
-        <Handset delay={L(44.85, start)} size={420} />
+        <Handset delay={L(41.21, start)} size={420} />
       </div>
       <div style={{ position: "absolute", left: 860, top: 300 }}>
         <div style={{ display: "inline-block", background: "#1FA34A", borderRadius: 40, padding: "12px 30px", clipPath: `inset(0 ${100 - pill * 100}% 0 0 round 40px)`, visibility: pill <= 0 ? "hidden" : "visible" }}>
           <span style={{ fontFamily: SANS, fontWeight: 500, fontSize: 34, color: W, letterSpacing: "0.2em" }}>LINHA VERDE GRATUITA</span>
         </div>
         <div style={{ display: "flex", gap: 30, marginTop: 34 }}>
-          <FlipGroup text="800" at={L(47.7, start)} size={150} />
-          <FlipGroup text="10" at={L(48.1, start)} size={150} />
-          <FlipGroup text="14" at={L(48.5, start)} size={150} />
+          <FlipGroup text="800" at={L(43.69, start)} size={150} />
+          <FlipGroup text="10" at={L(44.12, start)} size={150} />
+          <FlipGroup text="14" at={L(44.6, start)} size={150} />
         </div>
         <div style={{ height: 34 }} />
-        <Kicker delay={L(46.3, start)} size={42}>
+        <Kicker delay={L(42.6, start)} size={42}>
           Ligue gratuitamente
         </Kicker>
       </div>
-      <Burst at={L(48.5, start) + 10} x={1622} y={500} size={130} />
+      <Burst at={L(44.6, start) + 10} x={1622} y={500} size={130} />
     </AbsoluteFill>
   );
 };
@@ -508,30 +508,30 @@ const ParticipaPill: React.FC<{ delay: number }> = ({ delay }) => {
 const S9: React.FC<{ start: number }> = ({ start }) => (
   <AbsoluteFill>
     <Halo x={560} y={640} size={900} />
-    <Art src="spot/idoso.png" delay={L(49.85, start)} from="left" style={{ left: 120, top: 220, height: 860 }} />
+    <Art src="spot/idoso.png" delay={L(46.12, start)} from="left" style={{ left: 120, top: 220, height: 860 }} />
     <div style={{ position: "absolute", left: 980, top: 170 }}>
-      <Kicker delay={L(49.94, start)} size={64}>
+      <Kicker delay={L(46.14, start)} size={64}>
         Cada voto
       </Kicker>
       <div style={{ height: 6 }} />
-      <T d={L(50.6, start)} size={150}>
+      <T d={L(46.48, start)} size={150}>
         conta.
       </T>
       <div style={{ height: 26 }} />
-      <T d={L(51.39, start)} size={78} box={DEEP}>
+      <T d={L(47.3, start)} size={78} box={DEEP}>
         O teu também.
       </T>
       <div style={{ height: 46 }} />
-      <ParticipaPill delay={L(52.57, start)} />
+      <ParticipaPill delay={L(48.62, start)} />
     </div>
-    <Burst at={L(52.57, start) + 7} x={1030} y={632} size={120} />
+    <Burst at={L(48.62, start) + 7} x={1030} y={632} size={120} />
   </AbsoluteFill>
 );
 
 // CNE logo in the corner, as in the reference spot
 const Bug: React.FC<{ logos: "cor" | "mono" }> = ({ logos }) => {
   const frame = useCurrentFrame();
-  const o = interpolate(frame, [sec(0.3), sec(0.9), sec(49.65), sec(49.85)], [0, 1, 1, 0], clamp);
+  const o = interpolate(frame, [sec(0.29), sec(0.89), sec(45.95), sec(46.15)], [0, 1, 1, 0], clamp);
   const mono = logos === "mono";
   return (
     <AbsoluteFill style={{ opacity: o }}>
@@ -541,46 +541,46 @@ const Bug: React.FC<{ logos: "cor" | "mono" }> = ({ logos }) => {
   );
 };
 
-export const SPOT3_DURATION = sec(59.3);
+export const SPOT3_DURATION = sec(55.35);
 
 export const Spot3: React.FC<Spot3Props> = ({ variant, logos = "mono", opener = "multidao" }) => {
   const withBg = variant === "cor";
   return (
     <BgCtx.Provider value={withBg}>
       <AbsoluteFill>
-        <Scene from={0} to={2.9} name="01 15 de Novembro" bg={TEAL} cam={{ exit: { kind: "zoomIn", ox: 960, oy: 540, len: 9 } }}>
+        <Scene from={0} to={2.93} name="01 15 de Novembro" bg={TEAL} cam={{ exit: { kind: "zoomIn", ox: 960, oy: 540, len: 9 } }}>
           <S1 />
         </Scene>
-        <Scene from={2.9} to={8.6} name="02 Nenhum eleitor perde a possibilidade de votar" bg={OCEAN} cam={{ enter: { len: 12 } }}>
-          <S2 start={2.9} opener={opener} />
+        <Scene from={2.93} to={8.14} name="02 Nenhum eleitor perde a possibilidade de votar" bg={OCEAN} cam={{ enter: { len: 12 } }}>
+          <S2 start={2.93} opener={opener} />
         </Scene>
         {/* the prison scene sits underneath while the hospital recedes (zoom out) */}
-        <Scene from={12.1} to={16.7} name="03b Estabelecimentos prisionais" bg={OCEAN} cam={{ enter: { len: 14 }, push: true }}>
-          <S3b start={12.1} />
+        <Scene from={11.42} to={15.87} name="03b Estabelecimentos prisionais" bg={OCEAN} cam={{ enter: { len: 14 }, push: true }}>
+          <S3b start={11.42} />
         </Scene>
-        <Scene from={8.6} to={12.55} name="03 Hospitais" bg={TEAL} cam={{ exit: { kind: "zoomOut", len: 13 }, push: true }}>
-          <S3 start={8.6} />
+        <Scene from={8.14} to={11.89} name="03 Hospitais" bg={TEAL} cam={{ exit: { kind: "zoomOut", len: 13 }, push: true }}>
+          <S3 start={8.14} />
         </Scene>
         {/* the Câmara scene sits underneath while the calendar recedes (zoom out) */}
-        <Scene from={21.3} to={25.1} name="04b Para beneficiar desta modalidade de voto" bg={OCEAN} cam={{ enter: { len: 14 } }}>
-          <S4b start={21.3} />
+        <Scene from={20.03} to={23.4} name="04b Para beneficiar desta modalidade de voto" bg={OCEAN} cam={{ enter: { len: 14 } }}>
+          <S4b start={20.03} />
         </Scene>
-        <Scene from={25.1} to={33.4} name="05 Camara Municipal ate 26 out" bg={BRIGHT} cam={{ enter: { len: 12 } }}>
-          <S5 start={25.1} />
+        <Scene from={23.4} to={30.3} name="05 Camara Municipal ate 26 out" bg={BRIGHT} cam={{ enter: { len: 12 } }}>
+          <S5 start={23.4} />
         </Scene>
-        <Scene from={16.7} to={21.7} name="04 Calendario 2-5 Nov" bg={TEAL} cam={{ exit: { kind: "zoomOut", len: 13 } }}>
-          <S4 start={16.7} />
+        <Scene from={15.87} to={20.42} name="04 Calendario 2-5 Nov" bg={TEAL} cam={{ exit: { kind: "zoomOut", len: 13 } }}>
+          <S4 start={15.87} />
         </Scene>
-        <Scene from={33.4} to={44.7} name="06 Formulario com o diretor" bg={TEAL} cam={{ push: true }}>
-          <S6 start={33.4} />
+        <Scene from={30.3} to={41.07} name="06 Formulario com o diretor" bg={TEAL} cam={{ push: true }}>
+          <S6 start={30.3} />
         </Scene>
-        <Scene from={44.7} to={49.8} name="08 Linha gratuita" bg={TEAL} cam={{ exit: { kind: "zoomIn", ox: 440, oy: 690, len: 9 } }}>
-          <S8 start={44.7} />
+        <Scene from={41.07} to={46.11} name="08 Linha gratuita" bg={TEAL} cam={{ exit: { kind: "zoomIn", ox: 440, oy: 690, len: 9 } }}>
+          <S8 start={41.07} />
         </Scene>
-        <Scene from={49.8} to={53.75} name="09 Cada voto conta. O teu também. Participa!" bg={TEAL} cam={{ enter: { flash: true, len: 14 } }}>
-          <S9 start={49.8} />
+        <Scene from={46.11} to={49.8} name="09 Cada voto conta. O teu também. Participa!" bg={TEAL} cam={{ enter: { flash: true, len: 14 } }}>
+          <S9 start={46.11} />
         </Scene>
-        <Sequence from={sec(53.75)} name="10 Logo final">
+        <Sequence from={sec(49.8)} name="10 Logo final">
           {withBg && <AbsoluteFill style={{ background: LIGHT }} />}
           <LogoAnim variant="cor" />
         </Sequence>
@@ -593,7 +593,9 @@ export const Spot3: React.FC<Spot3Props> = ({ variant, logos = "mono", opener = 
           </Sequence>
         ))}
 
-        <Audio src={staticFile("spot/vo_presos.mp3")} trimBefore={sec(OFF)} />
+        <Sequence from={sec(0.2)} layout="none">
+          <Audio src={staticFile("spot/vo_presos_v2.mp3")} />
+        </Sequence>
       </AbsoluteFill>
     </BgCtx.Provider>
   );
