@@ -113,7 +113,7 @@ const TRANSITIONS: { at: number; kind: "wipe" | "iris" | "bars"; cx?: number; cy
   { at: 6.1, kind: "wipe" },
   { at: 23.7, kind: "bars" },
   { at: 38.3, kind: "wipe" },
-  { at: 52.9, kind: "iris", cx: 440, cy: 530 },
+  { at: 53.4, kind: "iris", cx: 440, cy: 530 },
   { at: 62.3, kind: "bars" },
 ]
 
@@ -441,11 +441,11 @@ const S7: React.FC<{ start: number }> = ({ start }) => (
 );
 
 // Web address written big, revealed left to right
-const Url: React.FC<{ delay: number; text: string }> = ({ delay, text }) => {
+const Url: React.FC<{ delay: number; text: string; size?: number }> = ({ delay, text, size = 104 }) => {
   const frame = useCurrentFrame();
   const p = ease(frame, delay, delay + 12, Easing.out(Easing.cubic));
   return (
-    <div style={{ clipPath: `inset(0 ${100 - p * 100}% 0 0)`, visibility: p <= 0 ? "hidden" : "visible", fontFamily: SANS, fontWeight: 800, fontSize: 104, color: W, letterSpacing: -1, whiteSpace: "nowrap" }}>{text}</div>
+    <div style={{ clipPath: `inset(0 ${100 - p * 100}% 0 0)`, visibility: p <= 0 ? "hidden" : "visible", fontFamily: SANS, fontWeight: 800, fontSize: size, color: W, letterSpacing: -1, whiteSpace: "nowrap" }}>{text}</div>
   );
 };
 
@@ -457,10 +457,10 @@ const S8: React.FC<{ start: number }> = ({ start }) => (
         Obtenha o formulário
       </Kicker>
       <div style={{ height: 18 }} />
-      <Url delay={L(51.43, start)} text="www.cne.cv" />
+      <Url delay={L(51.2, start)} text="www.cne.cv" size={88} />
       <div style={{ height: 10 }} />
-      <Url delay={L(52.21, start)} text="www.dgape.cv" />
-      <Underline delay={L(52.5, start)} width={240} align="left" />
+      <Url delay={L(51.85, start)} text="www.dgape.cv" size={88} />
+      <Underline delay={L(52.4, start)} width={240} align="left" />
     </div>
     <div style={{ position: "absolute", left: 870, top: 160 }}>
       <BrowserWindow delay={L(47.6, start)} typeAt={L(49.6, start)} loadAt={L(51.3, start)} width={700} url="www.cne.cv" screen="spot/cne_site.png" />
@@ -471,11 +471,11 @@ const S8: React.FC<{ start: number }> = ({ start }) => (
 // Free line: a handset badge on the left, the number flips in tile by tile on the right
 const S9: React.FC<{ start: number }> = ({ start }) => {
   const frame = useCurrentFrame();
-  const pill = ease(frame, L(53.4, start), L(53.4, start) + 10, Easing.out(Easing.cubic));
+  const pill = ease(frame, L(53.7, start), L(53.7, start) + 10, Easing.out(Easing.cubic));
   return (
     <AbsoluteFill>
       <div style={{ position: "absolute", left: 230, top: 320 }}>
-        <Handset delay={L(53.1, start)} size={420} />
+        <Handset delay={L(53.45, start)} size={420} />
       </div>
       <div style={{ position: "absolute", left: 860, top: 300 }}>
         <div style={{ display: "inline-block", background: RED, borderRadius: 40, padding: "12px 30px", clipPath: `inset(0 ${100 - pill * 100}% 0 0 round 40px)`, visibility: pill <= 0 ? "hidden" : "visible" }}>
@@ -600,11 +600,11 @@ export const Spot4: React.FC<Spot4Props> = ({ variant, logos = "mono" }) => {
         <Scene from={38.3} to={47.3} name="07 Formulario disponivel" bg={TEAL} cam={{ push: true, exit: { kind: "zoomIn", ox: 440, oy: 560, len: 10 } }}>
           <S7 start={38.3} />
         </Scene>
-        <Scene from={47.3} to={52.9} name="08 Sites CNE e DGAPE" bg={OCEAN} cam={{ enter: { flash: true, len: 14 } }}>
+        <Scene from={47.3} to={53.4} name="08 Sites CNE e DGAPE" bg={OCEAN} cam={{ enter: { flash: true, len: 14 } }}>
           <S8 start={47.3} />
         </Scene>
-        <Scene from={52.9} to={58.35} name="09 Linha gratuita" bg={TEAL} cam={{ exit: { kind: "zoomIn", ox: 440, oy: 690, len: 9 } }}>
-          <S9 start={52.9} />
+        <Scene from={53.4} to={58.35} name="09 Linha gratuita" bg={TEAL} cam={{ exit: { kind: "zoomIn", ox: 440, oy: 690, len: 9 } }}>
+          <S9 start={53.4} />
         </Scene>
         <Scene from={58.35} to={62.3} name="10 Cada voto conta. O teu também. Participa!" bg={TEAL} cam={{ enter: { flash: true, len: 14 } }}>
           <S10 start={58.35} />
