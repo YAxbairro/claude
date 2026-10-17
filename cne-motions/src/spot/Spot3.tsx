@@ -6,11 +6,12 @@ import { Art, Line, RED, Underline, ease, sec, useExit } from "./kit";
 import { VoteBox, Calendar, DatePage, HospitalIcon, InstitutionIcon } from "./vectors";
 import { BRIGHT, DEEP, Kicker, LIGHT, OCEAN, TEAL } from "./devices";
 import { Bars, BgTexture, Burst, FlipGroup, Handset, Iris } from "./fx";
+import { CardOpener, CrowdOpener, KineticOpener, PlaneOpener } from "./openers";
 
 // Spot "Voto antecipado – doentes internados e presos" (new voice-over, Oct 2026).
 // Same look and devices as Spot2; all cue times below are seconds of the trimmed voice-over
 // (the original file starts with a title read by mistake, cut at OFF).
-export type Spot3Props = { variant: "cor" | "alpha"; logos?: "cor" | "mono" };
+export type Spot3Props = { variant: "cor" | "alpha"; logos?: "cor" | "mono"; opener?: "urna" | "multidao" | "aviao" | "tipografia" | "cartao" };
 const OFF = 3.55;
 
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
@@ -166,11 +167,19 @@ const S1: React.FC = () => {
 };
 
 // "Nenhum eleitor perde a possibilidade de votar por se encontrar internado ou preso"
-const S2: React.FC<{ start: number }> = ({ start }) => (
+const S2: React.FC<{ start: number; opener: NonNullable<Spot3Props["opener"]> }> = ({ start, opener }) => {
+  const cues = { a: L(2.95, start), b: L(5.6, start), c: L(6.1, start), d: L(6.9, start) };
+  if (opener === "tipografia") return <KineticOpener cues={cues} />;
+  return (
   <AbsoluteFill>
-    <div style={{ position: "absolute", left: 250, top: 300 }}>
-      <VoteBox delay={L(2.95, start)} size={380} />
-    </div>
+    {opener === "urna" && (
+      <div style={{ position: "absolute", left: 250, top: 300 }}>
+        <VoteBox delay={L(2.95, start)} size={380} />
+      </div>
+    )}
+    {opener === "multidao" && <CrowdOpener cues={cues} />}
+    {opener === "aviao" && <PlaneOpener cues={cues} />}
+    {opener === "cartao" && <CardOpener cues={cues} />}
     <Sequence from={0} durationInFrames={L(5.6, start)} layout="none">
       <Exit len={6}>
         <div style={{ position: "absolute", left: 760, top: 360 }}>
@@ -202,7 +211,8 @@ const S2: React.FC<{ start: number }> = ({ start }) => (
       </div>
     </Sequence>
   </AbsoluteFill>
-);
+  );
+};
 
 const S3: React.FC<{ start: number }> = ({ start }) => (
   <AbsoluteFill>
@@ -533,7 +543,7 @@ const Bug: React.FC<{ logos: "cor" | "mono" }> = ({ logos }) => {
 
 export const SPOT3_DURATION = sec(59.3);
 
-export const Spot3: React.FC<Spot3Props> = ({ variant, logos = "mono" }) => {
+export const Spot3: React.FC<Spot3Props> = ({ variant, logos = "mono", opener = "urna" }) => {
   const withBg = variant === "cor";
   return (
     <BgCtx.Provider value={withBg}>
@@ -542,7 +552,7 @@ export const Spot3: React.FC<Spot3Props> = ({ variant, logos = "mono" }) => {
           <S1 />
         </Scene>
         <Scene from={2.9} to={8.6} name="02 Nenhum eleitor perde a possibilidade de votar" bg={OCEAN} cam={{ enter: { len: 12 } }}>
-          <S2 start={2.9} />
+          <S2 start={2.9} opener={opener} />
         </Scene>
         {/* the prison scene sits underneath while the hospital recedes (zoom out) */}
         <Scene from={12.1} to={16.7} name="03b Estabelecimentos prisionais" bg={OCEAN} cam={{ enter: { len: 14 }, push: true }}>
