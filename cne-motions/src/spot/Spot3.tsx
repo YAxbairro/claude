@@ -342,14 +342,14 @@ const S5: React.FC<{ start: number }> = ({ start }) => {
       <AbsoluteFill style={{ alignItems: "center", justifyContent: "center" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 40 }}>
           <div style={{ transform: "scale(1.75)", margin: "0 110px" }}>
-            <DatePage delay={L(30.6, start)} day="29" month="OUT" />
+            <DatePage delay={L(30.6, start)} day="26" month="OUT" />
           </div>
           <div>
             <Kicker delay={L(30.33, start)} size={64}>
               até
             </Kicker>
             <T d={L(30.99, start)} size={110}>
-              29 de
+              26 de
             </T>
             <T d={L(32.03, start)} size={110} box={RED}>
               outubro
@@ -565,7 +565,7 @@ export const Spot3: React.FC<Spot3Props> = ({ variant, logos = "mono", opener = 
         <Scene from={21.3} to={25.1} name="04b Para beneficiar desta modalidade de voto" bg={OCEAN} cam={{ enter: { len: 14 } }}>
           <S4b start={21.3} />
         </Scene>
-        <Scene from={25.1} to={33.4} name="05 Camara Municipal ate 29 out" bg={BRIGHT} cam={{ enter: { len: 12 } }}>
+        <Scene from={25.1} to={33.4} name="05 Camara Municipal ate 26 out" bg={BRIGHT} cam={{ enter: { len: 12 } }}>
           <S5 start={25.1} />
         </Scene>
         <Scene from={16.7} to={21.7} name="04 Calendario 2-5 Nov" bg={TEAL} cam={{ exit: { kind: "zoomOut", len: 13 } }}>
