@@ -543,7 +543,7 @@ const Bug: React.FC<{ logos: "cor" | "mono" }> = ({ logos }) => {
 
 export const SPOT3_DURATION = sec(59.3);
 
-export const Spot3: React.FC<Spot3Props> = ({ variant, logos = "mono", opener = "urna" }) => {
+export const Spot3: React.FC<Spot3Props> = ({ variant, logos = "mono", opener = "multidao" }) => {
   const withBg = variant === "cor";
   return (
     <BgCtx.Provider value={withBg}>
