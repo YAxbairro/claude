@@ -478,7 +478,7 @@ const S9: React.FC<{ start: number }> = ({ start }) => {
         <Handset delay={L(53.45, start)} size={420} />
       </div>
       <div style={{ position: "absolute", left: 860, top: 300 }}>
-        <div style={{ display: "inline-block", background: RED, borderRadius: 40, padding: "12px 30px", clipPath: `inset(0 ${100 - pill * 100}% 0 0 round 40px)`, visibility: pill <= 0 ? "hidden" : "visible" }}>
+        <div style={{ display: "inline-block", background: "#1FA34A", borderRadius: 40, padding: "12px 30px", clipPath: `inset(0 ${100 - pill * 100}% 0 0 round 40px)`, visibility: pill <= 0 ? "hidden" : "visible" }}>
           <span style={{ fontFamily: SANS, fontWeight: 500, fontSize: 34, color: W, letterSpacing: "0.2em" }}>LINHA VERDE GRATUITA</span>
         </div>
         <div style={{ display: "flex", gap: 30, marginTop: 34 }}>
