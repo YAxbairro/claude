@@ -6,6 +6,7 @@ import { Capa } from "./ep2/Capa";
 import { EP2_DURATION, Overlay2 } from "./ep2/Overlay2";
 import { EP3_DURATION, Overlay3 } from "./ep3/Overlay3";
 import { EP5_DURATION, Overlay5 } from "./ep5/Overlay5";
+import { DECRETO_DURATION, Decreto } from "./ep5/Decreto";
 import { SPOT_DURATION, Spot } from "./spot/Spot";
 import { SPOT2_DURATION, Spot2 } from "./spot/Spot2";
 import { FINALS_DURATION, FinalsReel } from "./spot/Finals";
@@ -34,6 +35,7 @@ export const RemotionRoot: React.FC = () => (
     />
     <Composition id="CapaConstituicao" component={Capa} durationInFrames={1} fps={FPS} width={1300} height={1700} />
     <Composition id="CneExplicaEp3" component={Overlay3} durationInFrames={EP3_DURATION} fps={FPS} width={1920} height={1080} />
+    <Composition id="EpEleicaoPR-Decreto" component={Decreto} durationInFrames={DECRETO_DURATION} fps={FPS} width={1920} height={1080} />
     <Composition id="CneExplicaEp5" component={Overlay5} durationInFrames={EP5_DURATION} fps={FPS} width={1920} height={1080} />
     <Composition id="CneExplicaEp2" component={Overlay2} durationInFrames={EP2_DURATION} fps={FPS} width={1920} height={1080} />
     {(["cor", "branco"] as const).map((variant) => (
