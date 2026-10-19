@@ -91,7 +91,9 @@ const Ballot: React.FC<{
   marks?: { row: number; at: number }[];
   // voto nulo by writing/drawing on the sheet: a hand-drawn squiggle and a doodle
   scribble?: [number, number];
-}> = ({ width, enterAt = 0, label, marks = [], scribble }) => {
+  // "marque uma cruz": a magnifier shows a single square being crossed, detached from any row (as in Ep. 4)
+  zoom?: { at: number; markAt: number };
+}> = ({ width, enterAt = 0, label, marks = [], scribble, zoom }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const p = spring({ frame: frame - enterAt, fps, config: { damping: 14, mass: 0.7 } });
@@ -102,6 +104,9 @@ const Ballot: React.FC<{
   const lab = label ? spring({ frame: frame - label.at, fps, config: { damping: 11, mass: 0.6 } }) : 0;
   const sc1 = scribble ? ramp(frame, scribble[0], 16) : 0;
   const sc2 = scribble ? ramp(frame, scribble[1], 14) : 0;
+  const lens = zoom ? spring({ frame: frame - zoom.at, fps, config: { damping: 12, mass: 0.6 } }) : 0;
+  const mark = zoom ? ramp(frame, zoom.markAt, 12) : 0;
+  const L = width * 0.62;
   return (
     <div style={{ position: "relative", width, transform: `translateY(${(1 - p) * 120}px) rotate(${(1 - p) * 8 + 2}deg)`, opacity: interpolate(p, [0, 0.3], [0, 1], clamp), visibility: p < 0.01 ? "hidden" : "visible" }}>
       <svg width={width} height={(width * H) / W} viewBox={`0 0 ${W} ${H}`} style={{ filter: "drop-shadow(0 16px 30px rgba(0,0,0,0.35))", overflow: "visible" }}>
@@ -129,6 +134,16 @@ const Ballot: React.FC<{
           </g>
         )}
       </svg>
+      {zoom && (
+        <div style={{ position: "absolute", left: -L * 0.55, bottom: -L * 0.35, width: L, height: L, transform: `scale(${lens})`, visibility: lens < 0.01 ? "hidden" : "visible" }}>
+          <svg width={L} height={L} viewBox="0 0 200 200" style={{ overflow: "visible", filter: "drop-shadow(0 10px 22px rgba(0,0,0,0.35))" }}>
+            <line x1="168" y1="168" x2="212" y2="212" stroke={NAVY} strokeWidth="16" strokeLinecap="round" />
+            <circle cx="100" cy="100" r="92" fill="#FBFAF6" stroke={NAVY} strokeWidth="10" />
+            <rect x="58" y="58" width="84" height="84" rx="8" fill="#fff" stroke={NAVY} strokeWidth="7" />
+            <Cross x={100} y={100} s={28} draw={mark} />
+          </svg>
+        </div>
+      )}
       {label && (
         <div style={{ position: "absolute", left: "50%", bottom: -34, transform: `translateX(-50%) scale(${lab})`, visibility: lab < 0.01 ? "hidden" : "visible", background: RED, padding: "8px 20px", whiteSpace: "nowrap" }}>
           <span style={{ fontFamily: SANS, fontWeight: 900, fontSize: 28, color: WHITE }}>{label.text}</span>
@@ -308,7 +323,7 @@ export const Overlay5: React.FC = () => (
         <Note delay={at(41.74, 35.2)}>Escolha clara</Note>
         <Note delay={at(42.88, 35.2)}>e sem dúvida</Note>
         <div style={{ marginTop: 34, marginRight: 40 }}>
-          <Ballot width={230} enterAt={at(47.86, 35.2)} marks={[{ row: 2, at: at(49.32, 35.2) }]} label={{ text: "VÁLIDO", at: at(54.32, 35.2) }} />
+          <Ballot width={230} enterAt={at(47.86, 35.2)} zoom={{ at: at(48.84, 35.2), markAt: at(49.32, 35.2) }} label={{ text: "VÁLIDO", at: at(54.32, 35.2) }} />
         </div>
       </TypeCard>
     </Seg>
