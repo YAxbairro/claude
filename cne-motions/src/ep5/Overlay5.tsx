@@ -93,7 +93,9 @@ const Ballot: React.FC<{
   scribble?: [number, number];
   // "marque uma cruz": a magnifier shows a single square being crossed, detached from any row (as in Ep. 4)
   zoom?: { at: number; markAt: number };
-}> = ({ width, enterAt = 0, label, marks = [], scribble, zoom }) => {
+  // voto nulo: crossed squares beside the sheet, stacked, never on a candidate row (as in Ep. 4)
+  sideMarks?: number[];
+}> = ({ width, enterAt = 0, label, marks = [], scribble, zoom, sideMarks = [] }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const p = spring({ frame: frame - enterAt, fps, config: { damping: 14, mass: 0.7 } });
@@ -134,6 +136,18 @@ const Ballot: React.FC<{
           </g>
         )}
       </svg>
+      {sideMarks.map((m, i) => {
+        const S = width * 0.36;
+        const pop = spring({ frame: frame - (m - 6), fps, config: { damping: 12, mass: 0.6 } });
+        return (
+          <div key={i} style={{ position: "absolute", left: -S * 0.55, top: ((width * H) / W) * 0.3 + i * (S + 14), width: S, height: S, transform: `scale(${pop})`, visibility: pop < 0.01 ? "hidden" : "visible" }}>
+            <svg width={S} height={S} viewBox="0 0 100 100" style={{ overflow: "visible", filter: "drop-shadow(0 8px 16px rgba(0,0,0,0.3))" }}>
+              <rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke={NAVY} strokeWidth="7" />
+              <Cross x={50} y={50} s={26} draw={ramp(frame, m, 10)} />
+            </svg>
+          </div>
+        );
+      })}
       {zoom && (
         <div style={{ position: "absolute", left: -L * 0.55, bottom: -L * 0.35, width: L, height: L, transform: `scale(${lens})`, visibility: lens < 0.01 ? "hidden" : "visible" }}>
           <svg width={L} height={L} viewBox="0 0 200 200" style={{ overflow: "visible", filter: "drop-shadow(0 10px 22px rgba(0,0,0,0.35))" }}>
@@ -348,11 +362,7 @@ export const Overlay5: React.FC = () => (
           <Ballot
             width={230}
             enterAt={at(71.12, 66.8)}
-            marks={[
-              { row: 1, at: at(74.78, 66.8) },
-              { row: 4, at: at(75.12, 66.8) },
-            ]}
-            scribble={[at(78.48, 66.8), at(79.18, 66.8)]}
+            sideMarks={[at(74.78, 66.8), at(75.12, 66.8)]}
             label={{ text: "NULO", at: at(81.0, 66.8) }}
           />
         </div>
