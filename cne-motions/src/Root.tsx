@@ -9,6 +9,7 @@ import { EP5_DURATION, Overlay5 } from "./ep5/Overlay5";
 import { DECRETO_DURATION, Decreto } from "./ep5/Decreto";
 import { EPPR_DURATION, OverlayPR } from "./ep5/OverlayPR";
 import { INTRO_FRAMES, IntroCNE } from "./ep5/IntroCNE";
+import { INTRO_ALPHA_FRAMES, IntroCNEAlpha } from "./ep5/IntroCNEAlpha";
 import { SPOT_DURATION, Spot } from "./spot/Spot";
 import { SPOT2_DURATION, Spot2 } from "./spot/Spot2";
 import { FINALS_DURATION, FinalsReel } from "./spot/Finals";
@@ -37,6 +38,8 @@ export const RemotionRoot: React.FC = () => (
     />
     <Composition id="CapaConstituicao" component={Capa} durationInFrames={1} fps={FPS} width={1300} height={1700} />
     <Composition id="CneExplicaEp3" component={Overlay3} durationInFrames={EP3_DURATION} fps={FPS} width={1920} height={1080} />
+    <Composition id="IntroCneExplica-4K-alpha" component={IntroCNEAlpha} durationInFrames={INTRO_ALPHA_FRAMES} fps={FPS} width={3840} height={2160} defaultProps={{ scale: 2 }} />
+    <Composition id="IntroCneExplica-HD-alpha" component={IntroCNEAlpha} durationInFrames={INTRO_ALPHA_FRAMES} fps={FPS} width={1920} height={1080} defaultProps={{ scale: 1 }} />
     <Composition id="IntroCneExplica" component={IntroCNE} durationInFrames={INTRO_FRAMES} fps={FPS} width={1920} height={1080} />
     <Composition id="CneExplicaEleicaoPR" component={OverlayPR} durationInFrames={EPPR_DURATION} fps={FPS} width={1920} height={1080} />
     <Composition id="EpEleicaoPR-Decreto" component={Decreto} durationInFrames={DECRETO_DURATION} fps={FPS} width={1920} height={1080} />
