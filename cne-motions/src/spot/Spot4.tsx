@@ -331,12 +331,12 @@ const S5: React.FC<{ start: number }> = ({ start }) => (
       </T>
       <div style={{ height: 40 }} />
       <Kicker delay={L(26.3, start)} size={40}>
-        de 8 a 9 de novembro
+        de 8 a 10 de novembro
       </Kicker>
       <Underline delay={L(28.3, start)} width={260} align="left" />
     </div>
     <div style={{ position: "absolute", left: 1220, top: 150, transform: "scale(0.88)", transformOrigin: "top left" }}>
-      <Calendar delay={L(23.9, start)} days={[8, 9]} markAt={[27.01, 27.81].map((s) => L(s, start))} />
+      <Calendar delay={L(23.9, start)} days={[8, 9, 10]} markAt={[27.01, 27.41, 27.81].map((s) => L(s, start))} />
     </div>
     <Burst at={L(27.81, start) + 6} x={1365} y={410} size={90} />
   </AbsoluteFill>
