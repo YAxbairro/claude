@@ -363,6 +363,7 @@ export const Overlay5: React.FC = () => (
             width={230}
             enterAt={at(71.12, 66.8)}
             sideMarks={[at(74.78, 66.8), at(75.12, 66.8)]}
+            scribble={[at(78.48, 66.8), at(79.18, 66.8)]}
             label={{ text: "NULO", at: at(81.0, 66.8) }}
           />
         </div>
