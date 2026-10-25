@@ -13,15 +13,22 @@ export type Progress = {
   shells: string[];              // golden shells collected in the 3D world ("island-index")
   world: { x: number; y: number; z: number; boat: boolean } | null;
   visited: number[];             // islands whose story was already told in the world
+  openAllV1?: boolean;           // migration: v1.1 opened every island once (parents can re-lock)
 };
 
 const KEY = 'yuna-ilhas-v2';
-const DEFAULT: Progress = { stars: {}, stickers: [], played: 0, current: 0, unlockAll: false, music: 0.45, voice: 1, sfx: 0.8, seenIntro: false, shells: [], world: null, visited: [] };
+const DEFAULT: Progress = { openAllV1: true, stars: {}, stickers: [], played: 0, current: 0, unlockAll: true, music: 0.45, voice: 1, sfx: 0.8, seenIntro: false, shells: [], world: null, visited: [] };
 
 function load(): Progress {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) return { ...DEFAULT, ...JSON.parse(raw) };
+    if (raw) {
+      const saved = JSON.parse(raw);
+      const p: Progress = { ...DEFAULT, ...saved };
+      // Every island is open from v1.1 on, also for saves made before it.
+      if (!saved.openAllV1) { p.unlockAll = true; p.openAllV1 = true; }
+      return p;
+    }
   } catch { /* storage unavailable */ }
   return { ...DEFAULT, stars: {}, stickers: [], shells: [], visited: [] };
 }
