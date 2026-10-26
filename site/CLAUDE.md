@@ -48,17 +48,25 @@ O cliente (Yanick) não programa. Pediu explicitamente:
 
 ## Emails de marcação
 
-A `verify-payment` envia o aviso à administração depois de confirmar o pagamento.
-O domínio **não** está verificado no Resend, por isso o plano gratuito obriga a:
+A `verify-payment` envia o aviso à administração depois de confirmar o pagamento,
+pelo Resend. `lutuimaveiga.com` está **verificado** (desde 26/10/2026):
 
-- remetente `onboarding@resend.dev`
-- destinatário apenas `yanickdrs@gmail.com` (o email da conta Resend)
+- remetente `marcacoes@lutuimaveiga.com`, assinado por DKIM
+- destinatários em `DESTINATARIOS`, no topo da função — acrescentar alguém é
+  acrescentar uma linha
+- o email leva HTML e texto simples; só HTML pontua pior nos filtros
 
-Para enviar de `marcacoes@lutuimaveiga.com` e para qualquer endereço, é preciso
-verificar `lutuimaveiga.com` em https://resend.com/domains e acrescentar 4 registos
-DNS na Namecheap (DKIM `resend._domainkey`, CNAME `rsend`, CNAME `send`, TXT `_dmarc`).
-O CNAME `send` colide com o TXT/MX antigos do mesmo nome — esses já foram removidos.
-Feito isso, só mudam `REMETENTE` e `DESTINATARIOS` no topo da função.
+Registos DNS na Namecheap que sustentam isto (não apagar):
+
+| Type | Host | Para quê |
+|---|---|---|
+| TXT | `resend._domainkey` | DKIM — assina cada email |
+| CNAME | `rsend` | SPF |
+| CNAME | `send` | SPF |
+| TXT | `_dmarc` | política em caso de falha |
+
+Sobrou um `TXT @ resend-domain-verification=73c9f681…` do domínio que foi
+apagado e recriado. É inofensivo e pode ser removido.
 
 O cliente recebe o recibo do Stripe, não um email nosso.
 

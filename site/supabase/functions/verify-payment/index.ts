@@ -22,12 +22,15 @@ const CABECALHOS_CORS = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-// Enquanto o domínio não estiver verificado no Resend, o remetente tem de ser
-// o endereço de testes e o destinatário tem de ser o email da conta Resend —
-// é a regra do plano gratuito. Verificado o domínio, passa a
-// `marcacoes@lutuimaveiga.com` e a lista aceita qualquer endereço.
-const REMETENTE = "Marcações Lutuima Veiga <onboarding@resend.dev>";
-const DESTINATARIOS = ["yanickdrs@gmail.com"];
+// `lutuimaveiga.com` está verificado no Resend (DKIM, SPF e DMARC publicados
+// na Namecheap), por isso o email sai assinado do próprio domínio e a lista
+// de destinatários aceita qualquer endereço. Acrescentar alguém é acrescentar
+// uma linha aqui.
+const REMETENTE = "Marcações Lutuima Veiga <marcacoes@lutuimaveiga.com>";
+const DESTINATARIOS = [
+  "lutuimaveiga694@gmail.com",  // Lutuima
+  "yanickdrs@gmail.com",        // Yanick
+];
 
 const DURACAO: Record<string, string> = {
   "15_minutes": "15 minutos",
