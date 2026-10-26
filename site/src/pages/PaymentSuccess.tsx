@@ -36,17 +36,11 @@ export default function PaymentSuccess() {
           body: { appointment_id: appointmentId, session_id: sessionId },
         });
 
+        // O aviso à administração parte da própria verify-payment, no servidor:
+        // é lá que o pagamento está provado, e o cliente pode fechar o separador
+        // mal paga — um envio feito daqui nem sempre chegaria a acontecer.
         if (error || !verification?.paid) {
           toast.error("Pagamento não confirmado");
-        } else {
-          // Emails de cortesia: uma falha aqui não invalida o pagamento.
-          await supabase.functions
-            .invoke("send-confirmation-email", { body: { appointment_id: appointmentId } })
-            .catch(() => toast.warning("Aviso: Email de confirmação pode ter falhado"));
-
-          await supabase.functions
-            .invoke("send-admin-notification", { body: { appointment_id: appointmentId } })
-            .catch(() => undefined);
         }
 
         const { data } = await supabase
