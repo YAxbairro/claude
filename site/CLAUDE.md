@@ -11,6 +11,8 @@ O cliente (Yanick) não programa. Pediu explicitamente:
 3. **Resumo curto no fim de cada resposta**, para não ter de ler tudo.
 4. **Explicar o porquê**, não só o que fazer — ele quer aprender.
 5. Português de Portugal.
+6. **Antes de lhe pedir para fazer alguma coisa, verificar se eu próprio consigo.**
+   Testar a ferramenta, não assumir. Se não der, dizer o que foi tentado e porque falhou.
 
 ## Que conta usar em cada serviço
 
