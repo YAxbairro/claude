@@ -132,6 +132,28 @@ function corpoEmail(m: Marcacao) {
 }
 
 /**
+ * Alternativa em texto simples. Um email só com HTML pontua pior nos filtros
+ * anti-spam, e sem domínio verificado o remetente já parte em desvantagem.
+ */
+function textoEmail(m: Marcacao) {
+  return [
+    "NOVA MARCAÇÃO PAGA",
+    "",
+    `Cliente: ${m.client_name} ${m.client_surname}`,
+    `Data: ${dataPt(String(m.scheduled_date))} às ${horaPt(String(m.scheduled_time))}`,
+    `Duração: ${DURACAO[String(m.service_type)] ?? m.service_type}`,
+    `Contactar por: ${CONTACTO[String(m.contact_preference)] ?? m.contact_preference}`,
+    `Telefone: ${m.client_phone}`,
+    `Email: ${m.client_email}`,
+    m.client_instagram ? `Instagram: ${m.client_instagram}` : "",
+    `Valor pago: ${Number(m.amount).toFixed(2).replace(".", ",")} €`,
+    m.notes ? `\nNotas: ${m.notes}` : "",
+    "",
+    "Aviso automático de lutuimaveiga.com.",
+  ].filter(Boolean).join("\n");
+}
+
+/**
  * Envia o aviso. Devolve sempre — uma falha de email não pode fazer o cliente
  * pensar que o pagamento correu mal, porque correu bem.
  */
@@ -155,6 +177,7 @@ async function avisarAdministracao(m: Marcacao) {
         reply_to: m.client_email,
         subject: `Nova marcação · ${m.client_name} ${m.client_surname} · ${dataPt(String(m.scheduled_date))} às ${horaPt(String(m.scheduled_time))}`,
         html: corpoEmail(m),
+        text: textoEmail(m),
       }),
     });
 
