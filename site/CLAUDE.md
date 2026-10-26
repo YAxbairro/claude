@@ -22,6 +22,7 @@ O cliente (Yanick) não programa. Pediu explicitamente:
 | **GitHub** | Código | utilizador `YAxbairro` |
 | **Stripe** | Receber pagamentos | conta do cliente final (Lutuima), Yanick entra como membro convidado |
 | **Painel /admin do site** | Ver marcações | `lutuimaveiga694@gmail.com` |
+| **Resend** | Emails de aviso de marcação | `yanickdrs@gmail.com` |
 
 ## Identificadores
 
@@ -33,6 +34,7 @@ O cliente (Yanick) não programa. Pediu explicitamente:
 | Projeto Supabase | `lutuima-veiga` · `ktdbdhsjznajrlklmmri` (eu-west-3) |
 | Repositório | `YAxbairro/claude`, pasta `site/`, branch `claude/youthful-brown-34xzmj` |
 | Segredo do Stripe | `STRIPE_SECRET_KEY` (segredos das Edge Functions do Supabase) |
+| Segredo do Resend | `RESEND_API_KEY` (mesmo sítio) |
 
 ## Limitações conhecidas desta configuração
 
@@ -41,6 +43,22 @@ O cliente (Yanick) não programa. Pediu explicitamente:
   de ser o cliente a fazer no painel.
 - **Não há conector Stripe nem Namecheap.** Essas partes são sempre guiadas, nunca executadas.
 - A rede da sessão bloqueia `epargmcwrvspkdxatgny.supabase.co` (o projeto antigo, perdido).
+
+## Emails de marcação
+
+A `verify-payment` envia o aviso à administração depois de confirmar o pagamento.
+O domínio **não** está verificado no Resend, por isso o plano gratuito obriga a:
+
+- remetente `onboarding@resend.dev`
+- destinatário apenas `yanickdrs@gmail.com` (o email da conta Resend)
+
+Para enviar de `marcacoes@lutuimaveiga.com` e para qualquer endereço, é preciso
+verificar `lutuimaveiga.com` em https://resend.com/domains e acrescentar 4 registos
+DNS na Namecheap (DKIM `resend._domainkey`, CNAME `rsend`, CNAME `send`, TXT `_dmarc`).
+O CNAME `send` colide com o TXT/MX antigos do mesmo nome — esses já foram removidos.
+Feito isso, só mudam `REMETENTE` e `DESTINATARIOS` no topo da função.
+
+O cliente recebe o recibo do Stripe, não um email nosso.
 
 ## Histórico
 
