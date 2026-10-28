@@ -196,3 +196,29 @@ grant select (
   id, service_type, scheduled_date, scheduled_time,
   amount, status, payment_status, created_at
 ) on appointments to anon;
+
+-- ------------------------------------------- ronda horária de pagamentos
+-- A confirmação normal corre no browser do cliente, ao voltar do Stripe.
+-- Quem fecha o separador paga sem que o site fique a saber: a marcação fica
+-- "pendente" e ninguém é avisado. Aconteceu — uma consulta paga a 4/10 só
+-- foi descoberta a 28/10, por esta ronda, à primeira execução.
+--
+-- Pergunta ao Stripe, de hora a hora, se alguma pendente foi afinal paga.
+-- Ao contrário de um webhook não precisa de nada configurado do lado de fora.
+
+create extension if not exists pg_cron;
+create extension if not exists pg_net;
+
+-- Ao minuto 7 e não a zero: à hora certa o agendador tem toda a gente à
+-- espera, e um atraso aqui é um aviso que chega tarde.
+select cron.schedule(
+  'ronda-marcacoes',
+  '7 * * * *',
+  $ronda$
+    select net.http_post(
+      url := 'https://ktdbdhsjznajrlklmmri.supabase.co/functions/v1/ronda-marcacoes',
+      headers := '{"Content-Type": "application/json"}'::jsonb,
+      timeout_milliseconds := 30000
+    );
+  $ronda$
+);
