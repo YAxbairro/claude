@@ -4,3 +4,5 @@ ep4/*.mov filter=lfs diff=lfs merge=lfs -text
 ep5/*.mov filter=lfs diff=lfs merge=lfs -text
 ep6/*.mov filter=lfs diff=lfs merge=lfs -text
 ep7/*.mov filter=lfs diff=lfs merge=lfs -text
+voto_acessivel/*.mp4 filter=lfs diff=lfs merge=lfs -text
+voto_acessivel/*.mov filter=lfs diff=lfs merge=lfs -text
