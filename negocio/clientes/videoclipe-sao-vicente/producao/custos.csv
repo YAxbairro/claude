@@ -13,3 +13,25 @@ data,endpoint,ficheiro,custo_usd,nota
 2026-11-02T14:49,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/personagens/mae-ficha.jpg,0.03,ficha
 2026-11-02T14:49,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/personagens/julha-ficha.jpg,0.03,ficha
 2026-11-02T14:50,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/personagens/julha-depois-ficha.jpg,0.03,ficha (2a tentativa)
+2026-11-02T14:54,fal-ai/bytedance/seedream/v4/text-to-image,negocio/clientes/videoclipe-sao-vicente/producao/cenas/01.jpg,0.03,cena 01
+2026-11-02T14:54,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/cenas/05.jpg,0.03,cena 05
+2026-11-02T14:54,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/cenas/02.jpg,0.03,cena 02
+2026-11-02T14:54,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/cenas/04.jpg,0.03,cena 04
+2026-11-02T14:54,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/cenas/03.jpg,0.03,cena 03
+2026-11-02T14:54,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/cenas/06.jpg,0.03,cena 06
+2026-11-02T14:54,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/cenas/07.jpg,0.03,cena 07
+2026-11-02T14:54,fal-ai/bytedance/seedream/v4/text-to-image,negocio/clientes/videoclipe-sao-vicente/producao/cenas/12.jpg,0.03,cena 12
+2026-11-02T14:54,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/cenas/08.jpg,0.03,cena 08
+2026-11-02T14:54,fal-ai/bytedance/seedream/v4/text-to-image,negocio/clientes/videoclipe-sao-vicente/producao/cenas/14.jpg,0.03,cena 14
+2026-11-02T14:54,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/cenas/10.jpg,0.03,cena 10
+2026-11-02T14:54,fal-ai/bytedance/seedream/v4/text-to-image,negocio/clientes/videoclipe-sao-vicente/producao/cenas/15.jpg,0.03,cena 15
+2026-11-02T14:54,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/cenas/09.jpg,0.03,cena 09
+2026-11-02T14:54,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/cenas/13.jpg,0.03,cena 13
+2026-11-02T14:54,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/cenas/11.jpg,0.03,cena 11
+2026-11-02T14:55,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/cenas/17.jpg,0.03,cena 17
+2026-11-02T14:55,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/cenas/18.jpg,0.03,cena 18
+2026-11-02T14:55,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/cenas/19.jpg,0.03,cena 19
+2026-11-02T14:55,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/cenas/16.jpg,0.03,cena 16
+2026-11-02T14:56,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/cenas/11.jpg,0.03,cena 11 v2
+2026-11-02T14:56,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/cenas/06.jpg,0.03,cena 06 v2
+2026-11-02T14:56,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/cenas/16.jpg,0.03,cena 16 v2
