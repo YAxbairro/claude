@@ -34,7 +34,7 @@ Ler sempre primeiro: `negocio/README.md`.
 `cacador-leads` · `copywriter` · `produtor-motion` · `construtor-web` · `gestor-crm` · `propostas`
 
 ## Comandos (skills em `.claude/skills/`)
-`/dia` · `/leads` · `/mensagens` · `/novo-cliente` · `/proposta` · `/entrega` · `/balanco`
+`/biblia` · `/elenco` · `/cenario` · `/planos` (vídeo IA) · `/dia` · `/leads` · `/mensagens` · `/novo-cliente` · `/proposta` · `/entrega` · `/balanco`
 
 ## Regras de trabalho
 1. Toda a alteração ao CRM ou às tarefas é commitada e enviada (push) no branch de trabalho.

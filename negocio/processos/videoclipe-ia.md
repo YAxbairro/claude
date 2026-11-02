@@ -2,8 +2,17 @@
 
 > Atualizar a cada projeto. Cada erro vira regra.
 
-## Pipeline
-Roteiro → storyboard (FLUX schnell, barato) → **fichas de personagens e lugares** (Seedream) → imagem inicial por cena (Seedream edit + fichas) → aprovação → vídeo (Kling i2v, 5 s) → montagem.
+## Pipeline (ordem de produção real, adaptada para IA)
+1. **Ideia e roteiro**: a única parte grátis; é aqui que se ganha.
+2. **Bíblia** (`/biblia`): lugares, personagens, regras → `biblia.md`
+3. **Beat sheet**: o que cada personagem **está a fazer** em cada momento (senão fica parada à janela).
+4. **Elenco** (`/elenco`): face lock → roupa → ficha, fundo cinzento 18%.
+5. **Cenários** (`/cenario`): plates dos lugares, com fotos reais quando o sítio existe.
+6. **Imagem inicial de cada plano** (`/cenario` tipo B) → aprovação do Yax.
+7. **Vídeo** (`/planos`): rascunho barato → final 1080p; start+end frame.
+8. **Montagem**: aproveitar os 3 s bons de cada take, cor única, grão por cima.
+
+Referência: o fluxo do Joey (Higgsfield/YouTube, out 2026): Story Bible → Castkit → Scenecraft → Shotcaller. Uma curta dele custou ~450 $ incluindo falhas. **Não tratar cada geração como uma slot machine: se não funciona, parar e reescrever.**
 
 ## Preços (fal, nov 2026)
 FLUX schnell ~0,003 $/img · Seedream v4 0,03 $/img · Kling 2.5 Turbo Pro 0,07 $/s · Kling 3 Pro 0,14 $/s · Seedance 2.5 ~0,46 $/s (720p)
