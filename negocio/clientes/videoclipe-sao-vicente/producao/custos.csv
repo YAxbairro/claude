@@ -1,0 +1,15 @@
+data,endpoint,ficheiro,custo_usd,nota
+2026-11-02T14:48,fal-ai/bytedance/seedream/v4/text-to-image,negocio/clientes/videoclipe-sao-vicente/producao/personagens/mae-base.jpg,0.03,base
+2026-11-02T14:48,fal-ai/bytedance/seedream/v4/text-to-image,negocio/clientes/videoclipe-sao-vicente/producao/personagens/rapaz-base.jpg,0.03,base
+2026-11-02T14:48,fal-ai/bytedance/seedream/v4/text-to-image,negocio/clientes/videoclipe-sao-vicente/producao/personagens/julha-base.jpg,0.03,base
+2026-11-02T14:48,fal-ai/bytedance/seedream/v4/text-to-image,negocio/clientes/videoclipe-sao-vicente/producao/personagens/conselheiro-base.jpg,0.03,base
+2026-11-02T14:48,fal-ai/bytedance/seedream/v4/text-to-image,negocio/clientes/videoclipe-sao-vicente/producao/lugares/rua-mindelo.jpg,0.03,base
+2026-11-02T14:48,fal-ai/bytedance/seedream/v4/text-to-image,negocio/clientes/videoclipe-sao-vicente/producao/lugares/cozinha.jpg,0.03,base
+2026-11-02T14:48,fal-ai/bytedance/seedream/v4/text-to-image,negocio/clientes/videoclipe-sao-vicente/producao/lugares/quarto.jpg,0.03,base
+2026-11-02T14:48,fal-ai/bytedance/seedream/v4/text-to-image,negocio/clientes/videoclipe-sao-vicente/producao/lugares/beco.jpg,0.03,base
+2026-11-02T14:48,fal-ai/bytedance/seedream/v4/text-to-image,negocio/clientes/videoclipe-sao-vicente/producao/lugares/porta-casa.jpg,0.03,base
+2026-11-02T14:49,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/personagens/rapaz-ficha.jpg,0.03,ficha
+2026-11-02T14:49,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/personagens/conselheiro-ficha.jpg,0.03,ficha
+2026-11-02T14:49,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/personagens/mae-ficha.jpg,0.03,ficha
+2026-11-02T14:49,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/personagens/julha-ficha.jpg,0.03,ficha
+2026-11-02T14:50,fal-ai/bytedance/seedream/v4/edit,negocio/clientes/videoclipe-sao-vicente/producao/personagens/julha-depois-ficha.jpg,0.03,ficha (2a tentativa)

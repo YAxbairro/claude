@@ -3,6 +3,9 @@
 > 🤖 = Claude · 👤 = Yax. O Claude mantém este ficheiro atualizado.
 
 ## 🔥 Agora
+- [ ] 👤 Aprovar as personagens do videoclipe São Vicente
+- [ ] 🤖 Imagens iniciais das 20 cenas → 👤 aprovar → 🤖 vídeo Kling
+- [ ] 👤 Receber os 8.000 CVE do videoclipe
 - [ ] 👤 Enviar ao Claude: WhatsApp, @ do Instagram (Yax + Afroberdiano), links de 3–5 melhores vídeos
 - [ ] 🤖 Página Eagle (portfólio + serviços + WhatsApp) no ar
 - [ ] 🤖 Demo Motion Promo de 15 s
