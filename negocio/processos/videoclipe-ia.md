@@ -18,3 +18,4 @@ FLUX schnell ~0,003 $/img · Seedream v4 0,03 $/img · Kling 2.5 Turbo Pro 0,07 
 7. **Personagem secundária com 2+ referências:** repetir na prompt os traços fixos (cabelo, barba, cicatriz, camisa), porque com 3 imagens o modelo mistura caras (cena 16, v1).
 8. **"Depois" de uma personagem:** usar a **ficha original** como referência e descrever a mudança. A ficha "depois" deriva o tom de pele (cena 11, v1).
 9. Rever **cada** imagem antes de mostrar ao Yax: 3 em 19 precisaram de correção (~0,09 $).
+10. **Lugares reais** (Mindelo): usar **fotos reais do sítio como referência** no Seedream edit. Sem elas o modelo inventa uma cidade genérica (cena 01, v1). E a abertura não deve ser "assustadora": a ilha é bonita; o drama vem depois.
