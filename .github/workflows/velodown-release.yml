@@ -3,6 +3,8 @@ name: VeloDown release
 on:
   push:
     tags: ["v*"]
+  release:
+    types: [published]   # creating a release on GitHub builds and attaches the files
   workflow_dispatch:
 
 permissions:
