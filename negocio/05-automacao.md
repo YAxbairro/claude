@@ -21,7 +21,7 @@
 
 ## CRM: [crm/leads.csv](crm/leads.csv)
 
-**Estados:** `novo` → `contactado` → `respondeu` → `proposta` → `pago-50` → `produção` → `entregue` → `pago-100` → `referências` · ou `perdido`
+**Estados:** `novo` → `pronto-a-enviar` → `contactado` → `respondeu` → `proposta` → `pago-50` → `producao` → `entregue` → `pago-100` → `referencias` · ou `perdido`
 
 **Rotina:** o Claude atualiza o CRM sempre que o Yax diz o que aconteceu ("o João respondeu", "a Maria pagou").
 

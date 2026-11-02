@@ -35,6 +35,11 @@ Em pausa até março: FleetCV, Berço.cv, site próprio da Afroberdiano.
 | [05-automacao.md](05-automacao.md) | O funil, do lead ao pagamento, e o que está automatizado |
 | [crm/leads.csv](crm/leads.csv) | Todos os contactos e o estado de cada um |
 | [processos/](processos/) | Como entregar cada produto, passo a passo |
+| [TAREFAS.md](TAREFAS.md) | Tarefas: agora, esta semana, depois |
+| [clientes/](clientes/) | Um projeto por cliente (copiar `_modelo`) |
+| [crm/pagamentos.csv](crm/pagamentos.csv) | Dinheiro recebido |
+
+
 
 ## Regras
 1. **50% adiantado.** Sempre.
