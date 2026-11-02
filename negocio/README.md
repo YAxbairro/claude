@@ -42,6 +42,7 @@ Em pausa até março: FleetCV, Berço.cv, site próprio da Afroberdiano.
 ## Comandos (escreve-os na conversa com o Claude)
 | Comando | O que faz |
 |---|---|
+| 📱 **Página de envios** | https://claude.ai/artifact/RYmvHTEEzMnthzsY86qk7i (gerada com `python3 negocio/scripts/gerar-pagina.py <semana.md> negocio/envios/pagina.html`) |
 | `/semana` | 💸 **O principal.** 1x por semana: leads + mensagens para a semana toda |
 | `/dia` | O que fazer hoje (usar só se precisares) |
 | `/leads artistas 30` | Encontra 30 leads e escreve as mensagens |

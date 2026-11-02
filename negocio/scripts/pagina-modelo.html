@@ -1,0 +1,139 @@
+<title>Eagle Envios</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Layout: um dia de cada vez, um cartão por pessoa, ações grandes para o polegar */
+:root{
+  --bg:#f6f3ee; --card:#ffffff; --fg:#1d1a16; --muted:#6d655b; --line:#e4ddd2;
+  --accent:#c2551f; --accent-fg:#ffffff; --ok:#2f7d4f; --ok-bg:#e3f1e8; --warn:#8a5a00; --warn-bg:#fbefd6;
+  --display:"Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
+  --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#16130f; --card:#211d18; --fg:#f2ece3; --muted:#a99f92; --line:#353029;
+  --accent:#ec7a3e; --accent-fg:#1a0f08; --ok:#6fcf97; --ok-bg:#1d3326; --warn:#f2c66d; --warn-bg:#3a2f17; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#16130f; --card:#211d18; --fg:#f2ece3; --muted:#a99f92; --line:#353029;
+  --accent:#ec7a3e; --accent-fg:#1a0f08; --ok:#6fcf97; --ok-bg:#1d3326; --warn:#f2c66d; --warn-bg:#3a2f17; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.45}
+.wrap{max-width:640px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
+h1{font-family:var(--display);font-weight:800;font-size:1.75rem;line-height:1.1;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0}
+.passos{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0;padding:0;list-style:none}
+.passos li{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 8px;font-size:.8rem;text-align:center;color:var(--muted)}
+.passos b{display:block;font-family:var(--display);font-size:1.1rem;color:var(--accent)}
+.dias{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.dias button{flex:1 0 auto;font:600 .95rem var(--body);padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer}
+.dias button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.dias small{font-weight:500;opacity:.7;margin-left:4px}
+.progresso{font-size:.9rem;color:var(--muted)}
+.progresso b{color:var(--ok)}
+.lista{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.card.feito{opacity:.55}
+.topo{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.nome{font-family:var(--display);font-weight:600;font-size:1.2rem;margin:0;min-width:0}
+.tag{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);white-space:nowrap}
+.handle{color:var(--muted);font-size:.95rem;margin-top:-8px;word-break:break-all}
+.aviso{background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:8px 10px;font-size:.88rem}
+.msg{white-space:pre-wrap;background:var(--bg);border-radius:10px;padding:12px;font-size:.95rem;margin:0;border:1px solid var(--line)}
+.acoes{display:flex;flex-wrap:wrap;gap:8px}
+.btn{font:600 1rem var(--body);padding:12px 16px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--fg);text-decoration:none;cursor:pointer;flex:1 1 140px;text-align:center}
+.btn.prim{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.ok{background:var(--ok-bg);color:var(--ok);border-color:transparent}
+.btn:focus-visible,.dias button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+details{font-size:.9rem}
+details summary{cursor:pointer;color:var(--muted)}
+.vazio{color:var(--muted)}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Mensagens de hoje</h1>
+    <p class="sub">Uma pessoa de cada vez. Abre, copia, cola, envia.</p>
+  </header>
+
+  <ol class="passos" aria-label="Como enviar">
+    <li><b>1</b>Abrir Instagram</li>
+    <li><b>2</b>Copiar mensagem</li>
+    <li><b>3</b>Mensagem → colar → enviar</li>
+    <li><b>4</b>Marcar enviado</li>
+  </ol>
+
+  <nav class="dias" id="dias" aria-label="Dias"></nav>
+  <div class="progresso" id="progresso"></div>
+  <section class="lista" id="lista"></section>
+</div>
+
+<script>
+const DIAS = /*DADOS*/[];
+const KEY = "eagle-enviados";
+let enviados = {};
+try { enviados = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+const guardar = () => { try { localStorage.setItem(KEY, JSON.stringify(enviados)); } catch (e) {} };
+
+const nomesDia = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+const hoje = nomesDia[new Date().getDay()];
+let atual = Math.max(0, DIAS.findIndex(d => d.dia === hoje));
+
+function copiar(texto, btn) {
+  const feito = () => { const o = btn.textContent; btn.textContent = "Copiado ✓"; setTimeout(() => btn.textContent = o, 1600); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(texto).then(feito).catch(() => selecionar(btn));
+  } else selecionar(btn);
+}
+function selecionar(btn) {
+  const pre = btn.closest(".card").querySelector(".msg");
+  const r = document.createRange(); r.selectNodeContents(pre);
+  const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+  btn.textContent = "Texto selecionado: copia à mão";
+}
+
+function render() {
+  const nav = document.getElementById("dias");
+  nav.innerHTML = "";
+  DIAS.forEach((d, i) => {
+    const b = document.createElement("button");
+    const feitos = d.pessoas.filter(p => enviados[p.nome]).length;
+    b.innerHTML = `${d.dia}<small>${feitos}/${d.pessoas.length}</small>`;
+    b.setAttribute("aria-pressed", i === atual);
+    b.onclick = () => { atual = i; render(); };
+    nav.appendChild(b);
+  });
+  const d = DIAS[atual];
+  const lista = document.getElementById("lista");
+  lista.innerHTML = "";
+  if (!d) { lista.innerHTML = '<p class="vazio">Sem mensagens.</p>'; return; }
+  const feitos = d.pessoas.filter(p => enviados[p.nome]).length;
+  document.getElementById("progresso").innerHTML = `${d.dia}: <b>${feitos} de ${d.pessoas.length}</b> enviadas`;
+  d.pessoas.forEach(p => {
+    const c = document.createElement("article");
+    c.className = "card" + (enviados[p.nome] ? " feito" : "");
+    const tipo = p.tipo === "artista" ? "Artista" : p.tipo === "marca" ? "Empresa" : "Já é cliente";
+    c.innerHTML = `
+      <div class="topo"><h2 class="nome"></h2><span class="tag">${tipo}</span></div>
+      ${p.handle ? `<div class="handle">${p.handle}</div>` : ""}
+      ${p.aviso ? `<div class="aviso"></div>` : ""}
+      <pre class="msg"></pre>
+      <div class="acoes">
+        ${p.link ? `<a class="btn" target="_blank" rel="noopener"></a>` : ""}
+        <button class="btn prim" data-a="copiar">Copiar mensagem</button>
+      </div>
+      ${p.alt ? `<details><summary>Versão em português</summary><pre class="msg alt"></pre><div class="acoes"><button class="btn" data-a="alt">Copiar versão PT</button></div></details>` : ""}
+      ${p.site ? `<div class="handle">Site: <a target="_blank" rel="noopener" class="site"></a></div>` : ""}
+      <button class="btn ${enviados[p.nome] ? "ok" : ""}" data-a="feito">${enviados[p.nome] ? "Enviado ✓" : "Marcar como enviado"}</button>`;
+    c.querySelector(".nome").textContent = p.nome;
+    c.querySelector(".msg").textContent = p.msg;
+    if (p.aviso) c.querySelector(".aviso").textContent = p.aviso;
+    if (p.link) { const a = c.querySelector("a.btn"); a.href = p.link; a.textContent = p.rotulo; }
+    if (p.alt) c.querySelector(".msg.alt").textContent = p.alt;
+    if (p.site) { const a = c.querySelector("a.site"); a.href = p.site; a.textContent = p.site.replace(/^https?:\/\//, "").slice(0, 40); }
+    c.querySelector('[data-a="copiar"]').onclick = e => copiar(p.msg, e.target);
+    if (p.alt) c.querySelector('[data-a="alt"]').onclick = e => copiar(p.alt, e.target);
+    c.querySelector('[data-a="feito"]').onclick = () => { enviados[p.nome] = !enviados[p.nome]; guardar(); render(); };
+    lista.appendChild(c);
+  });
+}
+render();
+</script>

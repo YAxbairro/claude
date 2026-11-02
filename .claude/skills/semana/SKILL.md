@@ -10,7 +10,8 @@ Numa só sessão, por esta ordem:
 3. **cacador-leads**: 40 leads novos, divididos pelas linhas que mais responderam (por defeito 25 artistas e 15 marcas).
 4. **copywriter**: todas as mensagens novas **e** todos os seguimentos, organizados por dia em `negocio/envios/semana-AAAA-MM-DD.md` (seg a sex, 10 por dia).
 5. Atualiza `TAREFAS.md` e o plano da semana.
-6. Commit + push (uma única vez, no fim).
+6. Gera a página de envios: `python3 negocio/scripts/gerar-pagina.py negocio/envios/semana-AAAA-MM-DD.md negocio/envios/pagina.html` e republica-a no mesmo link (https://claude.ai/artifact/RYmvHTEEzMnthzsY86qk7i, usar `url`).
+7. Commit + push (uma única vez, no fim).
 7. Resposta ao Yax com no máximo 8 linhas: números, onde estão as mensagens e as 3 prioridades.
 
 Durante a semana o Yax só abre o ficheiro de envios do dia, copia, cola e envia. Não precisa de gastar créditos.
