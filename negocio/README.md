@@ -39,8 +39,18 @@ Em pausa até março: FleetCV, Berço.cv, site próprio da Afroberdiano.
 | [clientes/](clientes/) | Um projeto por cliente (copiar `_modelo`) |
 | [crm/pagamentos.csv](crm/pagamentos.csv) | Dinheiro recebido |
 
+## Comandos (escreve-os na conversa com o Claude)
+| Comando | O que faz |
+|---|---|
+| `/dia` | O que fazer hoje na tua 1 hora |
+| `/leads artistas 30` | Encontra 30 leads e escreve as mensagens |
+| `/mensagens` | Colas uma conversa e recebes a resposta certa |
+| `/proposta Nome` | Proposta de 1 página |
+| `/novo-cliente Nome Produto Valor` | Abre o projeto de um cliente que fechou |
+| `/entrega Nome` | Produz, entrega e prepara a cobrança |
+| `/balanco` | Balanço de domingo + plano da semana |
 
-
+**Sub-agentes** (em `.claude/agents/`): `cacador-leads`, `copywriter`, `produtor-motion`, `construtor-web`, `gestor-crm`, `propostas`.
 ## Regras
 1. **50% adiantado.** Sempre.
 2. **Nada de projetos novos até março.**
