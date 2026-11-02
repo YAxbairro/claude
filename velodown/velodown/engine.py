@@ -84,9 +84,9 @@ def _filename_from(url: str, disposition: str | None) -> str:
     return name or "download.bin"
 
 
-def probe(url: str) -> ProbeResult:
+def probe(url: str, headers: dict | None = None) -> ProbeResult:
     """Find size, range support and file name, using a 1-byte range request."""
-    with _request(url, {"Range": "bytes=0-0"}) as r:
+    with _request(url, {**(headers or {}), "Range": "bytes=0-0"}) as r:
         disp = r.headers.get("Content-Disposition")
         final = r.geturl()
         if r.status == 206:
@@ -101,8 +101,10 @@ class Download:
     """One file transfer. Thread-safe; call start(), pause(), wait()."""
 
     def __init__(self, url: str, dest: str, connections: int = 8,
-                 limiter: TokenBucket | None = None, retries: int = 5):
+                 limiter: TokenBucket | None = None, retries: int = 5,
+                 headers: dict | None = None):
         self.url = url
+        self.headers = dict(headers or {})
         self.dest = dest
         self.connections = max(1, connections)
         self.limiter = limiter or TokenBucket(0)
@@ -190,7 +192,7 @@ class Download:
         try:
             os.makedirs(os.path.dirname(os.path.abspath(self.dest)), exist_ok=True)
             if not self._load_state():
-                info = probe(self.url)
+                info = probe(self.url, self.headers)
                 self.size, self.ranges = info.size, info.ranges
                 if self.ranges and self.size:
                     self._plan()
@@ -283,7 +285,7 @@ class Download:
         attempt = 0
         while seg.remaining and not self._stop.is_set():
             try:
-                with _request(self.url, {"Range": f"bytes={seg.pos}-{seg.end}"}) as r:
+                with _request(self.url, {**self.headers, "Range": f"bytes={seg.pos}-{seg.end}"}) as r:
                     if r.status != 206:
                         raise RuntimeError(f"server ignored range (HTTP {r.status})")
                     while not self._stop.is_set():
@@ -311,7 +313,7 @@ class Download:
         """Fallback for servers without range support: one stream, restart on resume."""
         self._active = 1
         self._single_pos = 0
-        with _request(self.url) as r, open(self.part_path, "wb") as f:
+        with _request(self.url, self.headers) as r, open(self.part_path, "wb") as f:
             while not self._stop.is_set():
                 data = r.read(CHUNK)
                 if not data:

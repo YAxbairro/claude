@@ -8,6 +8,7 @@ import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from velodown.engine import Download, TokenBucket, probe
+from velodown.hls import HlsDownload
 from velodown.manager import Manager, category_for
 
 DATA = os.urandom(6 * 1024 * 1024 + 12345)
@@ -21,6 +22,10 @@ class H(BaseHTTPRequestHandler):
         pass
 
     def do_GET(self):
+        if self.path.startswith("/auth") and self.headers.get("Cookie") != "session=abc":
+            self.send_response(403); self.send_header("Content-Length", "0"); self.end_headers(); return
+        if self.path.startswith("/hls/"):
+            return self.hls()
         ranges = not self.path.startswith("/norange")
         rng = self.headers.get("Range")
         start, end = 0, len(DATA) - 1
@@ -43,6 +48,32 @@ class H(BaseHTTPRequestHandler):
                     time.sleep(H.delay * (5 if start < len(DATA) // 4 else 1))
         except (BrokenPipeError, ConnectionResetError):
             pass
+
+
+    def hls(self):
+        n = 10
+        step = len(DATA) // n
+        if self.path == "/hls/master.m3u8":
+            body = ("#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=100000\nlow.m3u8\n"
+                    "#EXT-X-STREAM-INF:BANDWIDTH=900000\nhi.m3u8\n").encode()
+        elif self.path == "/hls/hi.m3u8":
+            body = ("#EXTM3U\n#EXT-X-TARGETDURATION:4\n" + "".join(
+                f"#EXTINF:4.0,\nseg{i}.ts\n" for i in range(n)) + "#EXT-X-ENDLIST\n").encode()
+        elif self.path == "/hls/low.m3u8":
+            body = b"#EXTM3U\n#EXTINF:4.0,\nwrong.ts\n#EXT-X-ENDLIST\n"
+        elif self.path == "/hls/drm.m3u8":
+            body = b'#EXTM3U\n#EXT-X-KEY:METHOD=SAMPLE-AES,URI="skd://x"\n#EXTINF:4,\nseg0.ts\n'
+        elif m := re.match(r"/hls/seg(\d+)\.ts", self.path):
+            i = int(m.group(1))
+            body = DATA[i * step: len(DATA) if i == n - 1 else (i + 1) * step]
+            if H.delay:
+                time.sleep(H.delay * 10)
+        else:
+            self.send_response(404); self.send_header("Content-Length", "0"); self.end_headers(); return
+        self.send_response(200)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
 
 class Base(unittest.TestCase):
@@ -119,6 +150,47 @@ class EngineTests(Base):
         t = time.monotonic(); dl.start(); dl.wait(60)
         self.assertEqual(dl.status, "done", dl.error)
         self.assertGreater(time.monotonic() - t, 2.0)  # ~6 MB at 2 MB/s
+
+
+class HlsAndHeaderTests(Base):
+    def test_hls_best_quality_joined_exactly(self):
+        dest = os.path.join(self.tmp, "video.ts")
+        dl = HlsDownload(self.base + "/hls/master.m3u8", dest, connections=4)
+        dl.start(); dl.wait(30)
+        self.assertEqual(dl.status, "done", dl.error)
+        self.assertEqual(self.sha(dl.dest), SHA)
+        self.assertFalse(os.path.exists(dest + ".parts"))
+
+    def test_hls_pause_resume(self):
+        H.delay = 0.05
+        dest = os.path.join(self.tmp, "v.ts")
+        url = self.base + "/hls/hi.m3u8"
+        dl = HlsDownload(url, dest, connections=2)
+        dl.start(); time.sleep(1.2); dl.pause()
+        self.assertEqual(dl.status, "paused")
+        saved = len(os.listdir(dest + ".parts"))
+        self.assertTrue(0 < saved < 10)
+        H.delay = 0
+        dl2 = HlsDownload(url, dest, connections=2)
+        dl2.start(); dl2.wait(30)
+        self.assertEqual(dl2.status, "done", dl2.error)
+        self.assertEqual(self.sha(dl2.dest), SHA)
+
+    def test_drm_is_refused(self):
+        dl = HlsDownload(self.base + "/hls/drm.m3u8", os.path.join(self.tmp, "d.ts"))
+        dl.start(); dl.wait(10)
+        self.assertEqual(dl.status, "error")
+        self.assertIn("DRM", dl.error)
+
+    def test_cookies_are_sent(self):
+        dest = os.path.join(self.tmp, "secret.bin")
+        bad = Download(self.base + "/auth/secret.bin", dest)
+        bad.start(); bad.wait(10)
+        self.assertEqual(bad.status, "error")
+        ok = Download(self.base + "/auth/secret.bin", dest, headers={"Cookie": "session=abc"})
+        ok.start(); ok.wait(30)
+        self.assertEqual(ok.status, "done", ok.error)
+        self.assertEqual(self.sha(dest), SHA)
 
 
 class ManagerTests(Base):

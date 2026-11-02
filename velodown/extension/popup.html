@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<style>
+:root{--bg:#fff;--ink:#17202b;--muted:#647184;--line:#e1e6ee;--accent:#0f766e;--err:#b91c1c}
+@media (prefers-color-scheme:dark){:root{--bg:#161d25;--ink:#e6edf3;--muted:#8b98a8;--line:#253040;--accent:#2dd4bf;--err:#f87171}}
+body{margin:0;width:340px;background:var(--bg);color:var(--ink);font:13px/1.4 system-ui,sans-serif}
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--line);font-weight:700}
+.dot{font-weight:400;font-size:12px;color:var(--muted)}.dot.ok::before{content:"● ";color:#16a34a}.dot.off::before{content:"● ";color:var(--err)}
+.list{max-height:260px;overflow:auto}
+.item{display:flex;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
+.item div{flex:1;min-width:0}.item b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.item small{color:var(--muted)}
+button{font:inherit;border:0;border-radius:6px;padding:5px 9px;background:var(--accent);color:#fff;cursor:pointer}
+.empty{padding:16px 12px;color:var(--muted)}
+footer{padding:10px 12px;display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line)}
+label{display:flex;gap:6px;align-items:center}a{color:var(--accent)}
+.msg{color:var(--err);font-size:12px}
+</style>
+</head>
+<body>
+<header>VeloDown <span class="dot" id="st"></span></header>
+<div class="list" id="list"></div>
+<footer>
+  <label><input type="checkbox" id="cap"> Apanhar downloads do browser automaticamente</label>
+  <label>Só ficheiros com mais de <input type="number" id="min" min="0" style="width:52px"> MB</label>
+  <div class="msg" id="msg"></div>
+  <a href="http://127.0.0.1:8787" target="_blank">Abrir o VeloDown</a>
+</footer>
+<script src="popup.js"></script>
+</body>
+</html>

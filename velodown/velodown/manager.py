@@ -3,11 +3,14 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
+import re
 import threading
 import time
 import uuid
 
 from .engine import Download, TokenBucket, probe
+from .hls import HlsDownload, is_hls
 
 CATEGORIES = {
     "Compressed": {"zip", "rar", "7z", "tar", "gz", "bz2", "xz", "iso"},
@@ -16,6 +19,11 @@ CATEGORIES = {
     "Programs": {"exe", "msi", "dmg", "pkg", "deb", "rpm", "appimage", "apk"},
     "Video": {"mp4", "mkv", "avi", "mov", "webm", "wmv", "flv", "m4v"},
 }
+
+
+def _safe_name(name: str) -> str:
+    name = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "_", os.path.basename(name)).strip(" .")
+    return name[:180] or "download.bin"
 
 
 def category_for(filename: str) -> str:
@@ -62,27 +70,36 @@ class Manager:
             json.dump(data, f, indent=1)
         os.replace(tmp, self.db_path)
 
-    def _make_dl(self, j: dict) -> Download:
-        return Download(j["url"], j["path"], j["connections"], self.limiter)
+    def _make_dl(self, j: dict):
+        cls = HlsDownload if j.get("kind") == "hls" else Download
+        return cls(j["url"], j["path"], j["connections"], self.limiter, headers=j.get("headers"))
 
     # ---- API -----------------------------------------------------------
     def add(self, url: str, connections: int = 8, start: bool = True,
-            filename: str | None = None, category: str | None = None) -> dict:
-        if not filename:
+            filename: str | None = None, category: str | None = None,
+            headers: dict | None = None, kind: str | None = None) -> dict:
+        headers = {k: v for k, v in (headers or {}).items()
+                   if k.lower() in ("cookie", "referer", "user-agent", "authorization") and v}
+        kind = kind or ("hls" if is_hls(url) else "file")
+        size = None
+        if kind == "hls":
+            filename = _safe_name(filename or "video")
+            if not os.path.splitext(filename)[1]:
+                filename += ".mp4"
+        elif not filename:
             try:
-                info = probe(url)
+                info = probe(url, headers)
                 filename, size = info.filename, info.size
             except Exception:
-                filename, size = os.path.basename(url.split("?")[0]) or "download.bin", None
-        else:
-            size = None
+                filename = os.path.basename(url.split("?")[0]) or "download.bin"
+        filename = _safe_name(filename)
         category = category or category_for(filename)
         folder = os.path.join(self.root, category)
         os.makedirs(folder, exist_ok=True)
         path = self._unique(os.path.join(folder, os.path.basename(filename)))
         j = {"id": uuid.uuid4().hex[:10], "url": url, "filename": os.path.basename(path), "path": path,
              "category": category, "connections": connections, "added": time.time(), "size": size,
-             "status": "queued"}
+             "status": "queued", "headers": headers, "kind": kind}
         j["dl"] = self._make_dl(j)
         j["dl"].size = size
         j["dl"].status = "queued" if start else "paused"
@@ -118,6 +135,7 @@ class Manager:
         for p in ([j["path"]] if remove_file else []) + [j["path"] + ".part", j["path"] + ".part.json"]:
             if os.path.exists(p):
                 os.remove(p)
+        shutil.rmtree(j["path"] + ".parts", ignore_errors=True)
         self.save()
 
     def start_queue(self) -> None:
@@ -180,9 +198,12 @@ class Manager:
 
     # ---- views ---------------------------------------------------------
     def view(self, j: dict) -> dict:
+        if j["dl"].dest != j["path"]:  # HLS output may be renamed to .ts
+            j["path"], j["filename"] = j["dl"].dest, os.path.basename(j["dl"].dest)
         snap = j["dl"].snapshot()
         size = snap["size"] or j.get("size")
-        return {k: j[k] for k in ("id", "url", "filename", "path", "category", "added")} | snap | {"size": size}
+        return {k: j[k] for k in ("id", "url", "filename", "path", "category", "added")} | snap | {
+            "size": size, "kind": j.get("kind", "file")}
 
     def state(self) -> dict:
         with self._lock:

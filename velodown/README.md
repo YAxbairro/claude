@@ -19,13 +19,38 @@ Usa apenas a biblioteca padrão do Python 3.10 ou mais recente, sem dependência
 | Categorias | Os ficheiros vão para Comprimidos, Documentos, Música, Programas, Vídeo ou Geral, conforme a extensão. |
 | Interface web | Barra de ferramentas, categorias, lista, detalhe com mapa dos segmentos, colar link com Ctrl+V, Ctrl+N e Del. |
 
+## Instalação rápida (Windows)
+
+1. Instala o [Python](https://www.python.org/downloads/) (3.10 ou mais recente). Marca a opção "Add Python to PATH".
+2. Faz duplo clique em `VeloDown.bat`. A interface abre no browser, em http://127.0.0.1:8787.
+3. Instala a extensão do browser (Chrome, Edge, Brave ou Opera):
+   - abre `chrome://extensions` (no Edge, `edge://extensions`);
+   - ativa o **Modo de programador**;
+   - clica em **Carregar sem compactação** e escolhe a pasta `extension`.
+
+No Mac ou Linux, corre `./velodown.sh`.
+
+Para o VeloDown arrancar com o Windows: carrega em `Win+R`, escreve `shell:startup` e põe nessa pasta um atalho para `VeloDown.bat`.
+
+## Extensão do browser
+
+| O que faz | Como |
+|---|---|
+| Apanha downloads | Os ficheiros que clicas (zip, exe, iso, mp4, pdf…, com mais de 1 MB) vão para o VeloDown em vez do browser. Se a app estiver fechada, o browser descarrega normalmente. |
+| Menu do botão direito | "Descarregar com VeloDown" em links, vídeos e imagens. "Descarregar todos os links" na página. |
+| Botão por cima dos vídeos | Passa o rato por cima de um vídeo e clica em **Descarregar este vídeo** (dá play primeiro). |
+| Vídeos detetados | O ícone da extensão mostra quantos vídeos ou áudios foram detetados na página. Clica nele para escolher qual queres. |
+| Sites com login | Envia os cookies e o referer da página, para os downloads que exigem sessão iniciada funcionarem. |
+
+Vídeos em streaming (HLS/.m3u8): o VeloDown escolhe a melhor qualidade e descarrega as partes em paralelo. Se o `ffmpeg` estiver instalado, junta tudo num `.mp4`; senão, guarda como `.ts` (abre no VLC). Streams com encriptação AES-128 precisam de `pip install cryptography`. Conteúdo protegido por DRM (Netflix, Disney+, etc.) não é suportado.
+
 ## Utilização
 
 Interface gráfica, no browser:
 
 ```bash
 cd velodown
-python3 -m velodown serve          # abre http://127.0.0.1:8787
+python3 -m velodown serve --open   # abre http://127.0.0.1:8787
 ```
 
 Linha de comandos:
@@ -42,7 +67,7 @@ Ctrl+C pausa o download. Correr o mesmo comando outra vez retoma-o.
 python3 -m unittest -v tests.test_velodown
 ```
 
-Os testes usam um servidor HTTP local e verificam o SHA-256 de cada ficheiro descarregado. Cobrem a segmentação dinâmica, pausar e retomar a partir do disco, o modo sem `Range`, o limite de velocidade, a fila e a persistência.
+Os testes usam um servidor HTTP local e verificam o SHA-256 de cada ficheiro descarregado. Cobrem a segmentação dinâmica, pausar e retomar a partir do disco, o modo sem `Range`, o limite de velocidade, cookies, HLS (melhor qualidade, retoma, recusa de DRM), a fila e a persistência.
 
 ## Estrutura
 
@@ -52,6 +77,7 @@ Os testes usam um servidor HTTP local e verificam o SHA-256 de cada ficheiro des
 - `velodown/static/index.html`: interface
 - `velodown/cli.py`: linha de comandos
 
-## Ainda não incluído
+## Limitações
 
-Integração com o browser (extensão), captura de vídeo de sites, FTP e autenticação HTTP.
+- Não suporta FTP nem streams DASH (.mpd).
+- A extensão é para browsers Chromium. No Firefox não foi testada.

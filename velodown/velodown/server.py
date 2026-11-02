@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from .manager import Manager
@@ -33,6 +34,8 @@ def make_handler(mgr: Manager):
             if self.path in ("/", "/index.html"):
                 with open(os.path.join(STATIC, "index.html"), "rb") as f:
                     return self._send(200, f.read(), "text/html; charset=utf-8")
+            if self.path == "/api/ping":
+                return self._send(200, {"app": "VeloDown", "ok": True})
             if self.path == "/api/state":
                 return self._send(200, mgr.state())
             self._send(404, {"error": "not found"})
@@ -40,7 +43,7 @@ def make_handler(mgr: Manager):
         def do_POST(self):
             # Reject cross-site requests: only same-origin pages may drive the API.
             origin = self.headers.get("Origin")
-            if origin and not re.match(r"^https?://(127\.0\.0\.1|localhost)(:\d+)?$", origin):
+            if origin and not re.match(r"^(https?://(127\.0\.0\.1|localhost)(:\d+)?|(chrome|moz)-extension://[\w-]+)$", origin):
                 return self._send(403, {"error": "forbidden origin"})
             try:
                 b = self._body()
@@ -48,8 +51,10 @@ def make_handler(mgr: Manager):
                     urls = [u.strip() for u in str(b.get("url", "")).split() if u.strip()]
                     if not urls or not all(re.match(r"^(https?|ftp)://", u) for u in urls):
                         return self._send(400, {"error": "Enter one or more http(s) URLs"})
+                    hdrs = b.get("headers") if isinstance(b.get("headers"), dict) else None
                     out = [mgr.add(u, int(b.get("connections", 8)), bool(b.get("start", True)),
-                                   b.get("filename") or None, b.get("category") or None) for u in urls]
+                                   b.get("filename") or None, b.get("category") or None,
+                                   hdrs, b.get("kind") or None) for u in urls]
                     return self._send(200, {"added": out})
                 m = re.match(r"^/api/downloads/(\w+)/(pause|resume|delete)$", self.path)
                 if m:
@@ -79,10 +84,15 @@ def make_handler(mgr: Manager):
     return Handler
 
 
-def serve(root: str | None = None, host: str = "127.0.0.1", port: int = 8787) -> None:
+def serve(root: str | None = None, host: str = "127.0.0.1", port: int = 8787,
+          open_browser: bool = False) -> None:
     mgr = Manager(root)
     httpd = ThreadingHTTPServer((host, port), make_handler(mgr))
-    print(f"VeloDown running at http://{host}:{port}  (files saved to {mgr.root})")
+    url = f"http://{host}:{port}"
+    print(f"VeloDown a correr em {url}  (ficheiros em {mgr.root})")
+    if open_browser:
+        import webbrowser
+        threading.Timer(0.5, webbrowser.open, (url,)).start()
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

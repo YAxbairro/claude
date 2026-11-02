@@ -7,6 +7,7 @@ import sys
 import time
 
 from .engine import Download, TokenBucket, probe
+from .hls import HlsDownload, is_hls
 
 
 def human(n: float) -> str:
@@ -19,9 +20,13 @@ def human(n: float) -> str:
 
 def cmd_get(a) -> int:
     dest = a.output
-    if not dest or os.path.isdir(dest):
+    if (not dest or os.path.isdir(dest)) and not is_hls(a.url):
         dest = os.path.join(dest or ".", probe(a.url).filename)
-    dl = Download(a.url, dest, a.connections, TokenBucket(a.limit * 1024))
+    if is_hls(a.url):
+        dest = a.output if a.output and not os.path.isdir(a.output) else os.path.join(a.output or ".", "video.mp4")
+        dl = HlsDownload(a.url, dest, a.connections, TokenBucket(a.limit * 1024))
+    else:
+        dl = Download(a.url, dest, a.connections, TokenBucket(a.limit * 1024))
     dl.start()
     try:
         while dl.status == "running":
@@ -38,7 +43,7 @@ def cmd_get(a) -> int:
     dl.wait()
     print()
     if dl.status == "done":
-        print(f"Saved {dest}")
+        print(f"Guardado em {dl.dest}")
         return 0
     print(f"Failed: {dl.error}")
     return 1
@@ -55,9 +60,10 @@ def main(argv=None) -> int:
     s = sub.add_parser("serve", help="start the web interface")
     s.add_argument("--root", help="download folder (default ~/Downloads/VeloDown)")
     s.add_argument("--port", type=int, default=8787)
+    s.add_argument("--open", action="store_true", help="abrir a interface no browser")
     a = p.parse_args(argv)
     if a.cmd == "get":
         return cmd_get(a)
     from .server import serve
-    serve(a.root, port=a.port)
+    serve(a.root, port=a.port, open_browser=a.open)
     return 0
