@@ -1,0 +1,68 @@
+name: VeloDown release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: velodown } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: python -m unittest -v tests.test_velodown
+
+  build:
+    needs: test
+    strategy:
+      matrix:
+        include:
+          - { os: windows-latest, name: VeloDown-Windows.exe, flags: "--noconsole" }
+          - { os: macos-latest,   name: VeloDown-macOS,       flags: "" }
+          - { os: ubuntu-latest,  name: VeloDown-Linux,       flags: "" }
+    runs-on: ${{ matrix.os }}
+    defaults: { run: { working-directory: velodown, shell: bash } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pyinstaller==6.11.1 cryptography
+      - name: Build
+        run: |
+          SEP=":"; [ "$RUNNER_OS" = "Windows" ] && SEP=";"
+          pyinstaller --onefile ${{ matrix.flags }} --name VeloDown \
+            --icon extension/icons/128.png \
+            --add-data "velodown/static${SEP}velodown/static" launcher.py \
+            || pyinstaller --onefile ${{ matrix.flags }} --name VeloDown \
+            --add-data "velodown/static${SEP}velodown/static" launcher.py
+          ls dist
+          if [ "$RUNNER_OS" = "Windows" ]; then mv dist/VeloDown.exe "dist/${{ matrix.name }}"; else mv dist/VeloDown "dist/${{ matrix.name }}"; fi
+      - uses: actions/upload-artifact@v4
+        with: { name: "${{ matrix.name }}", path: "velodown/dist/${{ matrix.name }}" }
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { path: out, merge-multiple: true }
+      - name: Package browser extension
+        run: cd velodown/extension && zip -r ../../out/VeloDown-Extensao-Browser.zip . && cd ../.. && ls -la out
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: VeloDown ${{ github.ref_name }}
+          files: out/*
+          body_path: velodown/RELEASE_NOTES.md
+      - name: Keep build as workflow artifact (manual runs)
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-artifact@v4
+        with: { name: VeloDown-all, path: out/* }

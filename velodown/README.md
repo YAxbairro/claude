@@ -1,5 +1,7 @@
 # VeloDown
 
+**Descarregar:** https://github.com/YAxbairro/claude/releases/latest (Windows, macOS, Linux e a extensão do browser). Não precisa de Python.
+
 Um gestor de downloads original, inspirado nas funcionalidades que o Internet Download Manager anuncia publicamente. Não contém código nem recursos do IDM, e o binário do IDM não foi descompilado.
 
 Usa apenas a biblioteca padrão do Python 3.10 ou mais recente, sem dependências.

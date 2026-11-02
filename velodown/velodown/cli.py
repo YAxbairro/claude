@@ -38,14 +38,14 @@ def cmd_get(a) -> int:
             time.sleep(0.3)
     except KeyboardInterrupt:
         dl.pause()
-        print("\nPaused. Run the same command again to resume.")
+        print("\nPausado. Corre o mesmo comando outra vez para retomar.")
         return 130
     dl.wait()
     print()
     if dl.status == "done":
         print(f"Guardado em {dl.dest}")
         return 0
-    print(f"Failed: {dl.error}")
+    print(f"Falhou: {dl.error}")
     return 1
 
 

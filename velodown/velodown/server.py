@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -66,6 +67,11 @@ def make_handler(mgr: Manager):
                     else:
                         getattr(mgr, action)(jid)
                     return self._send(200, {"ok": True})
+                if self.path == "/api/quit":
+                    self._send(200, {"ok": True})
+                    mgr.stop_queue()
+                    threading.Thread(target=self.server.shutdown, daemon=True).start()
+                    return
                 if self.path == "/api/queue/start":
                     mgr.start_queue()
                     return self._send(200, {"ok": True})
@@ -86,12 +92,20 @@ def make_handler(mgr: Manager):
 
 def serve(root: str | None = None, host: str = "127.0.0.1", port: int = 8787,
           open_browser: bool = False) -> None:
-    mgr = Manager(root)
-    httpd = ThreadingHTTPServer((host, port), make_handler(mgr))
+    import webbrowser
     url = f"http://{host}:{port}"
-    print(f"VeloDown a correr em {url}  (ficheiros em {mgr.root})")
+    try:
+        httpd = ThreadingHTTPServer((host, port), None)
+    except OSError:
+        # Already running (e.g. double-clicked twice): just show the open instance.
+        if open_browser:
+            webbrowser.open(url)
+        return
+    mgr = Manager(root)
+    httpd.RequestHandlerClass = make_handler(mgr)
+    if sys.stdout:  # windowless builds have no console
+        print(f"VeloDown a correr em {url}  (ficheiros em {mgr.root})")
     if open_browser:
-        import webbrowser
         threading.Timer(0.5, webbrowser.open, (url,)).start()
     try:
         httpd.serve_forever()

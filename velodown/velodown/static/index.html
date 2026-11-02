@@ -60,6 +60,7 @@ textarea{min-height:80px;resize:vertical}.row2{display:flex;gap:10px}.row2>div{f
   <button id="bSettings">⚙ <span class="label">Agendar / Opções</span></button>
   <div class="grow"></div>
   <div class="stat" id="total"></div>
+  <button id="bQuit" title="Fechar o VeloDown">⏻ <span class="label">Sair</span></button>
 </header>
 <main>
   <nav id="nav"></nav>
@@ -130,7 +131,7 @@ function render(){
   if(d){const segs=(d.size&&d.segments.length)?d.segments.map(([a,b,p])=>`<i style="left:${100*a/d.size}%;width:${100*(p-a)/d.size}%"></i>`).join(''):`<i style="left:0;width:${d.status==='done'?100:(d.size?100*d.downloaded/d.size:0)}%"></i>`;
     det.innerHTML=`<div class="meta"><span><b>${esc(d.filename)}</b></span><span>Guardado em <b>${esc(d.path)}</b></span><span>Ligações ativas <b>${d.connections}</b></span><span>Segmentos <b>${d.segments.length||1}</b></span><span>${fmt(d.downloaded)} de ${fmt(d.size)}</span></div><div class="segs">${segs}</div>${d.error?`<div class="err">${esc(d.error)}</div>`:''}`}
 }
-async function refresh(){try{S=await api('/api/state');render()}catch(e){}}
+async function refresh(){try{S=await api('/api/state');render()}catch(e){if(!$('#rows'))return;$('#total').textContent='Sem ligação ao VeloDown. Abre o programa.'}}
 setInterval(refresh,700);refresh();
 
 $('#nav').onclick=e=>{const a=e.target.closest('a');if(a){cat=a.dataset.c;render()}};
@@ -149,6 +150,7 @@ document.addEventListener('paste',e=>{if(document.querySelector('dialog[open]'))
 const toLocal=ts=>{const d=new Date(ts*1000);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)};
 $('#bSettings').onclick=()=>{$('#maxc').value=S.max_concurrent;$('#lim').value=Math.round(S.speed_limit/1024);$('#sched').value=S.schedule_at?toLocal(S.schedule_at):'';$('#schedInfo').textContent=S.schedule_at?'Agendado para '+new Date(S.schedule_at*1000).toLocaleString():'Sem agendamento';$('#dSet').showModal()};
 $('#bSaveSet').onclick=async()=>{const v=$('#sched').value;await api('/api/settings',{max_concurrent:+$('#maxc').value,speed_limit:(+$('#lim').value)*1024,schedule_at:v?new Date(v).getTime()/1000:null});$('#dSet').close();refresh()};
+$('#bQuit').onclick=async()=>{if(!confirm('Fechar o VeloDown? Os downloads em curso ficam pausados e podem ser retomados depois.'))return;await api('/api/quit',{}).catch(()=>{});document.body.innerHTML='<div class="empty" style="margin:auto">O VeloDown foi fechado. Para voltar a abrir, abre o programa VeloDown outra vez.</div>'};
 $('#bClearSched').onclick=async()=>{await api('/api/settings',{schedule_at:null});$('#dSet').close();refresh()};
 </script>
 </body>
