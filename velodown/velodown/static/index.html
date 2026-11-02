@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VeloDown</title>
+<style>
+:root{--bg:#f4f6f9;--panel:#fff;--ink:#17202b;--muted:#647184;--line:#e1e6ee;--accent:#0f766e;--accent-2:#14b8a6;--warn:#b45309;--err:#b91c1c;--sel:#e6f4f2}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f141a;--panel:#161d25;--ink:#e6edf3;--muted:#8b98a8;--line:#253040;--accent:#2dd4bf;--accent-2:#14b8a6;--warn:#f59e0b;--err:#f87171;--sel:#16302e}}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{font-weight:700;margin-right:12px;display:flex;align-items:center;gap:8px}
+.brand svg{width:22px;height:22px}
+button{font:inherit;color:var(--ink);background:transparent;border:1px solid transparent;border-radius:8px;padding:6px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+button:hover:not(:disabled){background:var(--sel)}button:disabled{opacity:.4;cursor:default}
+button.primary{background:var(--accent);color:#fff}button.primary:hover{filter:brightness(1.1);background:var(--accent)}
+.sep{width:1px;height:22px;background:var(--line);margin:0 4px}
+.grow{flex:1}.stat{color:var(--muted);font-variant-numeric:tabular-nums}
+main{flex:1;display:flex;min-height:0}
+nav{width:180px;background:var(--panel);border-right:1px solid var(--line);padding:8px;overflow:auto}
+nav h4{margin:10px 8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+nav a{display:flex;justify-content:space-between;padding:6px 10px;border-radius:8px;color:inherit;text-decoration:none;cursor:pointer}
+nav a.on{background:var(--sel);color:var(--accent);font-weight:600}nav a span{color:var(--muted);font-size:12px}
+section{flex:1;display:flex;flex-direction:column;min-width:0}
+.tablewrap{flex:1;overflow:auto}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{position:sticky;top:0;background:var(--bg);text-align:left;font-weight:600;font-size:12px;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px}
+tr.row{cursor:default}tr.row:hover{background:color-mix(in srgb,var(--sel) 50%,transparent)}tr.row.sel{background:var(--sel)}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;min-width:90px}.bar i{display:block;height:100%;background:var(--accent)}
+.st-done{color:var(--accent)}.st-error{color:var(--err)}.st-paused{color:var(--warn)}
+.empty{padding:60px 20px;text-align:center;color:var(--muted)}
+.detail{border-top:1px solid var(--line);background:var(--panel);padding:10px 14px;display:none}
+.detail.on{display:block}.detail .meta{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin-bottom:8px}
+.detail .meta b{color:var(--ink);font-weight:600}
+.segs{position:relative;height:18px;border-radius:4px;background:var(--line);overflow:hidden}
+.segs i{position:absolute;top:0;bottom:0;background:var(--accent-2)}.segs i.edge{background:var(--accent)}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);padding:18px;width:min(520px,calc(100vw - 32px))}
+dialog::backdrop{background:#0006}dialog h3{margin:0 0 12px}
+label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px}
+textarea{min-height:80px;resize:vertical}.row2{display:flex;gap:10px}.row2>div{flex:1}
+.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.err{color:var(--err);font-size:13px;min-height:1em;margin-top:8px}
+@media (max-width:720px){nav{display:none}td:nth-child(n+5),th:nth-child(n+5),td:nth-child(3),th:nth-child(3){display:none}td{max-width:180px}header .label{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v12m0 0-5-5m5 5 5-5" stroke="var(--accent)"/><path d="M4 19h16"/></svg>VeloDown</div>
+  <button class="primary" id="bAdd" title="Adicionar URL (Ctrl+N)">＋ <span class="label">Adicionar URL</span></button>
+  <div class="sep"></div>
+  <button id="bResume" disabled>▶ <span class="label">Retomar</span></button>
+  <button id="bPause" disabled>⏸ <span class="label">Pausar</span></button>
+  <button id="bDelete" disabled>🗑 <span class="label">Apagar</span></button>
+  <div class="sep"></div>
+  <button id="bQStart">⏵⏵ <span class="label">Iniciar fila</span></button>
+  <button id="bQStop">⏹ <span class="label">Parar fila</span></button>
+  <button id="bSettings">⚙ <span class="label">Agendar / Opções</span></button>
+  <div class="grow"></div>
+  <div class="stat" id="total"></div>
+</header>
+<main>
+  <nav id="nav"></nav>
+  <section>
+    <div class="tablewrap">
+      <table><thead><tr><th>Nome</th><th>Tamanho</th><th>Progresso</th><th>Estado</th><th>Velocidade</th><th>Tempo restante</th><th>Categoria</th></tr></thead>
+      <tbody id="rows"></tbody></table>
+      <div class="empty" id="empty">Sem downloads. Clica em <b>Adicionar URL</b> ou cola um link (Ctrl+V).</div>
+    </div>
+    <div class="detail" id="detail"></div>
+  </section>
+</main>
+
+<dialog id="dAdd"><form method="dialog" id="fAdd">
+  <h3>Novo download</h3>
+  <label for="url">URL (um por linha para vários)</label>
+  <textarea id="url" required placeholder="https://exemplo.com/ficheiro.zip"></textarea>
+  <div class="row2">
+    <div><label for="conn">Ligações</label><select id="conn"><option>1</option><option>2</option><option>4</option><option selected>8</option><option>16</option><option>32</option></select></div>
+    <div><label for="cat">Categoria</label><select id="cat"><option value="">Automática</option></select></div>
+  </div>
+  <label for="fname">Nome do ficheiro (opcional)</label><input id="fname">
+  <div class="err" id="addErr"></div>
+  <div class="actions"><button value="cancel" formnovalidate>Cancelar</button><button type="button" id="bLater">Mais tarde</button><button class="primary" type="button" id="bNow">Descarregar agora</button></div>
+</form></dialog>
+
+<dialog id="dSet"><form method="dialog">
+  <h3>Agendamento e opções</h3>
+  <div class="row2">
+    <div><label for="maxc">Downloads em simultâneo</label><input id="maxc" type="number" min="1" max="20"></div>
+    <div><label for="lim">Limite de velocidade (KB/s, 0 = sem)</label><input id="lim" type="number" min="0"></div>
+  </div>
+  <label for="sched">Iniciar a fila automaticamente às</label><input id="sched" type="datetime-local">
+  <div class="stat" id="schedInfo" style="margin-top:6px;font-size:13px"></div>
+  <div class="actions"><button value="cancel">Cancelar</button><button type="button" id="bClearSched">Remover agendamento</button><button class="primary" type="button" id="bSaveSet">Guardar</button></div>
+</form></dialog>
+
+<script>
+const $=s=>document.querySelector(s);
+let S={downloads:[],categories:[]},cat='All',sel=null;
+const fmt=n=>{if(n==null)return'—';const u=['B','KB','MB','GB','TB'];let i=0;while(n>=1024&&i<4){n/=1024;i++}return n.toFixed(i?1:0)+' '+u[i]};
+const eta=d=>{if(d.status!=='running'||!d.speed||!d.size)return'';let s=Math.round((d.size-d.downloaded)/d.speed);const h=Math.floor(s/3600),m=Math.floor(s%3600/60);s%=60;return(h?h+'h ':'')+(h||m?m+'m ':'')+s+'s'};
+const ST={running:'A descarregar',queued:'Na fila',paused:'Pausado',done:'Concluído',error:'Erro'};
+const catPT={All:'Todos',Compressed:'Comprimidos',Documents:'Documentos',Music:'Música',Programs:'Programas',Video:'Vídeo',General:'Geral'};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function api(path,body){const r=await fetch(path,body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const j=await r.json();if(!r.ok)throw new Error(j.error||r.status);return j}
+
+function render(){
+  const list=S.downloads.filter(d=>cat==='All'||d.category===cat);
+  const filters=[['All','Todos'],['__running','A descarregar'],['__done','Concluídos'],['__unfinished','Por terminar']];
+  const fcount=k=>S.downloads.filter(d=>k==='All'||(k==='__running'?d.status==='running':k==='__done'?d.status==='done':d.status!=='done')).length;
+  $('#nav').innerHTML='<h4>Estado</h4>'+filters.map(([k,l])=>`<a data-c="${k}" class="${cat===k?'on':''}">${l}<span>${fcount(k)}</span></a>`).join('')
+    +'<h4>Categorias</h4>'+S.categories.filter(c=>c!=='All').map(c=>`<a data-c="${c}" class="${cat===c?'on':''}">${catPT[c]||c}<span>${S.downloads.filter(d=>d.category===c).length}</span></a>`).join('');
+  const shown=cat.startsWith('__')?S.downloads.filter(d=>cat==='__running'?d.status==='running':cat==='__done'?d.status==='done':d.status!=='done'):list;
+  $('#rows').innerHTML=shown.map(d=>{const p=d.size?Math.min(100,100*d.downloaded/d.size):0;
+    return `<tr class="row ${d.id===sel?'sel':''}" data-id="${d.id}"><td title="${esc(d.url)}">${esc(d.filename)}</td><td>${fmt(d.size)}</td>
+    <td><div class="bar"><i style="width:${d.status==='done'?100:p}%"></i></div></td>
+    <td class="st-${d.status}">${ST[d.status]||d.status}${d.status==='running'?' '+p.toFixed(1)+'%':''}</td>
+    <td>${d.status==='running'?fmt(d.speed)+'/s':''}</td><td>${eta(d)}</td><td>${catPT[d.category]||d.category}</td></tr>`}).join('');
+  $('#empty').style.display=shown.length?'none':'block';
+  const tot=S.downloads.filter(d=>d.status==='running').reduce((a,d)=>a+d.speed,0);
+  $('#total').textContent=(S.queue_running?'Fila ativa · ':'')+(S.speed_limit?'Limite '+fmt(S.speed_limit)+'/s · ':'')+'Total '+fmt(tot)+'/s';
+  const d=S.downloads.find(x=>x.id===sel);
+  $('#bResume').disabled=!d||!['paused','error'].includes(d.status);
+  $('#bPause').disabled=!d||!['running','queued'].includes(d.status);
+  $('#bDelete').disabled=!d;
+  const det=$('#detail');det.classList.toggle('on',!!d);
+  if(d){const segs=(d.size&&d.segments.length)?d.segments.map(([a,b,p])=>`<i style="left:${100*a/d.size}%;width:${100*(p-a)/d.size}%"></i>`).join(''):`<i style="left:0;width:${d.status==='done'?100:(d.size?100*d.downloaded/d.size:0)}%"></i>`;
+    det.innerHTML=`<div class="meta"><span><b>${esc(d.filename)}</b></span><span>Guardado em <b>${esc(d.path)}</b></span><span>Ligações ativas <b>${d.connections}</b></span><span>Segmentos <b>${d.segments.length||1}</b></span><span>${fmt(d.downloaded)} de ${fmt(d.size)}</span></div><div class="segs">${segs}</div>${d.error?`<div class="err">${esc(d.error)}</div>`:''}`}
+}
+async function refresh(){try{S=await api('/api/state');render()}catch(e){}}
+setInterval(refresh,700);refresh();
+
+$('#nav').onclick=e=>{const a=e.target.closest('a');if(a){cat=a.dataset.c;render()}};
+$('#rows').onclick=e=>{const r=e.target.closest('tr');if(r){sel=r.dataset.id;render()}};
+$('#rows').ondblclick=e=>{const r=e.target.closest('tr');if(!r)return;const d=S.downloads.find(x=>x.id===r.dataset.id);if(d&&['paused','error'].includes(d.status))act('resume')};
+async function act(a){if(!sel)return;if(a==='delete'){const d=S.downloads.find(x=>x.id===sel);const rm=d&&d.status==='done'&&confirm('Apagar também o ficheiro do disco?');await api(`/api/downloads/${sel}/delete`,{remove_file:rm});sel=null}else await api(`/api/downloads/${sel}/${a}`,{});refresh()}
+$('#bResume').onclick=()=>act('resume');$('#bPause').onclick=()=>act('pause');$('#bDelete').onclick=()=>act('delete');
+$('#bQStart').onclick=()=>api('/api/queue/start',{}).then(refresh);$('#bQStop').onclick=()=>api('/api/queue/stop',{}).then(refresh);
+
+function openAdd(u=''){$('#cat').innerHTML='<option value="">Automática</option>'+S.categories.filter(c=>c!=='All').map(c=>`<option value="${c}">${catPT[c]||c}</option>`).join('');$('#url').value=u;$('#fname').value='';$('#addErr').textContent='';$('#dAdd').showModal();$('#url').focus()}
+async function add(start){try{const r=await api('/api/downloads',{url:$('#url').value,connections:+$('#conn').value,category:$('#cat').value,filename:$('#fname').value,start});$('#dAdd').close();sel=r.added[0].id;refresh()}catch(e){$('#addErr').textContent=e.message}}
+$('#bAdd').onclick=()=>openAdd();$('#bNow').onclick=()=>add(true);$('#bLater').onclick=()=>add(false);
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='n'){e.preventDefault();openAdd()}if(e.key==='Delete'&&sel&&!document.querySelector('dialog[open]'))act('delete')});
+document.addEventListener('paste',e=>{if(document.querySelector('dialog[open]'))return;const t=e.clipboardData.getData('text').trim();if(/^(https?|ftp):\/\//.test(t))openAdd(t)});
+
+const toLocal=ts=>{const d=new Date(ts*1000);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)};
+$('#bSettings').onclick=()=>{$('#maxc').value=S.max_concurrent;$('#lim').value=Math.round(S.speed_limit/1024);$('#sched').value=S.schedule_at?toLocal(S.schedule_at):'';$('#schedInfo').textContent=S.schedule_at?'Agendado para '+new Date(S.schedule_at*1000).toLocaleString():'Sem agendamento';$('#dSet').showModal()};
+$('#bSaveSet').onclick=async()=>{const v=$('#sched').value;await api('/api/settings',{max_concurrent:+$('#maxc').value,speed_limit:(+$('#lim').value)*1024,schedule_at:v?new Date(v).getTime()/1000:null});$('#dSet').close();refresh()};
+$('#bClearSched').onclick=async()=>{await api('/api/settings',{schedule_at:null});$('#dSet').close();refresh()};
+</script>
+</body>
+</html>
