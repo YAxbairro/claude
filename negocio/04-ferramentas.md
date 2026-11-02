@@ -15,6 +15,7 @@ Pesquisa feita a 2 nov 2026. ✅ = já ligado e pronto a usar.
 | **Supabase** | Base de dados do Menu Real, do imoauto e, se for preciso, do CRM |
 | **Gmail / Google Calendar / Drive** | Rascunhos de emails, blocos de tempo, entregas aos clientes |
 | **Gamma** | Propostas bonitas em minutos |
+| **fal.ai (FLUX schnell)** | Imagens para storyboards e demos, ~0,003 $ por imagem. O Yax dá a chave quando for preciso; **nunca guardar a chave no repositório** |
 | **Firecrawl** | Encontrar leads: artistas, negócios sem site, imobiliárias |
 | **Agente de vídeo imobiliário** (este repo) | Reels imobiliários a partir de fotos (imoauto + Lutuima) |
 
