@@ -42,7 +42,8 @@ Em pausa até março: FleetCV, Berço.cv, site próprio da Afroberdiano.
 ## Comandos (escreve-os na conversa com o Claude)
 | Comando | O que faz |
 |---|---|
-| `/dia` | O que fazer hoje na tua 1 hora |
+| `/semana` | 💸 **O principal.** 1x por semana: leads + mensagens para a semana toda |
+| `/dia` | O que fazer hoje (usar só se precisares) |
 | `/leads artistas 30` | Encontra 30 leads e escreve as mensagens |
 | `/mensagens` | Colas uma conversa e recebes a resposta certa |
 | `/proposta Nome` | Proposta de 1 página |

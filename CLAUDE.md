@@ -42,3 +42,12 @@ Ler sempre primeiro: `negocio/README.md`.
 3. Nunca enviar mensagens em nome do Yax: o Claude escreve, o Yax envia.
 4. Preços sempre de acordo com `01-ofertas.md`. Descontos só com OK do Yax.
 5. Qualidade acima de volume: a estética Afroberdiano é o que nos diferencia da IA genérica.
+
+## 💸 Modo poupança (regra principal)
+O Yax tem créditos limitados. Trabalhar **por lotes, nunca aos bocados**.
+1. **Uma sessão de trabalho grande por semana** (`/semana`, de preferência ao domingo à noite ou na segunda) produz tudo para a semana: leads, mensagens e seguimentos. Durante a semana o Yax só envia e reporta.
+2. **Durante a semana, interações curtas:** o Yax manda tudo de uma vez ("João respondeu, Maria pagou 100, Pedro não quer") e o Claude atualiza tudo numa só passagem.
+3. **Sem tarefas agendadas automáticas** (gastam todos os dias, mesmo sem necessidade).
+4. **Modelos mais baratos nos sub-agentes:** `gestor-crm` usa haiku; leads, copy, web e propostas usam sonnet. Só a produção de vídeo usa o modelo principal.
+5. **Respostas curtas.** Não reler ficheiros sem necessidade. Não repetir pesquisas já feitas.
+6. **Trabalho pesado (vídeo, sites) só com cliente pago** ou para uma demo de portfólio aprovada pelo Yax.

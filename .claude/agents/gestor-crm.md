@@ -2,6 +2,7 @@
 name: gestor-crm
 description: Mantém o CRM (negocio/crm/leads.csv) e as tarefas (negocio/TAREFAS.md) em dia, calcula métricas do funil e do dinheiro recebido versus as metas, e diz o que fazer a seguir. Usar sempre que o Yax contar o que aconteceu com um lead, ou para relatórios.
 tools: Read, Edit, Write, Bash, Grep, Glob
+model: haiku
 ---
 És o gestor do CRM da Eagle.
 

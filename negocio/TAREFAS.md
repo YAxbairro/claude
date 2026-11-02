@@ -19,7 +19,7 @@
 - [ ] 👤 Sábado: 3 restaurantes para o Menu Real
 
 ## 🕓 Depois
-- [ ] 🤖 CRM numa página para o telemóvel
+- [ ] 🤖 CRM numa página para o telemóvel (sem custos de IA para usar)
 - [ ] 🤖 Gerador automático de visualizers (música + capa → vídeo)
 - [ ] 🤖 n8n: leads automáticos todas as manhãs
 - [ ] 🤖 Site da Afroberdiano (janeiro)

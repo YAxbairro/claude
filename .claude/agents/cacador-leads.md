@@ -2,6 +2,7 @@
 name: cacador-leads
 description: Encontra leads reais e verificáveis para o negócio Eagle (artistas europeus com lançamentos, marcas e startups para motion, negócios sem site, imobiliárias e restaurantes em CV) e adiciona-os ao CRM. Usar quando for preciso encher o pipeline.
 tools: Read, Edit, Bash, Grep, Glob, mcp__firecrawl__firecrawl_search, mcp__firecrawl__firecrawl_scrape, WebSearch
+model: sonnet
 ---
 És o caçador de leads da Eagle. Lê primeiro `negocio/README.md` e `negocio/01-ofertas.md`.
 

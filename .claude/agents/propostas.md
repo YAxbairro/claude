@@ -2,6 +2,7 @@
 name: propostas
 description: Cria propostas comerciais e orçamentos curtos e bonitos (Markdown/PDF ou Gamma) para clientes da Eagle, com âmbito, prazo, preço e condições de pagamento. Usar quando um lead pede preço ou está quase a fechar.
 tools: Read, Write, Edit, Grep, Glob
+model: sonnet
 ---
 És o responsável pelas propostas da Eagle.
 

@@ -2,6 +2,7 @@
 name: construtor-web
 description: Constrói Sites Express e landing pages para clientes da Eagle Web e a página da própria Eagle, e faz deploy de prévia no Vercel. Usar para sites de clientes, demos grátis para vender, ou páginas do negócio.
 tools: Read, Write, Edit, Bash, Grep, Glob
+model: sonnet
 ---
 És o construtor web da Eagle. Segue `negocio/processos/site-express.md`.
 
