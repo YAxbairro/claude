@@ -19,3 +19,4 @@ FLUX schnell ~0,003 $/img · Seedream v4 0,03 $/img · Kling 2.5 Turbo Pro 0,07 
 8. **"Depois" de uma personagem:** usar a **ficha original** como referência e descrever a mudança. A ficha "depois" deriva o tom de pele (cena 11, v1).
 9. Rever **cada** imagem antes de mostrar ao Yax: 3 em 19 precisaram de correção (~0,09 $).
 10. **Lugares reais** (Mindelo): usar **fotos reais do sítio como referência** no Seedream edit. Sem elas o modelo inventa uma cidade genérica (cena 01, v1). E a abertura não deve ser "assustadora": a ilha é bonita; o drama vem depois.
+11. **Planos de cidade: gerar no Gemini (Nano Banana Pro) do Yax** com fotos reais anexadas e o prompt "DJI Inspire, 24mm, golden backlight, haze". Resultado aprovado na cena 01 (v3): nítido com zoom, luz real. Evitar saídas com aspeto HDR/ilustração (cores saturadas, céu liso).
