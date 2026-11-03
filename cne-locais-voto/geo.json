@@ -1,0 +1,431 @@
+{
+ "0": {
+  "lat": 37.7393398,
+  "lon": -25.6689503,
+  "q": "Ponta Delgada, Açores",
+  "level": 1,
+  "name": "Ponta Delgada, Açores, Portugal",
+  "type": "administrative",
+  "aprox": true
+ },
+ "1": {
+  "lat": 38.5346153,
+  "lon": -28.5269531,
+  "name": "Câmara Municipal da Madalena",
+  "level": 0
+ },
+ "2": {
+  "lat": 38.7205898,
+  "lon": -27.2798731,
+  "q": "Angra do Heroísmo, Açores",
+  "level": 1,
+  "name": "Angra do Heroísmo, Açores, Portugal",
+  "type": "administrative",
+  "aprox": true
+ },
+ "3": {
+  "lat": 38.7587857,
+  "lon": -9.2300123,
+  "q": "Praceta da Quinta Nova, Amadora",
+  "level": 0,
+  "name": "Praceta da Quinta Nova, Quinta Nova, Mina, Mina de Água, Amadora, Lisboa, 2700-582, Portug",
+  "type": "residential"
+ },
+ "4": {
+  "lat": 38.7492069,
+  "lon": -9.228199,
+  "q": "Escola Básica José Ruy, Amadora",
+  "level": 0,
+  "name": "Escola Básica José Ruy, Avenida Manuel Alpedrinha, Urbanização da Atalaia, Damaia, Águas L",
+  "type": "school"
+ },
+ "5": {
+  "lat": 38.743587,
+  "lon": -9.219445,
+  "q": "Rua Bernardino Machado, Damaia, Amadora",
+  "level": 1,
+  "name": "Rua Bernardino Machado, Urbanização do Neudel, Damaia, Águas Livres, Amadora, Lisboa, 2720",
+  "type": "residential"
+ },
+ "6": {
+  "lat": 38.7420243,
+  "lon": -9.2106829,
+  "q": "Escola Básica Alice Vieira, Amadora",
+  "level": 0,
+  "name": "Escola Básica Alice Vieira, Rua Professor Doutor Egas Moniz, Alto da Cova da Moura, Buraca",
+  "type": "school"
+ },
+ "7": {
+  "lat": 38.7690288,
+  "lon": -9.2270927,
+  "q": "Escola Básica Miguel Torga, Amadora",
+  "level": 0,
+  "name": "Escola Básica Miguel Torga, Praceta Padre Álvaro Proença, Mina, Mina de Água, Amadora, Lis",
+  "type": "school"
+ },
+ "8": {
+  "lat": 38.7613138,
+  "lon": -9.2053562,
+  "q": "Escola Básica Orlando Gonçalves, Alfornelos",
+  "level": 0,
+  "name": "Escola Básica Orlando Gonçalves, Largo Ana de Castro Osório, Alfornelos, Encosta do Sol, A",
+  "type": "school"
+ },
+ "9": {
+  "lat": 40.6320293,
+  "lon": -8.6597957,
+  "q": "Universidade de Aveiro",
+  "level": 0,
+  "name": "Universidade de Aveiro - Campus de Santiago, Campus Universitário de Santiago, Bairro da G",
+  "type": "university"
+ },
+ "10": {
+  "lat": 38.6699849,
+  "lon": -9.1929952,
+  "q": "Rua do Raposo de Cima, Almada",
+  "level": 0,
+  "name": "Rua do Raposo de Cima, Raposo, Banática, Caparica e Trafaria, Almada, Setúbal, 2825-099, P",
+  "type": "residential"
+ },
+ "11": {
+  "lat": 38.6709107,
+  "lon": -9.1588881,
+  "q": "Avenida da Fundação, Cova da Piedade",
+  "level": 0,
+  "name": "Avenida da Fundação, Nossa Senhora da Piedade, Cova da Piedade, Almada, Cova da Piedade, P",
+  "type": "residential"
+ },
+ "12": {
+  "lat": 38.6601546,
+  "lon": -9.0829479,
+  "q": "Moinho de Maré Pequeno, Barreiro",
+  "level": 0,
+  "name": "Moinho Pequeno, Passadiço Moinho Pequeno, Bairro Ferroviário, Barreiro, Barreiro e Lavradi",
+  "type": "watermill"
+ },
+ "13": {
+  "lat": 38.0038887,
+  "lon": -7.8561113,
+  "q": "Parque de Feiras e Exposições de Beja",
+  "level": 0,
+  "name": "Parque de Feiras e Exposições de Beja, Rua de Aristídes de Sousa Mendes, Bairro de São Joã",
+  "type": "exhibition_centre"
+ },
+ "14": {
+  "lat": 41.5608921,
+  "lon": -8.3937345,
+  "name": "Rua da Universidade, Gualtar, Braga",
+  "level": 0
+ },
+ "15": {
+  "lat": 41.7967997,
+  "lon": -6.7689632,
+  "q": "Escola Superior de Tecnologia e Gestão, Bragança",
+  "level": 0,
+  "name": "Escola Superior de Tecnologia e Gestão, Ciclovia do Fervença, Barrio São João de Brito, Lo",
+  "type": "yes"
+ },
+ "16": {
+  "lat": 38.7191967,
+  "lon": -9.3430965,
+  "q": "Biblioteca Municipal de São Domingos de Rana",
+  "level": 0,
+  "name": "Biblioteca Pública Municipal de São Domingos de Rana, Rua das Travessas, Massapés, Matos C",
+  "type": "library"
+ },
+ "17": {
+  "lat": 39.823666,
+  "lon": -7.491793,
+  "q": "@39.823666,-7.491793",
+  "level": 0,
+  "name": "coordenadas do ficheiro"
+ },
+ "18": {
+  "lat": 40.2093194,
+  "lon": -8.415955,
+  "q": "Casa Municipal da Cultura, Coimbra",
+  "level": 0,
+  "name": "Casa Municipal da Cultura, 64, Rua Pedro Monteiro, Calhabé, Coimbra (Sé Nova, Santa Cruz, ",
+  "type": "public"
+ },
+ "19": {
+  "lat": 40.283664,
+  "lon": -7.502421,
+  "q": "Rua Marquês de Ávila e Bolama, Covilhã",
+  "level": 1,
+  "name": "Rua Marquês de Ávila e Bolama, Covilhã e Canhoso, Covilhã, Castelo Branco, 6200-053, Portu",
+  "type": "secondary"
+ },
+ "20": {
+  "lat": 38.5679435,
+  "lon": -7.9106167,
+  "q": "Colégio Luís António Verney, Évora",
+  "level": 0,
+  "name": "Colégio Luis António Verney - Universidade de Évora, 59, Rua Romão Ramalho, Évora (São Mam",
+  "type": "university"
+ },
+ "21": {
+  "lat": 37.0300342,
+  "lon": -7.9243376,
+  "q": "Estrada da Penha, Faro",
+  "level": 1,
+  "name": "Estrada da Penha, Faro (Sé e São Pedro), Faro, 8005-114, Portugal",
+  "type": "tertiary"
+ },
+ "22": {
+  "lat": 40.5394267,
+  "lon": -7.2734758,
+  "q": "Avenida Doutor Francisco Sá Carneiro 50, Guarda",
+  "level": 0,
+  "name": "Avenida Doutor Francisco Sá Carneiro, Judiária, Quinta do Chafariz Velho, Guarda, 6300-734",
+  "type": "primary"
+ },
+ "23": {
+  "lat": 38.7677109,
+  "lon": -9.1581301,
+  "q": "Alameda das Linhas de Torres 156, Lisboa",
+  "level": 0,
+  "name": "Junta de Freguesia do Lumiar, 156, Alameda das Linhas de Torres, Quinta do Lambert, Lumiar",
+  "type": "townhall"
+ },
+ "24": {
+  "lat": 38.7004125,
+  "lon": -9.2162609,
+  "q": "Avenida do Restelo 33, Lisboa",
+  "level": 0,
+  "name": "Embaixada de Cabo Verde, 33, Avenida do Restelo, Restelo, São Francisco Xavier, Belém, Lis",
+  "type": "diplomatic"
+ },
+ "25": {
+  "lat": 38.7598334,
+  "lon": -9.1855762,
+  "q": "Largo das Pimenteiras, Lisboa",
+  "level": 0,
+  "name": "Largo das Pimenteiras, Carnide, Lisboa, 1600-576, Portugal",
+  "type": "service"
+ },
+ "26": {
+  "lat": 38.718392,
+  "lon": -9.1554247,
+  "q": "Rua de São Bento 640, Lisboa",
+  "level": 0,
+  "name": "640, Rua de São Bento, Amoreiras, Santo António, Campo de Ourique, Lisboa, 1250-222, Portu",
+  "type": "yes"
+ },
+ "27": {
+  "lat": 39.7371491,
+  "lon": -8.8105226,
+  "q": "Rua General Norton de Matos, Leiria",
+  "level": 1,
+  "name": "Rua General Norton de Matos, Quinta de São Bartolomeu, Cruz d'Areia, Leiria, Pousos, Barre",
+  "type": "residential"
+ },
+ "28": {
+  "lat": 38.8009634,
+  "lon": -9.1170045,
+  "q": "Avenida Amílcar Cabral, Sacavém",
+  "level": 1,
+  "name": "Avenida Amílcar Cabral, Quinta do Mocho, Sacavém e Prior Velho, Loures, Lisboa, 2685-119, ",
+  "type": "tertiary"
+ },
+ "29": {
+  "lat": 38.8144099,
+  "lon": -9.1166236,
+  "q": "Rua do Centro Social, Catujal",
+  "level": 0,
+  "name": "Rua do Centro Social, Bairro Venceslau, Catujal, Camarate, Unhos e Apelação, Loures, Lisbo",
+  "type": "residential"
+ },
+ "30": {
+  "lat": 38.8704154,
+  "lon": -9.1223174,
+  "q": "Escola Básica do Zambujal, Loures",
+  "level": 0,
+  "name": "Escola Básica do Zambujal, Rua Etelvino Fernandes, Bairro Penugem Fragosa, Zambujal, Santo",
+  "type": "school"
+ },
+ "31": {
+  "lat": 41.4778881,
+  "lon": -7.1771147,
+  "q": "Avenida 25 de Abril, Mirandela",
+  "level": 1,
+  "name": "Avenida 25 de Abril, Mirandela, Bragança, 5370-202, Portugal",
+  "type": "tertiary"
+ },
+ "32": {
+  "lat": 38.6480536,
+  "lon": -9.0417682,
+  "q": "Biblioteca Municipal do Vale da Amoreira",
+  "level": 0,
+  "name": "Biblioteca Municipal Bruno Vieira Amaral, Avenida José Almada Negreiros, Bairro das Descob",
+  "type": "library"
+ },
+ "33": {
+  "lat": 38.7903157,
+  "lon": -9.1804941,
+  "q": "Casa da Juventude de Odivelas",
+  "level": 0,
+  "name": "Casa da Juventude, 1, Largo da Memória, Bairro Espírito Santo, Odivelas, Lisboa, 2675-407,",
+  "type": "community_centre"
+ },
+ "34": {
+  "lat": 38.7303716,
+  "lon": -9.3143562,
+  "q": "Rua Antão Gonçalves, Porto Salvo",
+  "level": 0,
+  "name": "Rua Antão Gonçalves, Bairro dos Navegadores, Porto Salvo, Oeiras, Lisboa, 2740-234, Portug",
+  "type": "residential"
+ },
+ "35": {
+  "lat": 38.7242319,
+  "lon": -9.2230838,
+  "q": "Rua António Navarro, Carnaxide",
+  "level": 0,
+  "name": "Rua António Navarro, Bairro da Portela, Carnaxide e Queijas, Oeiras, Lisboa, 2790-153, Por",
+  "type": "tertiary"
+ },
+ "36": {
+  "lat": 39.2965567,
+  "lon": -7.4328118,
+  "name": "Avenida do Brasil, Portalegre",
+  "level": 0
+ },
+ "37": {
+  "lat": 37.1408196,
+  "lon": -8.5365981,
+  "name": "Rua Porta da Serra, Portimão",
+  "level": 0
+ },
+ "38": {
+  "lat": 41.1538113,
+  "lon": -8.6101712,
+  "q": "Rua de Camões 219, Porto",
+  "level": 0,
+  "name": "219, Rua de Camões, Trindade, Zona Histórica do Porto, Cedofeita, Santo Ildefonso, Sé, Mir",
+  "type": "house"
+ },
+ "39": {
+  "lat": 37.0646497,
+  "lon": -8.0960446,
+  "q": "Avenida Infante de Sagres, Quarteira",
+  "level": 0,
+  "name": "Avenida Infante de Sagres, Vilamoura, Quarteira, Loulé, Faro, 8125-616, Portugal",
+  "type": "pedestrian"
+ },
+ "40": {
+  "lat": 38.7701425,
+  "lon": -9.2989679,
+  "q": "Escola Secundária Ferreira Dias, Agualva",
+  "level": 0,
+  "name": "Escola Secundária Ferreira Dias, 1, Rua António Nunes Sequeira, Agualva, Agualva-Cacém, Ag",
+  "type": "school"
+ },
+ "41": {
+  "lat": 38.8020886,
+  "lon": -9.3510597,
+  "q": "Escola Mestre Domingos Saraiva, Algueirão",
+  "level": 0,
+  "name": "Escola Básica e Secundária Mestre Domingos Saraiva, 14,16, Rua Doutor Coutinho Pais, Casal",
+  "type": "school"
+ },
+ "42": {
+  "lat": 38.7711839,
+  "lon": -9.3146416,
+  "q": "Escola Secundária Gama Barros, Cacém",
+  "level": 0,
+  "name": "Escola Básica e Secundária Gama Barros, Rua da Esperança, Cacém, Cacém e São Marcos, Sintr",
+  "type": "school"
+ },
+ "43": {
+  "lat": 38.759103,
+  "lon": -9.2774633,
+  "q": "Escola Secundária Stuart Carvalhais, Massamá",
+  "level": 0,
+  "name": "Escola Secundária Stuart Carvalhais, Rua dos Jasmins, Quinta de Santo António da Barôta, M",
+  "type": "school"
+ },
+ "44": {
+  "lat": 38.7844799,
+  "lon": -9.3053422,
+  "q": "Casa da Cultura Lívio de Morais, Mira Sintra",
+  "level": 0,
+  "name": "Casa da Cultura Lívio de Morais, Largo da Igreja, Avenida 25 de Abril, Agualva, Mira-Sintr",
+  "type": "arts_centre"
+ },
+ "45": {
+  "lat": 38.7540853,
+  "lon": -9.2523491,
+  "q": "Escola Básica Padre Alberto Neto, Queluz",
+  "level": 0,
+  "name": "Escola Básica e Secundária Padre Alberto Neto, Avenida Comandante Paiva Couceiro, Queluz, ",
+  "type": "school"
+ },
+ "46": {
+  "lat": 38.7827195,
+  "lon": -9.3181245,
+  "q": "Escola Secundária Leal da Câmara, Rio de Mouro",
+  "level": 0,
+  "name": "Escola Secundária Leal da Câmara, 1; 1A, Avenida Pedro Nunes, Casal de Porqueiros, Rio de ",
+  "type": "school"
+ },
+ "47": {
+  "lat": 38.7474151,
+  "lon": -9.2937992,
+  "q": "Praceta Rio Amazonas, São Marcos",
+  "level": 0,
+  "name": "Praceta Rio Amazonas, São Marcos, Cacém e São Marcos, Sintra, Lisboa, 2735-661, Portugal",
+  "type": "residential"
+ },
+ "48": {
+  "lat": 38.6240123,
+  "lon": -9.1665057,
+  "q": "Rua 1º de Maio 13, Corroios",
+  "level": 0,
+  "name": "Rua 1º de Maio, Quinta do Albino, Quinta da Aniza, Corroios, Seixal, Setúbal, 2855-459, Po",
+  "type": "residential"
+ },
+ "49": {
+  "lat": 38.6291374,
+  "lon": -9.1169522,
+  "name": "Rua 1º de Maio, Amora (2845-125)",
+  "level": 0
+ },
+ "50": {
+  "lat": 38.6264493,
+  "lon": -9.1032969,
+  "name": "Largo Germano Gil Martins, Arrentela",
+  "level": 0
+ },
+ "51": {
+  "lat": 38.5220346,
+  "lon": -8.870706,
+  "q": "Rua do Antigo Olival, Setúbal",
+  "level": 0,
+  "name": "Rua do Antigo Olival, Bela Vista, Setúbal (São Sebastião), Alto da Guerra, Setúbal, 2910-0",
+  "type": "residential"
+ },
+ "52": {
+  "lat": 37.9562231,
+  "lon": -8.8805005,
+  "q": "Rua João Dorotéia, Sines",
+  "level": 0,
+  "name": "Rua João Doroteia, Bairro Amilcar Cabral, Sines, Setúbal, 7520-109, Portugal",
+  "type": "residential"
+ },
+ "53": {
+  "lat": 41.6913599,
+  "lon": -8.8283201,
+  "q": "Avenida dos Combatentes da Grande Guerra 225, Viana do Castelo",
+  "level": 0,
+  "name": "Avenida dos Combatentes da Grande Guerra, Viana do Castelo, Viana do Castelo (Santa Maria ",
+  "type": "tertiary"
+ },
+ "54": {
+  "lat": 38.8764231,
+  "lon": -9.0880687,
+  "q": "Rua Antero de Quental, Vialonga",
+  "level": 0,
+  "name": "Rua Antero de Quental, Bairro da Icesa, Mogos, Vialonga, Vila Franca de Xira, Lisboa, 2625",
+  "type": "residential"
+ }
+}

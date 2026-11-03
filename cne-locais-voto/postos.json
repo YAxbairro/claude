@@ -1,0 +1,710 @@
+[
+ {
+  "concelho": "AÇORES",
+  "posto": "Ilha de São Miguel",
+  "local": "AIPA - Associação dos Imigrantes nos Açores",
+  "mesas": [
+   {
+    "codigo": "PT-SM-01",
+    "eleitores": 95
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "AÇORES",
+  "posto": "Ilha do Pico",
+  "local": "Edifício dos Paços do Concelho da Câmara Municipal da Madalena",
+  "mesas": [
+   {
+    "codigo": "PT-PC-01",
+    "eleitores": 142
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "AÇORES",
+  "posto": "Ilha Terceira",
+  "local": "AIPA - Associação dos Imigrantes nos Açores",
+  "mesas": [
+   {
+    "codigo": "PT-TR-01",
+    "eleitores": 94
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "AMADORA",
+  "posto": "MINA",
+  "local": "Esc. Básica 1/Jinfantil da Mina. Praceta da Quinta Nova 6, 2700-688 Amadora",
+  "mesas": [
+   {
+    "codigo": "PT-MI-01",
+    "eleitores": 758
+   },
+   {
+    "codigo": "PT-MI-02",
+    "eleitores": 758
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "AMADORA",
+  "posto": "REBOLEIRA",
+  "local": "Esc.Básica 1, José Ruy, Av. Manuel Alpedrinha, 2720-354 Amadora",
+  "mesas": [
+   {
+    "codigo": "PT-RE-01",
+    "eleitores": 502
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "AMADORA",
+  "posto": "DAMAIA",
+  "local": "EB 2,3 Pedro d' Orey da Cunha, R. Bernardino Machado, Damaia, 2720-066 Amadora",
+  "mesas": [
+   {
+    "codigo": "PT-DA-01",
+    "eleitores": 788
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "AMADORA",
+  "posto": "BURACA",
+  "local": "Esc.Básica/JInfantil Alice Vieira, R. Prof. Dr. Egas Moniz 6, Amadora",
+  "mesas": [
+   {
+    "codigo": "PT-BU-01",
+    "eleitores": 625
+   },
+   {
+    "codigo": "PT-BU-02",
+    "eleitores": 624
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "AMADORA",
+  "posto": "CASAL DE SÃO BRÁS",
+  "local": "Escola Básica 2/3 Miguel Torga, Praceta Padre Álvaro Proença 10, Amadora",
+  "mesas": [
+   {
+    "codigo": "PT-CS-01",
+    "eleitores": 426
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "AMADORA",
+  "posto": "ALFORNELOS",
+  "local": "Escola Básica 1º Ciclo Orlando Gonçalves, Largo Ana de Castro Osório s/nº, 2700-054 Alfornelos",
+  "mesas": [
+   {
+    "codigo": "PT-AL-01",
+    "eleitores": 460
+   },
+   {
+    "codigo": "PT-AL-02",
+    "eleitores": 459
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "AVEIRO",
+  "posto": "AVEIRO",
+  "local": "Universidade de Aveiro, Campus Universitário de Aveiro",
+  "mesas": [
+   {
+    "codigo": "PT-AV-01",
+    "eleitores": 194
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "ALMADA",
+  "posto": "MONTE CAPARICA",
+  "local": "Escola Básica nº 1 do Monte, na Rua do Raposo de Cima, 2825 099",
+  "mesas": [
+   {
+    "codigo": "PT-MC-01",
+    "eleitores": 535
+   },
+   {
+    "codigo": "PT-MC-02",
+    "eleitores": 535
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "ALMADA",
+  "posto": "COVA DE PIEDADE",
+  "local": "Escola Básica n.º 1 da Cova da Piedade, sita na Avenida da Fundação, n.º 26, 2805-151",
+  "mesas": [
+   {
+    "codigo": "PT-CP-01",
+    "eleitores": 779
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "BARREIRO",
+  "posto": "BARREIRO",
+  "local": "Centro Interpretativo Moinho Maré Pequeno, Largo Moinho Pequeno 2830, Barreiro",
+  "mesas": [
+   {
+    "codigo": "PT-BA-01",
+    "eleitores": 665
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "BEJA",
+  "posto": "BEJA",
+  "local": "Edificio Administrativo do Parque de Freiras e Exposiçoes de Beja, Manuel de Castro e Brito, R. de Maria Isabel Covas Lima 1, 7800-590 Beja",
+  "mesas": [
+   {
+    "codigo": "PT-BE-01",
+    "eleitores": 123
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "BRAGA",
+  "posto": "BRAGA",
+  "local": "Universidade do Minho, Hall do Complexo Pedagógico I (CPI), R. da Universidade, 4710-057 Braga",
+  "mesas": [
+   {
+    "codigo": "PT-BR-01",
+    "eleitores": 235
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "BRAGANÇA",
+  "posto": "BRAGANÇA",
+  "local": "Hall da Escola Superior de Tecnologia e Gestão, Campus de Santa Apolónia, 5300-253 Bragança",
+  "mesas": [
+   {
+    "codigo": "PT-BG-01",
+    "eleitores": 497
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "CASCAIS",
+  "posto": "SÃO DOMINGOS DE RANA",
+  "local": "Biblioteca Municipal de S. Domingos de Rana, R. Travessas 165, 2785-285 São Domingos de Rana ( Bairro do Moinho)",
+  "mesas": [
+   {
+    "codigo": "PT-SD-01",
+    "eleitores": 519
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "CASTELO BRANCO",
+  "posto": "CASTELO BRANCO",
+  "local": "LARGO DA DEVESA , 6000-251 Castelo Branco( DOCAS) 39.823666° N, 7.491793° W",
+  "mesas": [
+   {
+    "codigo": "PT-CB-01",
+    "eleitores": 115
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "COIMBRA",
+  "posto": "COIMBRA",
+  "local": "Sala Francisco Sá de Miranda, na Casa Municipal da Cultura, Rua Pedro Monteiro, 3000-329 Coimbra",
+  "mesas": [
+   {
+    "codigo": "PT-CM-01",
+    "eleitores": 527
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "COVILHÃ",
+  "posto": "COVILHÃ",
+  "local": "Auditório da Biblioteca - Central da UBI, R. Marquês de Ávila e Bolama 48, Covilhã",
+  "mesas": [
+   {
+    "codigo": "PT-CV-01",
+    "eleitores": 80
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "ÉVORA",
+  "posto": "ÉVORA",
+  "local": "Universidade Évora Colégio Luis António Verney SALA 066, Rua Romão Ramalho, nº 59, 7000-671 Évora",
+  "mesas": [
+   {
+    "codigo": "PT-EV-01",
+    "eleitores": 164
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "FARO",
+  "posto": "FARO",
+  "local": "Universidade do Algarve - polo da Penha - Estr. da Penha, 8005-139 Faro",
+  "mesas": [
+   {
+    "codigo": "PT-FR-01",
+    "eleitores": 260
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "GUARDA",
+  "posto": "GUARDA",
+  "local": "Pavilhão Azul, junto às Residências de Estudantes da Universidade Politécnica da Guarda, Av. Dr. Francisco Sá Carneiro, n.º 50 6300-559 Guarda",
+  "mesas": [
+   {
+    "codigo": "PT-GR-01",
+    "eleitores": 64
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "LISBOA",
+  "posto": "LUMIAR",
+  "local": "Junta de fregueisia do Lumiar - salao nobre - Alameda das Linhas de Torres 156, 1750-149 Lisboa",
+  "mesas": [
+   {
+    "codigo": "PT-LA-01",
+    "eleitores": 433
+   }
+  ],
+  "alterado": true
+ },
+ {
+  "concelho": "LISBOA",
+  "posto": "EMBAIXADA LISBOA",
+  "local": "Embaixada de Cabo Verde, Av. Do restelo, 33, 1449 025 Lisboa",
+  "mesas": [
+   {
+    "codigo": "PT-LB-01",
+    "eleitores": 638
+   }
+  ],
+  "alterado": true
+ },
+ {
+  "concelho": "LISBOA",
+  "posto": "BENFICA",
+  "local": "Junta de Freguesia Carnide, Largo das Pimenteiras 6, 1600-576 Lisboa",
+  "mesas": [
+   {
+    "codigo": "PT-BC-01",
+    "eleitores": 435
+   }
+  ],
+  "alterado": true
+ },
+ {
+  "concelho": "LISBOA",
+  "posto": "ALCÂNTARA",
+  "local": "Centro Cultural de Cabo Verde, R de S. Bento 640, 1250-220 Lisboa",
+  "mesas": [
+   {
+    "codigo": "PT-AA-01",
+    "eleitores": 274
+   }
+  ],
+  "alterado": true
+ },
+ {
+  "concelho": "LEIRIA",
+  "posto": "LEIRIA",
+  "local": "lobby do auditório dos serviços centrais do Instituto Politécnico de Leiria, Rua General Norton de Matos, 2410-191 Leiria",
+  "mesas": [
+   {
+    "codigo": "PT-LR-01",
+    "eleitores": 219
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "LOURES",
+  "posto": "LOURES - SACAVÉM",
+  "local": "Casa da Cultura de Sacavém, Av. Amílcar Cabral, 2685-155 Sacavém Urbanização Terraços da Ponte",
+  "mesas": [
+   {
+    "codigo": "PT-SC-01",
+    "eleitores": 660
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "LOURES",
+  "posto": "LOURES - UNHOS",
+  "local": "Junta de freguesia - Delegação de Catujal - Rua do Centro Social, Bairro Venceslau, Catujal, 2680-494 Unhos",
+  "mesas": [
+   {
+    "codigo": "PT-UN-01",
+    "eleitores": 401
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "LOURES",
+  "posto": "LOURES - ZAMBUJAL",
+  "local": "Escola Básica do 1º Ciclo (EB1) do Zambujal",
+  "mesas": [
+   {
+    "codigo": "PT-ZB-01",
+    "eleitores": 401
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "MIRANDELA",
+  "posto": "MIRANDELA",
+  "local": "Polo Mirandela - Escola Superior de Comunicação Administração e Turismo, Campus do Cruzeiro – Avenida 25 de Abril, Lote 2, 5370-202 Mirandela",
+  "mesas": [
+   {
+    "codigo": "PT-MR-01",
+    "eleitores": 137
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "MOITA",
+  "posto": "VALE DE AMOREIRA",
+  "local": "Biblioteca Municipal do Vale da Amoreira, Avenida José Almada Negreiros, 2835-204 Vale da Amoreira",
+  "mesas": [
+   {
+    "codigo": "PT-VM-01",
+    "eleitores": 497
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "ODIVELAS",
+  "posto": "ODIVELAS",
+  "local": "Casa da Juventude de Odivelas, Largo Memória 1, 2675-407 Odivelas",
+  "mesas": [
+   {
+    "codigo": "PT-OD-01",
+    "eleitores": 617
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "OEIRAS",
+  "posto": "OEIRAS - PORTO SALVO",
+  "local": "Centro Comunitário dos Navegadores, Rua Antão Gonçalves, 3, 2740 231 Porto Salvo",
+  "mesas": [
+   {
+    "codigo": "PT-PO-01",
+    "eleitores": 612
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "OEIRAS",
+  "posto": "CARNAXIDE",
+  "local": "Igreja Velha Outurela, Rua António Navarro 1, 2790-205 Carnaxide",
+  "mesas": [
+   {
+    "codigo": "PT-CX-01",
+    "eleitores": 618
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "PORTALEGRE",
+  "posto": "PORTALEGRE",
+  "local": "União das Freguesias da Sé e S. Lourenço, Avenida do Brasil, N.º 20, 7300-068 Portalegre",
+  "mesas": [
+   {
+    "codigo": "PT-PA-01",
+    "eleitores": 51
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "PORTIMÃO",
+  "posto": "PORTIMÃO",
+  "local": "Consulado de Cabo Verde em Portimão, Rua Portas da Serra, nº 37, 1.º Esquerdo, 8500-603 Portimão.",
+  "mesas": [
+   {
+    "codigo": "PT-PR-01",
+    "eleitores": 306
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "PORTO",
+  "posto": "PORTO",
+  "local": "Consulado de Cabo Verde no Porto, Rua de Camões 219, 4000-265 Porto",
+  "mesas": [
+   {
+    "codigo": "PT-PT-01",
+    "eleitores": 531
+   },
+   {
+    "codigo": "PT-PT-02",
+    "eleitores": 531
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "QUARTEIRA",
+  "posto": "QUARTEIRA",
+  "local": "Espaço Atlântida, Urbanização Atlântida, Av. Infante Sagres, Lote 2.25 E)",
+  "mesas": [
+   {
+    "codigo": "PT-QR-01",
+    "eleitores": 410
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "SINTRA",
+  "posto": "AGUALVA CACÉM",
+  "local": "Escola Secundária Ferreira Dias, R. António Nunes Sequeira 1, Agualva, 2735-058 Agualva-Cacém",
+  "mesas": [
+   {
+    "codigo": "PT-GM-01",
+    "eleitores": 786
+   },
+   {
+    "codigo": "PT-GM-02",
+    "eleitores": 785
+   }
+  ],
+  "alterado": true
+ },
+ {
+  "concelho": "SINTRA",
+  "posto": "ALGUEIRÃO MEM MARTINS",
+  "local": "Escola Básica e Secundária Mestre Domingos Saraiva, Rua Doutor Coutinho Pais 14 Algueirão - Mem Martins, 2725-043",
+  "mesas": [
+   {
+    "codigo": "PT-AS-01",
+    "eleitores": 431
+   },
+   {
+    "codigo": "PT-AS-02",
+    "eleitores": 430
+   }
+  ],
+  "alterado": true
+ },
+ {
+  "concelho": "SINTRA",
+  "posto": "CACÉM",
+  "local": "Esc. Secundária Gama Barros, R. da Esperança nº12, 2735-473 Agualva-Cacém",
+  "mesas": [
+   {
+    "codigo": "PT-CC-01",
+    "eleitores": 407
+   },
+   {
+    "codigo": "PT-CC-02",
+    "eleitores": 407
+   }
+  ],
+  "alterado": true
+ },
+ {
+  "concelho": "SINTRA",
+  "posto": "MONTE ABRAÃO",
+  "local": "Escola Secundária Stuartt Carvalhais, R. dos Jasmins, Massamá, 2745-796 Queluz",
+  "mesas": [
+   {
+    "codigo": "PT-QM-01",
+    "eleitores": 429
+   },
+   {
+    "codigo": "PT-QM-02",
+    "eleitores": 428
+   }
+  ],
+  "alterado": true
+ },
+ {
+  "concelho": "SINTRA",
+  "posto": "MIRA SINTRA",
+  "local": "Casa da Cultura Lívio de Morais, Mira Sintra",
+  "mesas": [
+   {
+    "codigo": "PT-MS-01",
+    "eleitores": 74
+   }
+  ],
+  "alterado": true
+ },
+ {
+  "concelho": "SINTRA",
+  "posto": "QUELUZ",
+  "local": "EB Padre Alberto Neto, Av. Cmte. Paiva Couceiro, 2745-190 Queluz",
+  "mesas": [
+   {
+    "codigo": "PT-QL-01",
+    "eleitores": 509
+   },
+   {
+    "codigo": "PT-QL-02",
+    "eleitores": 509
+   }
+  ],
+  "alterado": true
+ },
+ {
+  "concelho": "SINTRA",
+  "posto": "RIO DE MOURO",
+  "local": "Escola Secundária Leal da Câmara, Av. Pedro Nunes 1, 2635-317 Rio de Mouro",
+  "mesas": [
+   {
+    "codigo": "PT-RM-01",
+    "eleitores": 506
+   },
+   {
+    "codigo": "PT-RM-02",
+    "eleitores": 506
+   }
+  ],
+  "alterado": true
+ },
+ {
+  "concelho": "SINTRA",
+  "posto": "SÃO MARCOS",
+  "local": "Esc. EB1/JI, S. Marcos 1, Praceta Rio Amazonas, 2735 São Marcos",
+  "mesas": [
+   {
+    "codigo": "PT-MM-01",
+    "eleitores": 122
+   }
+  ],
+  "alterado": true
+ },
+ {
+  "concelho": "SEIXAL",
+  "posto": "CORROIOS",
+  "local": "Biblioteca Municipal Seixal - Polo Corroios, Rua 1.º de Maio, n.º 13, 2855-108 Corroios",
+  "mesas": [
+   {
+    "codigo": "PT-AC-01",
+    "eleitores": 396
+   }
+  ],
+  "alterado": true
+ },
+ {
+  "concelho": "SEIXAL",
+  "posto": "AMORA",
+  "local": "Junta de Freguesia da Amora, R. 1º de Maio 4, 2845-125 Amora",
+  "mesas": [
+   {
+    "codigo": "PT-AM-01",
+    "eleitores": 446
+   },
+   {
+    "codigo": "PT-AM-02",
+    "eleitores": 445
+   }
+  ],
+  "alterado": true
+ },
+ {
+  "concelho": "SEIXAL",
+  "posto": "ARRENTELA",
+  "local": "Sociedade Filarmónica Arrentelense, Largo Germano Gil Martins, 2840-156 Arrentela",
+  "mesas": [
+   {
+    "codigo": "PT-AR-01",
+    "eleitores": 467
+   }
+  ],
+  "alterado": true
+ },
+ {
+  "concelho": "SETÚBAL",
+  "posto": "SETÚBAL",
+  "local": "Ass. Cabo Verdeana Setúbal, Rua do Antigo Olival, nº 8 - E11, 2910-060 Setúbal",
+  "mesas": [
+   {
+    "codigo": "PT-SU-01",
+    "eleitores": 492
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "SINES",
+  "posto": "SINES",
+  "local": "Assoc. Caboverdeana de Sines e Santiago do Cacém, Rua João Doroteia, Lote LE1, 7520-109 Sines,",
+  "mesas": [
+   {
+    "codigo": "PT-SN-01",
+    "eleitores": 220
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "VIANA DO CASTELO",
+  "posto": "VIANA DO CASTELO",
+  "local": "Escola Básica da Avenida, Av. dos Combatentes da Grande Guerra 225, 4900-344 Viana do Castelo",
+  "mesas": [
+   {
+    "codigo": "PT-VC-01",
+    "eleitores": 152
+   }
+  ],
+  "alterado": false
+ },
+ {
+  "concelho": "VILA FRANCA DE XIRA",
+  "posto": "VILA FRANCA DE XIRA / VIALONGA",
+  "local": "Centro Comunitário da Vialonga, Rua Antero de Quental, Bairro Olival de Fora, Vialonga",
+  "mesas": [
+   {
+    "codigo": "PT-VF-01",
+    "eleitores": 620
+   }
+  ],
+  "alterado": false
+ }
+]
