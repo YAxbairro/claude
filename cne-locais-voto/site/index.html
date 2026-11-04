@@ -341,7 +341,7 @@ function markSel(){Object.entries(markers).forEach(([id,m])=>{const el=m.getElem
 function renderList(flyToResults){
   const vis=visible();
   applyDim();
-  if(!data.length){listEl.innerHTML=`<div class="empty">Ainda não há postos na lista.${canWrite?' Usa <b>Novo posto</b> ou carrega a lista original:<br><br><button class="btn small" id="b-seed" type="button">Carregar lista original (55 postos)</button>':''}</div>`;return}
+  if(!data.length){listEl.innerHTML=`<div class="empty">Ainda não há postos na lista.${editing?' Usa <b>Novo posto</b> para acrescentar o primeiro.':''}</div>`;return}
   if(!vis.length){listEl.innerHTML=`<div class="empty">Nenhum posto encontrado para “${esc(q.value)}”. Experimenta o nome da cidade ou da freguesia.</div>`;return}
   const groups={};vis.forEach(p=>(groups[p.concelho||'Sem concelho']=groups[p.concelho||'Sem concelho']||[]).push(p));
   listEl.innerHTML=Object.keys(groups).sort((a,b)=>a.localeCompare(b,'pt')).map(c=>`<section class="group"><h2>${esc(c)}</h2>${groups[c].sort((a,b)=>String(a.posto).localeCompare(b.posto,'pt')).map(p=>
@@ -356,7 +356,6 @@ function select(id,fly){
   map.once('moveend',()=>markers[id]&&markers[id].openPopup());
 }
 listEl.addEventListener('click',e=>{
-  if(e.target.id==='b-seed'){seed();return}
   const b=e.target.closest('.item');if(!b)return;
   if(editing)openEditor(b.dataset.id); else select(b.dataset.id,true);
 });
@@ -386,6 +385,235 @@ document.addEventListener('click',e=>{
 
 function renderAll(fly){renderStats();renderList(fly);renderMarkers();}
 
+// ---------- editing ----------
+const edEl=$('editor');
+function status(s){$('status').textContent=s}
+function setEditing(on){
+  if(on&&!PIN){openLogin();return}
+  editing=on&&canWrite;
+  $('b-edit').setAttribute('aria-pressed',editing);$('b-edit').textContent=editing?'Terminar edição':'Editar mapa';
+  $('editnote').hidden=!editing;$('edtools').hidden=!editing;
+  if(!editing)closeEditor();
+  setHdr();renderMarkers();setTimeout(()=>map.invalidateSize(),50);
+}
+$('b-edit').onclick=()=>setEditing(!editing);
+$('b-new').onclick=()=>{
+  const c=map.getCenter();
+  draft={id:'n'+Date.now().toString(36),posto:'',concelho:'',local:'',gq:'',mesas:[{c:'',e:0}],alt:false,nota:'',lat:+c.lat.toFixed(6),lon:+c.lng.toFixed(6),aprox:false,_new:true};
+  prep(draft);renderMarkers();openEditor(draft.id);
+};
+$('b-texts').onclick=()=>openTexts();
+$('b-hist').onclick=()=>openHist();
+
+function closeEditor(){
+  editId=null;
+  if(draft){draft=null;renderMarkers();}
+  stopPick();
+  edEl.hidden=true;edEl.innerHTML='';listEl.hidden=false;
+  renderMarkers();
+}
+function showEditor(html){
+  edEl.innerHTML=html;edEl.hidden=false;listEl.hidden=true;
+  if(matchMedia('(max-width:760px)').matches)edEl.scrollIntoView({behavior:'smooth',block:'start'});
+  const f=edEl.querySelector('input,textarea');if(f)f.focus({preventScroll:true});
+}
+function mesaRow(m,i){return `<div class="mrow" data-i="${i}"><input type="text" id="m-c-${i}" aria-label="Código da mesa" placeholder="PT-XX-01" value="${esc(m.c)}"><input type="number" id="m-e-${i}" aria-label="Eleitores" min="0" placeholder="Eleitores" value="${esc(m.e)}"><button type="button" data-delmesa="${i}" aria-label="Remover mesa">×</button></div>`;}
+let edMesas=[];
+async function openEditor(id){
+  if(!editing)return;
+  const src=(draft&&draft.id===id)?draft:byId(id); if(!src)return;
+  delete edEl.dataset.mode; editId=id; sel=id; markSel();
+  edMesas=src.mesas.map(m=>({c:m.c||'',e:m.e??''}));
+  showEditor(`
+    <h2>${src._new?'Novo posto':'Editar posto'}</h2>
+    <label>Nome do posto<input type="text" id="e-posto" value="${esc(src.posto)}" placeholder="Ex.: Queluz"></label>
+    <label>Concelho<input type="text" id="e-concelho" value="${esc(src.concelho)}" placeholder="Ex.: Sintra" list="dl-conc"></label>
+    <datalist id="dl-conc">${[...new Set(data.map(p=>p.concelho))].sort().map(c=>`<option value="${esc(c)}">`).join('')}</datalist>
+    <label>Local de voto (nome e morada)<textarea id="e-local">${esc(src.local)}</textarea></label>
+    <label>Pesquisa no Google Maps <span class="hint">O que o botão "Abrir no Google Maps" procura. Se ficar vazio, usa a morada.</span><input type="text" id="e-gq" value="${esc(src.gq===src.local?'':src.gq)}"></label>
+    <div><label style="margin-bottom:6px">Mesas</label><div id="e-mesas" style="display:grid;gap:6px">${edMesas.map(mesaRow).join('')}</div>
+      <button type="button" class="btn small ghost" id="e-addmesa" style="margin-top:6px">+ Mesa</button></div>
+    <label class="chk"><input type="checkbox" id="e-alt" ${src.alt?'checked':''}> Local alterado (aparece a vermelho)</label>
+    <label>Nota visível no mapa <span class="hint">Opcional.</span><textarea id="e-nota">${esc(src.nota)}</textarea></label>
+    <div><label>Posição no mapa</label>
+      <div class="two"><input type="number" step="0.000001" id="e-lat" aria-label="Latitude" value="${esc(src.lat)}"><input type="number" step="0.000001" id="e-lon" aria-label="Longitude" value="${esc(src.lon)}"></div>
+      <div class="acts" style="margin-top:6px"><button type="button" class="btn small ghost" id="e-pick">Escolher no mapa</button><span class="hint" id="e-pickhint">Ou arrasta o ponto no mapa. Só fica guardado quando carregas em Guardar.</span></div>
+      <label class="chk" style="margin-top:4px"><input type="checkbox" id="e-aprox" ${src.aprox?'checked':''}> Posição aproximada</label></div>
+    <div class="acts"><button type="submit" class="btn" id="e-save">Guardar</button><button type="button" class="btn ghost" id="e-cancel">Cancelar</button>
+      ${src._new?'':'<button type="button" class="btn danger" id="e-del" style="margin-left:auto">Apagar posto</button>'}</div>
+    ${SNAP.some(x=>x.id===id)?'<div class="acts"><button type="button" class="btn small ghost" id="e-orig">Repor dados originais deste posto</button><span class="hint">Volta ao que estava na lista de 3 de novembro.</span></div>':''}
+    <div class="who" id="e-who"></div>`);
+  renderMarkers();
+  if(markers[id]){map.flyTo(markers[id].getLatLng(),Math.max(map.getZoom(),13),{duration:.6});}
+  if(src.updated_by){const d=src.updated_at?new Date(src.updated_at).toLocaleString('pt-PT',{dateStyle:'short',timeStyle:'short'}):'';
+    const w=$('e-who');if(w)w.textContent=`Última alteração: ${src.updated_by}${d?', '+d:''}`;}
+}
+function readMesas(){edMesas=[...edEl.querySelectorAll('.mrow')].map(r=>{const i=r.dataset.i;return{c:$('m-c-'+i).value.trim(),e:$('m-e-'+i).value===''?'':Math.max(0,parseInt($('m-e-'+i).value,10)||0)}});}
+edEl.addEventListener('click',e=>{
+  const t=e.target;
+  if(t.id==='e-addmesa'){readMesas();edMesas.push({c:'',e:''});$('e-mesas').innerHTML=edMesas.map(mesaRow).join('');$('m-c-'+(edMesas.length-1)).focus();}
+  else if(t.dataset.delmesa!==undefined){readMesas();edMesas.splice(+t.dataset.delmesa,1);$('e-mesas').innerHTML=edMesas.map(mesaRow).join('');}
+  else if(t.id==='e-cancel'||t.id==='x-cancel'){closeEditor();}
+  else if(t.id==='e-pick'){picking?stopPick():startPick();}
+  else if(t.id==='e-orig'){const o=SNAP.find(x=>x.id===editId);if(o){write(editId,strip(o),'Posto reposto como estava originalmente.',{acao:'repor original'}).then(ok=>{if(ok)closeEditor()});}}
+  else if(t.dataset.revert){revert(t.dataset.revert,t);}
+  else if(t.id==='e-del'){
+    if(!t.classList.contains('sure')){t.classList.add('sure');t.textContent='Confirmar: apagar';setTimeout(()=>{if(t.isConnected){t.classList.remove('sure');t.textContent='Apagar posto'}},4000);return}
+    del(editId);
+  }
+});
+edEl.addEventListener('input',e=>{
+  if(e.target.id==='e-lat'||e.target.id==='e-lon'){const la=parseFloat($('e-lat').value),lo=parseFloat($('e-lon').value);
+    if(isFinite(la)&&isFinite(lo)&&markers[editId])markers[editId].setLatLng([la,lo]);}
+});
+function startPick(){picking=true;document.body.classList.add('picking');const b=$('e-pick');if(b)b.textContent='Cancelar escolha';const h=$('e-pickhint');if(h)h.textContent='Clica no mapa no sítio do local de voto.';
+  if(matchMedia('(max-width:760px)').matches)document.querySelector('.mapwrap').scrollIntoView({behavior:'smooth'});}
+function stopPick(){picking=false;document.body.classList.remove('picking');const b=$('e-pick');if(b)b.textContent='Escolher no mapa';const h=$('e-pickhint');if(h)h.textContent='Ou arrasta o ponto no mapa. Só fica guardado quando carregas em Guardar.';}
+map.on('click',e=>{
+  if(!picking||!editId)return;
+  $('e-lat').value=e.latlng.lat.toFixed(6);$('e-lon').value=e.latlng.lng.toFixed(6);
+  if(markers[editId])markers[editId].setLatLng(e.latlng);
+  $('e-aprox').checked=false;stopPick();
+  if(matchMedia('(max-width:760px)').matches)edEl.scrollIntoView({behavior:'smooth'});
+});
+function moved(id,ll){
+  if(editId===id){$('e-lat').value=ll.lat.toFixed(6);$('e-lon').value=ll.lng.toFixed(6);$('e-aprox').checked=false;}
+}
+function strip(p){return{posto:p.posto,concelho:p.concelho,local:p.local,gq:p.gq||'',mesas:p.mesas.map(m=>({c:m.c,e:+m.e||0})),alt:!!p.alt,nota:p.nota||'',lat:p.lat,lon:p.lon,aprox:!!p.aprox}}
+edEl.addEventListener('submit',async e=>{
+  e.preventDefault();
+  if(edEl.dataset.mode==='texts'){return saveTexts();}
+  if(edEl.dataset.mode==='login'){return doLogin();}
+  readMesas();
+  const posto=$('e-posto').value.trim(), local=$('e-local').value.trim();
+  const la=parseFloat($('e-lat').value), lo=parseFloat($('e-lon').value);
+  if(!posto){toast('Escreve o nome do posto.');$('e-posto').focus();return}
+  if(!isFinite(la)||!isFinite(lo)||la<30||la>45||lo<-32||lo>-5){toast('A posição não está em Portugal. Escolhe-a no mapa.');return}
+  const body={posto,concelho:$('e-concelho').value.trim(),local,gq:$('e-gq').value.trim()||local,
+    mesas:edMesas.filter(m=>m.c||m.e!=='').map(m=>({c:m.c,e:+m.e||0})),alt:$('e-alt').checked,nota:$('e-nota').value.trim(),
+    lat:+la.toFixed(6),lon:+lo.toFixed(6),aprox:$('e-aprox').checked};
+  const id=editId.startsWith('n')?null:editId;
+  $('e-save').disabled=true;
+  const ok=await write(id,body,'Guardado. Já está visível para todos.');
+  if(ok){draft=null;closeEditor();}else{const b=$('e-save');if(b)b.disabled=false;}
+});
+
+// ---------- texts editor ----------
+function openTexts(){
+  editId=null;
+  edEl.dataset.mode='texts';
+  showEditor(`<h2>Textos da página</h2>
+    <label>Linha de cima<input type="text" id="x-eyebrow" value="${esc(txt.eyebrow||DEFAULT_TXT.eyebrow)}"></label>
+    <label>Título<input type="text" id="x-titulo" value="${esc(txt.titulo||DEFAULT_TXT.titulo)}"></label>
+    <label>Nota de rodapé<textarea id="x-rodape">${esc(txt.rodape||DEFAULT_TXT.rodape)}</textarea></label>
+    <div class="acts"><button type="submit" class="btn" id="x-save">Guardar</button><button type="button" class="btn ghost" id="x-cancel">Cancelar</button></div>`);
+}
+const _close=closeEditor;
+closeEditor=function(){delete edEl.dataset.mode;_close();};
+async function saveTexts(){
+  const body={eyebrow:$('x-eyebrow').value.trim(),titulo:$('x-titulo').value.trim(),rodape:$('x-rodape').value.trim()};
+  $('x-save').disabled=true;
+  try{await rpc('guardar_textos',{p_pin:PIN,p_eyebrow:body.eyebrow,p_titulo:body.titulo,p_rodape:body.rodape,p_autor:AUTOR});txt=body;renderTexts();toast('Textos guardados.');closeEditor();}
+  catch(err){writeErr(err);const b=$('x-save');if(b)b.disabled=false;}
+}
+
+// ---------- persistência (Supabase) ----------
+const SB_URL='https://goeafrpuplurjctxpoap.supabase.co', SB_KEY='sb_publishable_Rr-r7OYTc5iOh-A6PX3BcA_56Jz7xOo';
+const LS=k=>{try{return localStorage.getItem(k)}catch(_){return null}}, LSset=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(_){}};
+let PIN=LS('pin_edicao'), AUTOR=LS('nome_editor')||'';
+async function api(path,opt={}){
+  const r=await fetch(SB_URL+path,{...opt,headers:{apikey:SB_KEY,'Content-Type':'application/json',...(opt.headers||{})}});
+  const txt=await r.text(); let j=null; try{j=txt?JSON.parse(txt):null}catch(_){}
+  if(!r.ok){const e=new Error((j&&j.message)||('HTTP '+r.status));e.code=(j&&j.message)||'';throw e}
+  return j;
+}
+const rpc=(fn,args)=>api('/rest/v1/rpc/'+fn,{method:'POST',body:JSON.stringify(args)});
+function writeErr(err){
+  if(err&&/codigo_invalido/.test(err.code)){PIN=null;LSset('pin_edicao',null);setEditing(false);toast('O código de edição já não é válido. Entra outra vez com o código novo.');}
+  else toast('Não foi possível guardar agora. Verifica a ligação e tenta outra vez.');
+}
+async function refresh(){
+  try{
+    const rows=await api('/rest/v1/postos?select=*&order=concelho.asc,posto.asc');
+    data=rows.map(r=>prep({...r,mesas:Array.isArray(r.mesas)?r.mesas:[]}));
+    live=true; renderAll();
+    if(editId&&!(draft&&draft.id===editId)&&!byId(editId)){toast('Este posto foi apagado por outra pessoa.');closeEditor();}
+    status('Atualizado às '+new Date().toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'}));
+  }catch(_){status(live?'Sem ligação. A mostrar os últimos dados recebidos.':'Sem ligação. A mostrar a lista de 3 de novembro.')}
+}
+async function loadTexts(){try{const t=await api('/rest/v1/textos?select=k,v');if(t&&t.length){t.forEach(r=>{txt[r.k]=r.v});renderTexts();}}catch(_){}}
+let writing=Promise.resolve();
+const ACAO_TXT={criar:'Criou',editar:'Editou',apagar:'Apagou',desfazer:'Desfez uma alteração','repor original':'Repôs o original',repor:'Repôs uma versão anterior',textos:'Mudou os textos da página'};
+// Grava um posto (body=null apaga). O histórico é registado no servidor.
+async function commit(id,body,acao){
+  const prev=id?byId(id):null, antes=prev?strip(prev):null;
+  let newId=id;
+  await (writing=writing.then(async()=>{
+    if(body) newId=await rpc('guardar_posto',{p_pin:PIN,p_id:id,p_dados:body,p_autor:AUTOR,p_acao:acao||null});
+    else await rpc('apagar_posto',{p_pin:PIN,p_id:id,p_autor:AUTOR,p_acao:acao||'apagar'});
+  }));
+  await refresh();
+  return {id:newId,antes};
+}
+async function write(id,body,msg,opt){
+  try{status('A guardar…');const r=await commit(id,body,opt&&opt.acao);
+    toast(msg,{label:'Desfazer',run:()=>undo(r)});return true}
+  catch(err){status('');writeErr(err);return false}
+}
+async function undo(r){
+  try{await commit(r.id,r.antes,'desfazer');toast(r.antes?'Alteração desfeita.':'Posto novo removido.');}catch(err){writeErr(err)}
+}
+async function del(id){
+  try{const r=await commit(id,null,'apagar');closeEditor();toast('Posto apagado.',{label:'Desfazer',run:()=>undo(r)});}catch(err){writeErr(err)}
+}
+// ---------- histórico ----------
+let hist=[];
+async function openHist(){
+  editId=null;delete edEl.dataset.mode;
+  showEditor('<h2>Histórico de alterações</h2><p class="hint">A carregar…</p>');
+  try{hist=(await rpc('ver_historico',{p_pin:PIN,p_limite:150})).map(h=>({...h,hid:String(h.id)}));}
+  catch(err){if(/codigo_invalido/.test(err.code)){writeErr(err);return}
+    edEl.innerHTML='<h2>Histórico de alterações</h2><p class="hint">Não foi possível ler o histórico agora.</p><div class="acts"><button type="button" class="btn ghost" id="x-cancel">Fechar</button></div>';return}
+  const when=s=>{try{return new Date(s).toLocaleString('pt-PT',{dateStyle:'short',timeStyle:'short'})}catch(_){return''}};
+  const diff=h=>{const a=h.antes,b=h.depois;if(!a||!b||h.pid==='textos')return'';const out=[];
+    if(a.lat!==b.lat||a.lon!==b.lon)out.push('posição');if(a.posto!==b.posto)out.push('nome');if(a.local!==b.local)out.push('morada');
+    if(JSON.stringify(a.mesas)!==JSON.stringify(b.mesas))out.push('mesas');if(a.alt!==b.alt)out.push(b.alt?'marcado como alterado':'desmarcado como alterado');
+    if(a.nota!==b.nota)out.push('nota');if(a.concelho!==b.concelho)out.push('concelho');return out.join(', ');};
+  edEl.innerHTML='<h2>Histórico de alterações</h2><p class="hint">Cada linha é uma alteração. <b>Repor</b> volta a pôr o posto como estava antes dela.</p>'+
+    (hist.length?'<div class="hist">'+hist.map(h=>{const d=diff(h);
+      return `<div class="hrow"><b>${esc(h.posto||'Posto')}</b><span class="hd">${esc(h.por||'Alguém')} · ${esc(ACAO_TXT[h.acao]||h.acao)}${d?': '+esc(d):''}</span><span class="hm">${esc(when(h.em))}</span>${h.pid==='textos'?'<span></span>':`<button type="button" class="btn small ghost" data-revert="${esc(h.hid)}">Repor</button>`}</div>`}).join('')+'</div>'
+     :'<p class="hint">Ainda não há alterações registadas. As próximas aparecem aqui.</p>')+
+    '<div class="acts"><button type="button" class="btn ghost" id="x-cancel">Fechar</button></div>';
+}
+async function revert(hid,btn){
+  const h=hist.find(x=>x.hid===hid);if(!h)return;
+  btn.disabled=true;
+  try{const r=await commit(h.pid,h.antes,'repor');toast(h.antes?'Posto reposto como estava antes dessa alteração.':'Posto removido (tinha sido criado nessa alteração).',{label:'Desfazer',run:()=>undo(r)});openHist();}
+  catch(err){writeErr(err);btn.disabled=false;}
+}
+// ---------- entrar no modo de edição ----------
+function openLogin(){
+  editId=null; edEl.dataset.mode='login';
+  showEditor(`<h2>Entrar no modo de edição</h2>
+    <p class="hint">Pede o código de edição a quem gere o mapa. O teu nome fica registado no histórico de alterações.</p>
+    <label>O teu nome<input type="text" id="l-nome" autocomplete="name" value="${esc(AUTOR)}" placeholder="Ex.: Rito Correia"></label>
+    <label>Código de edição<input type="text" id="l-pin" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Código"></label>
+    <div class="acts"><button type="submit" class="btn" id="l-go">Entrar</button><button type="button" class="btn ghost" id="x-cancel">Cancelar</button></div>
+    <p class="hint" id="l-msg" role="status"></p>`);
+}
+async function doLogin(){
+  const nome=$('l-nome').value.trim(), pin=$('l-pin').value.trim();
+  if(!nome){$('l-msg').textContent='Escreve o teu nome.';$('l-nome').focus();return}
+  if(!pin){$('l-msg').textContent='Escreve o código de edição.';$('l-pin').focus();return}
+  $('l-go').disabled=true;$('l-msg').textContent='A verificar…';
+  try{const ok=await rpc('verificar_codigo',{p_pin:pin});
+    if(!ok){$('l-msg').textContent='Código errado. Confirma com quem te enviou o mapa.';$('l-go').disabled=false;return}
+    PIN=pin;AUTOR=nome;LSset('pin_edicao',pin);LSset('nome_editor',nome);
+    delete edEl.dataset.mode;closeEditor();setEditing(true);toast('Bem-vindo, '+nome+'. Já podes editar.');
+  }catch(_){$('l-msg').textContent='Sem ligação. Tenta outra vez.';$('l-go').disabled=false;}
+}
+function logout(){PIN=null;LSset('pin_edicao',null);setEditing(false);toast('Saíste do modo de edição.');}
+
 // ---------- tema ----------
 const THEMES=['auto','light','dark'], TLABEL={auto:'Automático',light:'Modo claro',dark:'Modo escuro'};
 const TICON={auto:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"></path></svg>',
@@ -399,53 +627,15 @@ function applyTheme(){
 $('b-theme').onclick=()=>{theme=THEMES[(THEMES.indexOf(theme)+1)%3];try{localStorage.setItem('tema',theme)}catch(_){}applyTheme();};
 applyTheme();
 
-// ---------- dados da Google Sheet ----------
-function status(t){$('status').textContent=t}
-const SHEET_ID='1BzhkrOqV7kRYnAbAulreCQRPCL0NFKlQ_SSLQy38woY';
-function num(s){return parseFloat(String(s).trim().replace(',','.'))}
-function parseCoords(s){
-  s=String(s||'').trim(); if(!s)return null;
-  let parts = s.includes('.') ? s.split(/\s*[,;]\s*|\s+/) : s.split(/\s*;\s*|\s+/);
-  parts=parts.filter(Boolean); if(parts.length<2)return null;
-  const la=num(parts[0]), lo=num(parts[1]);
-  return (isFinite(la)&&isFinite(lo)&&la>30&&la<45&&lo>-32&&lo<-5)?[la,lo]:null;
-}
-function parseMesas(s){
-  return String(s||'').split(/[;\n]+/).map(x=>x.trim()).filter(Boolean).map(x=>{
-    const m=x.match(/^(.*?)[\s:=(-]+(\d[\d\s.]*)\)?$/); return m?{c:m[1].trim(),e:parseInt(m[2].replace(/\D/g,''),10)||0}:{c:x,e:0};});
-}
-function fromSheet(resp){
-  if(!resp||resp.status==='error'||!resp.table)throw new Error('sheet');
-  const cell=(r,i)=>{const c=r.c&&r.c[i];if(!c)return'';return c.f!=null&&typeof c.v!=='string'?String(c.f):String(c.v??'')};
-  const out=[];
-  resp.table.rows.forEach((r,i)=>{
-    const posto=cell(r,1).trim(); const co=parseCoords(cell(r,6));
-    if(!posto||!co)return;
-    const local=cell(r,2).trim();
-    out.push(prep({id:'r'+(i+2),concelho:cell(r,0).trim(),posto,local,mesas:parseMesas(cell(r,3)),
-      alt:/^s/i.test(cell(r,4).trim()),nota:cell(r,5).trim(),lat:co[0],lon:co[1],aprox:/aproximad/i.test(cell(r,5)),gq:cell(r,7).trim()||local}));
-  });
-  return out;
-}
-let lastOk=null, firstLoad=true;
-function loadSheet(){
-  const cb='__sheet'+Date.now();
-  const s=document.createElement('script');
-  const t=setTimeout(()=>{cleanup();fail()},15000);
-  function cleanup(){clearTimeout(t);delete window[cb];s.remove();}
-  window[cb]=resp=>{cleanup();
-    try{const d=fromSheet(resp); if(!d.length)throw 0; data=d; lastOk=new Date(); renderAll(firstLoad&&false); firstLoad=false;
-      status('Atualizado às '+lastOk.toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'}));}
-    catch(_){fail()}};
-  s.onerror=()=>{cleanup();fail()};
-  s.src='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?headers=1&tqx=out:json;responseHandler:'+cb+'&_='+Date.now();
-  document.head.appendChild(s);
-}
-function fail(){status(lastOk?'Sem ligação. Dados de '+lastOk.toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'}):'A mostrar a lista de 3 de novembro.')}
+// ---------- boot ----------
+canWrite=true;
+$('edtools').insertAdjacentHTML('beforeend','<button class="btn small ghost" id="b-logout" type="button">Sair</button>');
+$('b-logout').onclick=logout;
+$('editbar').hidden=false;
 renderTexts();renderAll();
-$('editbar').hidden=false; $('b-edit').hidden=true;
-loadSheet(); setInterval(loadSheet,120000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadSheet()});
+refresh();loadTexts();
+setInterval(()=>{if(!document.hidden)refresh()},20000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
 })();
 </script>
 </body></html>
