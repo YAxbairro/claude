@@ -237,7 +237,7 @@ let db=null, user=null, canWrite=false, editing=false, live=false;
 let onlyAlt=false, sel=null, editId=null, draft=null, picking=false;
 
 function prep(p){
-  p.mesas=Array.isArray(p.mesas)?p.mesas:[];
+  p.mesas=Array.isArray(p.mesas)?p.mesas:[];p.alt=false;
   p.el=p.mesas.reduce((a,m)=>a+(+m.e||0),0);
   p.key=norm([p.posto,p.concelho,p.local,p.mesas.map(m=>m.c).join(' ')].join(' '));
   return p;
@@ -257,7 +257,7 @@ function renderStats(){
   $('stats').innerHTML=`<div class="stat"><b>${data.length}</b><span>postos</span></div>`+
     `<div class="stat"><b>${data.reduce((a,p)=>a+p.mesas.length,0)}</b><span>mesas</span></div>`+
     `<div class="stat"><b>${fmt(tot)}</b><span>eleitores</span></div>`+
-    `<div class="stat alt"><b>${alt.length}</b><span>locais alterados · ${fmt(ta)} eleitores</span></div>`;
+''; 
   $('n-all').textContent=data.length; $('n-alt').textContent=alt.length;
 }
 function setHdr(){document.documentElement.style.setProperty('--hdr',($('top').offsetHeight+($('editnote').hidden?0:$('editnote').offsetHeight))+'px')}
@@ -629,10 +629,9 @@ $('b-theme').onclick=()=>{theme=THEMES[(THEMES.indexOf(theme)+1)%3];try{localSto
 applyTheme();
 
 // ---------- boot ----------
-canWrite=true;
-$('edtools').insertAdjacentHTML('beforeend','<button class="btn small ghost" id="b-logout" type="button">Sair</button>');
-$('b-logout').onclick=logout;
-$('editbar').hidden=false;
+canWrite=false;
+$('f-alt').hidden=true;$('f-all').hidden=true;
+document.querySelector('.legend').hidden=true;
 renderTexts();renderAll();
 refresh();loadTexts();
 setInterval(()=>{if(!document.hidden)refresh()},20000);
