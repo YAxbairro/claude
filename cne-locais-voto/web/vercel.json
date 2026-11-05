@@ -1,0 +1,29 @@
+{
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/pt",
+      "permanent": false
+    },
+    {
+      "source": "/editar",
+      "destination": "/pt/editar",
+      "permanent": false
+    },
+    {
+      "source": "/editar/",
+      "destination": "/pt/editar",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/pt/editar",
+      "destination": "/pt/index.html"
+    },
+    {
+      "source": "/pt/editar/",
+      "destination": "/pt/index.html"
+    }
+  ]
+}
