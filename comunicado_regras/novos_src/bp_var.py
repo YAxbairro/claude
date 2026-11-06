@@ -1,5 +1,5 @@
 # Blueprint com 4 ESTILOS realmente diferentes (cor, grafismo, composição, tipografia). Só grafismo, sem fotos.
-import sys; OUT=sys.argv[1]; sys.argv=['x']
+import sys; OUT=sys.argv[1] if len(sys.argv)>1 else '.'; sys.argv=['x']
 import numpy as np, math
 from PIL import Image,ImageDraw,ImageFilter,ImageChops
 import bp_graf as g
@@ -105,5 +105,6 @@ def board(title,scenes,labels,out):
         for c,sc in enumerate(scenes):
             bd.paste(fn(sc).convert('RGB').resize((tw,th),Image.LANCZOS),(lw+gap+c*(tw+gap),y))
     bd.save(out,quality=90); print('ok',out)
-board('VÍDEO 1 · ACESSO E PERMANÊNCIA — 4 estilos',g.V1,['1 · ACESSO RESTRITO','2 · MEMBROS DA MESA (4)','3 · OBSERVADORES','4 · ELEITOR VOTA E SAI'],OUT+'/Blueprint_V1_estilos.jpg')
-board('VÍDEO 2 · MEMBROS DAS MESAS — 4 estilos',g.V2,['1 · ATENÇÃO MEMBROS','2 · 7H DA MANHÃ','3 · COMPENSAÇÃO','4 · TRANSFERÊNCIA BANCÁRIA'],OUT+'/Blueprint_V2_estilos.jpg')
+if __name__=='__main__':
+  board('VÍDEO 1 · ACESSO E PERMANÊNCIA — 4 estilos',g.V1,['1 · ACESSO RESTRITO','2 · MEMBROS DA MESA (4)','3 · OBSERVADORES','4 · ELEITOR VOTA E SAI'],OUT+'/Blueprint_V1_estilos.jpg')
+  board('VÍDEO 2 · MEMBROS DAS MESAS — 4 estilos',g.V2,['1 · ATENÇÃO MEMBROS','2 · 7H DA MANHÃ','3 · COMPENSAÇÃO','4 · TRANSFERÊNCIA BANCÁRIA'],OUT+'/Blueprint_V2_estilos.jpg')

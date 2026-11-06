@@ -137,6 +137,30 @@ def ILL_img(name,sz,shadow=False):
         R(26,2,74,98,INK,8); R(29,8,71,90,WHITE,4); R(42,4,58,6,INK2,1)
         R(32,14,68,24,NAVY,2); E(40,32,60,52,(46,170,100)); Ln([(44,42),(49,47),(57,37)],WHITE,2.4)
         R(34,58,66,62,(200,205,215),1); R(38,66,62,69,(220,224,232),1); R(34,76,66,84,RED,2); E(46,92,54,96,INK2)
+    elif name=='relogio0':
+        E(18,4,30,16,RED); E(70,4,82,16,RED); R(18,88,26,98,INK2,1); R(74,88,82,98,INK2,1)
+        E(8,8,92,92,NAVY); E(14,14,86,86,WHITE)
+        import math
+        for i in range(12):
+            a=math.radians(i*30); r0,r1=(30,36) if i%3 else (27,36); Ln([(50+r0*math.sin(a),50-r0*math.cos(a)),(50+r1*math.sin(a),50-r1*math.cos(a))],NAVY,1.4 if i%3 else 2.6)
+    elif name=='pessoas':
+        for cx,sk,sh,sc_,tp in((26,SK[2],NAVY,1.0,34),(74,SK[3],(240,240,240),1.0,34),(50,SK[0],RED,1.25,22)):
+            person(cx,tp,sc_,sk,sh,True)
+        R(4,78,96,80,(0,0,0,0),0)
+    elif name=='globo':
+        E(14,14,86,86,NAVY); E(18,18,82,82,(60,150,210))
+        G([(34,26),(50,22),(56,34),(46,44),(40,58),(30,46)],(90,180,110)); G([(58,48),(74,44),(76,62),(64,74),(58,62)],(90,180,110))
+        d.arc((*P(18,18),*P(82,82)),0,360,fill=WHITE,width=int(1.6*k)); d.ellipse((*P(36,18),*P(64,82)),outline=WHITE,width=int(1.4*k))
+        Ln([(18,50),(82,50)],WHITE,1.4); Ln([(22,34),(78,34)],WHITE,1.2); Ln([(22,66),(78,66)],WHITE,1.2); R(46,86,54,94,INK2,1); R(32,92,68,96,INK2,1)
+    elif name=='saida':
+        R(10,8,52,94,(230,236,244),2); G([(14,12),(40,20),(40,98),(14,90)],NAVY); E(33,52,37,57,(250,200,60))
+        R(50,46,78,56,RED,1); G([(74,36),(96,51),(74,66)],RED)
+    elif name=='aviso':
+        G([(50,6),(96,88),(4,88)],RED); G([(50,20),(84,82),(16,82)],WHITE); R(46,38,54,64,INK,2); E(45.5,68,54.5,77,INK)
+    elif name=='banco':
+        G([(50,6),(94,28),(6,28)],NAVY); R(6,28,94,34,NAVY,0); E(44,14,56,25,(250,200,60))
+        for x in (14,32,50,68,86): R(x-5,38,x+5,80,(230,236,244),1)
+        R(4,82,96,88,NAVY,0); R(0,90,100,96,NAVY,1)
     out=Image.new('RGBA',L.size,(0,0,0,0))
     if shadow:
         sh=Image.new('RGBA',L.size,(0,0,0,0)); sh.paste((0,30,70,90),mask=L.split()[3]); sh=sh.filter(ImageFilter.GaussianBlur(sz*S/60)); out.alpha_composite(sh,(int(sz*S*.015),int(sz*S*.03)))

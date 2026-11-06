@@ -1,7 +1,7 @@
 // Renderiza index.html?v=V1|V2 frame a frame no Chromium (Playwright) -> MP4 com a locução.
 // Uso: node render.js V1 saida.mp4 [workers=4]   |   node render.js V1 TEST out.jpg t1 t2 ...
 const {chromium}=require('playwright'), {spawn,execFileSync}=require('child_process'), path=require('path'), fs=require('fs');
-const [,,vid,out,...rest]=process.argv, FPS=25, url='file://'+path.join(__dirname,'index.html')+'?v='+vid;
+const [,,vid,out,...rest]=process.argv, FPS=25, url='file://'+path.join(__dirname,process.env.PAGE||'index.html')+'?v='+vid;
 (async()=>{
   const b=await chromium.launch({args:['--disable-web-security','--allow-file-access-from-files']});
   const page=async()=>{const p=await b.newPage({viewport:{width:1920,height:1080}});await p.goto(url);await p.evaluate(()=>window.READY);return p};
