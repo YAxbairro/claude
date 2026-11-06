@@ -1,0 +1,46 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:transparent;overflow:hidden}</style>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script></head><body>
+<script type="module">
+// Ilustrações 3D "clay" (estilo ilustrativo) renderizadas com three.js -> PNG transparente. ?m=clock|mesa|urna|cracha|tel
+import * as THREE from 'three';
+import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+const m=new URLSearchParams(location.search).get('m')||'clock', S=1200;
+const r=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});r.setSize(S,S);r.setPixelRatio(1);
+r.shadowMap.enabled=true;r.shadowMap.type=THREE.PCFSoftShadowMap;r.toneMapping=THREE.ACESFilmicToneMapping;r.outputColorSpace=THREE.SRGBColorSpace;document.body.appendChild(r.domElement);
+const sc=new THREE.Scene(), cam=new THREE.PerspectiveCamera(30,1,.1,100);
+sc.add(new THREE.HemisphereLight(0xffffff,0x8899bb,1.5));
+const L=new THREE.DirectionalLight(0xffffff,2.6);L.position.set(4,7,6);L.castShadow=true;L.shadow.mapSize.set(2048,2048);L.shadow.radius=8;
+Object.assign(L.shadow.camera,{left:-5,right:5,top:5,bottom:-5});sc.add(L);
+const F=new THREE.DirectionalLight(0xbfd8ff,.8);F.position.set(-5,2,4);sc.add(F);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(30,30),new THREE.ShadowMaterial({opacity:.18}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;sc.add(ground);
+const M=(c,o={})=>new THREE.MeshPhysicalMaterial({color:c,roughness:.45,clearcoat:.35,clearcoatRoughness:.4,...o});
+const NAVY=0x1d2f7a,RED=0xd8323a,WHITE=0xf4f6fa,SKIN=[0x8a5a3c,0x6b4128,0xa8714c,0x5c3a26],INK=0x1b1d22;
+const add=(g,mat,x=0,y=0,z=0,p)=>{const o=new THREE.Mesh(g,mat);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;(p||sc).add(o);return o};
+const RB=(w,h,d,rad=.08)=>new RoundedBoxGeometry(w,h,d,4,rad);
+if(m=='clock'){const g=new THREE.Group();sc.add(g);
+  add(new THREE.CylinderGeometry(1.25,1.25,.55,64).rotateX(Math.PI/2),M(NAVY),0,1.45,0,g);
+  add(new THREE.CylinderGeometry(1.08,1.08,.1,64).rotateX(Math.PI/2),M(WHITE,{clearcoat:.8}),0,1.45,.26,g);
+  add(new THREE.TorusGeometry(1.2,.1,24,80),M(NAVY),0,1.45,.28,g);
+  for(let i=0;i<12;i++){const a=i*Math.PI/6,t=add(RB(.07,i%3?.14:.24,.04,.02),M(NAVY),Math.sin(a)*.88,1.45+Math.cos(a)*.88,.33,g);t.rotation.z=-a}
+  const hand=(len,w,col,ang)=>{const p=new THREE.Group();p.position.set(0,1.45,.36);p.rotation.z=-ang;g.add(p);add(RB(w,len,.05,.02),M(col),0,len/2-.08,0,p)};
+  hand(.78,.09,NAVY,0);hand(.55,.13,RED,7*Math.PI/6);add(new THREE.SphereGeometry(.09,24,16),M(RED),0,1.45,.4,g);
+  for(const s of[-1,1]){const b=add(new THREE.SphereGeometry(.42,40,20,0,Math.PI*2,0,Math.PI/2),M(RED),s*.72,2.55,0,g);b.rotation.z=-s*.5;
+    const l=add(new THREE.CylinderGeometry(.07,.09,.42,16),M(NAVY),s*.8,.18,0,g);l.rotation.z=s*.45}
+  add(RB(.5,.12,.12,.04),M(NAVY),0,2.82,0,g);g.rotation.y=-.38;cam.position.set(1.2,2.6,8.6);cam.lookAt(0,1.4,0)}
+if(m=='mesa'){
+  const cols=[RED,NAVY,WHITE,NAVY];
+  cols.forEach((c,i)=>{const x=(i-1.5)*1.15,g=new THREE.Group();g.position.set(x,0,-.55);sc.add(g);
+    add(new THREE.CapsuleGeometry(.38,.6,8,24),M(c),0,1.15,0,g);add(new THREE.SphereGeometry(.3,32,24),M(SKIN[i],{clearcoat:.1}),0,2.05,0,g);
+    add(new THREE.SphereGeometry(.31,32,16,0,Math.PI*2,0,Math.PI/2.4),M(INK,{roughness:.8}),0,2.1,-.02,g);
+    add(RB(.18,.24,.04,.02),M(WHITE),0,1.32,.37,g);add(new THREE.TorusGeometry(.22,.018,8,30,Math.PI),M(c==NAVY?RED:NAVY),0,1.62,.2,g).rotation.z=Math.PI});
+  add(RB(5.0,.14,1.5,.05),M(WHITE,{clearcoat:.1,roughness:.7}),0,1.05,.15);
+  add(RB(5.0,.75,.06,.03),M(0xe4e9f2,{roughness:.8}),0,.62,.9);
+  for(const x of[-2.3,2.3])add(RB(.12,1,.12,.03),M(0xc9d2e0),x,.5,-.4);
+  [[-1.7,.1],[-.5,.25],[.6,.05],[1.7,.2]].forEach(([x,z],i)=>{const p=add(RB(.55,.04,.4,.01),M(i%2?WHITE:0xdfe8f6),x,1.14,z);p.rotation.y=(i-1.5)*.15});
+  add(new THREE.CylinderGeometry(.03,.03,.5,8).rotateZ(Math.PI/2),M(NAVY),-.5,1.18,.45);
+  cam.position.set(0,3.4,8.5);cam.lookAt(0,1.2,0)}
+if(m=='urna'){add(RB(1.5,1.7,1.5,.06),M(INK,{roughness:.35,clearcoat:.6}),0,.85,0);add(RB(1.75,.16,1.75,.05),M(0x2a2e36,{clearcoat:.6}),0,1.78,0);
+  add(RB(.8,.06,.08,.02),M(0x050608),0,1.87,0);const p=add(RB(.62,.9,.02,.01),M(WHITE),0,2.25,0);p.rotation.z=.08;
+  cam.position.set(3.4,3.6,6.5);cam.lookAt(0,1.2,0)}
+r.render(sc,cam);window.DONE=true;
+</script></body></html>
