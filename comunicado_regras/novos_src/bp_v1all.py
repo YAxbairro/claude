@@ -14,8 +14,9 @@ def icon(b,kind,cx,cy,s,col,acc=RED,w=None):
         el(30,2,46,18); el(54,2,70,18)
         el(39,20,61,42); ar(32,46,68,88)
         ln((0,72),(100,72)); ln((8,72),(8,100)); ln((92,72),(92,100)); return
-    if kind=='mesa4row':
-        for x in (14,38,62,86): el(x-8,24,x+8,40); ar(x-12,46,x+12,74)
+    if kind in('mesa4row','mesa4pres'):   # sempre igual; nas cenas do presidente só ele fica destacado
+        for i,x in enumerate((14,38,62,86)):
+            c=acc if (kind=='mesa4pres' and i==1) else col; el(x-8,24,x+8,40,c); ar(x-12,46,x+12,74,c)
         ln((0,62),(100,62)); ln((8,62),(8,96)); ln((92,62),(92,96)); return
     if kind=='cne':     # representante da CNE: pessoa com colete + escudo/crachá
         el(38,4,62,28); ln((18,96),(18,56),(32,38),(68,38),(82,56),(82,96)); ln((40,38),(50,58),(60,38))
@@ -36,9 +37,9 @@ S=[ # (estilo, t, ícones, kicker, linhas[(texto,papel)])
  ('A','10–22s',['cracha'],'CÓDIGO ELEITORAL',[('A CNE RECORDA:','n'),('APENAS PESSOAS','n'),('LEGALMENTE AUTORIZADAS','b'),('PODEM ENTRAR E PERMANECER','n'),('NO LOCAL DE VOTO','r')]),
  ('B','22–35s','LISTA','SÓ PODEM ENTRAR E PERMANECER',None),
  ('A','35–48s',['globo','cracha'],'OBSERVADORES INTERNACIONAIS',[('DEVIDAMENTE','n'),('CREDENCIADOS','hn'),('SÓ O TEMPO NECESSÁRIO','n'),('À OBSERVAÇÃO','r')]),
- ('B','48–62s',['mesa4','cracha'],'PRESIDENTE DA MESA',[('DEVE EXIGIR E VERIFICAR','n'),('CREDENCIAIS E CRACHÁS','b'),('EMITIDOS PELA CNE','r'),('ANTES DE AUTORIZAR A PERMANÊNCIA','s')]),
+ ('B','48–62s',['mesa4pres','cracha'],'PRESIDENTE DA MESA',[('DEVE EXIGIR E VERIFICAR','n'),('CREDENCIAIS E CRACHÁS','b'),('EMITIDOS PELA CNE','r'),('ANTES DE AUTORIZAR A PERMANÊNCIA','s')]),
  ('A','62–69s',['relogio'],'ELEITORES',[('SÓ PODEM PERMANECER','n'),('O TEMPO','hn'),('NECESSÁRIO','b'),('PARA VOTAR','r')]),
- ('B','69–75s',['mesa4','saida'],'PRESIDENTE DA MESA',[('DETERMINA A SAÍDA','b'),('DE TODAS AS PESSOAS','n'),('NÃO AUTORIZADAS','h')]),
+ ('B','69–75s',['mesa4pres','saida'],'PRESIDENTE DA MESA',[('DETERMINA A SAÍDA','b'),('DE TODAS AS PESSOAS','n'),('NÃO AUTORIZADAS','h')]),
  ('A','75–82s',['saida'],'CARO ELEITOR',[('APÓS VOTAR','n'),('ABANDONA O LOCAL','h'),('E RESPEITA AS ORIENTAÇÕES','s'),('DOS MEMBROS DA MESA','b')]),
  ('B','82–89s','FIM',None,[('JUNTOS POR ELEIÇÕES','n'),('LIVRES, JUSTAS E TRANSPARENTES','r')])]
 SZ={'n':50,'b':72,'r':76,'s':38,'h':118,'hn':118}
@@ -73,10 +74,10 @@ def scene(sc):
         paste(b,LOGO_COR,960-int(LOGO_COR.width*300/LOGO_COR.height)//2,140,300); paste(b,LOGO_CNE,960-int(LOGO_CNE.width*100/LOGO_CNE.height)//2,490,100)
         d=ImageDraw.Draw(b); d.text((960,710),'JUNTOS POR ELEIÇÕES',font=f(50,7),fill=NAVY,anchor='ms'); d.text((960,800),'LIVRES, JUSTAS E TRANSPARENTES',font=f(68),fill=RED,anchor='ms'); return b
     ci=WHITE if st=='A' else CBLUE
-    if ics==['FOTO']:
-        ph=Image.open(HERE+'/logos/ref_urna.png').convert('RGBA'); sz_=520; ph=ph.resize((int(ph.width*sz_/ph.height*1.05),int(sz_*1.05)),Image.LANCZOS)
-        ph=ph.crop(((ph.width-sz_)//2,0,(ph.width-sz_)//2+sz_,sz_)); m=Image.new('L',(sz_,sz_),0); ImageDraw.Draw(m).ellipse((0,0,sz_,sz_),fill=255); ph.putalpha(m)
-        b.alpha_composite(ph,(250,300)); ImageDraw.Draw(b).ellipse((242,292,250+sz_+8,300+sz_+8),outline=WHITE,width=6)
+    if ics==['FOTO']:   # imagem sem fundo, sem moldura
+        ph=Image.open(HERE+'/logos/urna_mao.png').convert('RGBA'); hh=700; ph=ph.resize((int(ph.width*hh/ph.height),hh),Image.LANCZOS)
+        sh=Image.new('RGBA',b.size,(0,0,0,0)); ImageDraw.Draw(sh).ellipse((300,930,820,990),fill=(0,20,60,110)); b.alpha_composite(sh.filter(ImageFilter.GaussianBlur(18)))
+        b.alpha_composite(ph,(560-ph.width//2,270))
         ics=[]
     if st=='B': card(b,(220,290,800,830),WHITE,44)
     if not ics: pass
@@ -91,7 +92,7 @@ BW=gap+cols*(tw+gap); BH=top+rows*(th+70)+20
 bd=Image.new('RGB',(BW,BH),(236,239,245)); d=ImageDraw.Draw(bd)
 d.rectangle((0,0,BW,130),fill=NAVY); d.rectangle((0,130,BW,138),fill=RED)
 d.text((40,62),'VÍDEO 1 · ACESSO E PERMANÊNCIA — todas as cenas (A e B alternados)',font=f(44),fill=WHITE,anchor='ls')
-d.text((40,108),'A = azul institucional · B = claro oficial · alternam cena a cena · mesa: 4 pessoas, presidente ao centro (fica vermelho só na animação) · canto inferior direito livre para a intérprete',font=f(22,7),fill=(190,205,240),anchor='ls')
+d.text((40,108),'A = azul institucional · B = claro oficial · alternam cena a cena · mesa: 4 pessoas, sempre 4 lado a lado, presidente só destacado quando referido · canto inferior direito livre para a intérprete',font=f(22,7),fill=(190,205,240),anchor='ls')
 for i,sc in enumerate(S):
     x=gap+(i%cols)*(tw+gap); y=top+(i//cols)*(th+70)
     d.text((x,y-14),f'CENA {i+1} · {sc[1]} · ESTILO {sc[0]}',font=f(22),fill=NAVY if sc[0]=='B' else RED,anchor='ls')
