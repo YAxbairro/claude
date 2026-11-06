@@ -4,7 +4,7 @@
 import sys,os
 from PIL import Image,ImageDraw,ImageFont,ImageFilter
 import numpy as np
-HERE=os.path.dirname(os.path.abspath(__file__)); OUTD=sys.argv[1]
+HERE=os.path.dirname(os.path.abspath(__file__)); OUTD=sys.argv[1] if len(sys.argv)>1 else '.'
 F8=HERE+'/../realista_src/fonts/M800.ttf'; F7=HERE+'/../realista_src/fonts/M700.ttf'
 W,H=1920,1080; CY=(20,157,208); NAVY=(25,41,109); RED=(212,41,46); WHITE=(255,255,255)
 def f(sz,b=8): return ImageFont.truetype(F8 if b==8 else F7,sz)
@@ -81,7 +81,10 @@ def T(sc):   # transição com faixas
 # ---------- ilustrações vetoriais (flat, sombras suaves) ----------
 SK=[(139,90,60),(107,65,40),(168,113,76),(92,58,38)]; INK=(24,26,32); INK2=(46,50,60); PAPER=(250,250,246)
 def ILL(b,box,name):
-    x0,y0,x1,y1=box; S=2; w,h=x1-x0,y1-y0; sz=min(h,w*1.3)
+    x0,y0,x1,y1=box; w,h=x1-x0,y1-y0; sz=min(h,w*1.3); out=ILL_img(name,int(sz),True)
+    b.alpha_composite(out,(int(x0+(w-sz)/2),int(y1-sz)))
+def ILL_img(name,sz,shadow=False):
+    S=2
     L=Image.new('RGBA',(int(sz*S),int(sz*S)),(0,0,0,0)); d=ImageDraw.Draw(L); k=sz*S/100
     P=lambda x,y:(x*k,y*k)
     def R(a,b_,c,e,col,r=2): d.rounded_rectangle((*P(a,b_),*P(c,e)),int(r*k),fill=col)
@@ -106,7 +109,7 @@ def ILL(b,box,name):
             R(cx+wd*.62,base-wd*1.66,cx+wd*1.0,base-wd*1.36,NAVY,1.5)
     if name=='mesa4':
         for i,(sk,sh) in enumerate(zip(SK,[RED,NAVY,(240,240,240),NAVY])): person(13+i*24.6,24,1.15,sk,sh)
-        R(0,60,100,67,PAPER,1); G([(2,67),(98,67),(94,98),(6,98)],(232,236,242)); urna(50,61,16,False)
+        R(0,60,100,67,PAPER,1); G([(2,67),(98,67),(94,98),(6,98)],(232,236,242)); R(40,57,60,61,PAPER,.4); R(44,55.5,56,57.5,(200,205,215),.3)
         R(12,56,26,60,NAVY,.4); R(72,56,86,60,NAVY,.4)
     elif name=='urna': urna(40,98,52)
     elif name=='porta':
@@ -134,9 +137,10 @@ def ILL(b,box,name):
         R(26,2,74,98,INK,8); R(29,8,71,90,WHITE,4); R(42,4,58,6,INK2,1)
         R(32,14,68,24,NAVY,2); E(40,32,60,52,(46,170,100)); Ln([(44,42),(49,47),(57,37)],WHITE,2.4)
         R(34,58,66,62,(200,205,215),1); R(38,66,62,69,(220,224,232),1); R(34,76,66,84,RED,2); E(46,92,54,96,INK2)
-    sh=Image.new('RGBA',L.size,(0,0,0,0)); sh.paste((0,30,70,90),mask=L.split()[3]); sh=sh.filter(ImageFilter.GaussianBlur(sz*S/60))
-    out=Image.new('RGBA',L.size,(0,0,0,0)); out.alpha_composite(sh,(int(sz*S*.015),int(sz*S*.03))); out.alpha_composite(L)
-    out=out.resize((int(sz),int(sz)),Image.LANCZOS); b.alpha_composite(out,(int(x0+(w-sz)/2),int(y1-sz)))
+    out=Image.new('RGBA',L.size,(0,0,0,0))
+    if shadow:
+        sh=Image.new('RGBA',L.size,(0,0,0,0)); sh.paste((0,30,70,90),mask=L.split()[3]); sh=sh.filter(ImageFilter.GaussianBlur(sz*S/60)); out.alpha_composite(sh,(int(sz*S*.015),int(sz*S*.03)))
+    out.alpha_composite(L); return out.resize((int(sz),int(sz)),Image.LANCZOS)
 V1=[dict(img='porta',txt=[('ATENÇÃO','cap'),('ACESSO RESTRITO','t'),('ÀS ASSEMBLEIAS','n'),('DE VOTO','r')]),
     dict(img='mesa4',txt=[('SÃO AUTORIZADOS','cap'),('MEMBROS','t'),('DA MESA','n')]),
     dict(img='cracha',txt=[('OBSERVADORES','cap'),('INTERNACIONAIS','t'),('CREDENCIADOS','n')]),
@@ -167,5 +171,6 @@ def board(title,scenes,labels,out):
             if r==0 and c==3: im=T(sc)
             im=im.convert('RGB').resize((tw,th),Image.LANCZOS); x=lw+gap+c*(tw+gap); bd.paste(im,(x,y))
     bd.save(out,quality=90); print('ok',out)
-board('VÍDEO 1 · ACESSO E PERMANÊNCIA — só grafismo',V1,['1 · ACESSO RESTRITO','2 · MEMBROS DA MESA (4)','3 · OBSERVADORES','4 · ELEITOR SAI  (A: com transição de faixas)'],OUTD+'/Blueprint_V1_grafismo.jpg')
-board('VÍDEO 2 · MEMBROS DAS MESAS — só grafismo',V2,['1 · ATENÇÃO MEMBROS','2 · 7H DA MANHÃ','3 · COMPENSAÇÃO','4 · TRANSFERÊNCIA BANCÁRIA'],OUTD+'/Blueprint_V2_grafismo.jpg')
+if __name__=='__main__':
+  board('VÍDEO 1 · ACESSO E PERMANÊNCIA — só grafismo',V1,['1 · ACESSO RESTRITO','2 · MEMBROS DA MESA (4)','3 · OBSERVADORES','4 · ELEITOR SAI  (A: com transição de faixas)'],OUTD+'/Blueprint_V1_grafismo.jpg')
+  board('VÍDEO 2 · MEMBROS DAS MESAS — só grafismo',V2,['1 · ATENÇÃO MEMBROS','2 · 7H DA MANHÃ','3 · COMPENSAÇÃO','4 · TRANSFERÊNCIA BANCÁRIA'],OUTD+'/Blueprint_V2_grafismo.jpg')
