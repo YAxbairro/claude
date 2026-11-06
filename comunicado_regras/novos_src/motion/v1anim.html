@@ -110,7 +110,7 @@ BT.forEach((b,i)=>{
       tl.set(g,{visibility:'visible'},t0);tl.set(g,{visibility:'hidden'},tEnd);
       const k=el('div','abs',g,'left:140px;top:205px');kicker(k,b.kick,st,t0+.1);
       const items=[['mesa4row','MEMBROS','DA MESA'],['cne','REPRESENTANTES','DA CNE E APOIO'],['pessoas','CANDIDATOS','E MANDATÁRIOS'],['cracha','DELEGADOS','DAS CANDIDATURAS']];
-      const cards=items.map((it,k)=>{const c=el('div','lcard',g,`left:${140+k*405}px;top:330px`);const im=el('img','',c);im.src=`v1/${it[0]}_B.png`;
+      const cards=items.map((it,k)=>{const c=el('div','lcard',g,`left:${140+k*405}px;top:330px`);const im=el('img','',c);im.src=k==0?'v1/mesa.png':`v1/${it[0]}_B.png`;if(k==0)im.style.cssText='left:22px;top:120px;width:331px';
         el('div','t1',c).textContent=it[1];el('div','t2',c).textContent=it[2];el('div','ring',c);
         const t1_=c.querySelector('.t1');let fs=40;t1_.style.fontSize=fs+'px';while(t1_.offsetWidth>310){fs-=1;t1_.style.fontSize=fs+'px'}return c});
       const foot=el('div','abs',g,'left:140px;top:880px;font-weight:800;color:#19296D;font-size:34px');foot.textContent='NOS TERMOS DA LEI';
@@ -149,8 +149,9 @@ BT.forEach((b,i)=>{
   const BGF={ASSEMBLEIA:'assembleia_tint',OBSFOTO:'obs_tint',VOTOFOTO:'voto_tint'};
   if(BGF[ics[0]]){const p=img(g,'v1/'+BGF[ics[0]]+'.png','width:1920px;left:0;top:-100px');tl.fromTo(p,{scale:1.15,opacity:0},{scale:1.02,opacity:1,duration:t1-t0,ease:'power1.out'},t0);
     const tx=el('div','abs A',g,'left:0;right:0;top:0;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center');
-    if(b.kick){const k=kicker(tx,b.kick,'A',t0+.2);k.style.marginBottom='20px'}
-    b.lines.forEach(([t,ro,tin])=>{const l=line(tx,t,ro,Math.round(SZ[ro]*1.15),1500);inLine(l,Math.max(t0+.15,tin),ro)});out();return}
+    if(ics[0]=='OBSFOTO'){tx.style.cssText='left:1060px;top:0;height:1080px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding-bottom:60px'}
+    if(b.kick){const k=kicker(tx,b.kick,'A',t0+.2);k.style.marginBottom='20px';if(ics[0]=='OBSFOTO'){let fs=46;while(k.offsetWidth>800&&fs>24){fs-=2;k.style.fontSize=fs+'px'}}}
+    b.lines.forEach(([t,ro,tin])=>{const l=line(tx,t,ro,Math.round(SZ[ro]*1.15),ics[0]=='OBSFOTO'?780:1500);inLine(l,Math.max(t0+.15,tin),ro)});out();return}
   if(/^OBS/.test(ics[0])){const first=!(prev&&/^OBS/.test((prev.ics||[])[0]||''));
     if(first){const tEnd=BT.filter(x=>/^OBS/.test((x.ics||[])[0]||'')).pop().t1;const pg=el('div','beat A',world);tl.set(pg,{visibility:'visible'},t0);tl.set(pg,{visibility:'hidden'},tEnd);
       const pn=el('div','panel',pg);const pi=img(pn,'v1/obs1.jpg','');
@@ -167,13 +168,19 @@ BT.forEach((b,i)=>{
     tl.fromTo(c,{rotationY:-70,y:80,opacity:0,transformOrigin:'0% 50%'},{rotationY:0,y:0,opacity:1,duration:1.1,ease:'power3.out'},t0+.1);
     tl.to(c,{rotationY:8,y:-12,duration:2,ease:'sine.inOut',yoyo:true,repeat:1},t0+1.2)}
   // ---------- batida normal: ícone(s) à esquerda, texto à direita ----------
-  const L=ics.filter(k=>k!='FOTO2'&&k!='CODIGO');
+  const L=ics.filter(k=>k!='FOTO2'&&k!='CODIGO'&&k!='MESA'&&k!='MESAPRES'); const MF=ics.find(k=>k=='MESA'||k=='MESAPRES');
+  if(MF){const w=el('div','abs',g,'left:60px;top:400px;width:870px;height:425px');
+    tl.fromTo(w,{y:70,opacity:0},{y:0,opacity:1,duration:.8,ease:'power3.out'},t0+.1); if(t1-t0>2.6)tl.to(w,{y:-10,duration:1.6,yoyo:true,repeat:Math.floor((t1-t0-1.6)/1.6),ease:'sine.inOut'},t0+1);
+    if(MF=='MESA'){img(w,'v1/mesa.png','width:870px;left:0;top:0')}
+    else{const o=img(w,'v1/mesa_out.png','width:870px;left:0;top:0'),gl=img(w,'v1/mesa_glow.png','width:870px;left:0;top:0'),p=img(w,'v1/mesa_pres.png','width:870px;left:0;top:0;transform-origin:50% 100%');
+      tl.set(gl,{opacity:0},0);tl.to(o,{opacity:.35,filter:'grayscale(1)',duration:.6},t0+1.3);tl.to(gl,{opacity:.9,duration:.6},t0+1.3);tl.fromTo(p,{scale:1},{scale:1.05,duration:.6,ease:'back.out(2)'},t0+1.3)}}
   if(ics[0]=='FOTO2'){const u=img(g,'v1/urna.png','height:760px;left:'+(510-0.415*760)+'px;top:-6px');tl.fromTo(u,{y:-200,opacity:0},{y:0,opacity:1,duration:.9,ease:'power3.out'},t0)}
-  if(st=='B'&&L.length){const c=el('div','card',g,'left:220px;top:290px;width:580px;height:540px');tl.fromTo(c,{scale:.8,opacity:0},{scale:1,opacity:1,duration:.6,ease:'back.out(1.5)'},b.n=='3'?6.6:t0)}
+  if(st=='B'&&L.length&&!MF){const c=el('div','card',g,'left:220px;top:290px;width:580px;height:540px');tl.fromTo(c,{scale:.8,opacity:0},{scale:1,opacity:1,duration:.6,ease:'back.out(1.5)'},b.n=='3'?6.6:t0)}
   const icTimes=[b.n=='3'?6.75:t0+.15,(b.lines[1]||b.lines[0]||[0,0,t0+.8])[2]];
-  L.forEach((k,j)=>{const sz=L.length==1?360:(j==0?230:200), cx=L.length==1?510:(j==0?395:645), cy=L.length==1?560:(j==0?540:600);
+  if(MF&&L.length){const c=el('div','card',g,'left:395px;top:175px;width:200px;height:200px;border-radius:30px');tl.fromTo(c,{scale:.6,opacity:0},{scale:1,opacity:1,duration:.5,ease:'back.out(1.6)'},(b.lines[2]||b.lines[0])[2]-.2)}
+  L.forEach((k,j)=>{const sz=MF?150:(L.length==1?360:(j==0?230:200)), cx=MF?495:(L.length==1?510:(j==0?395:645)), cy=MF?275:(L.length==1?560:(j==0?540:600));
     const src=k=='relogio'?`v1/relogio0_${st}.png`:(k=='mesa4pres'?`v1/mesa4row_${st}.png`:`v1/${k}_${st}.png`);
-    const s2=sz*600/440, i=img(g,src,`width:${s2}px;left:${cx-s2/2}px;top:${cy-s2/2}px`);inIcon(i,k,j==0?icTimes[0]:Math.max(icTimes[0]+.5,icTimes[1]-.1),t1);
+    const s2=sz*600/440, i=img(g,src,`width:${s2}px;left:${cx-s2/2}px;top:${cy-s2/2}px`);inIcon(i,k,MF?(b.lines[2]||b.lines[0])[2]:(j==0?icTimes[0]:Math.max(icTimes[0]+.5,icTimes[1]-.1)),t1);
     if(k=='mesa4pres'){const i2=img(g,`v1/mesa4pres_${st}.png`,`width:${s2}px;left:${cx-s2/2}px;top:${cy-s2/2}px`);tl.set(i2,{opacity:0},0);tl.set(i2,{opacity:1},t0+1.3);tl.set(i,{opacity:0},t0+1.3);{const tt=t0+.15;if(t1-tt>2.6)tl.to(i2,{y:-14,duration:1.5,yoyo:true,repeat:Math.floor((t1-tt-1.4)/1.5),ease:'sine.inOut'},tt+1.2)}tl.fromTo(i2,{scale:1},{scale:1.04,duration:.25,yoyo:true,repeat:1},t0+1.3)}
     if(k=='relogio')clockHands(g,cx,cy,sz*.42*1.0,st=='A'?'#fff':'#164B8C',t0);
   });

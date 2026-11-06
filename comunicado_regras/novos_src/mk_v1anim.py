@@ -36,3 +36,7 @@ for n,st,tt,ics,kick,lines,mov in BB.B:
 beats[-1]['t1']=88.74
 open(D+'/beats.js','w').write('window.BEATS='+json.dumps(beats,ensure_ascii=False)+';')
 for b in beats: print(b['n'],b['t0'],[round(l[2],1) for l in b['lines']])
+
+# ícones novos (referências do cliente), desenhados em SVG por mk_icons_svg.js
+import glob,shutil
+for f in glob.glob(HERE+'/icons_svg/*_[AB].png'): shutil.copy(f,D)
