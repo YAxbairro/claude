@@ -3,6 +3,7 @@
 import sys,os; OUT=sys.argv[1]; HERE=os.path.dirname(os.path.abspath(__file__))
 sys.argv=['x',HERE+'/logos','.']
 exec(open(HERE+'/bp_ab.py',encoding='utf-8').read().split('# ---------------- montagem')[0])
+import bp_s12 as S12   # cenas 1 (B) e 2 (D) escolhidas
 _icon=icon
 def icon(b,kind,cx,cy,s,col,acc=RED,w=None):
     d=ImageDraw.Draw(b); w=w or max(3,int(s*.07)); k=s/100; P=lambda x,y:(cx+(x-50)*k,cy+(y-50)*k)
@@ -74,6 +75,8 @@ def scene(sc):
     if ics=='FIM':
         paste(b,LOGO_COR,960-int(LOGO_COR.width*300/LOGO_COR.height)//2,140,300); paste(b,LOGO_CNE,960-int(LOGO_CNE.width*100/LOGO_CNE.height)//2,490,100)
         d=ImageDraw.Draw(b); d.text((960,710),'JUNTOS POR ELEIÇÕES',font=f(50,7),fill=NAVY,anchor='ms'); d.text((960,800),'LIVRES, JUSTAS E TRANSPARENTES',font=f(68),fill=RED,anchor='ms'); return b
+    if ics==['FOTO']: S12.c1_B(b); return b
+    if ics==['PALACIO']: S12.c2_D(b); return b
     ci=WHITE if st=='A' else CBLUE
     if ics==['FOTO']:   # imagem sem fundo, sem moldura
         ph=Image.open(HERE+'/logos/urna_mao.png').convert('RGBA'); hh=920; ph=ph.resize((int(ph.width*hh/ph.height),hh),Image.LANCZOS)

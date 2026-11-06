@@ -1,5 +1,5 @@
 # Variações só das cenas 1 (urna) e 2 (Palácio) — estilo A. Uso: python3 bp_s12.py <saida.jpg>
-import sys,os; OUT=sys.argv[1]; HERE=os.path.dirname(os.path.abspath(__file__)); sys.argv=['x',HERE+'/logos','.']
+import sys,os; OUT=sys.argv[1] if len(sys.argv)>1 else ''; HERE=os.path.dirname(os.path.abspath(__file__)); sys.argv=['x',HERE+'/logos','.']
 exec(open(HERE+'/bp_ab.py',encoding='utf-8').read().split('# ---------------- montagem')[0])
 URNA=Image.open(HERE+'/logos/urna_mao.png').convert('RGBA'); PAL=Image.open(HERE+'/logos/palacio.png').convert('RGBA')
 def rsH(im,h): return im.resize((int(im.width*h/im.height),h),Image.LANCZOS)
@@ -20,8 +20,8 @@ def c1_A(b):  # urna ao centro, a subir do fundo; texto em cima centrado
     shadow(b,(560,690,1060,740)); u=rsH(URNA,720); b.alpha_composite(u,(800-u.width//2,-6))
     ctag(b,800,860,'15 DE NOVEMBRO',46,'red'); ctag(b,800,970,'CABO VERDE VAI ÀS URNAS',76,'navy')
 def c1_B(b):  # urna grande à direita cortada pelo fundo; texto grande à esquerda
-    circ(b,1180,700,470); u=rsH(URNA,1080); b.alpha_composite(u,(1180-u.width//2,-6))
-    tag(b,140,420,'15 DE NOVEMBRO',46,'red'); tag(b,140,560,'CABO VERDE',120,'plain'); tag(b,140,690,'VAI ÀS URNAS',92,'navy')
+    circ(b,1120,700,440); u=rsH(URNA,1000); b.alpha_composite(u,(1120-u.width//2,-6))   # longe do logo CNE e da intérprete
+    tag(b,140,420,'15 DE NOVEMBRO',46,'red'); tag(b,140,550,'CABO VERDE',88,'plain'); tag(b,140,660,'VAI ÀS URNAS',72,'navy')
 def c1_C(b):  # "15" gigante translúcido por trás da urna; texto à direita
     l=Image.new('RGBA',b.size,(0,0,0,0)); ImageDraw.Draw(l).text((520,940),'15',font=f(900),fill=(255,255,255,40),anchor='ms'); b.alpha_composite(l)
     shadow(b,(270,830,780,890)); u=rsH(URNA,860); b.alpha_composite(u,(520-u.width//2,-6))
@@ -52,15 +52,17 @@ def lgp(b):
     l=Image.new('RGBA',b.size,(0,0,0,0)); ImageDraw.Draw(l).rounded_rectangle((1580,720,1880,1080),28,outline=(255,255,255,90),width=3); b.alpha_composite(l)
 ROWS=[('CENA 1 · 0–3,5s · URNA',[('A','URNA AO CENTRO, TEXTO EM BAIXO',c1_A),('B','URNA GRANDE À DIREITA',c1_B),('C','"15" GIGANTE POR TRÁS',c1_C),('D','CÍRCULO + CALENDÁRIO',c1_D)]),
       ('CENA 2 · 3,5–5,6s · PALÁCIO',[('A','PANORAMA NA BASE',c2_A),('B','PALÁCIO NUM CÍRCULO',c2_B),('C','PALÁCIO GRANDE À DIREITA',c2_C),('D','PALÁCIO EM AZUL NO FUNDO',c2_D)])]
-tw,th=640,360; gap=26; top=200
-BW=gap+4*(tw+gap); BH=top+2*(th+110)
-bd=Image.new('RGB',(BW,BH),(236,239,245)); d=ImageDraw.Draw(bd)
-d.rectangle((0,0,BW,130),fill=NAVY); d.rectangle((0,130,BW,138),fill=RED)
-d.text((40,62),'VÍDEO 1 · VARIAÇÕES DAS CENAS 1 E 2 (estilo A)',font=f(44),fill=WHITE,anchor='ls')
-d.text((40,108),'Escolhe uma variação para cada cena · ex.: "cena 1 = C, cena 2 = B" · canto inferior direito livre para a intérprete',font=f(22,7),fill=(190,205,240),anchor='ls')
-for r,(title,vs) in enumerate(ROWS):
-    y=top+r*(th+110)+40; d.text((gap,y-50),title,font=f(28),fill=RED,anchor='ls')
-    for c,(k,nm,fn) in enumerate(vs):
-        x=gap+c*(tw+gap); b=base(); fn(b); lgp(b)
-        d.text((x,y-14),f'{k} · {nm}',font=f(20),fill=NAVY,anchor='ls'); bd.paste(b.convert('RGB').resize((tw,th),Image.LANCZOS),(x,y))
-bd.save(OUT,quality=90); print('ok',bd.size)
+if __name__=='__main__':
+    tw,th=640,360; gap=26; top=200
+    BW=gap+4*(tw+gap); BH=top+2*(th+110)
+    bd=Image.new('RGB',(BW,BH),(236,239,245)); d=ImageDraw.Draw(bd)
+    d.rectangle((0,0,BW,130),fill=NAVY); d.rectangle((0,130,BW,138),fill=RED)
+    d.text((40,62),'VÍDEO 1 · VARIAÇÕES DAS CENAS 1 E 2 (estilo A)',font=f(44),fill=WHITE,anchor='ls')
+    d.text((40,108),'Escolhe uma variação para cada cena · ex.: "cena 1 = C, cena 2 = B" · canto inferior direito livre para a intérprete',font=f(22,7),fill=(190,205,240),anchor='ls')
+    for r,(title,vs) in enumerate(ROWS):
+        y=top+r*(th+110)+40; d.text((gap,y-50),title,font=f(28),fill=RED,anchor='ls')
+        for c,(k,nm,fn) in enumerate(vs):
+            x=gap+c*(tw+gap); b=base(); fn(b); lgp(b)
+            d.text((x,y-14),f'{k} · {nm}',font=f(20),fill=NAVY,anchor='ls'); bd.paste(b.convert('RGB').resize((tw,th),Image.LANCZOS),(x,y))
+    bd.save(OUT,quality=90); print('ok',bd.size)
+    
