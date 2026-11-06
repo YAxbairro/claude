@@ -1,0 +1,2 @@
+file '/home/user/claude/comunicado_regras/novos_src/tmp/V2_a.mp4'
+file '/home/user/claude/comunicado_regras/novos_src/tmp/V2_c.mp4'
