@@ -120,7 +120,7 @@ function svgIcon(p,kind,st,cx,cy,s2,ts,t1){
   if(kind=='lupa'){tl.fromTo(s.querySelector('.lens'),{x:0,y:0},{x:-34,y:-14,duration:1.1,ease:'sine.inOut',yoyo:true,repeat:Math.max(1,Math.floor((t1-after)/1.1)-1)},after)}
   if(kind=='relogio'){const d=t1-T-.6,n=Math.max(2,Math.round(d/1.4)),hm=s.querySelector('.hm'),hh=s.querySelector('.hh'),o={a:0};
     const set=()=>{hm.setAttribute('transform',`rotate(${o.a*360*n} 50 50)`);hh.setAttribute('transform',`rotate(${o.a*30*n} 50 50)`)};
-    tl.fromTo(o,{a:0},{a:1,duration:d,ease:'power1.inOut',onUpdate:set,onStart:set},T+.5);set()}
+    tl.fromTo(o,{a:0},{a:1,duration:d,ease:'power1.inOut',onUpdate:set,onStart:set},T+.5);set();tl.set([hm,hh],{opacity:0},0);tl.fromTo([hm,hh],{opacity:0},{opacity:1,duration:.3,immediateRender:false},T+.6)}
   if(t1-T>2.8)tl.to(s,{y:-12,duration:1.6,yoyo:true,repeat:Math.floor((t1-T-1.6)/1.6),ease:'sine.inOut'},T+1.2);
   return s}
 
