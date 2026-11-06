@@ -38,3 +38,10 @@ O vídeo base `../Apelo_Proibicoes_FINAL_16x9.mp4` tem de existir. Dele vêm a v
 | S1112 | 1355–1633 | 54.2–65.3 | drone (alpha) → telemóvel (Kling) + segredo do voto |
 | S13 | 1633–1775 | 65.3–71.0 | drone (alpha) + tranquilidade/ordem/respeito |
 | F14 | 1775–2275 | 71.0–91.0 | FINAL: participe + fim |
+
+## Versão SÓ ALPHA (`segs3.py` + `build3.sh`)
+Gera `../Apelo_Proibicoes_REALISTA_SO_ALPHA_16x9.mov` (+ prévia 720p). Diferenças para a versão acima:
+- **Sem vídeo nem degradê azul** nos trechos que levam vídeo por baixo (drone e Kling): ficam só textos, logos e grafismos em alpha. Saem também os colchetes/etiquetas AR que apontavam para objetos dos clips. Não precisa da pasta `dl/`.
+- **Abertura 0–19 s re-sincronizada** com `audio/words.json`: cada linha entra na palavra dita; o bloco "No dia 15 de novembro" sai uma só vez (sem o salto aos 5 s); o mapa é limpo do texto antigo do FINAL (`detext`) e leva os textos novos ("para que participem / neste importante momento / da democracia", "exercendo o seu direito de voto", liberdade/responsabilidade/consciência cívica no tempo certo).
+- F5, F9 e F14 continuam a vir do FINAL (grafismo opaco).
+- Render: `./build3.sh` (os 8 segmentos demoram ~10 min em 4 núcleos).
