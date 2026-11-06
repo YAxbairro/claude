@@ -45,6 +45,9 @@ html,body{width:1920px;height:1080px;overflow:hidden;font-family:M,sans-serif;ba
 .panel:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,90,160,.75),rgba(11,90,160,0) 28%),linear-gradient(90deg,rgba(14,110,180,0) 50%,rgba(14,110,180,.85) 92%,#0F6EB4)}
 .pedge{position:absolute;left:0;top:0;width:1000px;height:1080px;clip-path:polygon(100% 0,101.2% 0,83.2% 100%,82% 100%);background:#D4292E}
 svg.hands{position:absolute;overflow:visible}
+svg.vic{position:absolute;overflow:visible;fill:none;stroke-width:3.9;stroke-linecap:round;stroke-linejoin:round}
+svg.vic *{transform-box:fill-box}
+svg.vic .hm,svg.vic .hh,svg.vic .f{transform-box:view-box}
 </style></head>
 <body><div id="stage">
  <div class="bg" id="bgA"></div><div class="bg" id="bgB"></div>
@@ -72,6 +75,55 @@ function inLine(l,t,ro){const bx=l.querySelector('.bx'),ws=l.querySelectorAll('.
 function kicker(p,text,st,t){const k=el('div','kick '+st,p);if(st=='B'){el('i','',k)}const s=el('span','',k);s.textContent=text;
   if(st=='A')tl.fromTo(k,{scaleX:0},{scaleX:1,duration:.45,ease:'expo.out'},t);else tl.fromTo(k.querySelector('i'),{scaleY:0},{scaleY:1,duration:.4},t);
   tl.fromTo(s,{opacity:0,x:-20},{opacity:1,x:0,duration:.45,ease:'power3.out'},t+.12);return k}
+// ---------- ícones vetoriais: as linhas desenham-se ----------
+const RD='#D4292E';
+const ICS={
+ porta3:C=>`<g data-g="0"><rect class="d" x="27" y="9" width="46" height="82" rx="5" stroke="${C}"/></g>
+  <g data-g="0" class="hand"><path class="d" d="M43,78 L38,67 L33.5,59 A2.6,2.6 0 0 1 38,56.5 L41,61 L41,41 A2.5,2.5 0 0 1 46,41 L46,55 L46,37.5 A2.5,2.5 0 0 1 51,37.5 L51,55 L51,39.5 A2.5,2.5 0 0 1 56,39.5 L56,56 L56,45 A2.5,2.5 0 0 1 61,45 L61,66 C61,73 57,78 52,78 Z" stroke="${RD}" stroke-width="3.2"/></g>`,
+ cracha:C=>`<g data-g="0"><rect class="d" x="27" y="22" width="46" height="66" rx="5" stroke="${C}"/><rect class="d" x="45" y="12" width="10" height="18" rx="1.5" stroke="${RD}"/>
+  <circle class="d" cx="50" cy="45" r="7" stroke="${C}"/><path class="d" d="M37,64 C37,55 63,55 63,64 Z" stroke="${C}"/><path class="d" d="M37,72 L63,72" stroke="${C}"/><path class="d" d="M42,79 L58,79" stroke="${C}"/>
+  <circle class="f" cx="73" cy="25" r="9" fill="${RD}" stroke="none"/><path class="d" d="M68.5,25 L71.8,28.3 L77.5,21.8" stroke="#fff" stroke-width="2.6"/></g>`,
+ portaentra:C=>`<g data-g="0"><path class="d" d="M47,12 L71,12 L71,88 L47,88" stroke="${C}"/><path class="d leaf" d="M28,17 L47,10 L47,90 L28,83 Z" stroke="${C}"/></g>
+  <g data-g="0" class="arrow"><path class="d" d="M90,50 L57,50" stroke="${RD}"/><path class="d" d="M66,41 L57,50 L66,59" stroke="${RD}"/></g>`,
+ relogio:C=>`<g data-g="0"><circle class="d" cx="50" cy="50" r="42" stroke="${C}"/>
+  <path class="d" d="M50,13 L50,19" stroke="${C}"/><path class="d" d="M87,50 L81,50" stroke="${C}"/><path class="d" d="M50,87 L50,81" stroke="${C}"/><path class="d" d="M13,50 L19,50" stroke="${C}"/>
+  <line class="hm" x1="50" y1="50" x2="50" y2="22" stroke="${C}" stroke-width="4.4"/><line class="hh" x1="50" y1="50" x2="50" y2="32" stroke="${RD}" stroke-width="5.2"/><circle class="f" cx="50" cy="50" r="3.8" fill="${RD}" stroke="none"/></g>`,
+ lupa:C=>`<g data-g="0"><rect class="d" x="8" y="18" width="48" height="74" rx="5" stroke="${C}"/><path class="d" d="M24,18 L24,8 L40,8 L40,18" stroke="${C}"/>
+  <circle class="d" cx="32" cy="42" r="10" stroke="${C}"/><path class="d" d="M18,66 L46,66" stroke="${C}"/><path class="d" d="M18,76 L40,76" stroke="${C}"/></g>
+  <g data-g="0" class="lens"><circle class="d" cx="66" cy="58" r="18" stroke="${RD}"/><path class="d" d="M79,71 L94,88" stroke="${RD}"/></g>`,
+ autoriza:C=>`<g data-g="0"><rect class="d" x="6" y="34" width="32" height="44" rx="4" stroke="${C}"/><rect class="d" x="18.5" y="27" width="7" height="12" rx="1" stroke="${RD}" stroke-width="3"/>
+  <circle class="d" cx="22" cy="50" r="5" stroke="${C}" stroke-width="3.2"/><path class="d" d="M13,64 C13,57 31,57 31,64 Z" stroke="${C}" stroke-width="3.2"/><path class="d" d="M12,71 L32,71" stroke="${C}" stroke-width="3.2"/></g>
+  <g data-g="1"><circle class="d" cx="55" cy="60" r="5.5" stroke="${C}" stroke-width="3.4"/><path class="d" d="M45,86 L45,78 C45,71 65,71 65,78 L65,86" stroke="${C}" stroke-width="3.4"/>
+  <circle class="d" cx="80" cy="64" r="5.5" stroke="${C}" stroke-width="3.4"/><path class="d" d="M70,90 L70,82 C70,75 90,75 90,82 L90,90" stroke="${C}" stroke-width="3.4"/><path class="d" d="M63,74 L70,68" stroke="${C}" stroke-width="3.4"/>
+  <path class="d" d="M60,40 A14,14 0 1 1 66,46 L56,49 Z" stroke="${RD}"/><circle class="f" cx="70" cy="28" r="2" fill="${RD}" stroke="none"/><path class="d" d="M70,33 L70,42" stroke="${RD}"/></g>`,
+ saida:C=>`<g data-g="0"><rect class="d" x="10" y="8" width="48" height="87" rx="6" stroke="${C}"/></g>
+  <g data-g="0" class="arrow"><path class="d" d="M40,50 L92,50" stroke="${RD}"/><path class="d" d="M78,36 L92,50 L78,64" stroke="${RD}"/></g>`
+};
+// cria o ícone e anima: cada grupo começa no seu tempo (ts[g]); as linhas desenham-se uma a uma
+function svgIcon(p,kind,st,cx,cy,s2,ts,t1){
+  const C=st=='A'?'#FFFFFF':'#164B8C', N='http://www.w3.org/2000/svg', s=document.createElementNS(N,'svg');
+  s.setAttribute('viewBox','-18.18 -18.18 136.36 136.36');s.setAttribute('class','vic');
+  s.style.cssText=`left:${cx-s2/2}px;top:${cy-s2/2}px;width:${s2}px;height:${s2}px`;s.innerHTML=ICS[kind](C);p.appendChild(s);
+  s.querySelectorAll('.d').forEach(e=>{e.setAttribute('pathLength','1');e.style.strokeDasharray='1 1.02'});
+  const T=ts[0];
+  tl.fromTo(s,{scale:.92,opacity:0},{scale:1,opacity:1,duration:.5,ease:'power2.out'},T);
+  s.querySelectorAll('g[data-g]').forEach(g=>{const t=ts[+g.dataset.g]??T; const ds=[...g.querySelectorAll('.d')], fs=[...g.querySelectorAll('.f')];
+    tl.set(ds,{opacity:0},0);tl.set(ds,{opacity:1},t);
+    tl.fromTo(ds,{strokeDashoffset:1},{strokeDashoffset:0,duration:.55,ease:'power2.inOut',stagger:Math.min(.12,.9/ds.length)},t);
+    tl.fromTo(fs,{scale:0,transformOrigin:'50% 50%'},{scale:1,duration:.45,ease:'back.out(2.5)'},t+Math.min(.9,ds.length*.1)+.1)});
+  // movimento próprio
+  const after=T+1.1;
+  if(kind=='porta3'){const h=s.querySelector('.hand');tl.fromTo(h,{scale:.6,transformOrigin:'50% 70%'},{scale:1,duration:.6,ease:'back.out(2.5)'},T+.5);
+    tl.to(h,{scale:1.18,duration:.14,yoyo:true,repeat:1,transformOrigin:'50% 70%'},9.05);tl.to(h,{rotation:8,duration:.07,yoyo:true,repeat:5,transformOrigin:'50% 90%'},9.1)}
+  if(kind=='portaentra'){tl.to(s.querySelector('.arrow'),{x:-7,duration:.45,yoyo:true,repeat:Math.max(1,Math.floor((t1-after)/.45)-1),ease:'sine.inOut'},after)}
+  if(kind=='saida'){tl.to(s.querySelector('.arrow'),{x:7,duration:.45,yoyo:true,repeat:Math.max(1,Math.floor((t1-after)/.45)-1),ease:'sine.inOut'},after)}
+  if(kind=='lupa'){tl.fromTo(s.querySelector('.lens'),{x:0,y:0},{x:-34,y:-14,duration:1.1,ease:'sine.inOut',yoyo:true,repeat:Math.max(1,Math.floor((t1-after)/1.1)-1)},after)}
+  if(kind=='relogio'){const d=t1-T-.6,n=Math.max(2,Math.round(d/1.4)),hm=s.querySelector('.hm'),hh=s.querySelector('.hh'),o={a:0};
+    const set=()=>{hm.setAttribute('transform',`rotate(${o.a*360*n} 50 50)`);hh.setAttribute('transform',`rotate(${o.a*30*n} 50 50)`)};
+    tl.fromTo(o,{a:0},{a:1,duration:d,ease:'power1.inOut',onUpdate:set,onStart:set},T+.5);set()}
+  if(t1-T>2.8)tl.to(s,{y:-12,duration:1.6,yoyo:true,repeat:Math.floor((t1-T-1.6)/1.6),ease:'sine.inOut'},T+1.2);
+  return s}
+
 // ---------- ícones ----------
 function inIcon(i,kind,t,t1){
   if(t1&&t1-t>2.6)tl.to(i,{y:-14,duration:1.5,yoyo:true,repeat:Math.floor((t1-t-1.4)/1.5),ease:'sine.inOut'},t+1.2);
@@ -149,6 +201,12 @@ BT.forEach((b,i)=>{
     const tx=el('div','abs A',g,'left:0;right:0;top:330px;display:flex;flex-direction:column;align-items:center');
     const l1=line(tx,'ELEGER O','n',70);inLine(l1,3.65,'n');const l2=line(tx,'PRESIDENTE DA REPÚBLICA','b',96);inLine(l2,4.2,'b');
     const fl=el('div','abs',g,'left:760px;top:610px;width:400px;height:42px;background:linear-gradient(#fff 0 14px,#D4292E 14px 28px,#fff 28px)');tl.fromTo(fl,{scaleX:0},{scaleX:1,duration:.8,ease:'expo.out'},4.7);out();return}
+  if(ics[0]=='TXT'){const tx=el('div','abs A',g,'left:0;right:0;top:0;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px');
+    b.lines.forEach(([t,ro,tin],j)=>{const l=line(tx,t,ro,Math.round(SZ[ro]*1.4),1500);inLine(l,Math.max(t0+.15,tin),ro);tl.fromTo(l,{y:40},{y:0,duration:.7,ease:'power3.out'},Math.max(t0+.15,tin))});
+    tl.fromTo(tx,{scale:1},{scale:1.06,duration:t1-t0,ease:'none'},t0);
+    [[262,'#fff'],[880,'#D4292E']].forEach(([y,c],j)=>{const r=el('div','abs',g,`left:560px;width:800px;top:${y}px;height:6px;background:${c};transform-origin:50% 50%`);
+      tl.fromTo(r,{scaleX:0},{scaleX:1,duration:1.1,ease:'expo.out'},t0+.2+j*.25)});
+    out();return}
   const BGF={ASSEMBLEIA:'assembleia_tint',OBSFOTO:'obs_tint',VOTOFOTO:'voto_tint'};
   if(BGF[ics[0]]){const p=img(g,'v1/'+BGF[ics[0]]+'.png','width:1920px;left:0;top:-100px');tl.fromTo(p,{scale:1.15,opacity:0},{scale:1.02,opacity:1,duration:t1-t0,ease:'power1.out'},t0);
     const tx=el('div','abs A',g,'left:0;right:0;top:0;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center');
@@ -176,22 +234,18 @@ BT.forEach((b,i)=>{
     tl.fromTo(w,{y:70,opacity:0},{y:0,opacity:1,duration:.8,ease:'power3.out'},t0+.1); if(t1-t0>2.6)tl.to(w,{y:-10,duration:1.6,yoyo:true,repeat:Math.floor((t1-t0-1.6)/1.6),ease:'sine.inOut'},t0+1);
     tl.fromTo(w,{clipPath:'inset(0% 50% 0% 50%)',scale:1.08},{clipPath:'inset(-10% -5% -10% -5%)',scale:1,duration:1,ease:'power3.out'},t0+.1);
     if(MF=='MESA'){img(w,'v1/mesa.png','width:870px;left:0;top:0')}
-    else{const o=img(w,'v1/mesa_out.png','width:870px;left:0;top:0'),gl=img(w,'v1/mesa_glow.png','width:870px;left:0;top:0'),p=img(w,'v1/mesa_pres.png','width:870px;left:0;top:0;transform-origin:50% 100%');
-      tl.set(gl,{opacity:0},0);tl.to(o,{opacity:.35,filter:'grayscale(1)',duration:.6},t0+1.3);tl.to(gl,{opacity:.9,duration:.6},t0+1.3);tl.fromTo(p,{scale:1},{scale:1.05,duration:.6,ease:'back.out(2)'},t0+1.3)}}
+    else{const o=img(w,'v1/mesa_out.png','width:870px;left:0;top:0'),p=img(w,'v1/mesa_pres.png','width:870px;left:0;top:0;transform-origin:50% 100%');
+      tl.to(o,{opacity:.35,filter:'grayscale(1)',duration:.6},t0+1.3);tl.fromTo(p,{scale:1},{scale:1.05,duration:.6,ease:'back.out(2)'},t0+1.3)}}
   if(ics[0]=='FOTO2'){const u=img(g,'v1/urna.png','height:760px;left:'+(510-0.415*760)+'px;top:-6px');tl.fromTo(u,{y:-200,opacity:0},{y:0,opacity:1,duration:.9,ease:'power3.out'},t0)}
   if(st=='B'&&L.length&&!MF){const c=el('div','card',g,'left:220px;top:290px;width:580px;height:540px');tl.fromTo(c,{scale:.8,opacity:0},{scale:1,opacity:1,duration:.6,ease:'back.out(1.5)'},b.n=='3'?6.6:t0)}
   const icTimes=[b.n=='3'?6.75:t0+.15,(b.lines[1]||b.lines[0]||[0,0,t0+.8])[2]];
-  if(MF&&L.length){const c=el('div','card',g,'left:395px;top:175px;width:200px;height:200px;border-radius:30px');tl.fromTo(c,{scale:.6,opacity:0},{scale:1,opacity:1,duration:.5,ease:'back.out(1.6)'},(b.lines[2]||b.lines[0])[2]-.2)}
-  L.forEach((k,j)=>{const sz=MF?150:(L.length==1?360:(j==0?230:200)), cx=MF?495:(L.length==1?510:(j==0?395:645)), cy=MF?275:(L.length==1?560:(j==0?540:600));
-    const src=k=='relogio'?`v1/relogio0_${st}.png`:(k=='mesa4pres'?`v1/mesa4row_${st}.png`:`v1/${k}_${st}.png`);
-    const s2=sz*600/440, i=img(g,src,`width:${s2}px;left:${cx-s2/2}px;top:${cy-s2/2}px`);inIcon(i,k,MF?(b.lines[2]||b.lines[0])[2]:(j==0?icTimes[0]:Math.max(icTimes[0]+.5,icTimes[1]-.1)),t1);
-    if(k=='mesa4pres'){const i2=img(g,`v1/mesa4pres_${st}.png`,`width:${s2}px;left:${cx-s2/2}px;top:${cy-s2/2}px`);tl.set(i2,{opacity:0},0);tl.set(i2,{opacity:1},t0+1.3);tl.set(i,{opacity:0},t0+1.3);{const tt=t0+.15;if(t1-tt>2.6)tl.to(i2,{y:-14,duration:1.5,yoyo:true,repeat:Math.floor((t1-tt-1.4)/1.5),ease:'sine.inOut'},tt+1.2)}tl.fromTo(i2,{scale:1},{scale:1.04,duration:.25,yoyo:true,repeat:1},t0+1.3)}
-    if(k=='relogio')clockHands(g,cx,cy,sz*.42*1.0,st=='A'?'#fff':'#164B8C',t0);
-  });
+    L.forEach((k,j)=>{const sz=L.length==1?360:(j==0?230:200), cx=L.length==1?510:(j==0?395:645), cy=L.length==1?560:(j==0?540:600);
+    const s2=sz*600/440, T0=b.n=='3'?6.75:t0+.15, ts=k=='autoriza'?[T0,b.lines[1][2]-.05]:[j==0?T0:Math.max(T0+.5,icTimes[1]-.1)];
+    svgIcon(g,k,st,cx,cy,s2,ts,t1)});
   const tx=el('div','txt '+st,g); let kk=null; if(b.kick) kk=kicker(tx,b.kick,st,b.n=='3'?t0+.05:t0+.2);
   const dense=b.lines.length>=5;
   b.lines.forEach(([t,ro,tin])=>{const sz=Math.round(SZ[ro]*(dense&&ro[0]!='h'?.82:1));const l=line(tx,t,ro,sz,880);inLine(l,Math.max(t0+.15,tin),ro)});
-  if(b.n=='3'&&kk){const r=kk.getBoundingClientRect();const sc=3.2, dx=960-(r.left+r.width*sc/2), dy=540-(r.top+r.height*sc/2);
+  if(b.n=='3'&&kk){const bi=kk.querySelector('i');if(bi)bi.remove();const r=kk.getBoundingClientRect();const sc=3.2, dx=960-(r.left+r.width*sc/2), dy=540-(r.top+r.height*sc/2);
     kk.style.transformOrigin='0 0';tl.set(kk,{x:dx,y:dy,scale:sc},t0);tl.fromTo(kk,{opacity:0},{opacity:1,duration:.2},t0);
     tl.fromTo(kk,{scale:sc*1.3},{scale:sc,duration:.5,ease:'back.out(2)',immediateRender:false},t0+.05);
     tl.to(kk,{x:0,y:0,scale:1,duration:.6,ease:'power3.inOut'},6.55);
