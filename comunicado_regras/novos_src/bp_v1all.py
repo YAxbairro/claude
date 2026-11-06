@@ -32,7 +32,8 @@ def icon(b,kind,cx,cy,s,col,acc=RED,w=None):
         ln((4,74),(4,74)); return
     _icon(b,kind,cx,cy,s,col,acc,w)
 S=[ # (estilo, t, ícones, kicker, linhas[(texto,papel)])
- ('A','0–5s',['FOTO'],'15 DE NOVEMBRO',[('CABO VERDE VAI ÀS URNAS','n'),('ELEGER O PRESIDENTE','b'),('DA REPÚBLICA','r')]),
+ ('A','0–3,5s',['FOTO'],'15 DE NOVEMBRO',[('CABO VERDE VAI ÀS URNAS','n')]),
+ ('A','3,5–5,6s',['PALACIO'],None,[('ELEGER O PRESIDENTE','b'),('DA REPÚBLICA','r')]),
  ('B','5–10s',['porta'],'ATENÇÃO',[('O ACESSO E A PERMANÊNCIA','n'),('NAS ASSEMBLEIAS DE VOTO','n'),('SÃO RESTRITOS','h')]),
  ('A','10–22s',['cracha'],'CÓDIGO ELEITORAL',[('A CNE RECORDA:','n'),('APENAS PESSOAS','n'),('LEGALMENTE AUTORIZADAS','b'),('PODEM ENTRAR E PERMANECER','n'),('NO LOCAL DE VOTO','r')]),
  ('B','22–35s','LISTA','SÓ PODEM ENTRAR E PERMANECER',None),
@@ -79,12 +80,15 @@ def scene(sc):
         sh=Image.new('RGBA',b.size,(0,0,0,0)); ImageDraw.Draw(sh).ellipse((200,820,880,880),fill=(0,20,60,110)); b.alpha_composite(sh.filter(ImageFilter.GaussianBlur(18)))
         b.alpha_composite(ph,(540-ph.width//2,-70))  # braço sai pelo topo do ecrã
         ics=[]
+    if ics==['PALACIO']:   # Palácio do Plateau sem céu, base esbatida
+        ph=Image.open(HERE+'/logos/palacio.png').convert('RGBA'); ww=800; ph=ph.resize((ww,int(ph.height*ww/ph.width)),Image.LANCZOS)
+        b.alpha_composite(ph,(90,560-ph.height//2+20)); ics=[]
     if st=='B': card(b,(220,290,800,830),WHITE,44)
     if not ics: pass
     elif len(ics)==1: icon(b,ics[0],510,560,360,ci,RED,w=13)
     else:
         icon(b,ics[0],395,540,230 if ics[0]!='mesa4' else 230,ci,RED,w=10); icon(b,ics[1],645,600,200,ci,RED,w=10)
-    kicker(b,st,960,320,kick)
+    if kick: kicker(b,st,960,320,kick)
     textblock(b,st,960,350 if len(lines)>=4 else 380,lines,mw=880)
     return b
 tw,th=640,360; gap=26; top=200; cols=4; rows=3
