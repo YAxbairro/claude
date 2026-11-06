@@ -1,0 +1,83 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Play;font-weight:800;src:url(fonts/playfair-display-latin-800-normal.woff2)}
+@font-face{font-family:Play;font-style:italic;font-weight:400;src:url(fonts/playfair-display-latin-400-italic.woff2)}
+@font-face{font-family:Bebas;src:url(fonts/bebas-neue-latin-400-normal.woff2)}
+@font-face{font-family:Pop;font-weight:400;src:url(fonts/poppins-latin-400-normal.woff2)}
+@font-face{font-family:Pop;font-weight:600;src:url(fonts/poppins-latin-600-normal.woff2)}
+@font-face{font-family:Pop;font-weight:800;src:url(fonts/poppins-latin-800-normal.woff2)}
+@font-face{font-family:SG;font-weight:400;src:url(fonts/space-grotesk-latin-400-normal.woff2)}
+@font-face{font-family:SG;font-weight:700;src:url(fonts/space-grotesk-latin-700-normal.woff2)}
+@font-face{font-family:Arch;src:url(fonts/archivo-black-latin-400-normal.woff2)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;overflow:hidden}
+.f{position:absolute;inset:0;overflow:hidden}
+.lgp{position:absolute;left:1580px;top:720px;width:300px;height:400px;border-radius:28px;border:3px dashed rgba(127,127,127,.45)}
+.ph{position:absolute;display:flex;align-items:flex-end;justify-content:center}
+.ph svg{width:100%;height:100%}
+.ph b{position:absolute;bottom:42%;left:50%;transform:translateX(-50%);font:600 22px Pop;background:#111a;color:#fff;padding:6px 14px;border-radius:20px;white-space:nowrap}
+.logo{position:absolute}
+.dark .logo{filter:brightness(0) invert(1)}
+</style></head><body><div id="root"></div><script>
+const q=new URLSearchParams(location.search), V=+q.get('v'), S=+q.get('s');
+const SC=[{img:'P2-03',cap:'Comparece às',a:'7H',b:'da manhã',sub:'Para o início pontual da votação',n:'7H'},
+          {img:'P1-03',cap:'São autorizados',a:'Membros',b:'da mesa',sub:'Cada mesa de voto tem 4 membros',n:'4'}][S];
+const L=SC.a.length>3; const fig=(x,y,w,h,lab,extra='')=>`<div class="ph" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;${extra}">
+ <svg viewBox="0 0 100 130" preserveAspectRatio="xMidYMax meet"><defs><linearGradient id="gg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9d3e3"/><stop offset="1" stop-color="#9eabc2"/></linearGradient></defs>
+ <circle cx="50" cy="26" r="17" fill="url(#gg)"/><path d="M18 130 Q18 52 50 50 Q82 52 82 130 Z" fill="url(#gg)"/></svg><b>IMAGEM PIXAR · ${lab}</b></div>`;
+const logos=(dark)=>`<img class="logo" src="le.png" style="left:70px;top:40px;height:100px"><img class="logo" src="lc.png" style="left:1660px;top:56px;height:56px">`;
+const T={
+// 1 · EDITORIAL REVISTA — papel, serifa Playfair, arco, filetes finos, numeração
+1:()=>`<div class="f" style="background:#F4EFE6">${logos()}
+ <div style="position:absolute;left:150px;top:150px;right:150px;height:2px;background:#1B2A5E"></div>
+ <div style="position:absolute;left:150px;top:166px;font:400 22px SG;letter-spacing:6px;color:#1B2A5E">ELEIÇÕES PRESIDENCIAIS · 15.11.2026</div>
+ <div style="position:absolute;right:150px;top:166px;font:700 22px SG;color:#C8102E">05 / 09</div>
+ <div style="position:absolute;left:150px;top:330px;font:italic 400 52px Play;color:#C8102E">${SC.cap}</div>
+ <div style="position:absolute;left:146px;top:395px;font:800 ${L?118:170}px/0.95 Play;color:#1B2A5E">${SC.a}<br><span style="font-size:96px">${SC.b}</span></div>
+ <div style="position:absolute;left:150px;top:800px;width:520px;font:400 30px/1.4 SG;color:#3d4560;border-top:2px solid #1B2A5E;padding-top:18px">${SC.sub}</div>
+ <div style="position:absolute;left:960px;top:230px;width:520px;height:700px;border-radius:260px 260px 0 0;background:#E3D6C2;overflow:hidden">${fig(0,60,520,640,SC.img)}</div>
+ <div style="position:absolute;left:930px;top:200px;width:580px;height:760px;border-radius:290px 290px 0 0;border:2px solid #1B2A5E"></div>
+ <div class="lgp"></div></div>`,
+// 2 · POP AUTOCOLANTE — amarelo/ciano, Bebas gigante, contorno branco tipo sticker, meio-tom, etiquetas inclinadas
+2:()=>`<div class="f" style="background:#FFD23F">${logos()}
+ <div style="position:absolute;inset:0;background-image:radial-gradient(#00000022 3px,transparent 3.5px);background-size:26px 26px;-webkit-mask-image:linear-gradient(110deg,transparent 40%,#000 75%)"></div>
+ <div style="position:absolute;left:820px;top:120px;width:860px;height:860px;border-radius:50%;background:#1FB5E8"></div>
+ <div style="position:absolute;left:110px;top:260px;transform:rotate(-4deg);background:#E63946;color:#fff;font:400 54px Bebas;letter-spacing:3px;padding:8px 26px">${SC.cap}</div>
+ <div style="position:absolute;left:100px;top:330px;font:400 ${L?210:330}px/.85 Bebas;color:#14213D;text-shadow:10px 10px 0 #fff">${SC.a}</div>
+ <div style="position:absolute;left:110px;top:${L?560:640}px;font:400 120px/.9 Bebas;color:#14213D">${SC.b}</div>
+ <div style="position:absolute;left:110px;top:790px;transform:rotate(2deg);background:#14213D;color:#FFD23F;font:600 30px Pop;padding:12px 24px;border-radius:40px">${SC.sub}</div>
+ <div style="filter:drop-shadow(0 0 0 #fff) drop-shadow(12px 12px 0 #14213D)">${fig(900,190,700,800,SC.img,'filter:drop-shadow(8px 0 0 #fff) drop-shadow(-8px 0 0 #fff) drop-shadow(0 8px 0 #fff) drop-shadow(0 -8px 0 #fff)')}</div>
+ <svg style="position:absolute;left:1390px;top:150px;width:230px;height:230px" viewBox="0 0 100 100"><polygon fill="#E63946" points="${[...Array(24)].map((_,i)=>{const r=i%2?38:50,a=i*Math.PI/12;return (50+r*Math.cos(a))+','+(50+r*Math.sin(a))}).join(' ')}"/><text x="50" y="58" text-anchor="middle" font-family="Bebas" font-size="28" fill="#fff">${SC.n}</text></svg>
+ <div class="lgp"></div></div>`,
+// 3 · BENTO GRID — mosaico de cartões arredondados, Poppins, azul gelo, cada informação no seu bloco
+3:()=>`<div class="f" style="background:#EAF0F8">${logos()}
+ <div style="position:absolute;left:110px;top:170px;width:820px;height:520px;border-radius:44px;background:#fff;box-shadow:0 30px 60px -30px #1d2f7a55;padding:60px">
+   <div style="font:600 28px Pop;color:#2F6FED;letter-spacing:1px">${SC.cap}</div>
+   <div style="font:800 120px/1 Pop;color:#0F1B4C;margin-top:10px">${SC.a}</div><div style="font:800 76px/1.1 Pop;color:#0F1B4C">${SC.b}</div></div>
+ <div style="position:absolute;left:110px;top:720px;width:400px;height:250px;border-radius:44px;background:#2F6FED;color:#fff;padding:40px;font:800 150px/1 Pop">${SC.n}</div>
+ <div style="position:absolute;left:530px;top:720px;width:400px;height:250px;border-radius:44px;background:#0F1B4C;color:#fff;padding:40px;font:400 28px/1.4 Pop">${SC.sub}</div>
+ <div style="position:absolute;left:960px;top:170px;width:600px;height:800px;border-radius:44px;background:linear-gradient(160deg,#BFD8FF,#7FA9F5);overflow:hidden">${fig(30,90,540,710,SC.img)}</div>
+ <div style="position:absolute;left:1590px;top:170px;width:260px;height:520px;border-radius:44px;background:#FF5A5F"></div>
+ <div class="lgp"></div></div>`,
+// 4 · NEON NOITE — fundo quase preto, degradê ciano→magenta, contorno luminoso, Space Grotesk
+4:()=>`<div class="f dark" style="background:radial-gradient(circle at 70% 45%,#2a1458 0%,#0b0a1f 55%,#05050f 100%)">${logos(1)}
+ <div style="position:absolute;left:880px;top:130px;width:780px;height:780px;border-radius:50%;border:6px solid transparent;background:linear-gradient(#0b0a1f,#0b0a1f) padding-box,conic-gradient(#00E5FF,#FF2E88,#7C4DFF,#00E5FF) border-box;box-shadow:0 0 80px #FF2E8866,0 0 140px #00E5FF44"></div>
+ ${fig(940,170,660,800,SC.img,'filter:drop-shadow(0 0 22px #00E5FFaa)')}
+ <div style="position:absolute;left:140px;top:330px;font:700 30px SG;letter-spacing:10px;color:#00E5FF">${SC.cap.toUpperCase()}</div>
+ <div style="position:absolute;left:134px;top:380px;font:700 ${L?130:170}px/.95 SG;background:linear-gradient(90deg,#fff,#FF8AC4);-webkit-background-clip:text;color:transparent">${SC.a}</div>
+ <div style="position:absolute;left:140px;top:560px;font:700 90px SG;color:#fff">${SC.b}</div>
+ <div style="position:absolute;left:140px;top:690px;width:120px;height:6px;background:linear-gradient(90deg,#00E5FF,#FF2E88);box-shadow:0 0 20px #FF2E88"></div>
+ <div style="position:absolute;left:140px;top:730px;font:400 32px SG;color:#b9b6e0">${SC.sub}</div>
+ <div class="lgp"></div></div>`,
+// 5 · CABO VERDE — azul bandeira, faixas branca/vermelha, anel de 10 estrelas, Archivo Black
+5:()=>`<div class="f dark" style="background:#003893">${logos(1)}
+ <div style="position:absolute;left:0;right:0;top:640px;height:54px;background:#fff"></div><div style="position:absolute;left:0;right:0;top:694px;height:54px;background:#CF2027"></div><div style="position:absolute;left:0;right:0;top:748px;height:54px;background:#fff"></div>
+ <svg style="position:absolute;left:870px;top:110px;width:820px;height:820px" viewBox="0 0 100 100">${[...Array(10)].map((_,i)=>{const a=i*Math.PI/5-Math.PI/2,x=50+42*Math.cos(a),y=50+42*Math.sin(a);return `<polygon fill="#F7D116" transform="translate(${x} ${y}) scale(.9)" points="${[...Array(10)].map((_,k)=>{const r=k%2?1.6:4,b=k*Math.PI/5-Math.PI/2;return (r*Math.cos(b)).toFixed(2)+','+(r*Math.sin(b)).toFixed(2)}).join(' ')}"/>`}).join('')}</svg>
+ ${fig(960,180,640,800,SC.img)}
+ <div style="position:absolute;left:140px;top:250px;font:400 34px Arch;color:#F7D116;letter-spacing:2px">${SC.cap.toUpperCase()}</div>
+ <div style="position:absolute;left:136px;top:300px;font:400 ${L?104:150}px/1 Arch;color:#fff">${SC.a.toUpperCase()}</div>
+ <div style="position:absolute;left:140px;top:${L?420:460}px;font:400 70px Arch;color:#fff">${SC.b.toUpperCase()}</div>
+ <div style="position:absolute;left:140px;top:860px;font:600 32px Pop;color:#dfe8ff">${SC.sub}</div>
+ <div class="lgp"></div></div>`};
+document.getElementById('root').innerHTML=T[V]();
+window.READY=document.fonts.ready.then(()=>Promise.all([...document.images].map(i=>i.decode().catch(()=>0))));
+</script></body></html>
