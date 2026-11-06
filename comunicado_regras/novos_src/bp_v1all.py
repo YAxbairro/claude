@@ -75,9 +75,9 @@ def scene(sc):
         d=ImageDraw.Draw(b); d.text((960,710),'JUNTOS POR ELEIÇÕES',font=f(50,7),fill=NAVY,anchor='ms'); d.text((960,800),'LIVRES, JUSTAS E TRANSPARENTES',font=f(68),fill=RED,anchor='ms'); return b
     ci=WHITE if st=='A' else CBLUE
     if ics==['FOTO']:   # imagem sem fundo, sem moldura
-        ph=Image.open(HERE+'/logos/urna_mao.png').convert('RGBA'); hh=700; ph=ph.resize((int(ph.width*hh/ph.height),hh),Image.LANCZOS)
-        sh=Image.new('RGBA',b.size,(0,0,0,0)); ImageDraw.Draw(sh).ellipse((300,930,820,990),fill=(0,20,60,110)); b.alpha_composite(sh.filter(ImageFilter.GaussianBlur(18)))
-        b.alpha_composite(ph,(560-ph.width//2,270))
+        ph=Image.open(HERE+'/logos/urna_mao.png').convert('RGBA'); hh=920; ph=ph.resize((int(ph.width*hh/ph.height),hh),Image.LANCZOS)
+        sh=Image.new('RGBA',b.size,(0,0,0,0)); ImageDraw.Draw(sh).ellipse((200,820,880,880),fill=(0,20,60,110)); b.alpha_composite(sh.filter(ImageFilter.GaussianBlur(18)))
+        b.alpha_composite(ph,(540-ph.width//2,-70))  # braço sai pelo topo do ecrã
         ics=[]
     if st=='B': card(b,(220,290,800,830),WHITE,44)
     if not ics: pass
