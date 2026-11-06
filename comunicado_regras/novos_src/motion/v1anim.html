@@ -110,7 +110,7 @@ BT.forEach((b,i)=>{
       tl.set(g,{visibility:'visible'},t0);tl.set(g,{visibility:'hidden'},tEnd);
       const k=el('div','abs',g,'left:140px;top:205px');kicker(k,b.kick,st,t0+.1);
       const items=[['mesa4row','MEMBROS','DA MESA'],['cne','REPRESENTANTES','DA CNE E APOIO'],['pessoas','CANDIDATOS','E MANDATÁRIOS'],['cracha','DELEGADOS','DAS CANDIDATURAS']];
-      const cards=items.map((it,k)=>{const c=el('div','lcard',g,`left:${140+k*405}px;top:330px`);const im=el('img','',c);im.src=k==0?'v1/mesa.png':`v1/${it[0]}_B.png`;if(k==0)im.style.cssText='left:22px;top:120px;width:331px';
+      const cards=items.map((it,k)=>{const c=el('div','lcard',g,`left:${140+k*405}px;top:330px`);const im=el('img','',c);im.src=['v1/mesa.png','v1/grp_rep.png','v1/grp_cand.png','v1/grp_del.png'][k];im.style.cssText=k==0?'left:22px;top:120px;width:331px':'left:50%;top:70px;height:262px;width:auto;transform:translateX(-50%)';
         el('div','t1',c).textContent=it[1];el('div','t2',c).textContent=it[2];el('div','ring',c);
         const t1_=c.querySelector('.t1');let fs=40;t1_.style.fontSize=fs+'px';while(t1_.offsetWidth>310){fs-=1;t1_.style.fontSize=fs+'px'}return c});
       const foot=el('div','abs',g,'left:140px;top:880px;font-weight:800;color:#19296D;font-size:34px');foot.textContent='NOS TERMOS DA LEI';
