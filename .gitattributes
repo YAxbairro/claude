@@ -9,3 +9,9 @@ voto_acessivel/*.mov filter=lfs diff=lfs merge=lfs -text
 ep8/*.mov filter=lfs diff=lfs merge=lfs -text
 comunicado_regras/*REALISTA*.mp4 filter=lfs diff=lfs merge=lfs -text
 comunicado_regras/*REALISTA*.mov filter=lfs diff=lfs merge=lfs -text
+comunicado_regras/realista_src/**/*.mp4 filter=lfs diff=lfs merge=lfs -text
+comunicado_regras/realista_src/**/*.png filter=lfs diff=lfs merge=lfs -text
+comunicado_regras/realista_src/**/*.jpg filter=lfs diff=lfs merge=lfs -text
+comunicado_regras/realista_src/**/*.wav filter=lfs diff=lfs merge=lfs -text
+comunicado_regras/realista_src/**/*.m4a filter=lfs diff=lfs merge=lfs -text
+comunicado_regras/realista_src/*.png filter=lfs diff=lfs merge=lfs -text
