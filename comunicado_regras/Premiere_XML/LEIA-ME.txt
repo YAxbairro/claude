@@ -1,0 +1,23 @@
+SEQUÊNCIAS PREMIERE PRO (XML) - CNE Presidenciais 2026 - estilo B
+
+Cada pasta = 1 vídeo:  CNE_Acesso_Permanencia (1:29)  |  CNE_Membros_Mesas (1:04)
+  - <nome>.xml   -> sequência 1920x1080, 25 fps
+  - assets/      -> cada elemento num PNG transparente 1920x1080 JÁ na posição final
+  - locucao.mp3  -> voz (faixa A1)
+
+COMO ABRIR
+  1. Descompacta mantendo as pastas (o .xml tem de ficar ao lado de assets/ e locucao.mp3).
+  2. Premiere: File > Import > escolhe o .xml. Abre uma bin com a sequência e todos os assets.
+  3. Se pedir "Link Media", aponta para o primeiro PNG em assets/ - os restantes ligam sozinhos.
+
+TIMELINE
+  V1 Fundo | V2 Logos dos cantos | Ícone 1-4 | Etiqueta (pílula vermelha) | Texto 1-13 | Logo final 1-2
+  Cada clip entra no tempo exato da palavra na locução.
+  Fades: keyframes de Opacidade (entrada 10 frames, saída 9 frames) - editáveis em Effect Controls.
+  Para as animações de "salto" dos ícones/subida dos textos, adiciona Scale/Position no Premiere
+  (ponto de âncora: usa Transform ou recorta com Crop, porque os PNG são do tamanho do ecrã).
+
+TEXTOS
+  O XML não transporta texto editável do Premiere. Cada linha é um PNG separado.
+  Para mudar uma palavra: desativa essa camada e põe um Texto do Premiere por cima
+  (fonte Montserrat ExtraBold/Bold, navy #19296D, vermelho #D4292E), ou pede-me o PNG novo.
