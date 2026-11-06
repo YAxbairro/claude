@@ -77,7 +77,10 @@ function inIcon(i,kind,t,t1){
   if(t1&&t1-t>2.6)tl.to(i,{y:-14,duration:1.5,yoyo:true,repeat:Math.floor((t1-t-1.4)/1.5),ease:'sine.inOut'},t+1.2);
   const base={clipPath:'inset(0% 100% 0% 0%)',opacity:1}, to={clipPath:'inset(0% 0% 0% 0%)',duration:.9,ease:'power2.inOut'};
   tl.fromTo(i,{scale:.85,y:30,opacity:0},{scale:1,y:0,opacity:1,duration:.8,ease:'back.out(1.6)'},t);
-  if(kind=='porta'||kind=='livro'){tl.fromTo(i,{rotationY:-75,transformOrigin:'20% 50%'},{rotationY:0,duration:1.1,ease:'power3.out'},t)}
+  if(kind=='porta3'){tl.fromTo(i,{rotationY:-75,transformOrigin:'20% 50%'},{rotationY:0,duration:1.1,ease:'power3.out'},t);tl.to(i,{scale:1.12,duration:.15,yoyo:true,repeat:1},9.05);tl.to(i,{x:10,duration:.06,yoyo:true,repeat:5},9.1)}
+  else if(kind=='portaentra'){tl.fromTo(i,{rotationY:-75,transformOrigin:'20% 50%'},{rotationY:0,duration:.9,ease:'power3.out'},t);tl.to(i,{x:-14,duration:.45,yoyo:true,repeat:3,ease:'sine.inOut'},t+.9)}
+  else if(kind=='autoriza'){tl.fromTo(i,base,to,t);tl.fromTo(i,{rotation:-6},{rotation:0,duration:.9,ease:'elastic.out(1,.5)'},t+.5)}
+  else if(kind=='porta'||kind=='livro'){tl.fromTo(i,{rotationY:-75,transformOrigin:'20% 50%'},{rotationY:0,duration:1.1,ease:'power3.out'},t)}
   else if(kind=='cracha'){tl.fromTo(i,{rotation:-25,y:-160},{rotation:0,y:0,duration:1.0,ease:'elastic.out(1,.6)'},t)}
   else if(kind=='tempo'){tl.fromTo(i,{rotation:180},{rotation:0,duration:1.1,ease:'power3.inOut'},t+.1)}
   else if(kind=='globo'){tl.fromTo(i,{rotationY:-180},{rotationY:0,duration:1.4,ease:'power2.out'},t)}
@@ -110,14 +113,14 @@ BT.forEach((b,i)=>{
       tl.set(g,{visibility:'visible'},t0);tl.set(g,{visibility:'hidden'},tEnd);
       const k=el('div','abs',g,'left:140px;top:205px');kicker(k,b.kick,st,t0+.1);
       const items=[['mesa4row','MEMBROS','DA MESA'],['cne','REPRESENTANTES','DA CNE E APOIO'],['pessoas','CANDIDATOS','E MANDATÁRIOS'],['cracha','DELEGADOS','DAS CANDIDATURAS']];
-      const cards=items.map((it,k)=>{const c=el('div','lcard',g,`left:${140+k*405}px;top:330px`);const im=el('img','',c);im.src=['v1/mesa.png','v1/grp_rep.png','v1/grp_cand.png','v1/grp_del.png'][k];im.style.cssText=k==0?'left:22px;top:120px;width:331px':'left:50%;top:70px;height:262px;width:auto;transform:translateX(-50%)';
+      const cards=items.map((it,k)=>{const c=el('div','lcard',g,`left:${140+k*405}px;top:330px`);const im=el('img','',c);im.src=['v1/mesa.png','v1/grp_rep.png','v1/grp_cand.png','v1/grp_del.png'][k];im.style.cssText=k==0?'left:22px;top:120px;width:331px':'left:0;right:0;margin:0 auto;top:70px;height:262px;width:auto';
         el('div','t1',c).textContent=it[1];el('div','t2',c).textContent=it[2];el('div','ring',c);
-        const t1_=c.querySelector('.t1');let fs=40;t1_.style.fontSize=fs+'px';while(t1_.offsetWidth>310){fs-=1;t1_.style.fontSize=fs+'px'}return c});
+        c._im=im;const t1_=c.querySelector('.t1');let fs=40;t1_.style.fontSize=fs+'px';while(t1_.offsetWidth>310){fs-=1;t1_.style.fontSize=fs+'px'}return c});
       const foot=el('div','abs',g,'left:140px;top:880px;font-weight:800;color:#19296D;font-size:34px');foot.textContent='NOS TERMOS DA LEI';
       lista={g,cards,foot};tl.to(g,{scale:1.03,duration:tEnd-t0,ease:'none'},t0)}
     const f=ics[1], C=lista.cards;
     if(f!==null){const c=C[f];const tw=[23.55,24.95,28.55,32.05][f];
-      tl.fromTo(c,{opacity:0,y:120,rotationX:-40},{opacity:1,y:0,rotationX:0,duration:.8,ease:'power3.out'},tw);
+      tl.fromTo(c,{opacity:0,y:120,rotationX:-40},{opacity:1,y:0,rotationX:0,duration:.8,ease:'power3.out'},tw);tl.fromTo(c._im,{opacity:0,y:50,scale:.85},{opacity:1,y:0,scale:1,duration:.7,ease:'back.out(1.7)'},tw+.3);
       tl.to(c,{scale:1.14,y:-10,zIndex:5,duration:.6,ease:'back.out(1.6)'},tw+.25);tl.to(c.querySelector('.ring'),{opacity:1,duration:.3},tw+.25);
       C.slice(0,f).forEach(o=>{tl.to(o,{scale:1,y:0,opacity:.35,duration:.5},tw);tl.to(o.querySelector('.ring'),{opacity:0,duration:.2},tw)})}
     else{tl.to(C,{opacity:1,scale:1,y:0,duration:.6,ease:'power3.out',stagger:.05},t0+.05);tl.to(C.map(c=>c.querySelector('.ring')),{opacity:0,duration:.3},t0+.05);
@@ -171,6 +174,7 @@ BT.forEach((b,i)=>{
   const L=ics.filter(k=>k!='FOTO2'&&k!='CODIGO'&&k!='MESA'&&k!='MESAPRES'); const MF=ics.find(k=>k=='MESA'||k=='MESAPRES');
   if(MF){const w=el('div','abs',g,'left:60px;top:400px;width:870px;height:425px');
     tl.fromTo(w,{y:70,opacity:0},{y:0,opacity:1,duration:.8,ease:'power3.out'},t0+.1); if(t1-t0>2.6)tl.to(w,{y:-10,duration:1.6,yoyo:true,repeat:Math.floor((t1-t0-1.6)/1.6),ease:'sine.inOut'},t0+1);
+    tl.fromTo(w,{clipPath:'inset(0% 50% 0% 50%)',scale:1.08},{clipPath:'inset(-10% -5% -10% -5%)',scale:1,duration:1,ease:'power3.out'},t0+.1);
     if(MF=='MESA'){img(w,'v1/mesa.png','width:870px;left:0;top:0')}
     else{const o=img(w,'v1/mesa_out.png','width:870px;left:0;top:0'),gl=img(w,'v1/mesa_glow.png','width:870px;left:0;top:0'),p=img(w,'v1/mesa_pres.png','width:870px;left:0;top:0;transform-origin:50% 100%');
       tl.set(gl,{opacity:0},0);tl.to(o,{opacity:.35,filter:'grayscale(1)',duration:.6},t0+1.3);tl.to(gl,{opacity:.9,duration:.6},t0+1.3);tl.fromTo(p,{scale:1},{scale:1.05,duration:.6,ease:'back.out(2)'},t0+1.3)}}
