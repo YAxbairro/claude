@@ -14,6 +14,9 @@ def icon(b,kind,cx,cy,s,col,acc=RED,w=None):
         el(30,2,46,18); el(54,2,70,18)
         el(39,20,61,42); ar(32,46,68,88)
         ln((0,72),(100,72)); ln((8,72),(8,100)); ln((92,72),(92,100)); return
+    if kind=='mesa4row':
+        for x in (14,38,62,86): el(x-8,24,x+8,40); ar(x-12,46,x+12,74)
+        ln((0,62),(100,62)); ln((8,62),(8,96)); ln((92,62),(92,96)); return
     if kind=='cne':     # representante da CNE: pessoa com colete + escudo/crachá
         el(38,4,62,28); ln((18,96),(18,56),(32,38),(68,38),(82,56),(82,96)); ln((40,38),(50,58),(60,38))
         ln((56,64),(66,59),(76,64),(76,75),(66,86),(56,75),(56,64),c=acc); ln((61,72),(65,77),(71,68),c=acc); return
@@ -28,28 +31,28 @@ def icon(b,kind,cx,cy,s,col,acc=RED,w=None):
         ln((4,74),(4,74)); return
     _icon(b,kind,cx,cy,s,col,acc,w)
 S=[ # (estilo, t, ícones, kicker, linhas[(texto,papel)])
- ('A','0–5s',['boletim'],'15 DE NOVEMBRO',[('CABO VERDE VAI ÀS URNAS','n'),('ELEGER O PRESIDENTE','b'),('DA REPÚBLICA','r')]),
- ('B','5–10s',['porta'],'ATENÇÃO',[('O ACESSO E A PERMANÊNCIA','n'),('NAS ASSEMBLEIAS DE VOTO','n'),('SÃO RESTRITOS','r')]),
+ ('A','0–5s',['FOTO'],'15 DE NOVEMBRO',[('CABO VERDE VAI ÀS URNAS','n'),('ELEGER O PRESIDENTE','b'),('DA REPÚBLICA','r')]),
+ ('B','5–10s',['porta'],'ATENÇÃO',[('O ACESSO E A PERMANÊNCIA','n'),('NAS ASSEMBLEIAS DE VOTO','n'),('SÃO RESTRITOS','h')]),
  ('A','10–22s',['cracha'],'CÓDIGO ELEITORAL',[('A CNE RECORDA:','n'),('APENAS PESSOAS','n'),('LEGALMENTE AUTORIZADAS','b'),('PODEM ENTRAR E PERMANECER','n'),('NO LOCAL DE VOTO','r')]),
  ('B','22–35s','LISTA','SÓ PODEM ENTRAR E PERMANECER',None),
- ('A','35–48s',['globo','cracha'],'OBSERVADORES INTERNACIONAIS',[('DEVIDAMENTE','n'),('CREDENCIADOS','b'),('SÓ O TEMPO NECESSÁRIO','n'),('À OBSERVAÇÃO','r')]),
+ ('A','35–48s',['globo','cracha'],'OBSERVADORES INTERNACIONAIS',[('DEVIDAMENTE','n'),('CREDENCIADOS','hn'),('SÓ O TEMPO NECESSÁRIO','n'),('À OBSERVAÇÃO','r')]),
  ('B','48–62s',['mesa4','cracha'],'PRESIDENTE DA MESA',[('DEVE EXIGIR E VERIFICAR','n'),('CREDENCIAIS E CRACHÁS','b'),('EMITIDOS PELA CNE','r'),('ANTES DE AUTORIZAR A PERMANÊNCIA','s')]),
- ('A','62–69s',['relogio'],'ELEITORES',[('SÓ PODEM PERMANECER','n'),('O TEMPO NECESSÁRIO','b'),('PARA VOTAR','r')]),
- ('B','69–75s',['saida'],'PRESIDENTE DA MESA',[('DETERMINA A SAÍDA','b'),('DE TODAS AS PESSOAS','n'),('NÃO AUTORIZADAS','r')]),
- ('A','75–82s',['eleitor_sai'],'CARO ELEITOR',[('APÓS VOTAR','n'),('ABANDONA O LOCAL','r'),('E RESPEITA AS ORIENTAÇÕES','s'),('DOS MEMBROS DA MESA','b')]),
+ ('A','62–69s',['relogio'],'ELEITORES',[('SÓ PODEM PERMANECER','n'),('O TEMPO','hn'),('NECESSÁRIO','b'),('PARA VOTAR','r')]),
+ ('B','69–75s',['mesa4','saida'],'PRESIDENTE DA MESA',[('DETERMINA A SAÍDA','b'),('DE TODAS AS PESSOAS','n'),('NÃO AUTORIZADAS','h')]),
+ ('A','75–82s',['saida'],'CARO ELEITOR',[('APÓS VOTAR','n'),('ABANDONA O LOCAL','h'),('E RESPEITA AS ORIENTAÇÕES','s'),('DOS MEMBROS DA MESA','b')]),
  ('B','82–89s','FIM',None,[('JUNTOS POR ELEIÇÕES','n'),('LIVRES, JUSTAS E TRANSPARENTES','r')])]
-SZ={'n':50,'b':72,'r':76,'s':38}
+SZ={'n':50,'b':72,'r':76,'s':38,'h':118,'hn':118}
 def fit(t,sz,mw):
     while f(sz).getlength(t)>mw and sz>24: sz-=2
     return sz
 def textblock(b,st,x,y,lines,mw=840):
     d=ImageDraw.Draw(b); dense=len(lines)>=5; T=WHITE if st=='A' else NAVY
     for t,ro in lines:
-        sz=fit(t,int(SZ[ro]*(.82 if dense else 1)),mw); y+=int(sz*1.05)
+        sz=fit(t,int(SZ[ro]*(.82 if dense and ro[0]!='h' else 1)),mw); y+=int(sz*1.05)
         if st=='A':   # A: caixas navy/vermelho em fundo azul
-            tag(b,x,y,t,sz,{'n':'plain','s':'plain','b':'navy','r':'red'}[ro])
+            tag(b,x,y,t,sz,{'n':'plain','s':'plain','b':'navy','r':'red','h':'red','hn':'navy'}[ro])
         else:         # B: texto navy/vermelho em fundo claro + traço vermelho (mistura com caixa navy do A no 'b')
-            tag(b,x,y,t,sz,'plain',{'n':NAVY,'b':NAVY,'s':(70,80,110),'r':RED}[ro])
+            tag(b,x,y,t,sz,'plain',{'n':NAVY,'b':NAVY,'s':(70,80,110),'r':RED,'h':RED,'hn':NAVY}[ro])
         y+=int(sz*.32)+12
     return y
 def scene(sc):
@@ -59,7 +62,7 @@ def scene(sc):
     I=WHITE if st=='A' else CBLUE
     if ics=='LISTA':
         kicker(b,st,140,250,kick)
-        items=[('mesa4','MEMBROS','DA MESA (4)'),('cne','REPRESENTANTES','DA CNE E APOIO'),('pessoas','CANDIDATOS','E MANDATÁRIOS'),('cracha','DELEGADOS','DAS CANDIDATURAS')]
+        items=[('mesa4row','MEMBROS','DA MESA (4)'),('cne','REPRESENTANTES','DA CNE E APOIO'),('pessoas','CANDIDATOS','E MANDATÁRIOS'),('cracha','DELEGADOS','DAS CANDIDATURAS')]
         for k,(ic,a,c) in enumerate(items):
             x=140+k*405; y=310
             card(b,(x,y,x+375,y+520),WHITE,32)
@@ -70,8 +73,14 @@ def scene(sc):
         paste(b,LOGO_COR,960-int(LOGO_COR.width*300/LOGO_COR.height)//2,140,300); paste(b,LOGO_CNE,960-int(LOGO_CNE.width*100/LOGO_CNE.height)//2,490,100)
         d=ImageDraw.Draw(b); d.text((960,710),'JUNTOS POR ELEIÇÕES',font=f(50,7),fill=NAVY,anchor='ms'); d.text((960,800),'LIVRES, JUSTAS E TRANSPARENTES',font=f(68),fill=RED,anchor='ms'); return b
     ci=WHITE if st=='A' else CBLUE
+    if ics==['FOTO']:
+        ph=Image.open(HERE+'/logos/ref_urna.png').convert('RGBA'); sz_=520; ph=ph.resize((int(ph.width*sz_/ph.height*1.05),int(sz_*1.05)),Image.LANCZOS)
+        ph=ph.crop(((ph.width-sz_)//2,0,(ph.width-sz_)//2+sz_,sz_)); m=Image.new('L',(sz_,sz_),0); ImageDraw.Draw(m).ellipse((0,0,sz_,sz_),fill=255); ph.putalpha(m)
+        b.alpha_composite(ph,(250,300)); ImageDraw.Draw(b).ellipse((242,292,250+sz_+8,300+sz_+8),outline=WHITE,width=6)
+        ics=[]
     if st=='B': card(b,(220,290,800,830),WHITE,44)
-    if len(ics)==1: icon(b,ics[0],510,560,360,ci,RED,w=13)
+    if not ics: pass
+    elif len(ics)==1: icon(b,ics[0],510,560,360,ci,RED,w=13)
     else:
         icon(b,ics[0],395,540,230 if ics[0]!='mesa4' else 230,ci,RED,w=10); icon(b,ics[1],645,600,200,ci,RED,w=10)
     kicker(b,st,960,320,kick)
