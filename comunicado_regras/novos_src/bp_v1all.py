@@ -21,7 +21,7 @@ def icon(b,kind,cx,cy,s,col,acc=RED,w=None):
         ln((0,62),(100,62)); ln((8,62),(8,96)); ln((92,62),(92,96)); return
     if kind=='livro':   # Código Eleitoral
         d.rounded_rectangle((*P(20,6),*P(80,94)),int(5*k),outline=col,width=w); ln((30,6),(30,94)); ln((40,30),(70,30)); ln((40,42),(64,42))
-        ln((62,94),(62,80),(68,86),(74,80),(74,94),c=acc); return
+        return
     if kind=='info':    # prestar informações
         d.rounded_rectangle((*P(6,10),*P(94,74)),int(10*k),outline=col,width=w); ln((24,74),(18,94),(44,74)); el(46,20,54,28,acc); ln((50,38),(50,62),c=acc); return
     if kind=='lupa':    # verificar crachá
