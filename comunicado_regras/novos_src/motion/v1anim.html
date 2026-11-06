@@ -40,9 +40,9 @@ html,body{width:1920px;height:1080px;overflow:hidden;font-family:M,sans-serif;ba
 .orb{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.13),rgba(255,255,255,0) 70%)}
 #o1{width:1100px;height:1100px;left:-300px;top:200px}#o2{width:900px;height:900px;left:1200px;top:-300px}
 #sheen{position:absolute;top:-200px;bottom:-200px;width:260px;left:-400px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.10),transparent);transform:skewX(-18deg)}
-.panel{position:absolute;left:0;top:0;width:1000px;height:1080px;overflow:hidden;clip-path:polygon(0 0,100% 0,82% 100%,0 100%)}
+.panel{position:absolute;left:0;top:0;width:1000px;height:1080px;overflow:hidden}
 .panel img{position:absolute;left:-50px;top:0;height:1080px}
-.panel:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,90,160,0) 55%,rgba(11,90,160,.55))}
+.panel:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,90,160,.75),rgba(11,90,160,0) 28%),linear-gradient(90deg,rgba(14,110,180,0) 50%,rgba(14,110,180,.85) 92%,#0F6EB4)}
 .pedge{position:absolute;left:0;top:0;width:1000px;height:1080px;clip-path:polygon(100% 0,101.2% 0,83.2% 100%,82% 100%);background:#D4292E}
 svg.hands{position:absolute;overflow:visible}
 </style></head>
@@ -149,10 +149,11 @@ BT.forEach((b,i)=>{
   if(ics[0]=='ASSEMBLEIA'){const p=img(g,'v1/assembleia_tint.png','width:1920px;left:0;top:-100px');tl.fromTo(p,{scale:1.15,opacity:0},{scale:1.02,opacity:1,duration:t1-t0,ease:'power1.out'},t0);
     const tx=el('div','abs A',g,'left:0;right:0;top:0;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center');
     b.lines.forEach(([t,ro,tin])=>{const l=line(tx,t,ro,Math.round(SZ[ro]*1.15),1500);inLine(l,Math.max(t0+.15,tin),ro)});out();return}
-  if(/^OBS/.test(ics[0])){const pn=el('div','panel',g);const pi=img(pn,'v1/'+ics[0].toLowerCase()+'.jpg','');const ed=el('div','pedge',g);
-    tl.fromTo(pn,{clipPath:'polygon(0 0,0% 0,0% 100%,0 100%)'},{clipPath:'polygon(0 0,100% 0,82% 100%,0 100%)',duration:.7,ease:'power3.inOut'},t0);
-    tl.fromTo(ed,{opacity:0},{opacity:1,duration:.3},t0+.5);
-    tl.fromTo(pi,{scale:1.18,x:-30},{scale:1.02,x:20,duration:t1-t0+.6,ease:'none'},t0);
+  if(/^OBS/.test(ics[0])){const first=!(prev&&/^OBS/.test((prev.ics||[])[0]||''));
+    if(first){const tEnd=BT.filter(x=>/^OBS/.test((x.ics||[])[0]||'')).pop().t1;const pg=el('div','beat A',world);tl.set(pg,{visibility:'visible'},t0);tl.set(pg,{visibility:'hidden'},tEnd);
+      const pn=el('div','panel',pg);const pi=img(pn,'v1/obs1.jpg','');
+      tl.fromTo(pn,{opacity:0,x:-60},{opacity:1,x:0,duration:.8,ease:'power3.out'},t0);
+      tl.fromTo(pi,{scale:1.15,x:-20},{scale:1.0,x:20,duration:tEnd-t0,ease:'none'},t0);tl.to(pg,{opacity:0,duration:.3},tEnd-.3)}
     const tx=el('div','txt A',g);tx.style.left='1040px';if(b.kick){const k=kicker(tx,b.kick,'A',t0+.2);let fs=46;while(k.offsetWidth>800&&fs>24){fs-=2;k.style.fontSize=fs+'px'}}
     b.lines.forEach(([t,ro,tin])=>{const l=line(tx,t,ro,SZ[ro],780);inLine(l,Math.max(t0+.15,tin),ro)});
     if(ics[0]=='OBS3'){const bar=el('div','abs',g,'left:1040px;top:760px;width:560px;height:12px;background:rgba(255,255,255,.25)');const fill=el('div','abs',bar,'left:0;top:0;bottom:0;width:100%;background:#fff;transform-origin:0 50%');
