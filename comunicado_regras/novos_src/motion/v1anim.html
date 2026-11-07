@@ -199,7 +199,8 @@ BT.forEach((b,i)=>{
       tl.fromTo(lista.foot,{opacity:0,x:-30},{opacity:1,x:0,duration:.5},t0+.2)}
     if(next&&!(Array.isArray(next.ics)&&next.ics[0]=='LISTA'))tl.to(lista.g,{opacity:0,duration:.3},t1-.3);
     return}
-  const g=el('div','beat '+st,world); tl.set(g,{visibility:'visible'},t0); if(!/^OBS/.test((ics||[])[0]||''))tl.set(g,{visibility:'hidden'},t1+.05);
+  const g=el('div','beat '+st,world); tl.set(g,{visibility:'visible'},t0);
+  const BGK=(Array.isArray(ics)?ics:[]).find(k=>/^bg_/.test(k)); if(BGK){const p=img(g,'v2/'+BGK+'.png','width:1920px;left:0;top:-100px');tl.fromTo(p,{scale:1.12,opacity:0},{scale:1.02,opacity:1,duration:t1-t0,ease:'power1.out'},t0);tl.to(p,{opacity:1,duration:.6},t0)} if(!/^OBS/.test((ics||[])[0]||''))tl.set(g,{visibility:'hidden'},t1+.05);
   tl.fromTo(g,{scale:1},{scale:1.035,duration:t1-t0,ease:'none'},t0);   // câmara: push-in lento
   const same=next&&scn(next.n)==scn(b.n)&&next.st==st;
   const out=()=>{ if(!next) return; if(same) tl.to(g,{x:-90,opacity:0,duration:.35,ease:'power2.in'},t1-.33); else tl.to(g,{opacity:0,duration:.25},t1-.25)};
@@ -250,7 +251,7 @@ BT.forEach((b,i)=>{
     tl.fromTo(c,{rotationY:-70,y:80,opacity:0,transformOrigin:'0% 50%'},{rotationY:0,y:0,opacity:1,duration:1.1,ease:'power3.out'},t0+.1);
     tl.to(c,{rotationY:8,y:-12,duration:2,ease:'sine.inOut',yoyo:true,repeat:1},t0+1.2)}
   // ---------- batida normal: ícone(s) à esquerda, texto à direita ----------
-  const L=ics.filter(k=>k!='FOTO2'&&k!='CODIGO'&&k!='MESA'&&k!='MESAPRES'); const MF=ics.find(k=>k=='MESA'||k=='MESAPRES');
+  const L=ics.filter(k=>!/^bg_/.test(k)&&k!='FOTO2'&&k!='CODIGO'&&k!='MESA'&&k!='MESAPRES'); const MF=ics.find(k=>k=='MESA'||k=='MESAPRES');
   if(MF){const w=el('div','abs',g,'left:60px;top:400px;width:870px;height:425px');
     tl.fromTo(w,{y:70,opacity:0},{y:0,opacity:1,duration:.8,ease:'power3.out'},t0+.1); if(t1-t0>2.6)tl.to(w,{y:-10,duration:1.6,yoyo:true,repeat:Math.floor((t1-t0-1.6)/1.6),ease:'sine.inOut'},t0+1);
     tl.fromTo(w,{clipPath:'inset(0% 50% 0% 50%)',scale:1.08},{clipPath:'inset(-10% -5% -10% -5%)',scale:1,duration:1,ease:'power3.out'},t0+.1);
