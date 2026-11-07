@@ -278,10 +278,10 @@ BT.forEach((b,i)=>{
 }
   out();
 });
-tl.fromTo(['#leA','#lcA'],{y:-50,opacity:0},{y:0,opacity:1,duration:.8,ease:'power3.out',stagger:.1},0);
+tl.fromTo(BT[0].st=='A'?['#leA','#lcA']:['#leB','#lcB'],{y:-50,opacity:0},{y:0,opacity:1,duration:.8,ease:'power3.out'},0);
 tl.set({},{},DUR);
 }
-window.renderAt=t=>{tl.seek(t,false);
+window.renderAt=t=>{tl.seek(Math.max(t,.001),false);
   document.getElementById('o1').style.transform=`translate(${Math.sin(t*.21)*140}px,${Math.cos(t*.17)*80}px)`;
   document.getElementById('o2').style.transform=`translate(${Math.cos(t*.19)*120}px,${Math.sin(t*.23)*90}px)`;
   document.getElementById('sheen').style.left=(((t*260)%5200)-600)+'px';
