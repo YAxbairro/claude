@@ -1,0 +1,58 @@
+<!doctype html><html><head><meta charset="utf-8">
+<!-- Mapa limpo (ilhas + diáspora) para o Apelo/Proibições, 5,0–13,6 s. Sem texto: os textos vêm do segs3.py. -->
+<style>
+@font-face{font-family:M;font-weight:800;src:url(../fonts/M800.ttf)}
+*{margin:0;padding:0}html,body{width:1920px;height:1080px;overflow:hidden;font-family:M}
+#bg{position:absolute;inset:0;background:radial-gradient(ellipse 1300px 900px at 38% 52%,#1496CC 0%,#0B5AA0 100%)}
+svg{position:absolute;left:0;top:0}
+.lbl{position:absolute;background:#19296D;color:#fff;font-weight:800;font-size:30px;padding:8px 16px 6px;border-radius:24px;white-space:nowrap;transform-origin:50% 50%;box-shadow:0 6px 14px rgba(0,10,40,.35)}
+</style></head><body><div id="bg"></div>
+<svg id="sv" width="1920" height="1080"><defs>
+ <filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#002050" flood-opacity=".35"/></filter>
+ <filter id="gl"><feGaussianBlur stdDeviation="3"/></filter></defs>
+ <g id="cam"><path id="land" fill="rgba(255,255,255,.2)" stroke="rgba(255,255,255,.35)" vector-effect="non-scaling-stroke" stroke-width="1"/><g id="isl"></g></g>
+ <g id="arcs"></g><g id="pins"></g></svg>
+<div id="lbls"></div>
+<script src="gsap.min.js"></script><script src="geo.js"></script>
+<script>
+const G=window.GEO,NS='http://www.w3.org/2000/svg',tl=gsap.timeline({paused:true});
+const mk=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e};
+document.getElementById('land').setAttribute('d',G.land);
+const isl=G.isl.map(o=>{const e=mk('path',{d:o.d,fill:'#fff'},document.getElementById('isl'));e.style.transformBox='fill-box';e.style.transformOrigin='50% 50%';return e});
+// câmara: ecrã = (p - C)*s + Sc
+const cam={cx:G.cv[0],cy:G.cv[1],s:26,sx:600,sy:545};
+const scr=([x,y])=>[(x-cam.cx)*cam.s+cam.sx,(y-cam.cy)*cam.s+cam.sy];
+// pessoas (cabeça + corpo)
+const COL=['#D4292E','#19296D','#FFFFFF'];
+function person(p,c,sc){const g=mk('g',{},p);mk('circle',{cx:0,cy:-30*sc,r:8*sc,fill:c},g);mk('path',{d:`M${-12*sc},0 L${-12*sc},${-12*sc} Q${-12*sc},${-20*sc} 0,${-20*sc} Q${12*sc},${-20*sc} ${12*sc},${-12*sc} L${12*sc},0 Z`,fill:c},g);return g}
+// etiquetas + pessoas por ilha (6,1 – 9,4 s)
+const names=Object.entries(G.names), lbl=[], pins=[];
+names.forEach(([n,p],i)=>{const t=6.15+i*.36;const d=document.createElement('div');d.className='lbl';d.textContent=n;document.getElementById('lbls').appendChild(d);
+  lbl.push({d,p});tl.fromTo(d,{scale:0,opacity:0},{scale:1,opacity:1,duration:.4,ease:'back.out(2.2)'},t);
+  const k=1+(i%3);for(let j=0;j<k;j++){const g=person(document.getElementById('pins'),COL[(i+j)%3],1.1);const o={g,p,dx:(j-(k-1)/2)*24,dy:-6,t};pins.push(o);
+    tl.fromTo(o,{v:0},{v:1,duration:.5,ease:'back.out(2.5)'},t+.08+j*.07)}
+  tl.to(d,{opacity:0,duration:.3},9.55)});
+// ilhas: contorno desenha-se e enche
+const ord=isl.map((e,i)=>[e,G.isl[i].c]).sort((a,b)=>a[1][1]-b[1][1]||a[1][0]-b[1][0]);
+ord.forEach(([e],i)=>{tl.fromTo(e,{scale:0,opacity:0},{scale:1,opacity:1,duration:.55,ease:'back.out(2)'},5.6+i*.06)});
+// câmara: aproximação lenta, depois sai para o mundo
+tl.fromTo(cam,{s:23},{s:28,duration:4,ease:'none'},5.6);
+tl.to(cam,{s:1,cx:G.cv[0],cy:G.cv[1],sx:560,sy:600,duration:1.0,ease:'power3.inOut',onUpdate:()=>{}},9.6);
+tl.fromTo('#land',{opacity:0},{opacity:1,duration:.5},9.9);
+tl.fromTo(cam,{s:1},{s:1.07,duration:3,ease:'none',immediateRender:false},10.6);
+// arcos para a diáspora (10,4 – 12,6 s)
+const arcs=Object.entries(G.cities).map(([n,q],i)=>{const t=10.35+i*.2;const a=mk('path',{fill:'none',stroke:'#D4292E','stroke-width':4,'stroke-linecap':'round'},document.getElementById('arcs'));
+  const o={a,q,k:0,t};tl.fromTo(o,{k:0},{k:1,duration:.65,ease:'power2.out'},t);
+  const g=person(document.getElementById('pins'),COL[i%3],1.0);const pp={g,p:q,dx:0,dy:0,t:t+.55,end:1};pins.push(pp);tl.fromTo(pp,{v:0},{v:1,duration:.45,ease:'back.out(2.5)'},t+.55);return o});
+pins.forEach(o=>{if(o.v===undefined)o.v=0});
+function draw(){
+  const g=document.getElementById('cam');g.setAttribute('transform',`translate(${cam.sx-cam.cx*cam.s},${cam.sy-cam.cy*cam.s}) scale(${cam.s})`);
+  lbl.forEach(({d,p})=>{const [x,y]=scr(p);d.style.left=(x-d.offsetWidth/2)+'px';d.style.top=(y+34)+'px'});
+  pins.forEach(o=>{const [x,y]=scr(o.p);const v=o.v||0;o.g.setAttribute('transform',`translate(${x+o.dx},${y+o.dy-(1-v)*40}) scale(${Math.max(.001,v)})`);o.g.style.opacity=Math.min(1,v*2)*(o.end?1:(1-Math.min(1,Math.max(0,(curT-9.55)/.3))))});
+  const c0=scr(G.cv);arcs.forEach(o=>{const c1=scr(o.q);const mx=(c0[0]+c1[0])/2,my=(c0[1]+c1[1])/2-Math.hypot(c1[0]-c0[0],c1[1]-c0[1])*.28;
+    const pts=[];const N=40;for(let i=0;i<=N*o.k;i++){const u=i/N;pts.push([(1-u)*(1-u)*c0[0]+2*u*(1-u)*mx+u*u*c1[0],(1-u)*(1-u)*c0[1]+2*u*(1-u)*my+u*u*c1[1]])}
+    o.a.setAttribute('d',pts.length>1?'M'+pts.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' L'):'')})}
+let curT=0;
+window.renderAt=t=>{curT=t;tl.seek(t,false);draw()};
+window.READY=document.fonts.load('800 30px M').then(()=>{renderAt(5.6);return true});
+</script></body></html>

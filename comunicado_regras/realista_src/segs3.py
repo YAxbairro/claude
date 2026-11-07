@@ -35,8 +35,8 @@ S2A,S2B=140,322            # posição no vídeo novo (acelerado 1.8x)
 _mc={}
 def mapframe(n):
     """frame do mapa (sem texto) correspondente ao frame n do vídeo novo"""
-    x=(min(max(n,S2A),S2B-1)-S2A)/(S2B-S2A-1)*(MAP1-MAP0-1); a=int(round(x))
-    if a not in _mc: _mc[a]=detext(final(MAP0+a,MAP0+a+1)[0])
+    a=min(max(n,S2A),S2B-1)   # mapa refeito (html/map.html -> mapfr/), sem o painel nem o texto antigo do FINAL
+    if a not in _mc: _mc[a]=np.asarray(Image.open(f'{S}/mapfr/{a:05d}.png').convert('RGB'))
     return _mc[a]
 # ---------- textos da abertura, no tempo da voz ----------
 def abertura(b,t):
@@ -78,7 +78,7 @@ def S3():
     def f(n,t):
         i=n-n0; b=EMPTY()
         if i<16:
-            k=eio(i/15); cx,cy=598,538; R=lerp(482,1300,k)
+            k=eio(i/15); cx,cy=560,600; R=lerp(0,1400,k)   # íris abre a partir de Cabo Verde
             m=Image.new('L',(W,H),0); ImageDraw.Draw(m).ellipse((cx-R,cy-R,cx+R,cy+R),fill=255); m=m.filter(ImageFilter.GaussianBlur(2))
             b=Image.composite(b,fin,m); ImageDraw.Draw(b).ellipse((cx-R-7,cy-R-7,cx+R+7,cy+R+7),outline=(255,255,255,255),width=max(1,int(14*(1-k))))
         abertura(b,t); logos(b); return b
@@ -96,6 +96,33 @@ def S4():
         if n>=n1-12: b=blendA(b,RGBA(cam(site,1.08-0.08*eio((n-(n1-12))/11))),eio((n-(n1-12))/11))
         return b
     run('S4',n0,n1,f)
+# ---------- F5 585-814: site da CNE do FINAL, mas com o rato a clicar exatamente no botão CONSULTAR ----------
+def _cursor():
+    k=4; pts=[(0,0),(0,31),(7.5,24),(12.5,36),(18,33.5),(13,22),(23,22)]
+    im=Image.new('RGBA',(40*k,46*k),(0,0,0,0)); d=ImageDraw.Draw(im)
+    P=[((x+3)*k,(y+3)*k) for x,y in pts]; d.polygon(P,fill=(255,255,255,255),outline=(25,25,25,255),width=int(2.2*k))
+    sh=Image.new('RGBA',im.size,(0,0,0,0)); ImageDraw.Draw(sh).polygon([(x+2*k,y+3*k) for x,y in P],fill=(0,0,0,90))
+    sh=sh.filter(ImageFilter.GaussianBlur(3*k)); sh.alpha_composite(im); return sh.resize((54,62),Image.LANCZOS)
+def F5():
+    n0,n1=585,814; fr=final(n0,n1); plate=fr[0].copy(); BX=(60,560,1260,990)   # zona estática da página (sem rato)
+    cur=_cursor(); BTN=(176,820,263,851); TIP=(214,834); P0=(600,660); P1=(800,760)
+    def pos(n):
+        if n<=603: k=eio((n-585)/18); return (lerp(P0[0],TIP[0],k),lerp(P0[1],TIP[1],k))
+        if n<=615: return TIP
+        k=eio(min(1,(n-615)/13)); return (lerp(TIP[0],P1[0],k),lerp(TIP[1],P1[1],k))
+    def f(n,t):
+        x=fr[n-n0]
+        if n>=632: return RGBA(x)
+        x=x.copy(); x0,y0,x1,y1=BX; x[y0:y1,x0:x1]=plate[y0:y1,x0:x1]; b=RGBA(x); ov=EMPTY(); d=ImageDraw.Draw(ov)
+        i=n-604
+        if 0<=i<6: d.rectangle(BTN,fill=(10,30,90,int(70*(1-i/6))))          # botão "carregado"
+        if 0<=i<16:                                                             # onda do clique
+            r=lerp(8,46,eout(i/15)); a=int(200*(1-i/16)); cx,cy=(BTN[0]+BTN[2])/2,(BTN[1]+BTN[3])/2
+            d.ellipse((cx-r,cy-r,cx+r,cy+r),outline=(25,41,109,a),width=4)
+        b.alpha_composite(ov); px,py=pos(n); c=cur
+        if 0<=i<5: c=cur.resize((int(54*.86),int(62*.86)),Image.LANCZOS)
+        b.alpha_composite(c,(int(px-4),int(py-4))); return b
+    run('F5',n0,n1,f)
 # ---------- S678 814-1140: recorda / bebidas / raio 500 m (sem bar) -> relógio ----------
 def S678():
     n0,n1=814,1140; phone=RGBA(final(813,814)[0]); clock=RGBA(final(1140,1141)[0]); CX,CY=960,770
@@ -124,7 +151,6 @@ def S10():
     n0,n1=1180,1355; clk=RGBA(final(1180,1181)[0])
     def f(n,t):
         b=EMPTY()
-        nopark(b,1240,700,t,48.75,66)
         tag(b,t,1120,232,'É PROIBIDO',62,'red',47.85,54.0)
         tag(b,t,1126,322,'ESTACIONAR VEÍCULOS',58,'navy',48.75,54.0)
         tag(b,t,1120,385,'EM FRENTE ÀS ASSEMBLEIAS DE VOTO',36,'plain',49.95,54.0)
@@ -149,7 +175,7 @@ def S1112():
     run('S1112',1355,1633,f)
 # ---------- S13 1633-1775: tranquilidade/ordem/respeito ----------
 def S13():
-    n0,n1=1633,1775; fin=final(1765,1775)
+    n0,n1=1633,1775
     def f(n,t):
         b=EMPTY()
         for k,(w,tt) in enumerate([('TRANQUILIDADE',65.5),('ORDEM',66.7),('RESPEITO',67.2)]):
@@ -162,9 +188,17 @@ def S13():
         tag(b,t,1150,330,'SÃO RESPONSABILIDADES',44,'plain',68.35,70.4)
         tag(b,t,1156,420,'DE TODOS',66,'red',69.75,70.4)
         logos(b)
-        if n>=1765: b=blendA(b,RGBA(fin[n-1765]),eio((n-1765)/9))
+        if n>=1765: b=blendA(b,endframe(n),eio((n-1765)/9))
         return b
     run('S13',n0,n1,f)
+# ---------- F14 1775-2275: final refeito (html/end.html -> endfr/) ----------
+def endframe(n): return Image.open(f'{S}/endfr/{n:05d}.png').convert('RGBA')
+def F14():
+    def f(n,t):
+        b=endframe(n)
+        if n<2211: logos(b)          # o cartão final (88,44 s) não leva os logos dos cantos
+        return b
+    run('F14',1775,2275,f)
 # ---------- teste rápido: folha de frames sobre cinzento ----------
 def TEST(*ts):
     fns={'S1':(0,140),'S2':(140,322),'S3':(322,478)}
