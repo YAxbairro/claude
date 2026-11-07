@@ -58,9 +58,9 @@ svg.vic .hm,svg.vic .hh,svg.vic .f{transform-box:view-box}
  <div id="wipe"><div style="background:#19296D"></div><div style="background:#D4292E"></div><div style="background:#19296D"></div><div style="background:#19296D"></div><div style="background:#D4292E"></div><div style="background:#19296D"></div></div>
 </div>
 <script src="node_modules/gsap/dist/gsap.min.js"></script>
-<script src="data.js"></script><script src="v1/beats.js"></script>
+<script src="data.js"></script><script>window.VID=new URLSearchParams(location.search).get('v')||'V1';document.write('<script src="'+(VID=='V2'?'v2':'v1')+'/beats.js"><\/script>')</script>
 <script>
-const DUR=window.VIDS.V1.dur, tl=gsap.timeline({paused:true}), world=document.getElementById('world');
+const DUR=window.VIDS[window.VID].dur, tl=gsap.timeline({paused:true}), world=document.getElementById('world');
 const el=(tag,cls,p,css)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(css)e.style.cssText=css;p&&p.appendChild(e);return e};
 const SZ={n:50,b:72,r:76,s:38,h:118,hn:118};
 function img(p,src,css){const i=el('img','abs',p,css);i.src=src;return i}
@@ -68,7 +68,9 @@ function img(p,src,css){const i=el('img','abs',p,css);i.src=src;return i}
 function line(p,text,ro,sz,maxw){const l=el('div','ln '+ro,p);l.style.fontSize=sz+'px';el('div','bx',l);
   text.split(' ').forEach(w=>{el('span','w',l).textContent=w});
   if(maxw){let fs=sz;while(l.offsetWidth>maxw&&fs>20){fs-=2;l.style.fontSize=fs+'px'}}return l}
-function inLine(l,t,ro){const bx=l.querySelector('.bx'),ws=l.querySelectorAll('.w');
+function countUp(w,t){const v=+w.textContent.replace(/[^0-9$]/g,'').split('$')[0];w.style.display='inline-block';w.style.minWidth=w.offsetWidth+'px';const o={v:0};
+  const f=()=>{w.textContent=Math.round(o.v).toLocaleString('de-DE')+'$00'};tl.fromTo(o,{v:0},{v:v,duration:1.1,ease:'power2.out',onUpdate:f,onStart:f},t+.1)}
+function inLine(l,t,ro){const bx=l.querySelector('.bx'),ws=l.querySelectorAll('.w');ws.forEach(w=>{if(/\d\$00$/.test(w.textContent))countUp(w,t)});
   tl.fromTo(bx,{scaleX:0},{scaleX:1,duration:.45,ease:'expo.out'},t);
   tl.fromTo(ws,{yPercent:110,opacity:0},{yPercent:0,opacity:1,duration:.55,stagger:.06,ease:'power3.out'},t+.08);
   if(ro=='h'||ro=='hn')tl.fromTo(l,{scale:1.3,transformOrigin:'0% 50%'},{scale:1,duration:.7,ease:'back.out(2)'},t)}
@@ -96,6 +98,19 @@ const ICS={
   <g data-g="1"><circle class="d" cx="55" cy="60" r="5.5" stroke="${C}" stroke-width="3.4"/><path class="d" d="M45,86 L45,78 C45,71 65,71 65,78 L65,86" stroke="${C}" stroke-width="3.4"/>
   <circle class="d" cx="80" cy="64" r="5.5" stroke="${C}" stroke-width="3.4"/><path class="d" d="M70,90 L70,82 C70,75 90,75 90,82 L90,90" stroke="${C}" stroke-width="3.4"/><path class="d" d="M63,74 L70,68" stroke="${C}" stroke-width="3.4"/>
   <path class="d" d="M60,40 A14,14 0 1 1 66,46 L56,49 Z" stroke="${RD}"/><circle class="f" cx="70" cy="28" r="2" fill="${RD}" stroke="none"/><path class="d" d="M70,33 L70,42" stroke="${RD}"/></g>`,
+ selo:C=>`<g data-g="0"><path class="d" d="M20,8 L58,8 L70,20 L70,90 L20,90 Z" stroke="${C}"/><path class="d" d="M30,30 L58,30" stroke="${C}"/><path class="d" d="M30,42 L60,42" stroke="${C}"/><path class="d" d="M30,54 L50,54" stroke="${C}"/></g>
+  <g data-g="0" class="stamp"><circle class="d" cx="70" cy="72" r="20" stroke="${RD}"/><path class="d" d="M60,72 L67,79 L81,64" stroke="${RD}" stroke-width="4.6"/></g>`,
+ notas:C=>`<g data-g="0"><path class="d" d="M18,24 L96,24 L96,62" stroke="${C}"/><rect class="d" x="6" y="34" width="80" height="44" rx="4" stroke="${C}"/><circle class="d" cx="46" cy="56" r="11" stroke="${RD}"/>
+  <path class="d" d="M16,46 L16,46" stroke="${C}" stroke-width="5"/><path class="d" d="M76,66 L76,66" stroke="${C}" stroke-width="5"/></g>`,
+ prato:C=>`<g data-g="0"><circle class="d" cx="50" cy="52" r="27" stroke="${C}"/><circle class="d" cx="50" cy="52" r="17" stroke="${C}"/>
+  <path class="d" d="M12,20 L12,36 C12,42 20,42 20,36 L20,20" stroke="${RD}"/><path class="d" d="M16,40 L16,86" stroke="${RD}"/>
+  <path class="d" d="M86,86 L86,20 C78,28 78,44 86,48" stroke="${RD}"/></g>`,
+ troca:C=>`<g data-g="0" class="pa"><circle class="d" cx="28" cy="30" r="9" stroke="${C}"/><path class="d" d="M12,66 C12,50 44,50 44,66" stroke="${C}"/></g>
+  <g data-g="0" class="pb"><circle class="d" cx="72" cy="30" r="9" stroke="${C}"/><path class="d" d="M56,66 C56,50 88,50 88,66" stroke="${C}"/></g>
+  <g data-g="0" class="sw"><path class="d" d="M30,80 L68,80 L60,73" stroke="${RD}"/><path class="d" d="M70,92 L32,92 L40,99" stroke="${RD}"/></g>`,
+ banco:C=>`<g data-g="0"><path class="d" d="M4,38 L30,20 L56,38 Z" stroke="${C}"/><path class="d" d="M12,44 L12,64" stroke="${C}"/><path class="d" d="M24,44 L24,64" stroke="${C}"/><path class="d" d="M36,44 L36,64" stroke="${C}"/><path class="d" d="M48,44 L48,64" stroke="${C}"/><path class="d" d="M4,72 L56,72" stroke="${C}"/>
+  <rect class="d" x="64" y="44" width="32" height="22" rx="3" stroke="${C}"/><path class="d" d="M64,51 L96,51" stroke="${C}"/></g>
+  <g data-g="0" class="tr"><path class="d" d="M30,82 Q52,96 78,76" stroke="${RD}"/><path class="d" d="M69,75 L79,75 L79,85" stroke="${RD}"/></g>`,
  saida:C=>`<g data-g="0"><rect class="d" x="10" y="8" width="48" height="87" rx="6" stroke="${C}"/></g>
   <g data-g="0" class="arrow"><path class="d" d="M40,50 L92,50" stroke="${RD}"/><path class="d" d="M78,36 L92,50 L78,64" stroke="${RD}"/></g>`
 };
@@ -117,10 +132,15 @@ function svgIcon(p,kind,st,cx,cy,s2,ts,t1){
     tl.to(h,{scale:1.18,duration:.14,yoyo:true,repeat:1,transformOrigin:'50% 70%'},9.05);tl.to(h,{rotation:8,duration:.07,yoyo:true,repeat:5,transformOrigin:'50% 90%'},9.1)}
   if(kind=='portaentra'){tl.to(s.querySelector('.arrow'),{x:-7,duration:.45,yoyo:true,repeat:Math.max(1,Math.floor((t1-after)/.45)-1),ease:'sine.inOut'},after)}
   if(kind=='saida'){tl.to(s.querySelector('.arrow'),{x:7,duration:.45,yoyo:true,repeat:Math.max(1,Math.floor((t1-after)/.45)-1),ease:'sine.inOut'},after)}
+  if(kind=='selo'){tl.fromTo(s.querySelector('.stamp'),{scale:1.8,opacity:0,transformOrigin:'50% 50%'},{scale:1,opacity:1,duration:.35,ease:'power4.in'},Math.max(T+.6,22.0));tl.to(s,{y:8,duration:.08,yoyo:true,repeat:1},Math.max(T+.95,22.35))}
+  if(kind=='troca'){const pa=s.querySelector('.pa'),pb=s.querySelector('.pb');tl.to(pa,{x:44,duration:.7,ease:'power2.inOut'},44.6);tl.to(pb,{x:-44,duration:.7,ease:'power2.inOut'},44.6);tl.to(pa,{opacity:.35,duration:.4},44.6)}
+  if(kind=='banco'){tl.fromTo(s.querySelector('.tr'),{x:0},{x:6,duration:.5,yoyo:true,repeat:Math.max(1,Math.floor((t1-after)/.5)-1),ease:'sine.inOut'},after)}
+  if(kind=='notas'){tl.fromTo(s,{rotation:-8},{rotation:0,duration:1,ease:'elastic.out(1,.5)'},T)}
+  if(kind=='prato'){tl.fromTo(s,{rotation:-90},{rotation:0,duration:1,ease:'power3.out'},T)}
   if(kind=='lupa'){tl.fromTo(s.querySelector('.lens'),{x:0,y:0},{x:-34,y:-14,duration:1.1,ease:'sine.inOut',yoyo:true,repeat:Math.max(1,Math.floor((t1-after)/1.1)-1)},after)}
   if(kind=='relogio'){const d=t1-T-.6,n=Math.max(2,Math.round(d/1.4)),hm=s.querySelector('.hm'),hh=s.querySelector('.hh'),o={a:0};
-    const set=()=>{hm.setAttribute('transform',`rotate(${o.a*360*n} 50 50)`);hh.setAttribute('transform',`rotate(${o.a*30*n} 50 50)`)};
-    tl.fromTo(o,{a:0},{a:1,duration:d,ease:'power1.inOut',onUpdate:set,onStart:set},T+.5);set();tl.set([hm,hh],{opacity:0},0);tl.fromTo([hm,hh],{opacity:0},{opacity:1,duration:.3,immediateRender:false},T+.6)}
+    const H=window.VID=='V2'?7:n;const set=()=>{hm.setAttribute('transform',`rotate(${o.a*360*H} 50 50)`);hh.setAttribute('transform',`rotate(${o.a*30*H} 50 50)`)};
+    tl.fromTo(o,{a:0},{a:1,duration:window.VID=='V2'?2.2:d,ease:window.VID=='V2'?'power2.inOut':'power1.inOut',onUpdate:set,onStart:set},window.VID=='V2'?25.3:T+.5);set();tl.set([hm,hh],{opacity:0},0);tl.fromTo([hm,hh],{opacity:0},{opacity:1,duration:.3,immediateRender:false},T+.6)}
   if(t1-T>2.8)tl.to(s,{y:-12,duration:1.6,yoyo:true,repeat:Math.floor((t1-T-1.6)/1.6),ease:'sine.inOut'},T+1.2);
   return s}
 
@@ -188,7 +208,7 @@ BT.forEach((b,i)=>{
     tl.fromTo(a,{opacity:0,y:40,scale:.85},{opacity:1,y:0,scale:1,duration:1,ease:'back.out(1.4)'},t0+.2);tl.fromTo(c,{opacity:0,y:30},{opacity:1,y:0,duration:.8},t0+.7);
     tl.to(['#leB','#lcB'],{opacity:0,duration:.4},t0);
     const tx=el('div','abs B',g,'left:0;right:0;top:640px;display:flex;flex-direction:column;align-items:center');
-    const l1=line(tx,'JUNTOS POR ELEIÇÕES','n',50);l1.style.fontWeight=700;inLine(l1,84.8,'n');const l2=line(tx,'LIVRES, JUSTAS E TRANSPARENTES','r',68);inLine(l2,85.8,'r');return}
+    const l1=line(tx,'JUNTOS POR ELEIÇÕES','n',50);l1.style.fontWeight=700;inLine(l1,b.lines[0]?b.lines[0][2]:84.8,'n');const l2=line(tx,'LIVRES, JUSTAS E TRANSPARENTES','r',68);inLine(l2,b.lines[1]?b.lines[1][2]:85.8,'r');return}
   if(ics[0]=='FOTO'){const ci=el('div','circ',g,'left:680px;top:260px;width:880px;height:880px');tl.fromTo(ci,{scale:0},{scale:1,duration:1,ease:'expo.out'},2.3);
     const u=img(g,'v1/urna.png','height:1000px;left:707px;top:-6px');tl.fromTo(u,{y:-1100},{y:0,duration:1.0,ease:'power3.out'},2.35);
     tl.to(u,{y:10,duration:.9,ease:'sine.inOut',yoyo:true,repeat:1},3.35);
@@ -201,13 +221,14 @@ BT.forEach((b,i)=>{
     const tx=el('div','abs A',g,'left:0;right:0;top:330px;display:flex;flex-direction:column;align-items:center');
     const l1=line(tx,'ELEGER O','n',70);inLine(l1,3.65,'n');const l2=line(tx,'PRESIDENTE DA REPÚBLICA','b',96);inLine(l2,4.2,'b');
     const fl=el('div','abs',g,'left:760px;top:610px;width:400px;height:42px;background:linear-gradient(#fff 0 14px,#D4292E 14px 28px,#fff 28px)');tl.fromTo(fl,{scaleX:0},{scaleX:1,duration:.8,ease:'expo.out'},4.7);out();return}
-  if(ics[0]=='TXT'){const tx=el('div','abs A',g,'left:0;right:0;top:0;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px');
+  if(ics[0]=='TXT'){const tx=el('div','abs '+st,g,'left:0;right:0;top:0;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px');
+    if(b.kick){const k=kicker(tx,b.kick,st,t0+.05);const bi=k.querySelector('i');if(bi)bi.remove();k.style.marginBottom='30px';tl.fromTo(k,{scale:3},{scale:1,duration:.7,ease:'power3.inOut',immediateRender:true},b.lines[0][2]-.6)}
     b.lines.forEach(([t,ro,tin],j)=>{const l=line(tx,t,ro,Math.round(SZ[ro]*1.4),1500);inLine(l,Math.max(t0+.15,tin),ro);tl.fromTo(l,{y:40},{y:0,duration:.7,ease:'power3.out'},Math.max(t0+.15,tin))});
     tl.fromTo(tx,{scale:1},{scale:1.06,duration:t1-t0,ease:'none'},t0);
-    [[262,'#fff'],[880,'#D4292E']].forEach(([y,c],j)=>{const r=el('div','abs',g,`left:560px;width:800px;top:${y}px;height:6px;background:${c};transform-origin:50% 50%`);
+    [[262,st=='A'?'#fff':'#19296D'],[880,'#D4292E']].forEach(([y,c],j)=>{const r=el('div','abs',g,`left:560px;width:800px;top:${y}px;height:6px;background:${c};transform-origin:50% 50%`);
       tl.fromTo(r,{scaleX:0},{scaleX:1,duration:1.1,ease:'expo.out'},t0+.2+j*.25)});
     out();return}
-  const BGF={ASSEMBLEIA:'assembleia_tint',OBSFOTO:'obs_tint',VOTOFOTO:'voto_tint'};
+  const BGF={PALACIO2:'palacio_tint',ASSEMBLEIA:'assembleia_tint',OBSFOTO:'obs_tint',VOTOFOTO:'voto_tint'};
   if(BGF[ics[0]]){const p=img(g,'v1/'+BGF[ics[0]]+'.png','width:1920px;left:0;top:-100px');tl.fromTo(p,{scale:1.15,opacity:0},{scale:1.02,opacity:1,duration:t1-t0,ease:'power1.out'},t0);
     const tx=el('div','abs A',g,'left:0;right:0;top:0;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center');
     if(ics[0]=='OBSFOTO'){tx.style.cssText='left:1060px;top:0;height:1080px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding-bottom:60px'}
