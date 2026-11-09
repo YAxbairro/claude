@@ -160,6 +160,7 @@ function svgIcon(p,kind,st,cx,cy,s2,ts,t1){
   if(kind=='portaentra'){tl.to(s.querySelector('.arrow'),{x:-7,duration:.45,yoyo:true,repeat:Math.max(1,Math.floor((t1-after)/.45)-1),ease:'sine.inOut'},after)}
   if(kind=='saida'){tl.to(s.querySelector('.arrow'),{x:7,duration:.45,yoyo:true,repeat:Math.max(1,Math.floor((t1-after)/.45)-1),ease:'sine.inOut'},after)}
   if(kind=='cadeado'){const sh=s.querySelector('.sh');tl.fromTo(sh,{y:-14},{y:0,duration:.25,ease:'power4.in'},9.1);tl.to(s,{scale:1.08,duration:.1,yoyo:true,repeat:1},9.35)}
+  const GV=['G1','G2','G3'].find(k=>OPT.has(k));if(kind=='semacesso'&&window.VID=='V1'&&GV){s.style.display='none';restrIcon(p,cx,cy,GV,T,ts[1],t1);return}
   if(kind=='semacesso'){tl.fromTo(s.querySelector('.no'),{scale:1.4,transformOrigin:'50% 50%'},{scale:1,duration:.4,ease:'back.out(2)'},ts[1])}
   const EV=['E1','E2','E3'].find(k=>OPT.has(k));
   if(kind=='semacesso'&&window.VID=='V1'&&EV){const pg=s.querySelector('g[data-g="0"]'),cd=p.querySelector('.card')||s,R=ts[1];
@@ -242,6 +243,43 @@ function credBadges(g,C,t0,t1){const tC=54.66;
     seal(g,1555,905,tC)}}
 function seal(g,cx,cy,t){const s=el('div','abs',g,`left:${cx-80}px;top:${cy-80}px;width:160px;height:160px;border-radius:50%;border:8px solid #D4292E;color:#D4292E;font-weight:800;font-size:46px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.9);z-index:9`);s.textContent='CNE';
   tl.fromTo(s,{scale:2.4,opacity:0,rotation:-25},{scale:1,opacity:1,rotation:-12,duration:.45,ease:'power4.in'},t);tl.fromTo(s,{scale:1},{scale:1.08,duration:.15,yoyo:true,repeat:1},t+.45)}
+
+// ---------- "são restritos": 3 conceitos de ícone animado (G1 porta, G2 cancela, G3 leitor de credencial) ----------
+function restrIcon(p,cx,cy,G,T,R,t1){const N='http://www.w3.org/2000/svg',sv=document.createElementNS(N,'svg'),NV='#19296D',RD2='#D4292E';
+  sv.setAttribute('viewBox','0 0 400 400');sv.style.cssText=`position:absolute;left:${cx-210}px;top:${cy-210}px;width:420px;height:420px;overflow:visible`;p.appendChild(sv);
+  const q=x=>sv.querySelector(x),qa=x=>[...sv.querySelectorAll(x)];
+  const draw=(els,t)=>{els.forEach(e=>{e.setAttribute('pathLength','1');e.style.strokeDasharray='1 1.02'});tl.fromTo(els,{strokeDashoffset:1},{strokeDashoffset:0,duration:.6,stagger:.08,ease:'power2.inOut'},t)};
+  if(G=='G1'){ // porta: a pessoa aproxima-se, a porta fecha-se e tranca
+    sv.innerHTML=`<rect x="128" y="62" width="144" height="282" fill="#EAF0FA"/>
+      <g class="ps"><circle cx="200" cy="168" r="24" fill="none" stroke="${NV}" stroke-width="9"/><path d="M158,300 C158,236 242,236 242,300" fill="none" stroke="${NV}" stroke-width="9" stroke-linecap="round"/></g>
+      <g class="lf"><rect x="128" y="62" width="144" height="282" fill="${NV}"/><circle cx="252" cy="210" r="8" fill="#fff"/></g>
+      <path class="dr" d="M120,350 L120,54 L280,54 L280,350" fill="none" stroke="${NV}" stroke-width="10" stroke-linejoin="round"/><path class="dr" d="M70,352 L330,352" stroke="${NV}" stroke-width="10" stroke-linecap="round"/>
+      <g class="lk"><rect x="168" y="196" width="64" height="54" rx="8" fill="${RD2}"/><path d="M180,196 L180,180 A20,20 0 0 1 220,180 L220,196" fill="none" stroke="${RD2}" stroke-width="10"/><circle cx="200" cy="220" r="7" fill="#fff"/><path d="M200,222 L200,236" stroke="#fff" stroke-width="6"/></g>`;
+    draw(qa('.dr'),T);tl.fromTo(q('.ps'),{scale:.55,opacity:0,transformOrigin:'200px 300px'},{scale:1,opacity:1,duration:R-T-.4,ease:'power1.inOut'},T+.3);
+    tl.fromTo(q('.lf'),{scaleX:.1,transformOrigin:'128px 200px'},{scaleX:.1},0);tl.set(q('.lf'),{opacity:0},0);tl.set(q('.lf'),{opacity:1},T+.3);
+    tl.to(q('.lf'),{scaleX:1,duration:.38,ease:'power3.in'},R-.05);tl.to(sv,{x:6,duration:.05,yoyo:true,repeat:3},R+.33);
+    tl.fromTo(q('.lk'),{scale:0,transformOrigin:'200px 215px'},{scale:1,duration:.45,ease:'back.out(3)'},R+.45)}
+  if(G=='G2'){ // cancela: a pessoa caminha, a barreira desce à frente dela
+    let st='';for(let i=0;i<6;i++)st+=`<rect x="${92+i*44}" y="248" width="22" height="24" fill="#fff"/>`;
+    sv.innerHTML=`<g class="ps"><circle cx="300" cy="196" r="24" fill="none" stroke="${NV}" stroke-width="9"/><path d="M258,330 C258,250 342,250 342,330" fill="none" stroke="${NV}" stroke-width="9" stroke-linecap="round"/></g>
+      <path class="dr" d="M40,346 L370,346" stroke="${NV}" stroke-width="10" stroke-linecap="round"/>
+      <g class="arm"><rect x="80" y="248" width="270" height="24" rx="8" fill="${RD2}"/>${st}</g>
+      <rect x="62" y="232" width="40" height="114" rx="6" fill="${NV}"/><circle class="lt" cx="82" cy="212" r="15" fill="#C9D0E2"/>`;
+    draw(qa('.dr'),T);tl.fromTo(q('.ps'),{x:90,opacity:0},{x:0,opacity:1,duration:R-T-.3,ease:'none'},T+.2);
+    tl.fromTo(q('.ps'),{y:0},{y:-5,duration:.2,yoyo:true,repeat:Math.max(1,Math.floor((R-T-.5)/.2)),ease:'sine.inOut'},T+.2);
+    tl.fromTo(q('.arm'),{rotation:-82,svgOrigin:'82 260'},{rotation:-82,svgOrigin:'82 260'},0);
+    tl.to(q('.arm'),{rotation:0,duration:.75,ease:'bounce.out',svgOrigin:'82 260'},R-.05);tl.to(q('.ps'),{x:14,duration:.18,ease:'power2.out'},R+.25);
+    tl.to(q('.lt'),{fill:RD2,duration:.01},R);tl.to(q('.lt'),{opacity:.25,duration:.22,yoyo:true,repeat:Math.max(1,Math.floor((t1-R-.3)/.22)),ease:'none'},R+.1)}
+  if(G=='G3'){ // leitor de credencial: o crachá aproxima-se e é recusado
+    sv.innerHTML=`<g class="dv"><rect class="dr" x="120" y="70" width="130" height="250" rx="18" fill="#fff" stroke="${NV}" stroke-width="10"/><rect class="sc" x="142" y="96" width="86" height="70" rx="8" fill="#E3E8F2"/>
+      <path class="x" d="M166,112 L204,150 M204,112 L166,150" stroke="#fff" stroke-width="10" stroke-linecap="round" opacity="0"/><path class="dr" d="M150,206 L220,206" stroke="${NV}" stroke-width="8" stroke-linecap="round"/><circle class="lt" cx="185" cy="270" r="14" fill="#C9D0E2"/></g>
+      <g class="bd"><rect x="250" y="150" width="96" height="134" rx="12" fill="#fff" stroke="${NV}" stroke-width="8"/><rect x="282" y="138" width="32" height="18" rx="5" fill="${NV}"/><circle cx="298" cy="198" r="16" fill="none" stroke="${NV}" stroke-width="7"/><path d="M270,248 L326,248 M276,266 L320,266" stroke="${NV}" stroke-width="7" stroke-linecap="round"/></g>`;
+    draw(qa('.dr'),T);tl.fromTo(q('.bd'),{x:120,y:40,rotation:12,opacity:0,svgOrigin:'298 217'},{x:0,y:0,rotation:-6,opacity:1,duration:1.2,ease:'power3.out',svgOrigin:'298 217'},T+.4);
+    tl.to(q('.bd'),{x:-62,y:-40,rotation:0,duration:.6,ease:'power2.inOut',svgOrigin:'298 217'},R-.6);
+    tl.to(q('.sc'),{fill:RD2,duration:.01},R);tl.to(q('.x'),{opacity:1,duration:.01},R);tl.to(q('.lt'),{fill:RD2,duration:.01},R);
+    tl.to(q('.dv'),{x:7,duration:.05,yoyo:true,repeat:5},R+.02);tl.to(q('.bd'),{x:30,y:10,rotation:10,duration:.5,ease:'power3.out',svgOrigin:'298 217'},R+.25);
+    tl.to([q('.sc'),q('.lt')],{opacity:.5,duration:.25,yoyo:true,repeat:Math.max(1,Math.floor((t1-R-.5)/.25)),ease:'none'},R+.4)}
+  tl.fromTo(sv,{opacity:0},{opacity:1,duration:.3},T)}
 // ---------- estilo / transições ----------
 function setStyle(st,t){const A=st=='A';
   tl.set('#bgB',{opacity:A?0:1},t);tl.set(['#leA','#lcA'],{opacity:A?1:0},t);tl.set(['#leB','#lcB'],{opacity:A?0:1},t)}
