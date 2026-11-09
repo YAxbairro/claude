@@ -63,7 +63,7 @@ svg.vic .hm,svg.vic .hh,svg.vic .f,svg.vic .g1,svg.vic .g2{transform-box:view-bo
 <script src="node_modules/gsap/dist/gsap.min.js"></script>
 <script src="data.js"></script><script>window.VID=new URLSearchParams(location.search).get('v')||'V1';document.write('<script src="'+(VID=='V2'?'v2':'v1')+'/beats.js"><\/script>')</script>
 <script>
-const OPT=new Set((new URLSearchParams(location.search).get('o')||(window.VID=='V2'?'T1,M15,P4,S6':'T1,R2,L9,F2,K1,C1,X1')).split(','));
+const OPT=new Set((new URLSearchParams(location.search).get('o')||(window.VID=='V2'?'T1,M15,P4,S6':'T1,R2,L9,F2,K1,C1,X1,H3')).split(','));
 const DUR=window.VIDS[window.VID].dur, tl=gsap.timeline({paused:true}), world=document.getElementById('world');
 const el=(tag,cls,p,css)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(css)e.style.cssText=css;p&&p.appendChild(e);return e};
 const SZ={n:50,b:72,r:76,s:38,h:118,hn:118};
@@ -300,17 +300,15 @@ function restrIcon(p,cx,cy,G,T,R,t1){const N='http://www.w3.org/2000/svg',sv=doc
     draw(qa('.dr'),T);tl.fromTo(q('.bl'),{y:-30,opacity:0},{y:0,opacity:1,duration:.6,ease:'power2.out'},T+.5);tl.to(q('.bl'),{y:40,duration:.5,ease:'power2.in'},T+1.3);
     tl.fromTo(q('.ps'),{x:80,opacity:0},{x:0,opacity:1,duration:R-T-.4,ease:'power1.inOut'},T+.3);
     tl.fromTo(q('.hd'),{scale:0,rotation:-20,transformOrigin:'50% 50%'},{scale:1,rotation:0,duration:.5,ease:'back.out(2.5)'},R-.05);tl.to(q('.ps'),{x:24,duration:.3,ease:'power2.out'},R+.15)}
-  if(G=='H3'){ // entrada da assembleia: de quatro pessoas só a credenciada entra, as outras ficam de fora
-    const P=(x,c)=>`<g class="${c}"><circle cx="${x}" cy="262" r="14" fill="${NV}"/><path d="M${x-24},340 C${x-24},290 ${x+24},290 ${x+24},340 Z" fill="${NV}"/></g>`;
-    sv.innerHTML=`<path class="dr" d="M128,340 L128,64 L272,64 L272,340" fill="none" stroke="${NV}" stroke-width="10" stroke-linejoin="round"/><path class="dr" d="M30,342 L370,342" stroke="${NV}" stroke-width="10" stroke-linecap="round"/>
-      <rect class="dk" x="133" y="69" width="134" height="271" fill="#EAF0FA"/>
-      ${P(60,'p0')}${P(200,'pc')}${P(318,'p2')}${P(374,'p3')}<rect class="cr" x="192" y="304" width="16" height="20" rx="3" fill="#fff"/>
-      <g transform="translate(200 120)"><g class="ok"><circle r="30" fill="${NV}"/><path d="M-13,1 L-3,11 L14,-9" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></g></g>`;
-    sv.insertBefore(q('.dk'),sv.firstChild);
-    draw(qa('.dr'),T);tl.fromTo(qa('.p0,.pc,.p2,.p3,.cr'),{y:30,opacity:0},{y:0,opacity:1,duration:.4,stagger:.1,ease:'power2.out'},T+.4);
-    tl.to(qa('.p0,.p2,.p3'),{fill:'#C9D0E2',duration:.25},R);tl.to(qa('.p0 *,.p2 *,.p3 *'),{fill:'#C9D0E2',duration:.25},R);
-    tl.to(q('.p0'),{x:-20,duration:.4,ease:'power2.out'},R);tl.to(q('.p2'),{x:8,duration:.4,ease:'power2.out'},R);tl.to(q('.p3'),{x:16,duration:.4,ease:'power2.out'},R);
-    tl.to([q('.pc'),q('.cr')],{y:-40,scale:.8,svgOrigin:'200 340',duration:.7,ease:'power2.inOut'},R+.15);
+  if(G=='H3'){ // porta da assembleia: três pessoas, só a credenciada entra
+    const P=(x,c)=>`<g class="${c}"><circle cx="${x}" cy="226" r="22" fill="${NV}"/><path d="M${x-38},340 C${x-38},262 ${x+38},262 ${x+38},340 Z" fill="${NV}"/></g>`;
+    sv.innerHTML=`<rect x="135" y="55" width="130" height="285" fill="#EAF0FA"/>
+      <path class="dr" d="M130,340 L130,50 L270,50 L270,340" fill="none" stroke="${NV}" stroke-width="10" stroke-linejoin="round"/><path class="dr" d="M20,342 L380,342" stroke="${NV}" stroke-width="10" stroke-linecap="round"/>
+      ${P(62,'pl')}${P(338,'pr')}<g class="pc">${P(200,'')}<rect x="187" y="286" width="26" height="32" rx="4" fill="${RD2}"/><rect x="194" y="281" width="12" height="8" rx="2" fill="#fff"/></g>
+      <g transform="translate(200 120)"><g class="ok"><circle r="34" fill="${NV}"/><path d="M-15,1 L-4,12 L16,-10" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></g></g>`;
+    draw(qa('.dr'),T);tl.fromTo(qa('.pl,.pc,.pr'),{y:30,opacity:0},{y:0,opacity:1,duration:.45,stagger:.12,ease:'power2.out'},T+.4);
+    tl.to(qa('.pl *,.pr *'),{fill:'#C9D0E2',duration:.25},R);tl.to(q('.pl'),{x:-16,duration:.4,ease:'power2.out'},R);tl.to(q('.pr'),{x:16,duration:.4,ease:'power2.out'},R);
+    tl.to(q('.pc'),{y:-26,scale:.82,svgOrigin:'200 340',duration:.7,ease:'power2.inOut'},R+.15);
     tl.fromTo(q('.ok'),{scale:0,transformOrigin:'50% 50%'},{scale:1,duration:.4,ease:'back.out(3)'},R+.7)}
   tl.fromTo(sv,{opacity:0},{opacity:1,duration:.3},T)}
 // ---------- estilo / transições ----------
