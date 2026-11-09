@@ -78,8 +78,8 @@ function inLine(l,t,ro){const bx=l.querySelector('.bx'),ws=l.querySelectorAll('.
   tl.fromTo(bx,{scaleX:0},{scaleX:1,duration:.45,ease:'expo.out'},t);
   tl.fromTo(ws,{yPercent:110,opacity:0},{yPercent:0,opacity:1,duration:.55,stagger:.06,ease:'power3.out'},t+.08);
   if(ro=='h'||ro=='hn')tl.fromTo(l,{scale:1.3,transformOrigin:'0% 50%'},{scale:1,duration:.7,ease:'back.out(2)'},t)}
-function kicker(p,text,st,t){const k=el('div','kick '+st,p);if(st=='B'){el('i','',k)}const s=el('span','',k);s.textContent=text;
-  if(st=='A')tl.fromTo(k,{scaleX:0},{scaleX:1,duration:.45,ease:'expo.out'},t);else tl.fromTo(k.querySelector('i'),{scaleY:0},{scaleY:1,duration:.4},t);
+function kicker(p,text,st,t){const k=el('div','kick '+st,p);const NB=window.VID=='V1';if(st=='B'&&!NB){el('i','',k)}const s=el('span','',k);s.textContent=text;
+  if(st=='A')tl.fromTo(k,{scaleX:0},{scaleX:1,duration:.45,ease:'expo.out'},t);else if(!NB)tl.fromTo(k.querySelector('i'),{scaleY:0},{scaleY:1,duration:.4},t);
   tl.fromTo(s,{opacity:0,x:-20},{opacity:1,x:0,duration:.45,ease:'power3.out'},t+.12);return k}
 // ---------- ícones vetoriais: as linhas desenham-se ----------
 const RD='#D4292E';
@@ -247,13 +247,14 @@ const scn=n=>n.replace(/[a-z]$/,'');
 // ---------- batidas ----------
 const BT=window.BEATS; let lista=null;
 if(window.VID=='V1'){const RI=['R1','R2','R3'].find(k=>OPT.has(k)),ICN={R1:'cadeado',R2:'semacesso',R3:'barreira'};
-  const PH={'6c':['tempo','V6c',['relogio']],'7a':['pres','V7a',[]],'7c':['extra','V7c',[]]};
+  const PH={'6c':['tempo','V6c',['relogio']],'7a':['exigir','V7a',[]],'7c':['extra','V7c',[]],'9':['pres','V9',[]]};
   BT.forEach(b=>{if(b.n=='3'&&RI)b.ics=[ICN[RI]];
     if(PH[b.n]&&OPT.has('F1')){b.ics=[];b.frame=PH[b.n][0]}
     if(PH[b.n]&&OPT.has('F2')){b.ics=['bg_v1'+PH[b.n][0],...PH[b.n][2]];b.lay=PH[b.n][1]}
     const K=['K1','K2'].find(k=>OPT.has(k));if(b.n=='6c'&&K)b.lay='V6c'+K;
     const C=['C1','C2'].find(k=>OPT.has(k));if(b.n=='7b'&&C){b.ics=['CRED'];b.cred=C;b.lay='V7b'+C}
-    if((b.n=='7a'||b.n=='7c')&&OPT.has('X1'))b.lay+='x'})}
+    if((b.n=='7a'||b.n=='7c'||b.n=='9')&&OPT.has('X1'))b.lay+='x';
+    if(b.n=='10b')b.t1=84.2;if(b.n=='11')b.t0=84.2})}
 BT.forEach(b=>{const MV=['M10','M11','M12','M13','M14','M15','M16','M17','M18'].find(k=>OPT.has(k));
   if(b.n=='23b'&&MV){b.ics=MV=='M11'?[]:['bg_13a'];b.st='A';b.lay=MV}
   else if(b.n=='23b'&&OPT.has('M7')){b.ics=['bg_13a'];b.st='A';b.lay='M7'}
@@ -269,7 +270,7 @@ BT.forEach(b=>{const MV=['M10','M11','M12','M13','M14','M15','M16','M17','M18'].
   if(b.n=='28'&&(OPT.has('S1')||OPT.has('S2')))b.ics=[OPT.has('S2')?'PANELSUP':'bg_sup','troca']});
 const LAY={bg_13:{tx:[140,215],ic:[1560,400,300],ts:{engren:[11.35,14.6],checklist:[11.35,11.9,12.6,14.6]}},bg_38:{tx:[140,575],ic:[1650,330,250],ts:{tel1:[36.7,39.2],tel2:[36.7,39.2]}},
   bg_sup:{dy:150,ic:[560,720,300]},
-  V6c:{kb:1,tx:[960,285]},V6cK1:{kb:1,tx:[960,250],ic:[1075,790,250]},V6cK2:{kb:1,tx:[1000,285],ic:[830,440,240]},V7a:{kb:1,tx:[720,600]},V7ax:{kb:1,tx:[110,545],fx:1},V7c:{kb:1,tx:[140,690]},V7cx:{kb:1,tx:[110,650],fx:1},
+  V6c:{kb:1,tx:[960,285]},V6cK1:{kb:1,tx:[960,250],ic:[1075,790,250]},V6cK2:{kb:1,tx:[1000,285],ic:[830,440,240]},V7a:{kb:1,tx:[720,600]},V7ax:{kb:1,tx:[110,250],fx:1},V9x:{kb:1,tx:[90,520],fx:1,fs:.78},V7c:{kb:1,tx:[140,690]},V7cx:{kb:1,tx:[110,650],fx:1},
   V7bC1:{tx:[140,360],mw:720},V7bC2:{tx:[140,360],mw:820},V9:{kb:1,bgTop:0,tx:[140,560],fs:.82},
   M7:{kb:1,bgTop:0,custom:1},M10:{kb:1,bgTop:0,bgLeft:560,custom:1},M11:{custom:1},M12:{kb:1,bgTop:0,custom:1},
   M13:{kb:1,bgTop:0,custom:1,cc:{top:178,sz:[.82,.92,.82,.82],dx:[0,0,0,0]}},
