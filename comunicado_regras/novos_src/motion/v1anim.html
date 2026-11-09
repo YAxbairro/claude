@@ -209,7 +209,7 @@ function trans(st,t){const A=st=='A';
 const scn=n=>n.replace(/[a-z]$/,'');
 // ---------- batidas ----------
 const BT=window.BEATS; let lista=null;
-BT.forEach(b=>{const MV=['M10','M11','M12','M13','M14','M15'].find(k=>OPT.has(k));
+BT.forEach(b=>{const MV=['M10','M11','M12','M13','M14','M15','M16','M17','M18'].find(k=>OPT.has(k));
   if(b.n=='23b'&&MV){b.ics=MV=='M11'?[]:['bg_13a'];b.st='A';b.lay=MV}
   else if(b.n=='23b'&&OPT.has('M7')){b.ics=['bg_13a'];b.st='A';b.lay='M7'}
   else if(b.n=='23b'&&(OPT.has('M8')||OPT.has('M9'))){b.ics=['bg_13m'];b.lay=OPT.has('M8')?'M8':'M9'}
@@ -227,6 +227,9 @@ const LAY={bg_13:{tx:[140,215],ic:[1560,400,300],ts:{engren:[11.35,14.6],checkli
   M7:{kb:1,bgTop:0,custom:1},M10:{kb:1,bgTop:0,bgLeft:560,custom:1},M11:{custom:1},M12:{kb:1,bgTop:0,custom:1},
   M13:{kb:1,bgTop:0,custom:1,cc:{top:178,sz:[.82,.92,.82,.82],dx:[0,0,0,0]}},
   M14:{kb:1,bgTop:0,custom:1,cc:{top:178,sz:[.82,.92,.82,.82],dx:[-170,-60,60,170]}},
+  M16:{kb:1,bgTop:0,custom:1,cc:{top:165,sz:[.9,1,.9,.9],dx:[0,0,0,0]}},
+  M17:{kb:1,bgTop:0,custom:1,cc:{top:178,sz:[.86,.96,.86,.86],dx:[0,0,0,0],al:'flex-start',left:140}},
+  M18:{kb:1,bgTop:0,custom:1,cc:{top:178,sz:[.86,.96,.86,.86],dx:[0,0,0,0],al:'flex-end',left:-140}},
   M15:{kb:1,bgTop:0,custom:1,cc:{top:172,sz:[.7,1.08,.7,.74],dx:[0,0,0,0]}},M8:{kb:1,bgTop:0,bgLeft:560,custom:1},M9:{kb:1,bgTop:0,custom:1},
   M5:{kb:1,bgTop:0,center:205,fs:.9,rules:1},M6:{kb:1,bgTop:0,center:205,fs:.9,card:1},
   S5:{kb:1,bgTop:-200,tx:[690,540],fs:.85,mw:820,ic:[560,725,200]},S6:{kb:1,bgTop:-200,tx:[640,520],mw:960,ic:[500,735,220]},
@@ -324,7 +327,7 @@ BT.forEach((b,i)=>{
         tl.fromTo(fr,{x:300,opacity:0,rotation:4},{x:0,opacity:1,rotation:0,duration:.9,ease:'power3.out'},t0);tl.fromTo(pi,{scale:1.1},{scale:1,duration:t1-t0,ease:'none'},t0)}
       const tx=el('div','abs A',g,'left:120px;top:0;height:1080px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding-bottom:40px');
       Ls.forEach(([t,ro,tin],j)=>{const r2=RS[j]||ro;const l=line(tx,t,r2,Math.round(SZ[r2]*(j==1?1:.92)),b.lay=='M11'?660:820);inLine(l,Math.max(t0+.15,tin),r2)})}
-    if(LAY[b.lay].cc){const C=LAY[b.lay].cc;const tx=el('div','abs A',g,`left:0;width:1920px;top:${C.top}px;display:flex;flex-direction:column;align-items:center`);
+    if(LAY[b.lay].cc){const C=LAY[b.lay].cc;const tx=el('div','abs A',g,`left:${C.left||0}px;width:1920px;top:${C.top}px;display:flex;flex-direction:column;align-items:${C.al||'center'}`);
       Ls.forEach(([t,ro,tin],j)=>{const r2=RS[j]||ro;const l=line(tx,t,r2,Math.round(SZ[r2]*C.sz[j]),1500);l.style.left=C.dx[j]+'px';tin=Math.max(t0+.15,tin);inLine(l,tin,r2);
         if(C.dx[j])tl.fromTo(l,{x:C.dx[j]>0?120:-120},{x:0,duration:.6,ease:'power3.out'},tin)});
       window._ccb=()=>tx.getBoundingClientRect().bottom}
