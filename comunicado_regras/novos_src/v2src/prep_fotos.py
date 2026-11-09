@@ -16,7 +16,10 @@ def tintA(im,col=(20,110,190),k=.65):  # mesmo tratamento das fotos A do V1
     return Image.fromarray(np.dstack([rgb.clip(0,255),np.full(a.shape[:2],.55*255)]).astype('uint8'),'RGBA')
 # s13: mesa de frente (urna e crachás desfocados); escala 1.25 -> caras em baixo, parede livre em cima
 f=blur(Image.open('v2src/foto_13.jpg').convert('RGB'),[(235,810,380,1020),(785,795,865,860),(1155,925,1245,980),(1015,990,1130,1025),(1530,1005,1615,1050)])
-f=f.resize((2500,1666),Image.LANCZOS).crop((290,0,2210,1280)); washB(f).save(D+'bg_13.png')
+f=f.resize((2500,1666),Image.LANCZOS).crop((290,0,2210,1280)); washB(f).save(D+'bg_13_foto1.png')
+# s13 (nova foto, escolhida): sala inteira, urna e crachás desfocados; escala 1.25 -> mesa em baixo, texto livre em cima
+f=blur(Image.open('v2src/foto_13b.jpg').convert('RGB'),[(808,685,898,745),(440,700,480,760),(580,700,620,760),(950,690,990,740)])
+f=f.resize((2500,1666),Image.LANCZOS).crop((400,0,2320,1280)); washB(f).save(D+'bg_13.png')
 # s38: mesa a trabalhar
 f=Image.open('v2src/foto_38.jpg').convert('RGB').resize((1920,1280),Image.LANCZOS); washB(f).save(D+'bg_38.png')
 # suplentes: sala (urna desfocada)
