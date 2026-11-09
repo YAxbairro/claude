@@ -209,7 +209,9 @@ function trans(st,t){const A=st=='A';
 const scn=n=>n.replace(/[a-z]$/,'');
 // ---------- batidas ----------
 const BT=window.BEATS; let lista=null;
-BT.forEach(b=>{if(b.n=='23b'&&(OPT.has('M5')||OPT.has('M6'))){b.ics=['bg_13m'];b.lay=OPT.has('M6')?'M6':'M5'}
+BT.forEach(b=>{if(b.n=='23b'&&OPT.has('M7')){b.ics=['bg_13a'];b.st='A';b.lay='M7'}
+  else if(b.n=='23b'&&(OPT.has('M8')||OPT.has('M9'))){b.ics=['bg_13m'];b.lay=OPT.has('M8')?'M8':'M9'}
+  else if(b.n=='23b'&&(OPT.has('M5')||OPT.has('M6'))){b.ics=['bg_13m'];b.lay=OPT.has('M6')?'M6':'M5'}
   else if(b.n=='23b'&&(OPT.has('M3')||OPT.has('M4'))){b.ics=['bg_13m'];b.lay=OPT.has('M4')?'M4':'M3'}
   else if(b.n=='28'&&(OPT.has('S5')||OPT.has('S6'))){b.ics=['bg_supm','troca'];b.lay=OPT.has('S6')?'S6':'S5'}
   else if(b.n=='27'&&(OPT.has('P3')||OPT.has('P4'))){b.ics=['bg_38','tel1'];b.lay=OPT.has('P4')?'P4':'P3'}
@@ -220,6 +222,7 @@ BT.forEach(b=>{if(b.n=='23b'&&(OPT.has('M5')||OPT.has('M6'))){b.ics=['bg_13m'];b
   if(b.n=='28'&&(OPT.has('S1')||OPT.has('S2')))b.ics=[OPT.has('S2')?'PANELSUP':'bg_sup','troca']});
 const LAY={bg_13:{tx:[140,215],ic:[1560,400,300],ts:{engren:[11.35,14.6],checklist:[11.35,11.9,12.6,14.6]}},bg_38:{tx:[140,575],ic:[1650,330,250],ts:{tel1:[36.7,39.2],tel2:[36.7,39.2]}},
   bg_sup:{dy:150,ic:[560,720,300]},
+  M7:{kb:1,bgTop:0,custom:1},M8:{kb:1,bgTop:0,bgLeft:560,custom:1},M9:{kb:1,bgTop:0,custom:1},
   M5:{kb:1,bgTop:0,center:205,fs:.9,rules:1},M6:{kb:1,bgTop:0,center:205,fs:.9,card:1},
   S5:{kb:1,bgTop:-200,tx:[690,540],fs:.85,mw:820,ic:[560,725,200]},S6:{kb:1,bgTop:-200,tx:[640,520],mw:960,ic:[500,735,220]},
   M3:{kb:1,center:610},M4:{kb:1,center:610,band:1},
@@ -251,7 +254,7 @@ BT.forEach((b,i)=>{
     if(next&&!(Array.isArray(next.ics)&&next.ics[0]=='LISTA'))tl.to(lista.g,{opacity:0,duration:.3},t1-.3);
     return}
   const g=el('div','beat '+st,world); tl.set(g,{visibility:'visible'},t0); if(OPT.has('T1')&&prev&&prev.st!=st) tl.fromTo(g,{opacity:0},{opacity:1,duration:.4,immediateRender:false},t0);
-  const BGK=(Array.isArray(ics)?ics:[]).find(k=>/^bg_/.test(k)); if(BGK){const LB=b.lay&&LAY[b.lay];const p=img(g,'v2/'+BGK+'.png','width:1920px;left:0;top:'+(LB&&LB.bgTop!=null?LB.bgTop:-100)+'px');const KB=b.lay&&LAY[b.lay].kb;tl.fromTo(p,{scale:KB?1.03:1.12},{scale:KB?1.0:1.02,duration:t1-t0,ease:'power1.out'},t0);tl.fromTo(p,{opacity:0},{opacity:1,duration:.5,ease:'none'},t0)} if(!/^OBS/.test((ics||[])[0]||''))tl.set(g,{visibility:'hidden'},t1+.05);
+  const BGK=(Array.isArray(ics)?ics:[]).find(k=>/^bg_/.test(k)); if(BGK){const LB=b.lay&&LAY[b.lay];const p=img(g,'v2/'+BGK+'.png','width:1920px;left:'+(LB&&LB.bgLeft||0)+'px;top:'+(LB&&LB.bgTop!=null?LB.bgTop:-100)+'px');const KB=b.lay&&LAY[b.lay].kb;tl.fromTo(p,{scale:KB?1.03:1.12},{scale:KB?1.0:1.02,duration:t1-t0,ease:'power1.out'},t0);tl.fromTo(p,{opacity:0},{opacity:1,duration:.5,ease:'none'},t0)} if(!/^OBS/.test((ics||[])[0]||''))tl.set(g,{visibility:'hidden'},t1+.05);
   tl.fromTo(g,{scale:1},{scale:1.035,duration:t1-t0,ease:'none'},t0);   // câmara: push-in lento
   const same=next&&scn(next.n)==scn(b.n)&&next.st==st;
   const out=()=>{ if(!next) return; if(same) tl.to(g,{x:-90,opacity:0,duration:.35,ease:'power2.in'},t1-.33); else tl.to(g,{opacity:0,duration:.25},t1-.25)};
@@ -306,6 +309,19 @@ BT.forEach((b,i)=>{
   if(ics[0]=='CODIGO'){const c=img(g,'v1/codigo.png','height:680px;left:'+(510-0.375*680)+'px;top:220px');
     tl.fromTo(c,{rotationY:-70,y:80,opacity:0,transformOrigin:'0% 50%'},{rotationY:0,y:0,opacity:1,duration:1.1,ease:'power3.out'},t0+.1);
     tl.to(c,{rotationY:8,y:-12,duration:2,ease:'sine.inOut',yoyo:true,repeat:1},t0+1.2)}
+  if(b.lay&&LAY[b.lay].custom){const Ls=b.lines;
+    if(b.lay=='M7'){const tx=el('div','abs A',g,'left:0;width:1920px;top:175px;display:flex;flex-direction:column;align-items:center');const rs=['b','h','b','r'];
+      Ls.forEach(([t,ro,tin],j)=>{const r2=rs[j]||ro;const l=line(tx,t,r2,Math.round(SZ[r2]*(j==1?1:.92)),1500);inLine(l,Math.max(t0+.15,tin),r2)})}
+    if(b.lay=='M8'){const gr=el('div','abs',g,'left:0;top:0;width:1400px;height:1080px;background:linear-gradient(90deg,#F6F8FC 0,#F6F8FC 470px,rgba(246,248,252,0) 1020px)');
+      tl.fromTo(gr,{x:-400,opacity:0},{x:0,opacity:1,duration:.7,ease:'power3.out'},t0);
+      const tx=el('div','txt B',g,'left:120px');Ls.forEach(([t,ro,tin])=>{const l=line(tx,t,ro,Math.round(SZ[ro]*1.12),780);inLine(l,Math.max(t0+.15,tin),ro)})}
+    if(b.lay=='M9'){const page=(arr,szs)=>{const tx=el('div','abs B',g,'left:0;width:1920px;top:210px;display:flex;flex-direction:column;align-items:center');
+        arr.forEach(([t,ro,tin],j)=>{const l=line(tx,t,ro,szs[j],1640);const ws=l.querySelectorAll('.w');tin=Math.max(t0+.15,tin);
+          tl.fromTo(ws,{opacity:0,scale:1.7,filter:'blur(14px)'},{opacity:1,scale:1,filter:'blur(0px)',duration:.55,stagger:.09,ease:'power3.out'},tin);
+          if(ro[0]=='h')tl.to(l,{scale:1.06,duration:.18,yoyo:true,repeat:1,transformOrigin:'50% 50%'},tin+.6)});return tx};
+      const p1=page([Ls[0],Ls[1]],[84,156]);const p2=page([Ls[2],Ls[3]],[84,112]);const tc=Ls[2][2]-.1;
+      tl.to(p1,{y:-70,opacity:0,duration:.35,ease:'power2.in'},tc-.3)}
+    out();return}
   // ---------- batida normal: ícone(s) à esquerda, texto à direita ----------
   const L=ics.filter(k=>!/^bg_/.test(k)&&k!='PANELSUP'&&k!='NOTAS'&&k!='FOTO2'&&k!='CODIGO'&&k!='MESA'&&k!='MESAPRES'); const MF=ics.find(k=>k=='MESA'||k=='MESAPRES');
   if(MF){const w=el('div','abs',g,'left:60px;top:400px;width:870px;height:425px');
