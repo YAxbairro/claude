@@ -1,8 +1,8 @@
-exec(open('bp_v1_saoeles3.py').read().split("R=[")[0].replace("by_{o}","br_{o}"))
-R=[('0:06 · "O ACESSO E A PERMANÊNCIA ... SÃO RESTRITOS" · 3 CONCEITOS DE ÍCONE (o texto fica igual)',[
-   ('Opção 1 · Porta','a pessoa aproxima-se da porta aberta; no "são restritos" a porta fecha-se de golpe e aparece um cadeado vermelho','T1,R2,L9,F2,K1,C1,X1,G1',[7.4,8.4,9.3,10.2]),
-   ('Opção 2 · Cancela','a pessoa caminha até à entrada; no "são restritos" a cancela desce à frente dela e a luz pisca a vermelho','T1,R2,L9,F2,K1,C1,X1,G2',[7.4,8.4,9.3,10.2]),
-   ('Opção 3 · Leitor de credencial','um crachá aproxima-se do leitor; no "são restritos" o ecrã fica vermelho com um X e o crachá é recusado','T1,R2,L9,F2,K1,C1,X1,G3',[7.4,8.4,9.3,10.2])])]
+exec(open('bp_v1_saoeles3.py').read().split("R=[")[0].replace("by_{o}","bh_{o}"))
+R=[('0:06 · "O ACESSO E A PERMANÊNCIA ... SÃO RESTRITOS" · 3 NOVOS CONCEITOS DE ÍCONE (o texto fica igual)',[
+   ('Opção 1 · Planta da sala de voto','vista de cima: mesa com os 4 membros, urna e cabine; pessoas chegam à entrada e no "são restritos" a entrada fecha a vermelho e ficam de fora','T1,R2,L9,F2,K1,C1,X1,H1',[7.4,8.6,9.4,10.0]),
+   ('Opção 2 · Urna e mão de pare','o boletim entra na urna; uma pessoa aproxima-se e no "são restritos" surge a mão vermelha de pare entre ela e a urna','T1,R2,L9,F2,K1,C1,X1,H2',[7.4,8.6,9.4,10.0]),
+   ('Opção 3 · Só entra quem tem credencial','quatro pessoas à porta da assembleia; no "são restritos" três ficam a cinzento de fora e só a credenciada entra, com visto','T1,R2,L9,F2,K1,C1,X1,H3',[7.4,8.6,9.4,10.0])])]
 tw,th=560,315; LW=400; G=24
 rows=sum(len(r[1]) for r in R); H=150+len(R)*70+rows*(th+G)+40
 W=Image.new('RGB',(LW+4*(tw+G)+40,H),(244,246,250)); d=ImageDraw.Draw(W)
