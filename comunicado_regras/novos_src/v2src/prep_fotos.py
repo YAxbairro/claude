@@ -33,4 +33,6 @@ f=blur(Image.open('v2src/foto_suplentes.jpg').convert('RGB'),[(1262,668,1378,778
 tintA(f.resize((1920,1280),Image.LANCZOS)).save(D+'bg_supm.png')
 f=blur(Image.open('v2src/foto_13b.jpg').convert('RGB'),[(808,685,898,745),(440,700,480,760),(580,700,620,760),(950,690,990,740)])
 tintA(f.resize((1920,1280),Image.LANCZOS)).save(D+'bg_13a.png')
+f=blur(Image.open('v2src/foto_13b.jpg').convert('RGB'),[(808,685,898,745),(440,700,480,760),(580,700,620,760),(950,690,990,740)])
+f.resize((1000,667),Image.LANCZOS).save(D+'panel_13.jpg',quality=92)
 print('ok')
