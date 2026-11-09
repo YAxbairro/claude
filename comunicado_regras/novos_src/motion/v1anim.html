@@ -239,7 +239,7 @@ BT.forEach(b=>{const MV=['M10','M11','M12','M13','M14','M15','M16','M17','M18'].
   if(b.n=='28'&&(OPT.has('S1')||OPT.has('S2')))b.ics=[OPT.has('S2')?'PANELSUP':'bg_sup','troca']});
 const LAY={bg_13:{tx:[140,215],ic:[1560,400,300],ts:{engren:[11.35,14.6],checklist:[11.35,11.9,12.6,14.6]}},bg_38:{tx:[140,575],ic:[1650,330,250],ts:{tel1:[36.7,39.2],tel2:[36.7,39.2]}},
   bg_sup:{dy:150,ic:[560,720,300]},
-  V6c:{kb:1,tx:[960,285]},V7a:{kb:1,tx:[720,600]},V7b:{kb:1,tx:[140,690]},V9:{kb:1,bgTop:0,tx:[140,640],fs:.82},
+  V6c:{kb:1,tx:[960,285]},V7a:{kb:1,tx:[720,600]},V7b:{kb:1,tx:[140,690]},V9:{kb:1,bgTop:0,tx:[140,560],fs:.82},
   M7:{kb:1,bgTop:0,custom:1},M10:{kb:1,bgTop:0,bgLeft:560,custom:1},M11:{custom:1},M12:{kb:1,bgTop:0,custom:1},
   M13:{kb:1,bgTop:0,custom:1,cc:{top:178,sz:[.82,.92,.82,.82],dx:[0,0,0,0]}},
   M14:{kb:1,bgTop:0,custom:1,cc:{top:178,sz:[.82,.92,.82,.82],dx:[-170,-60,60,170]}},
@@ -269,10 +269,12 @@ BT.forEach((b,i)=>{
       const SY=j=>110+j*118, FY=400, H=95;
       const its=items.map((it,j)=>{const row=el('div','abs',sk,'left:0;top:0;width:1920px;text-align:center;transform-origin:50% 50%');
         const c=el('div','',row,'display:inline-block;position:relative;white-space:nowrap;padding-bottom:14px');
-        const a=el('span','',c,'font-weight:800;color:#19296D;font-size:76px');a.textContent=it[0]+' ';
-        const b2=el('span','',c,'font-weight:800;color:#D4292E;font-size:50px');b2.textContent=it[1];
+        let bd=null;if(LC=='L9'){bd=el('div','',c,'position:absolute;left:-36px;right:-36px;top:-8px;bottom:-2px;background:#19296D;border-radius:10px;transform-origin:0 50%');tl.set(bd,{scaleX:0},0)}
+        let nm=null;if(LC=='L8'){nm=el('span','',c,'display:inline-block;font-weight:800;color:#fff;background:#D4292E;font-size:46px;width:78px;height:78px;line-height:80px;text-align:center;border-radius:50%;margin-right:26px;vertical-align:8px');nm.textContent=j+1;tl.set(nm,{scale:0},0)}
+        const a=el('span','',c,'position:relative;font-weight:800;color:#19296D;font-size:76px');a.textContent=it[0]+' ';
+        const b2=el('span','',c,'position:relative;font-weight:800;color:#D4292E;font-size:50px');b2.textContent=it[1];
         const u=el('div','',c,'position:absolute;left:0;bottom:0;width:100%;height:8px;background:#D4292E;transform-origin:0 50%');tl.set(u,{scaleX:0},0);
-        tl.set(row,{y:LC=='L7'?FY:SY(j),opacity:0},0);row.u=u;return row});
+        tl.set(row,{y:LC=='L7'?FY:SY(j),opacity:0},0);Object.assign(row,{u,bd,nm,a,b2});return row});
       const foot=el('div','abs',sk,`left:0;top:${SY(4)}px;width:1920px;text-align:center;font-weight:800;color:#19296D;font-size:44px;letter-spacing:2px`);foot.textContent='NOS TERMOS DA LEI';tl.set(foot,{opacity:0},0);
       // enquadramento: o bloco (título + nomes) fica sempre ao centro do ecrã
       const cen=(top,bot,t,d)=>tl.to(sk,{y:545-(top+bot)/2,duration:d,ease:'power3.inOut'},t);
@@ -289,18 +291,19 @@ BT.forEach((b,i)=>{
       if(LC=='L8'){ // lugar fixo: sobe por máscara, sublinhado salta para o atual
         tl.fromTo(c,{opacity:1,y:SY(f)+60,clipPath:'inset(0 0 100% 0)'},{y:SY(f),clipPath:'inset(0 0 0% 0)',duration:.6,ease:'power3.out'},tw);
         tl.fromTo(c,{scale:1.08},{scale:1,duration:.9,ease:'power2.out'},tw);
-        tl.fromTo(c.u,{scaleX:0,transformOrigin:'0 50%'},{scaleX:1,duration:.5,ease:'expo.out'},tw+.3);
-        its.slice(0,f).forEach(o=>{tl.to(o,{opacity:.35,scale:.9,duration:.45},tw);tl.to(o.u,{scaleX:0,transformOrigin:'100% 50%',duration:.3},tw)})}
+        tl.fromTo(c.nm,{scale:0,rotation:-90},{scale:1,rotation:0,duration:.55,ease:'back.out(2)'},tw+.15);
+        its.slice(0,f).forEach(o=>{tl.to(o,{opacity:.35,scale:.9,duration:.45},tw)})}
       if(LC=='L9'){ // alterna lados: entra da esquerda/direita
         const dx=f%2?260:-260;
         tl.fromTo(c,{opacity:0,y:SY(f),x:dx,skewX:f%2?-12:12},{opacity:1,x:0,skewX:0,duration:.65,ease:'power4.out'},tw);
         tl.fromTo(c,{scale:1.1},{scale:1,duration:.9,ease:'power2.out'},tw+.1);
-        tl.fromTo(c.u,{scaleX:0,transformOrigin:f%2?'100% 50%':'0 50%'},{scaleX:1,duration:.5,ease:'expo.out'},tw+.3);
-        its.slice(0,f).forEach(o=>{tl.to(o,{opacity:.35,scale:.9,duration:.45},tw);tl.to(o.u,{scaleX:0,duration:.3},tw)})}
+        tl.fromTo(c.bd,{scaleX:0,transformOrigin:f%2?'100% 50%':'0 50%'},{scaleX:1,duration:.35,ease:'power3.out'},tw+.15);
+        tl.to(c.a,{color:'#fff',duration:.25},tw+.3);tl.to(c.b2,{color:'#FFB3B5',duration:.25},tw+.3);
+        its.slice(0,f).forEach(o=>{tl.to(o,{opacity:.35,scale:.9,duration:.45},tw);tl.to(o.bd,{scaleX:0,duration:.3},tw);tl.to(o.a,{color:'#19296D',duration:.3},tw);tl.to(o.b2,{color:'#D4292E',duration:.3},tw)})}
       if(LC!='L7'&&f>0)cen(0,SY(f)+H,tw,.7)}
     else{ // fecho: os quatro iguais, centrados, e entra a frase
       if(LC=='L7')tl.to(kw,{y:0,duration:.6,ease:'power3.inOut'},t0+.05);
-      its.forEach((o,j)=>{tl.to(o,{y:SY(j),scale:.9,opacity:1,duration:.6,ease:'power3.inOut'},t0+.05+j*.04);tl.to(o.u,{scaleX:0,duration:.3},t0)});
+      its.forEach((o,j)=>{tl.to(o,{y:SY(j),scale:.9,opacity:1,duration:.6,ease:'power3.inOut'},t0+.05+j*.04);tl.to(o.u,{scaleX:0,duration:.3},t0);if(o.bd){tl.to(o.bd,{scaleX:0,duration:.3},t0);tl.to(o.a,{color:'#19296D',duration:.3},t0);tl.to(o.b2,{color:'#D4292E',duration:.3},t0)}});
       cen(0,SY(4)+50,t0+.05,.6);
       tl.fromTo(foot,{opacity:0,y:30},{opacity:1,y:0,duration:.5,ease:'power3.out',immediateRender:false},t0+.35)}
     if(next&&!(Array.isArray(next.ics)&&next.ics[0]=='LISTA'))tl.to(lista.g,{opacity:0,duration:.3},t1-.3);

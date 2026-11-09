@@ -12,9 +12,10 @@ def frames(o,ts):
     return out
 F=ImageFont.truetype('../realista_src/fonts/M800.ttf',30); F2=ImageFont.truetype('../realista_src/fonts/M700.ttf',22); FT=ImageFont.truetype('../realista_src/fonts/M800.ttf',48); FH=ImageFont.truetype('../realista_src/fonts/M800.ttf',36)
 R=[('"SÃO ELES" · 0:22–0:35 · TUDO AO CENTRO DO ECRÃ, O BLOCO REENQUADRA-SE A CADA NOME',[
-   ('Opção A · Roda','o nome dito entra grande ao centro; os anteriores sobem, encolhem e somem; no fim os 4 juntam-se','T1,R2,L7',[23.9,29.4,33.0,34.6]),
-   ('Opção B · Revela no lugar','cada nome sobe por máscara no seu lugar; sublinhado vermelho salta para o atual; o bloco desliza para ficar centrado','T1,R2,L8',[23.9,29.4,33.0,34.6]),
-   ('Opção C · Entra dos lados','os nomes entram alternando esquerda/direita; sublinhado no atual; o bloco desliza para ficar centrado','T1,R2,L9',[23.9,29.4,33.0,34.6])])]
+   ('Opção A · Roda','o nome dito entra grande ao centro; os anteriores sobem, encolhem e somem; no fim os 4 juntam-se','T1,R2,L7',[24.2,29.4,33.0,34.6]),
+   ('Opção B · Numerados','cada nome entra com um número vermelho (1, 2, 3, 4) que gira; o atual fica forte, os outros claros','T1,R2,L8',[24.2,29.4,33.0,34.6]),
+   ('Opção C · Faixa azul','os nomes entram alternando dos lados; uma faixa azul abre por trás do nome que está a ser dito','T1,R2,L9',[24.2,29.4,33.0,34.6])]),
+ ('FOTO 1:10 · "DETERMINA A SAÍDA" · TEXTO SUBIU',[('Ajuste','texto mais acima, sem tapar caras','T1,R2,L7,F2',[73.0,74.6])])]
 tw,th=560,315; LW=400; G=24
 rows=sum(len(r[1]) for r in R); H=150+len(R)*70+rows*(th+G)+40
 W=Image.new('RGB',(LW+4*(tw+G)+40,H),(244,246,250)); d=ImageDraw.Draw(W)
