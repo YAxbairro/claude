@@ -209,11 +209,18 @@ function trans(st,t){const A=st=='A';
 const scn=n=>n.replace(/[a-z]$/,'');
 // ---------- batidas ----------
 const BT=window.BEATS; let lista=null;
-BT.forEach(b=>{if(b.n=='23b'&&(OPT.has('M1')||OPT.has('M2')))b.ics=['bg_13',OPT.has('M2')?'checklist':'engren'];
+BT.forEach(b=>{if(b.n=='23b'&&(OPT.has('M3')||OPT.has('M4'))){b.ics=['bg_13m'];b.lay=OPT.has('M4')?'M4':'M3'}
+  else if(b.n=='27'&&(OPT.has('P3')||OPT.has('P4'))){b.ics=['bg_38','tel1'];b.lay=OPT.has('P4')?'P4':'P3'}
+  else if(b.n=='28'&&(OPT.has('S3')||OPT.has('S4'))){b.ics=[OPT.has('S3')?'bg_supm':'bg_sup','troca'];b.lay=OPT.has('S3')?'S3':'S4'}
+  if(b.lay)return;
+  if(b.n=='23b'&&(OPT.has('M1')||OPT.has('M2')))b.ics=['bg_13',OPT.has('M2')?'checklist':'engren'];
   if(b.n=='27'&&(OPT.has('P1')||OPT.has('P2')))b.ics=['bg_38',OPT.has('P2')?'tel2':'tel1'];
   if(b.n=='28'&&(OPT.has('S1')||OPT.has('S2')))b.ics=[OPT.has('S2')?'PANELSUP':'bg_sup','troca']});
 const LAY={bg_13:{tx:[140,215],ic:[1560,400,300],ts:{engren:[11.35,14.6],checklist:[11.35,11.9,12.6,14.6]}},bg_38:{tx:[140,575],ic:[1650,330,250],ts:{tel1:[36.7,39.2],tel2:[36.7,39.2]}},
-  bg_sup:{dy:150,ic:[560,720,300]},PANELSUP:{dx:1040,dy:160,ic:[1200,265,210]}};
+  bg_sup:{dy:150,ic:[560,720,300]},
+  M3:{kb:1,center:610},M4:{kb:1,center:610,band:1},
+  P3:{tx:[140,480],ic:[235,345,190],ts:{tel1:[36.7,39.2]}},P4:{tx:[140,480],ic:[1080,750,200],ts:{tel1:[36.7,39.2]}},
+  S3:{kb:1,tx:[1180,720],fs:.7,mw:700,ic:[1020,860,210]},S4:{dy:150,ic:[830,700,210]},PANELSUP:{dx:1040,dy:160,ic:[1200,265,210]}};
 function build(){
 BT.forEach((b,i)=>{
   const prev=BT[i-1], next=BT[i+1], st=b.st, t0=b.t0, t1=b.t1;
@@ -240,7 +247,7 @@ BT.forEach((b,i)=>{
     if(next&&!(Array.isArray(next.ics)&&next.ics[0]=='LISTA'))tl.to(lista.g,{opacity:0,duration:.3},t1-.3);
     return}
   const g=el('div','beat '+st,world); tl.set(g,{visibility:'visible'},t0); if(OPT.has('T1')&&prev&&prev.st!=st) tl.fromTo(g,{opacity:0},{opacity:1,duration:.4,immediateRender:false},t0);
-  const BGK=(Array.isArray(ics)?ics:[]).find(k=>/^bg_/.test(k)); if(BGK){const p=img(g,'v2/'+BGK+'.png','width:1920px;left:0;top:-100px');tl.fromTo(p,{scale:1.12},{scale:1.02,duration:t1-t0,ease:'power1.out'},t0);tl.fromTo(p,{opacity:0},{opacity:1,duration:.5,ease:'none'},t0)} if(!/^OBS/.test((ics||[])[0]||''))tl.set(g,{visibility:'hidden'},t1+.05);
+  const BGK=(Array.isArray(ics)?ics:[]).find(k=>/^bg_/.test(k)); if(BGK){const p=img(g,'v2/'+BGK+'.png','width:1920px;left:0;top:-100px');const KB=b.lay&&LAY[b.lay].kb;tl.fromTo(p,{scale:KB?1.03:1.12},{scale:KB?1.0:1.02,duration:t1-t0,ease:'power1.out'},t0);tl.fromTo(p,{opacity:0},{opacity:1,duration:.5,ease:'none'},t0)} if(!/^OBS/.test((ics||[])[0]||''))tl.set(g,{visibility:'hidden'},t1+.05);
   tl.fromTo(g,{scale:1},{scale:1.035,duration:t1-t0,ease:'none'},t0);   // câmara: push-in lento
   const same=next&&scn(next.n)==scn(b.n)&&next.st==st;
   const out=()=>{ if(!next) return; if(same) tl.to(g,{x:-90,opacity:0,duration:.35,ease:'power2.in'},t1-.33); else tl.to(g,{opacity:0,duration:.25},t1-.25)};
@@ -304,15 +311,17 @@ BT.forEach((b,i)=>{
     else{const o=img(w,'v1/mesa_out.png','width:870px;left:0;top:0'),p=img(w,'v1/mesa_pres.png','width:870px;left:0;top:0;transform-origin:50% 100%');
       tl.to(o,{opacity:.35,filter:'grayscale(1)',duration:.6},t0+1.3);tl.fromTo(p,{scale:1},{scale:1.05,duration:.6,ease:'back.out(2)'},t0+1.3)}}
   if(ics[0]=='FOTO2'){const u=img(g,'v1/urna.png','height:760px;left:'+(510-0.415*760)+'px;top:-6px');tl.fromTo(u,{y:-200,opacity:0},{y:0,opacity:1,duration:.9,ease:'power3.out'},t0)}
-  const LY=LAY[BGK||ics[0]]; const NOCARD=BGK=='bg_3a'||!!LY; if(st=='B'&&L.length&&!MF&&!NOCARD){const c=el('div','card',g,'left:220px;top:290px;width:580px;height:540px');tl.fromTo(c,{scale:.8,opacity:0},{scale:1,opacity:1,duration:.6,ease:'back.out(1.5)'},b.n=='3'?6.6:t0)}
+  const LY=LAY[b.lay||BGK||ics[0]]; const NOCARD=BGK=='bg_3a'||!!LY; if(st=='B'&&L.length&&!MF&&!NOCARD){const c=el('div','card',g,'left:220px;top:290px;width:580px;height:540px');tl.fromTo(c,{scale:.8,opacity:0},{scale:1,opacity:1,duration:.6,ease:'back.out(1.5)'},b.n=='3'?6.6:t0)}
   const icTimes=[b.n=='3'?6.75:t0+.15,(b.lines[1]||b.lines[0]||[0,0,t0+.8])[2]];
     L.forEach((k,j)=>{let sz=L.length==1?360:(j==0?230:200), cx=L.length==1?510:(j==0?395:645), cy=L.length==1?560:(j==0?540:600);
     if(NOCARD){sz=260;cx=330;cy=330} if(LY){[cx,cy,sz]=LY.ic}
     const s2=sz*600/440, T0=b.n=='3'?6.75:t0+.15; let ts=k=='autoriza'?[T0,b.lines[1][2]-.05]:[j==0?T0:Math.max(T0+.5,icTimes[1]-.1)]; if(LY&&LY.ts&&LY.ts[k])ts=LY.ts[k];
     svgIcon(g,k,st,cx,cy,s2,ts,t1)});
-  const tx=el('div','txt '+st,g); let kk=null; if(NOCARD&&!LY){tx.style.left='140px';tx.style.top='190px'} if(LY){if(LY.tx){tx.style.left=LY.tx[0]+'px';tx.style.top=LY.tx[1]+'px';tx.style.height='auto';tx.style.paddingBottom='0'} if(LY.dx)tx.style.left=LY.dx+'px'; if(LY.dy)tx.style.top=LY.dy+'px'} if(b.kick) kk=kicker(tx,b.kick,st,b.n=='3'?t0+.05:t0+.2);
+  const tx=el('div','txt '+st,g); let kk=null; if(NOCARD&&!LY){tx.style.left='140px';tx.style.top='190px'} if(LY){if(LY.tx){tx.style.left=LY.tx[0]+'px';tx.style.top=LY.tx[1]+'px';tx.style.height='auto';tx.style.paddingBottom='0'} if(LY.dx)tx.style.left=LY.dx+'px'; if(LY.dy)tx.style.top=LY.dy+'px';
+    if(LY.center!=null){tx.style.cssText+=`;left:0;width:1920px;top:${LY.center}px;height:auto;padding-bottom:0;align-items:center`;
+      if(LY.band){const bd=el('div','abs',g,'left:0;right:0;top:'+(LY.center-10)+'px;height:480px;background:linear-gradient(rgba(246,248,252,0),rgba(246,248,252,.82) 22%,rgba(246,248,252,.82) 78%,rgba(246,248,252,0))');g.insertBefore(bd,tx);tl.fromTo(bd,{opacity:0},{opacity:1,duration:.5},t0+.1)}}} if(b.kick) kk=kicker(tx,b.kick,st,b.n=='3'?t0+.05:t0+.2);
   const dense=b.lines.length>=5;
-  b.lines.forEach(([t,ro,tin])=>{const sz=Math.round(SZ[ro]*(dense&&ro[0]!='h'?.82:1));const l=line(tx,t,ro,sz,880);inLine(l,Math.max(t0+.15,tin),ro)});
+  b.lines.forEach(([t,ro,tin])=>{const sz=Math.round(SZ[ro]*(dense&&ro[0]!='h'?.82:1)*(LY&&LY.fs||1));const l=line(tx,t,ro,sz,LY&&LY.mw||880);inLine(l,Math.max(t0+.15,tin),ro)});
   if(b.n=='3'&&kk){const bi=kk.querySelector('i');if(bi)bi.remove();const r=kk.getBoundingClientRect();const sc=3.2, dx=960-(r.left+r.width*sc/2), dy=540-(r.top+r.height*sc/2);
     kk.style.transformOrigin='0 0';tl.set(kk,{x:dx,y:dy,scale:sc},t0);tl.fromTo(kk,{opacity:0},{opacity:1,duration:.2},t0);
     tl.fromTo(kk,{scale:sc*1.3},{scale:sc,duration:.5,ease:'back.out(2)',immediateRender:false},t0+.05);
