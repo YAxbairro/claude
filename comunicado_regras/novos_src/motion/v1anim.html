@@ -211,14 +211,14 @@ function badge(p,fun,css){const c=el('div','abs',p,'width:330px;height:540px;bac
   const ph=el('div','abs',c,'left:95px;top:120px;width:140px;height:154px;border-radius:14px;overflow:hidden;border:5px solid #19296D');ph.innerHTML=SIL;
   const n=el('div','abs',c,'left:0;top:292px;width:330px;text-align:center;font-weight:800;color:#19296D;font-size:28px');n.textContent='NOME SOBRENOME';
   const f=el('div','abs',c,'left:24px;top:342px;width:282px;padding:12px 0;text-align:center;background:#19296D;color:#fff;border-radius:12px;font-weight:800;font-size:'+(fun.length>12?24:34)+'px;line-height:1.1');f.innerHTML=fun;
-  const i=el('div','abs',c,'left:0;top:'+(fun.includes('<br>')?432:410)+'px;width:330px;text-align:center;font-weight:800;color:#D4292E;font-size:26px');i.textContent='INSTITUIÇÃO';
+  const i=el('div','abs',c,'left:0;top:'+(fun.includes('<br>')?432:410)+'px;width:330px;text-align:center;font-weight:800;color:#D4292E;font-size:'+(fun=='DELEGADO'?22:26)+'px');i.textContent=fun=='DELEGADO'?'CÍRCULO ELEITORAL':'INSTITUIÇÃO';
   el('div','abs',c,'left:0;bottom:0;width:330px;height:16px;background:linear-gradient(#D4292E 0 6px,#19296D 6px)');return c}
 function credBadges(g,C,t0,t1){const tC=54.66;
   if(C=='C1'){const F=['OBSERVADOR<br>INTERNACIONAL','DELEGADO','STAFF'],X=[1100,1400,1700],R=[-7,0,7],Y=[330,280,330];
     const bs=F.map((f,j)=>badge(g,f,`left:${X[j]-165+0}px;top:${Y[j]}px;z-index:${j==1?3:1}`));
     bs.forEach((b,j)=>{tl.fromTo(b,{y:-900,rotation:R[j]*2.4},{y:0,rotation:R[j],duration:1.1,ease:'back.out(1.1)'},t0+.15+[.2,0,.4][j]);
       tl.to(b,{rotation:R[j]+(j==1?1.6:-1.2),duration:1.6,ease:'sine.inOut',yoyo:true,repeat:3},t0+1.4)});
-    seal(g,1400+135,280+505,tC);
+    seal(g,1400+150,280+570,tC);
     tl.to(bs[1],{scale:1.06,duration:.5,ease:'back.out(2)'},tC)}
   else{const b=badge(g,'OBSERVADOR<br>INTERNACIONAL','left:1185px;top:250px;transform:scale(1.25)');
     const cord=el('div','abs',g,'left:1340px;top:-20px;width:20px;height:240px;background:linear-gradient(90deg,#19296D 0 50%,#D4292E 50%);transform-origin:50% 0');g.insertBefore(cord,b);
