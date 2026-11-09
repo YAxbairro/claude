@@ -15,3 +15,4 @@ comunicado_regras/realista_src/**/*.jpg filter=lfs diff=lfs merge=lfs -text
 comunicado_regras/realista_src/**/*.wav filter=lfs diff=lfs merge=lfs -text
 comunicado_regras/realista_src/**/*.m4a filter=lfs diff=lfs merge=lfs -text
 comunicado_regras/realista_src/*.png filter=lfs diff=lfs merge=lfs -text
+ep9/*.mov filter=lfs diff=lfs merge=lfs -text
