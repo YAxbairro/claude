@@ -2,6 +2,8 @@
 import numpy as np
 from PIL import Image, ImageFilter
 D='motion/v2/'
+import sys as _s; _s.path.insert(0,'v1src')
+from textblur import textblur, TB
 def blur(im,boxes):
     # rótulo "em branco": pinta a área com a cor clara do próprio papel e suaviza a borda (sem texto legível, sem retângulo duro)
     import numpy as np
@@ -29,21 +31,23 @@ def tintA(im,col=(20,110,190),k=.65):  # mesmo tratamento das fotos A do V1
 f=blur(Image.open('v2src/foto_13.jpg').convert('RGB'),[(235,810,380,1020),(785,795,865,860),(1155,925,1245,980),(1015,990,1130,1025),(1530,1005,1615,1050)])
 f=f.resize((2500,1666),Image.LANCZOS).crop((290,0,2210,1280)); washB(f).save(D+'bg_13_foto1.png')
 # s13 (nova foto, escolhida): sala inteira, urna e crachás desfocados; escala 1.25 -> mesa em baixo, texto livre em cima
-f=blur(Image.open('v2src/foto_13b.jpg').convert('RGB'),[(808,685,898,745),(440,700,480,760),(580,700,620,760),(950,690,990,740)])
+f=textblur(Image.open('v2src/foto_13b.jpg'),TB['foto_13b'])
 f=f.resize((2500,1666),Image.LANCZOS).crop((400,0,2320,1280)); washB(f).save(D+'bg_13.png')
 # s38: mesa a trabalhar
 f=Image.open('v2src/foto_38.jpg').convert('RGB').resize((1920,1280),Image.LANCZOS); washB(f).save(D+'bg_38.png')
 # suplentes: sala (urna desfocada)
-f=blur(Image.open('v2src/foto_suplentes.jpg').convert('RGB'),[(1262,668,1378,778)])
+f=textblur(Image.open('v2src/foto_suplentes.jpg'),TB['foto_suplentes'])
 fs=f.resize((2400,1600),Image.LANCZOS).crop((240,320,2160,1600)); tintA(fs).save(D+'bg_sup.png')
 f.crop((600,280,1575,1333)).resize((1000,1080),Image.LANCZOS).save(D+'panel_sup.jpg',quality=92)
 # encaixe mínimo (foto inteira na largura, 1920x1280)
-f=blur(Image.open('v2src/foto_13b.jpg').convert('RGB'),[(808,685,898,745),(440,700,480,760),(580,700,620,760),(950,690,990,740)])
+f=textblur(Image.open('v2src/foto_13b.jpg'),TB['foto_13b'])
 washB(f.resize((1920,1280),Image.LANCZOS)).save(D+'bg_13m.png')
-f=blur(Image.open('v2src/foto_suplentes.jpg').convert('RGB'),[(1262,668,1378,778)])
+f=textblur(Image.open('v2src/foto_suplentes.jpg'),TB['foto_suplentes'])
 tintA(f.resize((1920,1280),Image.LANCZOS)).save(D+'bg_supm.png')
-f=blur(Image.open('v2src/foto_13b.jpg').convert('RGB'),[(808,685,898,745),(440,700,480,760),(580,700,620,760),(950,690,990,740)])
+f=textblur(Image.open('v2src/foto_13b.jpg'),TB['foto_13b'])
 tintA(f.resize((1920,1280),Image.LANCZOS)).save(D+'bg_13a.png')
-f=blur(Image.open('v2src/foto_13b.jpg').convert('RGB'),[(808,685,898,745),(440,700,480,760),(580,700,620,760),(950,690,990,740)])
+f=textblur(Image.open('v2src/foto_13b.jpg'),TB['foto_13b'])
 f.resize((1000,667),Image.LANCZOS).save(D+'panel_13.jpg',quality=92)
+# abertura: foto já limpa enviada pelo cliente (sem qualquer desfoque)
+f=Image.open('v2src/foto_1_clean.webp').convert('RGB').resize((1920,1280),Image.LANCZOS); washB(f).save(D+'bg_1a.png')
 if __name__=="__main__": print("ok")
