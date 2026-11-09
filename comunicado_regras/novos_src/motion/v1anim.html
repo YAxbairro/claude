@@ -62,7 +62,7 @@ svg.vic .hm,svg.vic .hh,svg.vic .f,svg.vic .g1,svg.vic .g2{transform-box:view-bo
 <script src="node_modules/gsap/dist/gsap.min.js"></script>
 <script src="data.js"></script><script>window.VID=new URLSearchParams(location.search).get('v')||'V1';document.write('<script src="'+(VID=='V2'?'v2':'v1')+'/beats.js"><\/script>')</script>
 <script>
-const OPT=new Set((new URLSearchParams(location.search).get('o')||(window.VID=='V2'?'T1,M15,P4,S6':'')).split(','));
+const OPT=new Set((new URLSearchParams(location.search).get('o')||(window.VID=='V2'?'T1,M15,P4,S6':'T1,R2,L9,F2')).split(','));
 const DUR=window.VIDS[window.VID].dur, tl=gsap.timeline({paused:true}), world=document.getElementById('world');
 const el=(tag,cls,p,css)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(css)e.style.cssText=css;p&&p.appendChild(e);return e};
 const SZ={n:50,b:72,r:76,s:38,h:118,hn:118};
