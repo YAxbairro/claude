@@ -220,7 +220,7 @@ const scn=n=>n.replace(/[a-z]$/,'');
 // ---------- batidas ----------
 const BT=window.BEATS; let lista=null;
 if(window.VID=='V1'){const RI=['R1','R2','R3'].find(k=>OPT.has(k)),ICN={R1:'cadeado',R2:'semacesso',R3:'barreira'};
-  const PH={'6c':['tempo','V6c',['relogio']],'7a':['pres','V7a',[]],'7b':['extra','V7b',[]],'7c':['autoriza','V7c',[]]};
+  const PH={'6c':['tempo','V6c',['relogio']],'7a':['pres','V7a',[]],'7b':['extra','V7b',[]],'9':['autoriza','V9',[]]};
   BT.forEach(b=>{if(b.n=='3'&&RI)b.ics=[ICN[RI]];
     if(PH[b.n]&&OPT.has('F1')){b.ics=[];b.frame=PH[b.n][0]}
     if(PH[b.n]&&OPT.has('F2')){b.ics=['bg_v1'+PH[b.n][0],...PH[b.n][2]];b.lay=PH[b.n][1]}})}
@@ -239,7 +239,7 @@ BT.forEach(b=>{const MV=['M10','M11','M12','M13','M14','M15','M16','M17','M18'].
   if(b.n=='28'&&(OPT.has('S1')||OPT.has('S2')))b.ics=[OPT.has('S2')?'PANELSUP':'bg_sup','troca']});
 const LAY={bg_13:{tx:[140,215],ic:[1560,400,300],ts:{engren:[11.35,14.6],checklist:[11.35,11.9,12.6,14.6]}},bg_38:{tx:[140,575],ic:[1650,330,250],ts:{tel1:[36.7,39.2],tel2:[36.7,39.2]}},
   bg_sup:{dy:150,ic:[560,720,300]},
-  V6c:{kb:1,tx:[960,175]},V7a:{kb:1,tx:[1010,690]},V7b:{kb:1,tx:[140,690]},V7c:{kb:1,bgTop:0,tx:[140,195]},
+  V6c:{kb:1,tx:[960,285]},V7a:{kb:1,tx:[720,600]},V7b:{kb:1,tx:[140,690]},V9:{kb:1,bgTop:0,tx:[140,640],fs:.82},
   M7:{kb:1,bgTop:0,custom:1},M10:{kb:1,bgTop:0,bgLeft:560,custom:1},M11:{custom:1},M12:{kb:1,bgTop:0,custom:1},
   M13:{kb:1,bgTop:0,custom:1,cc:{top:178,sz:[.82,.92,.82,.82],dx:[0,0,0,0]}},
   M14:{kb:1,bgTop:0,custom:1,cc:{top:178,sz:[.82,.92,.82,.82],dx:[-170,-60,60,170]}},
@@ -258,6 +258,27 @@ BT.forEach((b,i)=>{
   if(!prev||prev.st!=st){if(prev)trans(st,t0);else setStyle(st,t0)}
   const ics=b.ics;
   // LISTA (5a..5e): um só bloco persistente
+  const LW=['L4','L5','L6'].find(k=>OPT.has(k));
+  if(Array.isArray(ics)&&ics[0]=='LISTA'&&LW){
+    if(!lista){const g=el('div','beat '+st,world);const tEnd=BT.filter(x=>Array.isArray(x.ics)&&x.ics[0]=='LISTA').pop().t1;
+      tl.set(g,{visibility:'visible'},t0);tl.set(g,{visibility:'hidden'},tEnd);
+      const k=el('div','abs',g,'left:140px;top:205px');kicker(k,b.kick,st,t0+.1);
+      const items=[['MEMBROS','DA MESA'],['REPRESENTANTES','DA CNE E APOIO'],['CANDIDATOS','E MANDATÁRIOS'],['DELEGADOS','DAS CANDIDATURAS']];
+      const Y=j=>345+j*135;
+      const its=items.map((it,j)=>{const c=el('div','abs',g,`left:${LW=='L6'?190:140}px;top:0;white-space:nowrap;transform-origin:0 50%`);
+        const a=el('span','',c,'font-weight:800;color:#19296D;font-size:76px');a.textContent=it[0]+' ';const b2=el('span','',c,'font-weight:800;color:#D4292E;font-size:50px');b2.textContent=it[1];
+        tl.set(c,{y:Y(LW=='L5'?0:j),opacity:0},0);return c});
+      let bar=null;if(LW=='L6'){bar=el('div','abs',g,'left:140px;top:0;width:12px;height:70px;background:#D4292E');tl.set(bar,{y:Y(0)+8,scaleY:0},0)}
+      const foot=el('div','abs',g,'left:140px;top:905px;font-weight:800;color:#19296D;font-size:44px');foot.textContent='NOS TERMOS DA LEI';tl.set(foot,{opacity:0},0);
+      lista={g,its,bar,foot,Y}}
+    const f=ics[1],{its,bar,foot,Y}=lista;
+    if(f!==null){const tw=[23.55,24.95,28.55,32.05][f],c=its[f];
+      if(LW=='L4'){tl.fromTo(c,{opacity:0,x:-80,scale:1},{opacity:1,x:0,duration:.6,ease:'power3.out'},tw);its.slice(0,f).forEach(o=>tl.to(o,{scale:.7,opacity:.45,duration:.5,ease:'power2.out'},tw))}
+      if(LW=='L5'){tl.fromTo(c,{opacity:0,y:Y(0)-90,scale:1},{opacity:1,y:Y(0),duration:.6,ease:'power3.out'},tw);its.slice(0,f).forEach((o,k)=>tl.to(o,{y:Y(f-k),scale:.7,opacity:.45,duration:.6,ease:'power3.inOut'},tw))}
+      if(LW=='L6'){tl.fromTo(c,{opacity:0,x:-60},{opacity:1,x:0,duration:.6,ease:'power3.out'},tw);tl.to(bar,{y:Y(f)+8,scaleY:1,duration:.5,ease:'power3.inOut'},tw-.05);its.slice(0,f).forEach(o=>tl.to(o,{opacity:.35,duration:.4},tw))}}
+    else{tl.to(its,{opacity:1,scale:LW=='L6'?1:.85,duration:.5,stagger:.05},t0+.05);if(bar)tl.to(bar,{scaleY:0,duration:.3},t0);tl.fromTo(foot,{opacity:0,x:-30},{opacity:1,x:0,duration:.5,immediateRender:false},t0+.2)}
+    if(next&&!(Array.isArray(next.ics)&&next.ics[0]=='LISTA'))tl.to(lista.g,{opacity:0,duration:.3},t1-.3);
+    return}
   const LV=['L1','L2','L3'].find(k=>OPT.has(k));
   if(Array.isArray(ics)&&ics[0]=='LISTA'&&LV){
     if(!lista){const g=el('div','beat '+st,world);const tEnd=BT.filter(x=>Array.isArray(x.ics)&&x.ics[0]=='LISTA').pop().t1;
