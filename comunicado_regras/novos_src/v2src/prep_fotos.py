@@ -3,8 +3,19 @@ import numpy as np
 from PIL import Image, ImageFilter
 D='motion/v2/'
 def blur(im,boxes):
+    # rótulo "em branco": pinta a área com a cor clara do próprio papel e suaviza a borda (sem texto legível, sem retângulo duro)
+    import numpy as np
+    from PIL import ImageDraw
     for b in boxes:
-        r=im.crop(b).filter(ImageFilter.GaussianBlur(14)); im.paste(r,b[:2])
+        Q=None
+        if isinstance(b[0],tuple): Q=b; xs=[q[0] for q in Q]; ys=[q[1] for q in Q]; b=(min(xs),min(ys),max(xs),max(ys))
+        x0,y0,x1,y1=b; a=np.asarray(im.crop(b)).reshape(-1,3); L=a.sum(1)
+        if Q: a=a[L>=np.percentile(L,40)]; L=a.sum(1)
+        col=tuple(int(v) for v in np.median(a[L>=np.percentile(L,70)],0))
+        p=4; pat=Image.new('RGB',(x1-x0,y1-y0),col)
+        g=im.crop(b).filter(ImageFilter.GaussianBlur(40)); pat=Image.blend(pat,g,.25)
+        m=Image.new('L',pat.size,0); (ImageDraw.Draw(m).polygon([(q[0]-x0,q[1]-y0) for q in Q],fill=255) if Q else ImageDraw.Draw(m).rounded_rectangle((p,p,pat.width-p,pat.height-p),radius=6,fill=255)); m=m.filter(ImageFilter.GaussianBlur(3))
+        im.paste(pat,(x0,y0),m)
     return im
 def washB(im):  # mesmo tratamento das fotos B do V2
     a=np.asarray(im.convert('RGB')).astype(np.float32); g=(a@[.3,.59,.11])[...,None].repeat(3,2)
@@ -35,4 +46,4 @@ f=blur(Image.open('v2src/foto_13b.jpg').convert('RGB'),[(808,685,898,745),(440,7
 tintA(f.resize((1920,1280),Image.LANCZOS)).save(D+'bg_13a.png')
 f=blur(Image.open('v2src/foto_13b.jpg').convert('RGB'),[(808,685,898,745),(440,700,480,760),(580,700,620,760),(950,690,990,740)])
 f.resize((1000,667),Image.LANCZOS).save(D+'panel_13.jpg',quality=92)
-print('ok')
+if __name__=="__main__": print("ok")

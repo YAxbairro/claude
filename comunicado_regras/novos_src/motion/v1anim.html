@@ -62,7 +62,7 @@ svg.vic .hm,svg.vic .hh,svg.vic .f,svg.vic .g1,svg.vic .g2{transform-box:view-bo
 <script src="node_modules/gsap/dist/gsap.min.js"></script>
 <script src="data.js"></script><script>window.VID=new URLSearchParams(location.search).get('v')||'V1';document.write('<script src="'+(VID=='V2'?'v2':'v1')+'/beats.js"><\/script>')</script>
 <script>
-const OPT=new Set(window.VID=='V2'?(new URLSearchParams(location.search).get('o')||'T1,M15,P4,S6').split(','):[]);
+const OPT=new Set((new URLSearchParams(location.search).get('o')||(window.VID=='V2'?'T1,M15,P4,S6':'')).split(','));
 const DUR=window.VIDS[window.VID].dur, tl=gsap.timeline({paused:true}), world=document.getElementById('world');
 const el=(tag,cls,p,css)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(css)e.style.cssText=css;p&&p.appendChild(e);return e};
 const SZ={n:50,b:72,r:76,s:38,h:118,hn:118};
@@ -101,6 +101,13 @@ const ICS={
   <g data-g="1"><circle class="d" cx="55" cy="60" r="5.5" stroke="${C}" stroke-width="3.4"/><path class="d" d="M45,86 L45,78 C45,71 65,71 65,78 L65,86" stroke="${C}" stroke-width="3.4"/>
   <circle class="d" cx="80" cy="64" r="5.5" stroke="${C}" stroke-width="3.4"/><path class="d" d="M70,90 L70,82 C70,75 90,75 90,82 L90,90" stroke="${C}" stroke-width="3.4"/><path class="d" d="M63,74 L70,68" stroke="${C}" stroke-width="3.4"/>
   <path class="d" d="M60,40 A14,14 0 1 1 66,46 L56,49 Z" stroke="${RD}"/><circle class="f" cx="70" cy="28" r="2" fill="${RD}" stroke="none"/><path class="d" d="M70,33 L70,42" stroke="${RD}"/></g>`,
+ cadeado:C=>`<g data-g="0"><rect class="d" x="22" y="44" width="56" height="46" rx="7" stroke="${C}"/><circle class="d" cx="50" cy="63" r="5" stroke="${RD}"/><path class="d" d="M50,68 L50,77" stroke="${RD}"/></g>
+  <g data-g="0" class="sh"><path class="d" d="M34,44 L34,30 A16,16 0 0 1 66,30 L66,44" stroke="${C}"/></g>`,
+ semacesso:C=>`<g data-g="0"><circle class="d" cx="50" cy="34" r="11" stroke="${C}"/><path class="d" d="M28,80 C28,58 72,58 72,80" stroke="${C}"/></g>
+  <g data-g="1" class="no"><circle class="d" cx="50" cy="52" r="44" stroke="${RD}" stroke-width="6"/><path class="d" d="M19,83 L81,21" stroke="${RD}" stroke-width="6"/></g>`,
+ barreira:C=>`<g data-g="0"><path class="d" d="M18,30 L18,88" stroke="${C}"/><path class="d" d="M82,30 L82,88" stroke="${C}"/><path class="d" d="M10,90 L26,90" stroke="${C}"/><path class="d" d="M74,90 L90,90" stroke="${C}"/>
+  <circle class="d" cx="18" cy="26" r="4" stroke="${C}"/><circle class="d" cx="82" cy="26" r="4" stroke="${C}"/></g>
+  <g data-g="1" class="rope"><path class="d" d="M18,38 Q50,62 82,38" stroke="${RD}" stroke-width="6"/></g>`,
  engren:C=>`<g data-g="0" class="g1"><path class="d" d="${gear(38,42,30,9)}" stroke="${C}"/><circle class="d" cx="38" cy="42" r="10" stroke="${C}"/></g>
   <g data-g="0" class="g2"><path class="d" d="${gear(78,80,17,7)}" stroke="${C}"/><circle class="d" cx="78" cy="80" r="6" stroke="${C}"/></g>
   <g data-g="1" class="ok"><circle class="d" cx="84" cy="22" r="15" stroke="${RD}"/><path class="d" d="M77,22 L82,27 L92,16" stroke="${RD}" stroke-width="4.6"/></g>`,
@@ -151,6 +158,9 @@ function svgIcon(p,kind,st,cx,cy,s2,ts,t1){
     tl.to(h,{scale:1.18,duration:.14,yoyo:true,repeat:1,transformOrigin:'50% 70%'},9.05);tl.to(h,{rotation:8,duration:.07,yoyo:true,repeat:5,transformOrigin:'50% 90%'},9.1)}
   if(kind=='portaentra'){tl.to(s.querySelector('.arrow'),{x:-7,duration:.45,yoyo:true,repeat:Math.max(1,Math.floor((t1-after)/.45)-1),ease:'sine.inOut'},after)}
   if(kind=='saida'){tl.to(s.querySelector('.arrow'),{x:7,duration:.45,yoyo:true,repeat:Math.max(1,Math.floor((t1-after)/.45)-1),ease:'sine.inOut'},after)}
+  if(kind=='cadeado'){const sh=s.querySelector('.sh');tl.fromTo(sh,{y:-14},{y:0,duration:.25,ease:'power4.in'},9.1);tl.to(s,{scale:1.08,duration:.1,yoyo:true,repeat:1},9.35)}
+  if(kind=='semacesso'){tl.fromTo(s.querySelector('.no'),{scale:1.4,transformOrigin:'50% 50%'},{scale:1,duration:.4,ease:'back.out(2)'},ts[1])}
+  if(kind=='barreira'){tl.fromTo(s.querySelector('.rope'),{y:-10},{y:0,duration:.8,ease:'elastic.out(1,.4)'},ts[1]+.3)}
   if(kind=='engren'){const g1=s.querySelector('.g1'),g2=s.querySelector('.g2');const o={a:0},sg=()=>{g1.setAttribute('transform',`rotate(${o.a*300} 38 42)`);g2.setAttribute('transform',`rotate(${-o.a*540} 78 80)`)};tl.fromTo(o,{a:0},{a:1,duration:t1-T,ease:'none',onUpdate:sg,onStart:sg},T);sg();
     tl.fromTo(s.querySelector('.ok'),{scale:.4,transformOrigin:'50% 50%'},{scale:1,duration:.5,ease:'back.out(3)'},ts[1])}
   if(kind=='checklist'){ts.slice(1).forEach(t=>tl.to(s,{scale:1.05,duration:.12,yoyo:true,repeat:1},t+.1))}
@@ -209,6 +219,11 @@ function trans(st,t){const A=st=='A';
 const scn=n=>n.replace(/[a-z]$/,'');
 // ---------- batidas ----------
 const BT=window.BEATS; let lista=null;
+if(window.VID=='V1'){const RI=['R1','R2','R3'].find(k=>OPT.has(k)),ICN={R1:'cadeado',R2:'semacesso',R3:'barreira'};
+  const PH={'6c':['tempo','V6c',['relogio']],'7a':['pres','V7a',[]],'7b':['extra','V7b',[]],'7c':['autoriza','V7c',[]]};
+  BT.forEach(b=>{if(b.n=='3'&&RI)b.ics=[ICN[RI]];
+    if(PH[b.n]&&OPT.has('F1')){b.ics=[];b.frame=PH[b.n][0]}
+    if(PH[b.n]&&OPT.has('F2')){b.ics=['bg_v1'+PH[b.n][0],...PH[b.n][2]];b.lay=PH[b.n][1]}})}
 BT.forEach(b=>{const MV=['M10','M11','M12','M13','M14','M15','M16','M17','M18'].find(k=>OPT.has(k));
   if(b.n=='23b'&&MV){b.ics=MV=='M11'?[]:['bg_13a'];b.st='A';b.lay=MV}
   else if(b.n=='23b'&&OPT.has('M7')){b.ics=['bg_13a'];b.st='A';b.lay='M7'}
@@ -224,6 +239,7 @@ BT.forEach(b=>{const MV=['M10','M11','M12','M13','M14','M15','M16','M17','M18'].
   if(b.n=='28'&&(OPT.has('S1')||OPT.has('S2')))b.ics=[OPT.has('S2')?'PANELSUP':'bg_sup','troca']});
 const LAY={bg_13:{tx:[140,215],ic:[1560,400,300],ts:{engren:[11.35,14.6],checklist:[11.35,11.9,12.6,14.6]}},bg_38:{tx:[140,575],ic:[1650,330,250],ts:{tel1:[36.7,39.2],tel2:[36.7,39.2]}},
   bg_sup:{dy:150,ic:[560,720,300]},
+  V6c:{kb:1,tx:[960,175]},V7a:{kb:1,tx:[1010,690]},V7b:{kb:1,tx:[140,690]},V7c:{kb:1,bgTop:0,tx:[140,195]},
   M7:{kb:1,bgTop:0,custom:1},M10:{kb:1,bgTop:0,bgLeft:560,custom:1},M11:{custom:1},M12:{kb:1,bgTop:0,custom:1},
   M13:{kb:1,bgTop:0,custom:1,cc:{top:178,sz:[.82,.92,.82,.82],dx:[0,0,0,0]}},
   M14:{kb:1,bgTop:0,custom:1,cc:{top:178,sz:[.82,.92,.82,.82],dx:[-170,-60,60,170]}},
@@ -242,6 +258,31 @@ BT.forEach((b,i)=>{
   if(!prev||prev.st!=st){if(prev)trans(st,t0);else setStyle(st,t0)}
   const ics=b.ics;
   // LISTA (5a..5e): um só bloco persistente
+  const LV=['L1','L2','L3'].find(k=>OPT.has(k));
+  if(Array.isArray(ics)&&ics[0]=='LISTA'&&LV){
+    if(!lista){const g=el('div','beat '+st,world);const tEnd=BT.filter(x=>Array.isArray(x.ics)&&x.ics[0]=='LISTA').pop().t1;
+      tl.set(g,{visibility:'visible'},t0);tl.set(g,{visibility:'hidden'},tEnd);
+      const k=el('div','abs',g,'left:140px;top:205px');kicker(k,b.kick,st,t0+.1);
+      const items=[['MEMBROS','DA MESA'],['REPRESENTANTES','DA CNE E APOIO'],['CANDIDATOS','E MANDATÁRIOS'],['DELEGADOS','DAS CANDIDATURAS']];
+      const row=el('div','abs',g,`left:140px;right:140px;top:${LV=='L2'?360:430}px;display:flex;justify-content:space-between;align-items:flex-start`);
+      const cols=items.map((it,j)=>{const c=el('div','',row,'position:relative');
+        if(LV=='L2'){const nb=el('div','',c,'font-weight:800;color:#D4292E;font-size:130px;line-height:1;margin-bottom:14px');nb.textContent='0'+(j+1)}
+        const t1_=el('div','',c,'font-weight:800;color:'+(LV=='L3'?'#fff':'#19296D')+';font-size:'+(LV=='L3'?40:48)+'px;white-space:nowrap;line-height:1.1;display:inline-block');t1_.textContent=it[0];
+        if(LV=='L3'){t1_.style.cssText+=';background:#19296D;border-radius:60px;padding:22px 32px'}
+        const t2=el('div','',c,'font-weight:800;color:#D4292E;font-size:'+(LV=='L3'?30:32)+'px;white-space:nowrap;margin-top:'+(LV=='L3'?18:12)+'px'+(LV=='L3'?';padding-left:32px':''));t2.textContent=it[1];
+        if(LV=='L1'&&j>0){const ln=el('div','abs',c,'left:-34px;top:-8px;width:5px;height:120px;background:#D4292E;transform-origin:50% 0');c._ln=ln}
+        const ul=el('div','abs',c,'left:'+(LV=='L3'?32:0)+'px;top:100%;margin-top:20px;width:130px;height:9px;background:#D4292E;transform-origin:0 50%');c._ul=ul;tl.set(ul,{scaleX:0},0);
+        return c});
+      const foot=el('div','abs',g,`left:140px;top:${LV=='L2'?800:760}px;font-weight:800;color:#19296D;font-size:44px`);foot.textContent='NOS TERMOS DA LEI';
+      lista={g,cards:cols,foot};tl.set(cols,{opacity:0},0)}
+    const f=ics[1], C=lista.cards;
+    if(f!==null){const c=C[f];const tw=[23.55,24.95,28.55,32.05][f];
+      tl.fromTo(c,{opacity:0,y:LV=='L3'?-120:60},{opacity:1,y:0,duration:.7,ease:LV=='L3'?'bounce.out':'power3.out'},tw);if(c._ln)tl.fromTo(c._ln,{scaleY:0},{scaleY:1,duration:.5},tw);
+      tl.to(c._ul,{scaleX:1,duration:.5,ease:'expo.out'},tw+.3);
+      C.slice(0,f).forEach(o=>{tl.to(o,{opacity:.4,duration:.4},tw);tl.to(o._ul,{scaleX:0,duration:.3},tw)})}
+    else{tl.to(C,{opacity:1,duration:.5,stagger:.05},t0+.05);tl.fromTo(lista.foot,{opacity:0,x:-30},{opacity:1,x:0,duration:.5},t0+.2)}
+    if(next&&!(Array.isArray(next.ics)&&next.ics[0]=='LISTA'))tl.to(lista.g,{opacity:0,duration:.3},t1-.3);
+    return}
   if(Array.isArray(ics)&&ics[0]=='LISTA'){
     if(!lista){const g=el('div','beat '+st,world);const tEnd=BT.filter(x=>Array.isArray(x.ics)&&x.ics[0]=='LISTA').pop().t1;
       tl.set(g,{visibility:'visible'},t0);tl.set(g,{visibility:'hidden'},tEnd);
@@ -351,12 +392,14 @@ BT.forEach((b,i)=>{
     if(MF=='MESA'){img(w,'v1/mesa.png','width:870px;left:0;top:0')}
     else{const o=img(w,'v1/mesa_out.png','width:870px;left:0;top:0'),p=img(w,'v1/mesa_pres.png','width:870px;left:0;top:0;transform-origin:50% 100%');
       tl.to(o,{opacity:.35,filter:'grayscale(1)',duration:.6},t0+1.3);tl.fromTo(p,{scale:1},{scale:1.05,duration:.6,ease:'back.out(2)'},t0+1.3)}}
+  if(b.frame){const fr=el('div','abs',g,'left:110px;top:290px;width:780px;height:520px;border-radius:36px;overflow:hidden;box-shadow:0 22px 44px rgba(0,0,0,.28)');const pi=img(fr,'v2/fr_'+b.frame+'.jpg','left:0;top:0;width:780px');
+    tl.fromTo(fr,{clipPath:'inset(0% 50% 0% 50% round 36px)',y:40},{clipPath:'inset(0% 0% 0% 0% round 36px)',y:0,duration:.9,ease:'power3.out'},t0+.1);tl.fromTo(pi,{scale:1.12},{scale:1,duration:t1-t0,ease:'none'},t0)}
   if(ics[0]=='FOTO2'){const u=img(g,'v1/urna.png','height:760px;left:'+(510-0.415*760)+'px;top:-6px');tl.fromTo(u,{y:-200,opacity:0},{y:0,opacity:1,duration:.9,ease:'power3.out'},t0)}
   const LY=LAY[b.lay||BGK||ics[0]]; const NOCARD=BGK=='bg_3a'||!!LY; if(st=='B'&&L.length&&!MF&&!NOCARD){const c=el('div','card',g,'left:220px;top:290px;width:580px;height:540px');tl.fromTo(c,{scale:.8,opacity:0},{scale:1,opacity:1,duration:.6,ease:'back.out(1.5)'},b.n=='3'?6.6:t0)}
   const icTimes=[b.n=='3'?6.75:t0+.15,(b.lines[1]||b.lines[0]||[0,0,t0+.8])[2]];
     L.forEach((k,j)=>{let sz=L.length==1?360:(j==0?230:200), cx=L.length==1?510:(j==0?395:645), cy=L.length==1?560:(j==0?540:600);
-    if(NOCARD){sz=260;cx=330;cy=330} if(LY){[cx,cy,sz]=LY.ic}
-    const s2=sz*600/440, T0=b.n=='3'?6.75:t0+.15; let ts=k=='autoriza'?[T0,b.lines[1][2]-.05]:[j==0?T0:Math.max(T0+.5,icTimes[1]-.1)]; if(LY&&LY.ts&&LY.ts[k])ts=LY.ts[k];
+    if(NOCARD){sz=260;cx=330;cy=330} if(LY&&LY.ic){[cx,cy,sz]=LY.ic}
+    const s2=sz*600/440, T0=b.n=='3'?6.75:t0+.15; let ts=k=='autoriza'?[T0,b.lines[1][2]-.05]:[j==0?T0:Math.max(T0+.5,icTimes[1]-.1)]; if(LY&&LY.ts&&LY.ts[k])ts=LY.ts[k]; if(b.n=='3'&&/semacesso|barreira/.test(k))ts=[6.75,9.1];
     svgIcon(g,k,st,cx,cy,s2,ts,t1)});
   const tx=el('div','txt '+st,g); let kk=null; if(NOCARD&&!LY){tx.style.left='140px';tx.style.top='190px'} if(LY){if(LY.tx){tx.style.left=LY.tx[0]+'px';tx.style.top=LY.tx[1]+'px';tx.style.height='auto';tx.style.paddingBottom='0'} if(LY.dx)tx.style.left=LY.dx+'px'; if(LY.dy)tx.style.top=LY.dy+'px';
     if(LY.center!=null){tx.style.cssText+=`;left:0;width:1920px;top:${LY.center}px;height:auto;padding-bottom:0;align-items:center`;
