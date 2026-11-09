@@ -258,6 +258,53 @@ BT.forEach((b,i)=>{
   if(!prev||prev.st!=st){if(prev)trans(st,t0);else setStyle(st,t0)}
   const ics=b.ics;
   // LISTA (5a..5e): um só bloco persistente
+  const LC=['L7','L8','L9'].find(k=>OPT.has(k));
+  if(Array.isArray(ics)&&ics[0]=='LISTA'&&LC){
+    if(!lista){const g=el('div','beat '+st,world,'transform-origin:50% 50%');const LB=BT.filter(x=>Array.isArray(x.ics)&&x.ics[0]=='LISTA');const tEnd=LB[LB.length-1].t1;
+      tl.set(g,{visibility:'visible'},t0);tl.set(g,{visibility:'hidden'},tEnd);
+      tl.fromTo(g,{scale:1},{scale:1.04,duration:tEnd-t0,ease:'none'},t0);
+      const sk=el('div','abs',g,'left:0;top:0;width:1920px');
+      const kw=el('div','abs',sk,'left:0;top:0;width:1920px;display:flex;justify-content:center');kicker(kw,b.kick,st,t0+.1);
+      const items=[['MEMBROS','DA MESA'],['REPRESENTANTES','DA CNE E APOIO'],['CANDIDATOS','E MANDATÁRIOS'],['DELEGADOS','DAS CANDIDATURAS']];
+      const SY=j=>110+j*118, FY=400, H=95;
+      const its=items.map((it,j)=>{const row=el('div','abs',sk,'left:0;top:0;width:1920px;text-align:center;transform-origin:50% 50%');
+        const c=el('div','',row,'display:inline-block;position:relative;white-space:nowrap;padding-bottom:14px');
+        const a=el('span','',c,'font-weight:800;color:#19296D;font-size:76px');a.textContent=it[0]+' ';
+        const b2=el('span','',c,'font-weight:800;color:#D4292E;font-size:50px');b2.textContent=it[1];
+        const u=el('div','',c,'position:absolute;left:0;bottom:0;width:100%;height:8px;background:#D4292E;transform-origin:0 50%');tl.set(u,{scaleX:0},0);
+        tl.set(row,{y:LC=='L7'?FY:SY(j),opacity:0},0);row.u=u;return row});
+      const foot=el('div','abs',sk,`left:0;top:${SY(4)}px;width:1920px;text-align:center;font-weight:800;color:#19296D;font-size:44px;letter-spacing:2px`);foot.textContent='NOS TERMOS DA LEI';tl.set(foot,{opacity:0},0);
+      // enquadramento: o bloco (título + nomes) fica sempre ao centro do ecrã
+      const cen=(top,bot,t,d)=>tl.to(sk,{y:545-(top+bot)/2,duration:d,ease:'power3.inOut'},t);
+      if(LC=='L7'){tl.set(kw,{y:FY-90},0);tl.set(sk,{y:545-(FY-90+FY+H)/2},0)}else tl.set(sk,{y:545-(0+SY(0)+H)/2},0);
+      lista={g,its,foot,SY,FY,H,kw,cen}}
+    const f=ics[1],{its,foot,SY,FY,H,kw,cen}=lista;
+    if(f!==null){const tw=[23.55,24.95,28.55,32.05][f],c=its[f];
+      if(LC=='L7'){ // roda: o novo entra ao centro, os anteriores sobem e encolhem
+        tl.fromTo(c,{opacity:0,y:FY+130,scale:1.15,clipPath:'inset(0 0 100% 0)'},{opacity:1,y:FY,scale:1,clipPath:'inset(0 0 0% 0)',duration:.7,ease:'power3.out'},tw);
+        its.slice(0,f).forEach((o,k)=>tl.to(o,{y:FY-(f-k)*100-40,scale:.62,opacity:f-k>2?0:.42,duration:.7,ease:'power3.inOut'},tw));
+        const kt=f==0?FY-90:FY-Math.min(f,2)*100-40+15-85;if(f>0)tl.to(kw,{y:kt,duration:.7,ease:'power3.inOut'},tw);
+        if(f>0)cen(kt,FY+H,tw,.8);
+        tl.fromTo(c.u,{scaleX:0},{scaleX:1,duration:.5,ease:'expo.out'},tw+.35);if(f>0)tl.to(its[f-1].u,{scaleX:0,transformOrigin:'100% 50%',duration:.3},tw)}
+      if(LC=='L8'){ // lugar fixo: sobe por máscara, sublinhado salta para o atual
+        tl.fromTo(c,{opacity:1,y:SY(f)+60,clipPath:'inset(0 0 100% 0)'},{y:SY(f),clipPath:'inset(0 0 0% 0)',duration:.6,ease:'power3.out'},tw);
+        tl.fromTo(c,{scale:1.08},{scale:1,duration:.9,ease:'power2.out'},tw);
+        tl.fromTo(c.u,{scaleX:0,transformOrigin:'0 50%'},{scaleX:1,duration:.5,ease:'expo.out'},tw+.3);
+        its.slice(0,f).forEach(o=>{tl.to(o,{opacity:.35,scale:.9,duration:.45},tw);tl.to(o.u,{scaleX:0,transformOrigin:'100% 50%',duration:.3},tw)})}
+      if(LC=='L9'){ // alterna lados: entra da esquerda/direita
+        const dx=f%2?260:-260;
+        tl.fromTo(c,{opacity:0,y:SY(f),x:dx,skewX:f%2?-12:12},{opacity:1,x:0,skewX:0,duration:.65,ease:'power4.out'},tw);
+        tl.fromTo(c,{scale:1.1},{scale:1,duration:.9,ease:'power2.out'},tw+.1);
+        tl.fromTo(c.u,{scaleX:0,transformOrigin:f%2?'100% 50%':'0 50%'},{scaleX:1,duration:.5,ease:'expo.out'},tw+.3);
+        its.slice(0,f).forEach(o=>{tl.to(o,{opacity:.35,scale:.9,duration:.45},tw);tl.to(o.u,{scaleX:0,duration:.3},tw)})}
+      if(LC!='L7'&&f>0)cen(0,SY(f)+H,tw,.7)}
+    else{ // fecho: os quatro iguais, centrados, e entra a frase
+      if(LC=='L7')tl.to(kw,{y:0,duration:.6,ease:'power3.inOut'},t0+.05);
+      its.forEach((o,j)=>{tl.to(o,{y:SY(j),scale:.9,opacity:1,duration:.6,ease:'power3.inOut'},t0+.05+j*.04);tl.to(o.u,{scaleX:0,duration:.3},t0)});
+      cen(0,SY(4)+50,t0+.05,.6);
+      tl.fromTo(foot,{opacity:0,y:30},{opacity:1,y:0,duration:.5,ease:'power3.out',immediateRender:false},t0+.35)}
+    if(next&&!(Array.isArray(next.ics)&&next.ics[0]=='LISTA'))tl.to(lista.g,{opacity:0,duration:.3},t1-.3);
+    return}
   const LW=['L4','L5','L6'].find(k=>OPT.has(k));
   if(Array.isArray(ics)&&ics[0]=='LISTA'&&LW){
     if(!lista){const g=el('div','beat '+st,world);const tEnd=BT.filter(x=>Array.isArray(x.ics)&&x.ics[0]=='LISTA').pop().t1;
