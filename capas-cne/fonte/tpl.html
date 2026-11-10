@@ -1,0 +1,33 @@
+<!doctype html><html lang="{{lang}}"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@600;700;800&display=block" rel="stylesheet">
+<style>
+@page{size:210mm 297mm;margin:0}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:210mm;height:297mm}
+body{font-family:'Noto Sans',Inter,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{position:relative;width:210mm;height:297mm;overflow:hidden;
+ background:linear-gradient(160deg,#0a63c9 0%,#0b6ad0 45%,#1170d2 100%)}
+.shape{position:absolute}
+.s1{left:-20mm;top:-40mm;width:200mm;height:120mm;background:linear-gradient(135deg,rgba(255,255,255,.22),rgba(255,255,255,.08));transform:skewX(-42deg);transform-origin:top left}
+.s2{right:-60mm;top:-10mm;width:110mm;height:140mm;background:linear-gradient(200deg,rgba(255,255,255,.2),rgba(255,255,255,.03));transform:skewX(-42deg)}
+.s3{right:-70mm;top:150mm;width:140mm;height:180mm;border-radius:34mm;background:linear-gradient(160deg,rgba(255,255,255,.14),rgba(255,255,255,.04));transform:rotate(45deg)}
+.s4{right:30mm;top:126mm;width:60mm;height:30mm;border-radius:50%;background:rgba(255,255,255,.18)}
+.logo{position:absolute;left:20mm;top:20mm;width:109mm}
+.band{position:absolute;left:2mm;right:0;top:74.5mm;height:75.5mm;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#0b4596}
+.band h1{font-size:40pt;line-height:1.12;font-weight:700;letter-spacing:-.3pt}
+.band .rule{width:48mm;height:.7mm;background:#1667c9;margin:7mm 0 6mm}
+.band p{font-size:16pt;font-weight:700;color:#0d3f86}
+.elec{position:absolute;left:50%;top:162mm;width:96mm;transform:translateX(-50%)}
+.cv{position:absolute;left:17mm;top:247mm;color:#fff;font-weight:700;font-size:19pt}
+.yr{position:absolute;left:17mm;top:264.5mm;color:#fff;font-weight:700;font-size:19pt;border-top:.7mm solid #fff;border-bottom:.7mm solid #fff;padding:.4mm 1.4mm}
+.qr{position:absolute;right:17mm;bottom:20mm;width:40mm;background:#fff;border-radius:4mm;padding:3mm 3mm 3mm;text-align:center;box-shadow:0 1mm 4mm rgba(0,30,80,.25)}
+.qr img{width:100%;display:block}
+.qr span{display:block;margin-top:1.8mm;color:#0b4596;font-weight:700;font-size:9.5pt;line-height:1.2}
+</style></head><body><div class="page">
+<div class="shape s1"></div><div class="shape s2"></div><div class="shape s3"></div><div class="shape s4"></div>
+<img class="logo" src="cne_white.png">
+<div class="band"><h1>{{title}}</h1><div class="rule"></div><p>{{sub}}</p></div>
+<img class="elec" src="eleicao.png">
+<div class="cv">CABO VERDE</div><div class="yr">2026</div>
+<div class="qr"><img src="qr.png"><span>{{qr}}</span></div>
+</div></body></html>
