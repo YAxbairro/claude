@@ -20,14 +20,14 @@ body{font-family:'Noto Sans',Inter,sans-serif;-webkit-print-color-adjust:exact;p
 .elec{position:absolute;left:50%;top:162mm;width:96mm;transform:translateX(-50%)}
 .cv{position:absolute;left:17mm;top:247mm;color:#fff;font-weight:700;font-size:19pt}
 .yr{position:absolute;left:17mm;top:264.5mm;color:#fff;font-weight:700;font-size:19pt;border-top:.7mm solid #fff;border-bottom:.7mm solid #fff;padding:.4mm 1.4mm}
-.qr{position:absolute;right:17mm;bottom:20mm;width:40mm;background:#fff;border-radius:4mm;padding:3mm 3mm 3mm;text-align:center;box-shadow:0 1mm 4mm rgba(0,30,80,.25)}
-.qr img{width:100%;display:block}
-.qr span{display:block;margin-top:1.8mm;color:#0b4596;font-weight:700;font-size:9.5pt;line-height:1.2}
+.qr{position:absolute;right:17mm;bottom:20mm;background:#fff;border-radius:3mm;padding:2.2mm 2.6mm 2.6mm;text-align:center;box-shadow:0 1mm 4mm rgba(0,30,80,.25);display:flex;flex-direction:column;align-items:center}
+.qr img{width:24mm;display:block}
+.qr span{display:block;margin-bottom:1.6mm;color:#0b4596;font-weight:700;font-size:8pt;line-height:1.2;white-space:nowrap}
 </style></head><body><div class="page">
 <div class="shape s1"></div><div class="shape s2"></div><div class="shape s3"></div><div class="shape s4"></div>
 <img class="logo" src="cne_white.png">
 <div class="band"><h1>{{title}}</h1><div class="rule"></div><p>{{sub}}</p></div>
 <img class="elec" src="eleicao.png">
 <div class="cv">CABO VERDE</div><div class="yr">2026</div>
-<div class="qr"><img src="qr.png"><span>{{qr}}</span></div>
+<div class="qr"><span>{{qr}}</span><img src="qr.png"></div>
 </div></body></html>
