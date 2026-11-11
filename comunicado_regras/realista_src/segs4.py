@@ -89,4 +89,28 @@ def S1112():
     run('S1112',1355,1633,f)
 S2,S3_,S13,F14=M.S2,M.S3,M.S13,M.F14
 G={'S1':S1,'S2':S2,'S3':S3_,'S4':S4,'S678':S678,'S10':S10,'S1112':S1112,'S13':S13,'F14':F14}
+# ---------- trechos do FINAL sem os logos gravados (os logos vão no PNG à parte) ----------
+import cv2 as _cv
+import eng as _E
+def _lmask():
+    m=np.zeros((1080,1920),np.uint8)
+    for im,(x,y) in [(LES,(44,27)),(LE,(44,24)),(LCS,(1593,55)),(LC,(1593,52))]:
+        a=np.asarray(im)[...,3]; h,w=a.shape; m[y:y+h,x:x+w]=np.maximum(m[y:y+h,x:x+w],(a>8).astype(np.uint8)*255)
+    return _cv.dilate(m,np.ones((9,9),np.uint8))
+_LM=_lmask(); _BOX=[(20,0,300,190),(1570,30,1900,170)]
+def nologo(fr):
+    out=np.ascontiguousarray(fr.copy())
+    for x0,y0,x1,y1 in _BOX:
+        roi=np.ascontiguousarray(out[y0:y1,x0:x1]); out[y0:y1,x0:x1]=_cv.inpaint(roi,_LM[y0:y1,x0:x1],7,_cv.INPAINT_TELEA)
+    return out
+_final0=_E.final
+def final_clean(a,b): return [nologo(np.asarray(f)) for f in _final0(a,b)]
+M.final=final_clean; final=final_clean
+import segs as _V1; _V1.final=final_clean
+def F9():
+    fr=final_clean(1140,1180)
+    run('F9',1140,1180,lambda n,t:RGBA(fr[n-1140]))
+def F5():
+    M.F5()
+G['F9']=F9; G['F5']=F5
 if __name__=='__main__': G[sys.argv[1]]()
