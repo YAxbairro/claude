@@ -1,0 +1,140 @@
+<!doctype html><html><head><meta charset="utf-8">
+<!-- Final refeito (70,6–91 s): calendário → urna do logo → site → CNE + votos a entrar → cartão final. Opaco. -->
+<style>
+@font-face{font-family:M;font-weight:800;src:url(../fonts/M800.ttf)}
+@font-face{font-family:M;font-weight:700;src:url(../fonts/M700.ttf)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;overflow:hidden;font-family:M;background:#0A5AA6}
+#bg{position:absolute;inset:0;background:radial-gradient(circle at 70% 28%,#2B95DF 0%,#1279C2 42%,#0A5AA6 100%)}
+#fx{position:absolute;inset:0}
+.ring{position:absolute;border-radius:50%;border:2px solid rgba(255,255,255,.09)}
+#trk{position:absolute;left:0;top:0;width:6000px;height:1080px}
+.st{position:absolute;top:0;height:1080px;width:1300px}
+.blk{position:absolute;left:1090px;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.ln{position:relative;overflow:hidden;font-weight:800;color:#fff;line-height:1;white-space:nowrap}
+.ln .t{display:inline-block;position:relative}
+.ln.k{font-size:54px;padding:6px 0 8px}.ln.k .t{text-shadow:0 2px 12px rgba(0,25,70,.5)}
+.ln.r,.ln.n{font-size:84px;padding:16px 24px 11px}
+.ln .bg{position:absolute;inset:0;transform-origin:0 50%}.ln.r .bg{background:#E3262B}.ln.n .bg{background:#19296D}
+/* calendário */
+#cal{position:absolute;left:370px;top:330px;width:380px;height:440px;border-radius:26px;background:#fff;overflow:hidden;box-shadow:0 30px 60px rgba(0,25,70,.35)}
+#cal .hd{height:110px;background:#19296D;color:#fff;font-size:46px;display:flex;align-items:center;justify-content:center;letter-spacing:2px}
+#cal .rg{position:absolute;top:-18px;width:22px;height:56px;border-radius:11px;background:#E3262B}
+#cal .nw{position:absolute;left:0;right:0;top:110px;bottom:0;overflow:hidden}
+#cal .nb{position:absolute;left:0;right:0;height:330px;display:flex;align-items:center;justify-content:center;font-size:220px;color:#E3262B;letter-spacing:-6px}
+/* browser */
+#web{position:absolute;left:150px;top:290px;width:820px;height:520px;border-radius:22px;background:#fff;overflow:hidden;box-shadow:0 30px 60px rgba(0,25,70,.35)}
+#web .bar{height:64px;background:#E9EEF6;display:flex;align-items:center;padding:0 22px;gap:10px}
+#web .dot{width:16px;height:16px;border-radius:50%}
+#web .url{margin-left:18px;flex:1;height:40px;border-radius:20px;background:#fff;border:2px solid #CFD8E6;display:flex;align-items:center;padding:0 18px;font-size:24px;color:#19296D;font-weight:700}
+#web .car{display:inline-block;width:3px;height:26px;background:#19296D;margin-left:3px}
+#web .pg{position:absolute;left:0;right:0;top:64px;bottom:0}
+#web .pg>*{position:absolute}
+#cur{position:absolute;width:34px;height:40px}
+/* CNE */
+#cne{position:absolute;left:350px;top:330px;width:420px;height:420px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 30px 60px rgba(0,25,70,.35)}
+#cne img{width:330px}
+.rip{position:absolute;left:350px;top:330px;width:420px;height:420px;border-radius:50%;border:5px solid #fff}
+.vb{position:absolute;width:44px;height:56px;border-radius:6px;background:#fff;box-shadow:0 8px 16px rgba(0,25,70,.3)}
+.vb i{position:absolute;left:9px;right:9px;height:5px;border-radius:3px;background:#C7D3E6}
+#mine{position:absolute;width:84px;height:75px}
+/* cartão final */
+#end{position:absolute;inset:0;background:#E8EFF8;clip-path:circle(0px at 560px 540px)}
+#end img{position:absolute}
+#dt{position:absolute;left:0;width:1920px;top:780px;text-align:center;font-size:40px;color:#3B4A86;letter-spacing:3px;font-weight:800}
+</style></head><body>
+<div id="bg"></div><canvas id="fx" width="1920" height="1080"></canvas>
+<div class="ring" style="left:1180px;top:-420px;width:1100px;height:1100px"></div><div class="ring" style="left:1320px;top:-280px;width:820px;height:820px"></div>
+<div id="trk">
+ <div class="st" style="left:0"><div id="cal"><div class="hd">NOVEMBRO</div><div class="rg" style="left:90px"></div><div class="rg" style="left:268px"></div>
+   <div class="nw"><div class="nb" data-n="0">13</div><div class="nb" data-n="1">14</div><div class="nb" data-n="2">15</div></div></div></div>
+ <div class="st" style="left:1300px"><div id="urn" style="position:absolute;left:-190px;top:400px;width:1500px;height:320px">
+   <img id="urnw" src="urn_w.png" style="position:absolute;left:0;top:0;width:1500px">
+   <img id="bal" src="ballot.png" style="position:absolute;left:646px;top:0;width:237px"></div>
+   <div id="urnRing" class="rip" style="left:330px;top:330px;width:460px;height:460px;opacity:0"></div></div>
+ <div class="st" style="left:2600px"><div id="web"><div class="bar"><span class="dot" style="background:#E3262B"></span><span class="dot" style="background:#F3B33D"></span><span class="dot" style="background:#3BB273"></span>
+   <div class="url"><span id="ut"></span><span class="car" id="car"></span></div></div>
+   <div class="pg"><img class="pi" src="lc.png" style="left:34px;top:26px;height:56px">
+    <div class="pi" style="left:470px;top:42px;width:300px;height:22px;border-radius:11px;background:#E9EEF6"></div>
+    <div class="pi" style="left:34px;top:112px;width:752px;height:150px;border-radius:14px;background:#19296D"></div>
+    <div class="pi" style="left:64px;top:146px;width:360px;height:26px;border-radius:13px;background:#fff"></div>
+    <div class="pi" style="left:64px;top:190px;width:250px;height:20px;border-radius:10px;background:rgba(255,255,255,.5)"></div>
+    <div class="pi" style="left:600px;top:150px;width:150px;height:56px;border-radius:28px;background:#E3262B"></div>
+    <div class="pi" style="left:34px;top:290px;width:234px;height:150px;border-radius:14px;background:#E9EEF6"></div>
+    <div class="pi" style="left:293px;top:290px;width:234px;height:150px;border-radius:14px;background:#E9EEF6"></div>
+    <div class="pi" style="left:552px;top:290px;width:234px;height:150px;border-radius:14px;background:#E9EEF6"></div></div></div>
+   <svg id="cur" viewBox="0 0 34 40" style="left:820px;top:700px"><path d="M3,3 L3,33 L10,26 L15,37 L21,34.5 L16,24 L26,24 Z" fill="#fff" stroke="#19296D" stroke-width="2.5" stroke-linejoin="round"/></svg></div>
+ <div class="st" style="left:3900px"><div class="rip r1"></div><div class="rip r2"></div><div class="rip r3"></div><div id="vbs"></div>
+   <div id="cne"><img src="lc.png"></div><img id="mine" src="ballot.png"></div>
+</div>
+<div id="tx"></div>
+<div id="end"><img id="eu" src="urn_n.png" style="left:513px;top:250px;width:894px"><img id="eb" src="ballot.png" style="left:898px;top:250px;width:141px">
+ <img id="et" src="le_txt.png" style="left:513px;top:250px;width:894px"><div id="dt">— 15 DE NOVEMBRO —</div></div>
+<script src="gsap.min.js"></script>
+<script>
+const tl=gsap.timeline({paused:true}),$=(s,r=document)=>[...r.querySelectorAll(s)];
+// ---------- textos ----------
+function block(top,lines,out){const b=document.createElement('div');b.className='blk';b.style.top=top+'px';document.getElementById('tx').appendChild(b);
+  lines.forEach(([k,txt,a,fs])=>{const l=document.createElement('div');l.className='ln '+k;if(fs)l.style.fontSize=fs+'px';
+    if(k!='k'){const g=document.createElement('i');g.className='bg';l.appendChild(g)}
+    const s=document.createElement('span');s.className='t';s.textContent=txt;l.appendChild(s);b.appendChild(l);
+    let f=parseFloat(getComputedStyle(l).fontSize);while(l.offsetWidth>780&&f>30){f--;l.style.fontSize=f+'px'}
+    tl.set(l,{opacity:0},0);tl.set(l,{opacity:1},a);const bg=l.querySelector('.bg');
+    if(bg)tl.fromTo(bg,{scaleX:0},{scaleX:1,duration:.4,ease:'power3.out',immediateRender:false},a);
+    tl.fromTo(s,{yPercent:115},{yPercent:0,duration:.55,ease:'power3.out',immediateRender:false},a+(bg?.1:0))});
+  tl.to(b,{x:-40,opacity:0,duration:.35,ease:'power2.in'},out)}
+block(410,[['k','NO DIA',71.08],['n','15 DE NOVEMBRO',71.46]],72.55);
+block(380,[['r','PARTICIPE',72.96],['n','VOTE LIVREMENTE',73.78],['k','RESPEITE AS REGRAS',75.3]],76.1);
+block(380,[['k','PARA MAIS INFORMAÇÕES',76.56],['r','CONSULTE',78.1],['n','WWW.CNE.CV',79.18]],80.95);
+block(430,[['k','COMISSÃO NACIONAL',81.36],['n','DE ELEIÇÕES',82.0]],83.25);
+block(330,[['k','CADA VOTO',83.48],['n','CONTA.',84.08,124],['r','O TEU TAMBÉM.',84.78]],85.95);
+block(400,[['k','PELA DEMOCRACIA,',86.12],['r','PARTICIPA.',87.5,124]],88.05);
+// ---------- câmara: desliza entre estações ----------
+tl.set('#trk',{x:0},0);
+[[72.5,-1300],[76.1,-2600],[80.95,-3900]].forEach(([t,x])=>tl.to('#trk',{x,duration:.75,ease:'power3.inOut'},t));
+// ---------- calendário ----------
+tl.fromTo('#cal',{y:90,rotation:-8,opacity:0},{y:0,rotation:0,opacity:1,duration:.7,ease:'power3.out',immediateRender:false},70.75);tl.set('#cal',{opacity:0},0);
+const nb=$('#cal .nb');nb.forEach((e,i)=>tl.set(e,{yPercent:i?100:0},0));
+[[71.0,0,1],[71.3,1,2]].forEach(([t,a,b])=>{tl.to(nb[a],{yPercent:-100,duration:.25,ease:'power2.in'},t);tl.fromTo(nb[b],{yPercent:100},{yPercent:0,duration:.3,ease:'back.out(1.6)',immediateRender:false},t+.12)});
+tl.to('#cal',{scale:1.06,duration:.18,yoyo:true,repeat:1,ease:'power2.out'},71.5);
+// ---------- urna do logo ----------
+tl.fromTo('#urnw',{clipPath:'inset(0 50% 0 50%)'},{clipPath:'inset(0 0% 0 0%)',duration:.6,ease:'power3.out',immediateRender:false},72.6);tl.set('#urnw',{clipPath:'inset(0 50% 0 50%)'},0);
+tl.fromTo('#bal',{y:-330,rotation:-14,opacity:0},{y:0,rotation:0,opacity:1,duration:.7,ease:'back.out(1.7)',immediateRender:false},72.95);tl.set('#bal',{opacity:0},0);
+tl.to('#urn',{y:-10,duration:1.3,yoyo:true,repeat:2,ease:'sine.inOut'},73.7);
+tl.to('#bal',{y:12,duration:.15,yoyo:true,repeat:1,ease:'power2.out'},73.78);
+tl.fromTo('#urnRing',{scale:.6,opacity:.8},{scale:1.5,opacity:0,duration:1.1,ease:'power2.out',immediateRender:false},75.3);
+// ---------- site ----------
+tl.fromTo('#web',{scale:.86,opacity:0},{scale:1,opacity:1,duration:.7,ease:'power3.out',immediateRender:false},76.3);tl.set('#web',{opacity:0},0);
+const U='www.cne.cv',ut=document.getElementById('ut'),ty={n:0};
+tl.fromTo(ty,{n:0},{n:3,duration:.36,ease:'none',immediateRender:false},78.54);tl.to(ty,{n:7,duration:.32,ease:'none'},79.18);tl.to(ty,{n:10,duration:.2,ease:'none'},80.0);
+tl.set($('#web .pi'),{opacity:.18},0);tl.fromTo($('#web .pi'),{y:30,opacity:.18},{y:0,opacity:1,duration:.45,stagger:.06,ease:'power3.out',immediateRender:false},80.25);
+tl.fromTo('#cur',{x:120,y:120,opacity:0},{x:-260,y:-372,opacity:1,duration:.9,ease:'power2.inOut',immediateRender:false},77.4);tl.set('#cur',{opacity:0},0);
+tl.to('#cur',{scale:.8,duration:.08,yoyo:true,repeat:1},78.35);tl.to('#cur',{x:-60,y:-160,duration:.6,ease:'power2.inOut'},80.3);
+// ---------- CNE + votos ----------
+tl.fromTo('#cne',{scale:.4,opacity:0},{scale:1,opacity:1,duration:.75,ease:'back.out(1.6)',immediateRender:false},81.2);tl.set('#cne',{opacity:0},0);
+$('.st .rip').forEach((r,i)=>{tl.set(r,{opacity:0},0);for(let k=0;k<4;k++)tl.fromTo(r,{scale:1,opacity:.55},{scale:1.7,opacity:0,duration:1.4,ease:'power2.out',immediateRender:false},81.5+i*.45+k*1.6)});
+// votos (boletins) a entrar no círculo; nascem à esquerda/em cima, nunca no canto do intérprete
+const vbs=document.getElementById('vbs'),CX=560,CY=540;let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
+for(let i=0;i<30;i++){const v=document.createElement('div');v.className='vb';v.innerHTML='<i style="top:12px"></i><i style="top:24px;right:16px"></i><i style="top:36px"></i>';vbs.appendChild(v);
+  const ang=Math.PI*(.55+rnd()*1.25),R=560+rnd()*260,x0=CX+Math.cos(ang)*R,y0=CY+Math.sin(ang)*R*0.85,t=83.5+i*.075+rnd()*.15;
+  tl.set(v,{left:x0-22,top:y0-28,opacity:0,rotation:rnd()*60-30},0);
+  tl.to(v,{opacity:1,duration:.15},t);tl.to(v,{left:CX-22,top:CY-28,rotation:0,scale:.35,duration:.9+rnd()*.3,ease:'power2.in'},t);tl.to(v,{opacity:0,duration:.12},t+.95)}
+tl.set('#mine',{left:-40,top:900,opacity:0,scale:1.2,rotation:-25},0);
+tl.to('#mine',{opacity:1,duration:.1},84.6);tl.to('#mine',{left:CX-42,top:CY-38,rotation:0,scale:.6,duration:.95,ease:'power3.inOut'},84.6);
+tl.to('#mine',{opacity:0,duration:.15},85.5);tl.to('#cne',{scale:1.08,duration:.2,yoyo:true,repeat:1,ease:'power2.out'},85.5);
+tl.to('#cne',{scale:1.1,duration:.22,yoyo:true,repeat:1,ease:'power2.out'},87.5);
+// ---------- cartão final ----------
+tl.fromTo('#end',{clipPath:'circle(0px at 560px 540px)'},{clipPath:'circle(2300px at 560px 540px)',duration:.55,ease:'power3.in',immediateRender:false},88.0);
+tl.fromTo('#eu',{clipPath:'inset(0 50% 0 50%)'},{clipPath:'inset(0 0% 0 0%)',duration:.6,ease:'power3.out',immediateRender:false},88.55);tl.set('#eu',{clipPath:'inset(0 50% 0 50%)'},0);
+tl.fromTo('#eb',{y:-260,rotation:-14,opacity:0},{y:0,rotation:0,opacity:1,duration:.7,ease:'back.out(1.7)',immediateRender:false},88.8);tl.set('#eb',{opacity:0},0);
+tl.fromTo('#et',{clipPath:'inset(40% 100% 0 0)',y:20},{clipPath:'inset(40% 0% 0 0)',y:0,duration:.8,ease:'power3.out',immediateRender:false},89.05);tl.set('#et',{clipPath:'inset(40% 100% 0 0)'},0);
+tl.fromTo('#dt',{opacity:0,y:20,letterSpacing:'14px'},{opacity:1,y:0,letterSpacing:'3px',duration:.8,ease:'power3.out',immediateRender:false},89.6);tl.set('#dt',{opacity:0},0);
+// ---------- partículas e anéis de fundo (contínuos) ----------
+const cv=document.getElementById('fx'),cx=cv.getContext('2d'),P=[];seed=99;
+for(let i=0;i<70;i++)P.push({x:rnd()*1920,y:rnd()*1080,r:1.5+rnd()*3.5,v:12+rnd()*30,a:.08+rnd()*.22,p:rnd()*6});
+function fx(t){cx.clearRect(0,0,1920,1080);P.forEach(o=>{let y=(o.y-o.v*t)%1180;if(y<-50)y+=1180;const x=o.x+Math.sin(t*.6+o.p)*18;
+  if(x>1480&&y>640)return;cx.beginPath();cx.arc(x,y,o.r,0,7);cx.fillStyle=`rgba(255,255,255,${o.a})`;cx.fill()});
+  $('.ring').forEach((r,i)=>r.style.transform=`rotate(${t*4*(i?-1:1)}deg) scale(${1+.03*Math.sin(t*.7+i)})`)}
+window.renderAt=t=>{tl.seek(t,false);ut.textContent=U.slice(0,Math.round(ty.n));document.getElementById('car').style.opacity=(Math.floor(t*2.5)%2)?1:0;fx(t)};
+window.READY=Promise.all([document.fonts.load('800 50px M'),document.fonts.load('700 50px M')]).then(()=>Promise.all([...document.images].map(i=>i.decode().catch(()=>0)))).then(()=>{renderAt(71);return true});
+</script></body></html>

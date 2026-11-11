@@ -34,7 +34,7 @@ names.forEach(([n,p],i)=>{const t=6.15+i*.36;const d=document.createElement('div
   tl.to(d,{opacity:0,duration:.3},9.55)});
 // ilhas: contorno desenha-se e enche
 const ord=isl.map((e,i)=>[e,G.isl[i].c]).sort((a,b)=>a[1][1]-b[1][1]||a[1][0]-b[1][0]);
-ord.forEach(([e],i)=>{tl.fromTo(e,{scale:0,opacity:0},{scale:1,opacity:1,duration:.55,ease:'back.out(2)'},5.6+i*.06)});
+ord.forEach(([e],i)=>{tl.fromTo(e,{opacity:0},{opacity:1,duration:.45,ease:'power2.out'},5.05+i*.035)});
 // câmara: aproximação lenta, depois sai para o mundo
 tl.fromTo(cam,{s:23},{s:28,duration:4,ease:'none'},5.6);
 tl.to(cam,{s:1,cx:G.cv[0],cy:G.cv[1],sx:560,sy:600,duration:1.0,ease:'power3.inOut',onUpdate:()=>{}},9.6);

@@ -111,7 +111,7 @@ const tl=gsap.timeline({paused:true}),$=(s,r=document)=>[...r.querySelectorAll(s
 const draw=(els,t,d=.7,st=.08)=>{els.forEach(e=>{e.setAttribute('pathLength','1');e.style.strokeDasharray='1 1.02'});tl.fromTo(els,{strokeDashoffset:1},{strokeDashoffset:0,duration:d,stagger:st,ease:'power2.inOut',immediateRender:false},t);tl.set(els,{strokeDashoffset:1},0)};
 function show(id,a,b){tl.set('#'+id,{visibility:'visible'},a);tl.set('#'+id,{visibility:'hidden'},b);tl.set('#'+id,{visibility:'hidden'},0)}
 // painel azul: entra da direita até ao corte, sai para a esquerda depois do corte
-function panel(id,inA,inB,outA){const p=$('#'+id+' .pan')[0],c=$('#'+id)[0];
+function panel(id,inA,inB,outA){const p=$('#'+id+' .pan')[0],c=$('#'+id)[0];tl.set(c,{clipPath:'inset(0 0 0 100%)'},0);
   tl.fromTo(c,{clipPath:'inset(0 0 0 100%)'},{clipPath:'inset(0 0 0 0%)',duration:inB-inA,ease:'power3.inOut',immediateRender:false},inA);
   if(outA)tl.to(c,{clipPath:'inset(0 100% 0 0%)',duration:.38,ease:'power3.inOut'},outA)}
 // texto: faixa cresce da esquerda, o texto sobe dentro da máscara
@@ -125,7 +125,7 @@ function text(blk,eOut){const W=+blk.dataset.w||900;
     tl.fromTo(s,{yPercent:115},{yPercent:0,duration:.5,ease:'power3.out',immediateRender:false},a+(bg?.1:0))});
   const e=eOut||+blk.dataset.e;if(e)tl.to(blk,{x:-30,opacity:0,duration:.3,ease:'power2.in'},e)}
 // ---------- palácio 3.30-5.60 ----------
-show('pal',3.30,5.65);tl.fromTo('#pal',{clipPath:'inset(0 0 0 100%)'},{clipPath:'inset(0 0 0 0%)',duration:.28,ease:'power3.inOut',immediateRender:false},3.30);
+show('pal',3.30,5.65);tl.set('#pal',{clipPath:'inset(0 0 0 100%)'},0);tl.fromTo('#pal',{clipPath:'inset(0 0 0 100%)'},{clipPath:'inset(0 0 0 0%)',duration:.28,ease:'power3.inOut',immediateRender:false},3.30);
 tl.fromTo('#pal img',{scale:1.05,y:-14},{scale:1.0,y:-14,duration:2.4,ease:'none',immediateRender:false},3.30);
 // ---------- G1 19.12-23.40 ----------
 show('g1',19.12,23.45);panel('g1',19.14,19.44);draw($('#g1 .d'),19.4,.7,.06);
