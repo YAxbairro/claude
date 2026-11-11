@@ -79,7 +79,7 @@ function block(top,lines,out){const b=document.createElement('div');b.className=
     if(k!='k'){const g=document.createElement('i');g.className='bg';l.appendChild(g)}
     const s=document.createElement('span');s.className='t';s.textContent=txt;l.appendChild(s);b.appendChild(l);
     let f=parseFloat(getComputedStyle(l).fontSize);while(l.offsetWidth>780&&f>30){f--;l.style.fontSize=f+'px'}
-    tl.set(l,{opacity:0},0);tl.set(l,{opacity:1},a);const bg=l.querySelector('.bg');
+    tl.set(l,{opacity:0},0);tl.set(s,{yPercent:115},0);tl.set(l,{opacity:1},a);const bg=l.querySelector('.bg');
     if(bg)tl.fromTo(bg,{scaleX:0},{scaleX:1,duration:.4,ease:'power3.out',immediateRender:false},a);
     tl.fromTo(s,{yPercent:115},{yPercent:0,duration:.55,ease:'power3.out',immediateRender:false},a+(bg?.1:0))});
   tl.to(b,{x:-40,opacity:0,duration:.35,ease:'power2.in'},out)}

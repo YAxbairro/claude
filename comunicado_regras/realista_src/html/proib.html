@@ -120,7 +120,7 @@ function text(blk,eOut){const W=+blk.dataset.w||900;
     const s=document.createElement('span');s.className='t';s.textContent=tx.toUpperCase();l.appendChild(s);
     let fs=parseFloat(getComputedStyle(l).fontSize);while(l.offsetWidth>W&&fs>30){fs-=1;l.style.fontSize=fs+'px'}
     const a=+l.dataset.a,bg=l.querySelector('.bg');
-    tl.set(l,{opacity:0},0);tl.set(l,{opacity:1},a);
+    tl.set(l,{opacity:0},0);tl.set(s,{yPercent:115},0);tl.set(l,{opacity:1},a);
     if(bg)tl.fromTo(bg,{scaleX:0},{scaleX:1,duration:.38,ease:'power3.out',immediateRender:false},a);
     tl.fromTo(s,{yPercent:115},{yPercent:0,duration:.5,ease:'power3.out',immediateRender:false},a+(bg?.1:0))});
   const e=eOut||+blk.dataset.e;if(e)tl.to(blk,{x:-30,opacity:0,duration:.3,ease:'power2.in'},e)}

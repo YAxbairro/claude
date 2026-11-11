@@ -30,11 +30,21 @@ def abertura(b,t):
     tag(b,t,1112,566,'RESPONSABILIDADE',39,'navy',16.58,19.0)
     tag(b,t,1112,629,'CONSCIÊNCIA CÍVICA',39,'red',17.84,19.0)
 M.abertura=abertura
+# mapa a partir de 5,0 s (ilhas entram durante a passagem do palácio) e final novo (html/end2.html -> endfr2/)
+_mc2={}
+def mapframe(n):
+    a=min(max(n,125),M.S2B-1)
+    if a not in _mc2: _mc2[a]=np.asarray(Image.open(f'{S}/mapfr/{a:05d}.png').convert('RGB'))
+    return _mc2[a]
+M.mapframe=mapframe
+def endframe(n): return Image.open(f'{S}/endfr2/{n:05d}.png').convert('RGBA')
+M.endframe=endframe
+
 def S1():
     def f(n,t):
         b=EMPTY(); abertura(b,t); addH(b,n)
         if n>=125:
-            k=eio((n-125)/14); m=RGBA(cam(Image.fromarray(mapframe(S2A)),1.06-0.06*k)); m.putalpha(int(255*k)); b.alpha_composite(m)
+            k=eio((n-125)/14); m=RGBA(cam(Image.fromarray(mapframe(n)),1.06-0.06*k)); m.putalpha(int(255*k)); b.alpha_composite(m)
         return b
     run('S1',0,140,f)
 def S4():

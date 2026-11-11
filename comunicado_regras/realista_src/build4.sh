@@ -5,7 +5,9 @@ set -e
 cd "$(dirname "$0")"
 V=../Apelo_Proibicoes_FINAL_16x9.mp4
 # grafismos e textos novos (html/proib.html) -> hfr/
-[ "$(ls hfr 2>/dev/null | wc -l)" -ge 735 ] || for r in "82 145" "478 585" "893 1012" "1180 1633"; do node html/shot.js html/proib.html hfr $r 4; done
+for r in "82 145" "478 585" "893 1012" "1180 1633"; do node html/shot.js html/proib.html hfr $r 4; done
+node html/shot.js html/map.html mapfr 125 322 4
+node html/shot.js html/end2.html endfr2 1765 2275 4
 mkdir -p seg4
 for s in S1 S2 S3 S4 S678 S10 S1112 S13 F14; do python3 segs4.py $s & done; wait
 cp seg3/F5.mov seg3/F9.mov seg4/
