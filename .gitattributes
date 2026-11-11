@@ -21,3 +21,5 @@ ep10/*.mp4 filter=lfs diff=lfs merge=lfs -text
 ep10/*.mov filter=lfs diff=lfs merge=lfs -text
 ep11/*.mov filter=lfs diff=lfs merge=lfs -text
 ep11/*.mp4 filter=lfs diff=lfs merge=lfs -text
+ep11/insert/*.mov filter=lfs diff=lfs merge=lfs -text
+ep11/insert/*.mp4 filter=lfs diff=lfs merge=lfs -text
