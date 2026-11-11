@@ -1352,6 +1352,7 @@ var CAUDA_CHEIA = 30000;   /* a cauda inteira só vai de 30 em 30 s; pelo
                               posição pesava 8 kB em vez de menos de 1. */
 
 var loja=null, quem=null, estado='a-ligar', ritmo=RITMO_VIVO, opGuardado={};
+var pronto=null, aReligar=null;
 var ouvintes=[], subs=[], cacheRasto={};
 var D = { frota:null, turnos:[], vivos:[] };
 
@@ -2042,6 +2043,47 @@ function vaiHaverSupabase(){
   return !noEnsaio() && !!(c && c.supabaseUrl && c.supabaseChave);
 }
 
+/* ─── quando a base de dados não responde ─────────────────
+   A 11/11/2026 o Supabase gratuito pôs a base a dormir, e o patrão
+   que estava a criar a conta, com a internet ligada, leu "Para criar
+   conta é preciso estar ligado à internet". Agora diz-se o que se
+   passa: ou é este aparelho que está sem rede, ou é o servidor. E
+   antes de desistir tenta-se ligar outra vez — se a base voltou, a
+   pessoa entra sem ter de recarregar a página. */
+var SEM_BASE='O servidor da FleetCV não está a responder agora — não é a sua internet. '+
+  'Tente outra vez daqui a uns minutos. Se continuar, fale connosco pelo WhatsApp: +238 955 78 82.';
+var SEM_REDE='Este aparelho está sem internet. Ligue os dados ou o Wi-Fi e tente outra vez.';
+function semLigacao(){
+  try{ if(navigator.onLine===false) return SEM_REDE; }catch(e){}
+  return SEM_BASE;
+}
+function comBase(){ return !!(loja&&(loja.supabase||loja.servidor)); }
+function religar(){
+  if(aReligar) return aReligar;
+  aReligar = ligarSupabase(opGuardado.papel).then(function(sb){
+    if(!sb || comBase()) return;
+    var ls=lojaDoSupabase(sb); loja=ls; enviarRegistos();
+    return ls.comecar().then(function(entrou){
+      estado = !entrou ? 'supabase-por-entrar'
+             : ls.semRede() ? 'supabase-sem-rede' : 'supabase';
+      avisar();
+      if(entrou) return semear(opGuardado).then(escutar).then(retomarFila);
+    });
+  }).catch(function(){}).then(function(){ aReligar=null; });
+  return aReligar;
+}
+/* Antes de entrar ou de criar conta num site com base: espera pela
+   primeira tentativa de ligar (quem carrega em Entrar logo ao abrir não
+   leva um "não responde" por ser rápido demais) e, se falhou, tenta
+   outra vez. Devolve a mensagem a mostrar, ou nada se há base. */
+function precisaDeBase(){
+  if(!vaiHaverSupabase() || comBase()) return Promise.resolve(null);
+  var espera = pronto ? Promise.race([pronto,
+    new Promise(function(ok){ setTimeout(ok, 12000); })]) : Promise.resolve();
+  return espera.then(function(){ return comBase() ? null : religar(); })
+    .then(function(){ return comBase() ? null : semLigacao(); });
+}
+
 function arrancar(op){
   op=op||{}; opGuardado=op;
   D.frota  = local('frota')  || (vaiHaverSupabase() ? frotaVazia() : frotaNova());
@@ -2061,7 +2103,7 @@ function arrancar(op){
   };
   /* A ordem é a da qualidade: Supabase, servidor próprio, base do
      Claude, e por fim só este aparelho. Fica o primeiro que houver. */
-  ligarSupabase(op.papel).then(function(sb){
+  pronto = ligarSupabase(op.papel).then(function(sb){
     if(sb){
       var ls=lojaDoSupabase(sb); loja=ls; enviarRegistos();
       return ls.comecar().then(function(entrou){
@@ -2662,6 +2704,9 @@ return {
      lista da frota, como até aqui. */
   temServidor:function(){ return !!(loja&&(loja.servidor||loja.supabase)); },
   entrar:function(email, codigo){
+    if(vaiHaverSupabase() && !comBase())
+      return precisaDeBase().then(function(falta){
+        return falta ? {erro:falta, semBase:true} : Nuvem.entrar(email, codigo); });
     var e=String(email||'').trim().toLowerCase(), c=String(codigo||'').trim();
     if(loja&&loja.supabase)
       return loja.entrar(e,c).then(function(j){
@@ -2694,8 +2739,15 @@ return {
   },
   /* Criar conta de proprietário. Só há contas com o Supabase: sem ele
      não há onde as guardar, e diz-se isso em vez de fingir. */
-  podeCriarConta:function(){ return !!(loja&&loja.supabase); },
+  podeCriarConta:function(){ return !!(loja&&loja.supabase) || vaiHaverSupabase(); },
+  /* o site tem base de dados (não é o ficheiro de experimentar) */
+  aSerio:function(){ return vaiHaverSupabase(); },
+  /* já se tentou ligar e a base não respondeu */
+  semBase:function(){ return vaiHaverSupabase() && !!loja && !comBase(); },
   criarConta:function(d){
+    if(vaiHaverSupabase() && !comBase())
+      return precisaDeBase().then(function(falta){
+        return falta ? {erro:falta, semBase:true} : Nuvem.criarConta(d); });
     if(!(loja&&loja.supabase))
       return Promise.resolve({erro:'Para criar conta é preciso estar ligado à internet.'});
     return loja.criarConta(d).then(function(j){
@@ -2733,6 +2785,9 @@ return {
      aplicar: supabase/por_aplicar.sql), responde semFuncao — e o ecrã
      manda falar pelo WhatsApp. */
   recuperarAcesso:function(email, rec, novo){
+    if(vaiHaverSupabase() && !comBase())
+      return precisaDeBase().then(function(falta){
+        return falta ? {erro:falta, semBase:true} : Nuvem.recuperarAcesso(email, rec, novo); });
     if(!(loja&&loja.supabase))
       return Promise.resolve({erro:'Isto só se faz com a internet ligada.'});
     var e=String(email||'').trim().toLowerCase();
@@ -3076,6 +3131,29 @@ function verMatricula(t, ignorar){
    campo. Isto trata dos dois, e marca o campo em falta a vermelho —
    num telemóvel, um erro escrito lá em cima e o campo lá em baixo
    não se veem ao mesmo tempo. */
+/* a base de dados não responde: diz-se logo, antes de a pessoa escrever
+   tudo e carregar no botão (e diz-se que não é a internet dela) */
+function avisoSemBase(){
+  if(!(Nuvem.semBase && Nuvem.semBase())) return '';
+  return '<div class="cartao mau"><p class="p-nota"><b>O servidor não está a responder '+
+    'agora.</b> Não é a sua internet. Tente daqui a uns minutos; se continuar, fale '+
+    'connosco pelo WhatsApp: +238 955 78 82.</p></div>';
+}
+/* O aviso de um formulário fica à vista. No criar conta, num computador,
+   o botão está lá em baixo e o aviso aparecia lá em cima, fora do ecrã:
+   carregava-se em "Criar a minha frota" e parecia que nada acontecia
+   (o Yanick, a 11/11/2026). Agora, cada aviso novo é trazido ao ecrã. */
+var avisoVisto=null;
+function verAviso(){
+  var chave=S.aviso ? S.ecra+'|'+(typeof S.aviso==='string' ? S.aviso : JSON.stringify(S.aviso)) : null;
+  if(chave===avisoVisto) return;
+  avisoVisto=chave;
+  if(!chave || ['entrar','criar','recuperar'].indexOf(S.ecra)<0) return;
+  var cx=document.querySelectorAll('#ecra .cartao.mau, #ecra .cartao.aviso');
+  var ult=cx[cx.length-1]; if(!ult || !ult.scrollIntoView) return;
+  var rc=ult.getBoundingClientRect();
+  if(rc.top<60 || rc.bottom>window.innerHeight-10) ult.scrollIntoView({block:'center'});
+}
 function caixaAviso(){
   if(!S.aviso) return '';
   var t = typeof S.aviso==='string' ? S.aviso : (S.aviso.d||'');
@@ -4103,11 +4181,12 @@ function pintar(){
 
   /* ── entrar ─────────────────────────────────────────── */
   if(S.ecra==='entrar'){
-    h='<div style="height:10px"></div><h1>Entrar</h1>'+
-      '<p class="sub">Painel do proprietário.</p>'+
-      '<label class="campo"><span class="lb">Email</span>'+
+    h='<div style="height:10px"></div><h1>Entrar como proprietário</h1>'+
+      '<p class="sub">O e-mail e o código que escolheu quando criou a conta.</p>'+
+      (S.aviso?'':avisoSemBase())+
+      '<label class="campo"><span class="lb">E-mail</span>'+
       '<input type="text" id="i-email" value="'+esc(S.r.email||'')+
-      '" placeholder="patrao@exemplo.cv"></label>'+
+      '" placeholder="o.seu@email.cv"></label>'+
       '<label class="campo"><span class="lb">Código</span>'+
       '<input type="password" id="i-cod" autocomplete="current-password" value="'+
       esc(S.r.cod||'')+'" placeholder="o seu código"></label>';
@@ -4116,9 +4195,10 @@ function pintar(){
     if(Nuvem.podeCriarConta && Nuvem.podeCriarConta())
       h+='<p style="text-align:center;margin:12px 0 0"><button class="lig" '+
         'data-f="ir-recuperar">Esqueci-me do código</button></p>';
-    /* Com a base de dados ligada, quem ainda não tem conta cria-a aqui.
-       Sem ela (aberto como ficheiro) não há onde guardar contas, e fica
-       o código de experimentar de sempre. */
+    /* No site a sério, quem ainda não tem conta cria-a aqui — mesmo
+       antes de a base responder (antes, nesse segundo, aparecia o código
+       de experimentar a quem vinha criar a sua frota). Aberto como
+       ficheiro não há onde guardar contas, e fica o código de sempre. */
     h+= Nuvem.podeCriarConta && Nuvem.podeCriarConta()
       ? '<div class="cartao nota" style="margin-top:14px"><p class="p-nota">'+
         '<b>Ainda não tem conta?</b> Crie a sua frota em dois minutos. '+
@@ -4127,6 +4207,9 @@ function pintar(){
         'Criar conta grátis</button></div>'
       : '<div class="cartao nota"><p class="p-nota"><b>Para experimentar:</b><br>'+
         'patrao@exemplo.cv · 9999</p></div>';
+    if(document.getElementById('trocar'))
+      h+='<p class="p-nota" style="text-align:center;margin-top:16px">É condutor? '+
+        '<button class="lig" data-f="ir-condutor">Entrar como condutor</button></p>';
     b=false;
   }
 
@@ -4141,7 +4224,7 @@ function pintar(){
                  rentacar:'Ex.: Praia Rent-a-car'}[tipoC];
     h='<div style="height:10px"></div><h1>Criar conta</h1>'+
       '<p class="sub">30 dias grátis, sem cartão. Depois, se servir, '+
-      'fala-se do preço.</p>'+caixaAviso()+
+      'fala-se do preço.</p>'+(S.aviso?'':avisoSemBase())+
       '<div class="campo"><span class="lb">Que frota é?</span><div class="opcoes">'+
       ['taxi','instituicao','rentacar'].map(function(k){ var K=FleetTipos.de(k);
         return '<button class="opcao'+(tipoC===k?' on':'')+'" data-f="tipo-criar" data-tipo="'+k+'">'+
@@ -4169,6 +4252,7 @@ function pintar(){
       '<span>Li e aceito os <a href="/termos" target="_blank" rel="noopener">termos de '+
       'utilização</a> e a <a href="/privacidade" target="_blank" rel="noopener">política de '+
       'privacidade</a>.</span></label>'+
+      caixaAviso()+
       '<button class="bt pri" data-f="criar">Criar a minha frota</button>'+
       '<p style="text-align:center;margin:14px 0 0"><button class="lig" '+
       'data-f="ir-entrar">Já tenho conta — entrar</button></p>';
@@ -5004,9 +5088,15 @@ function pintar(){
     '<span class="lupa-x">× fechar</span></div>';
   el('ecra').innerHTML=h;
   montarMapas();
+  verAviso();
   el('nav').parentNode.hidden = !b;
   var pv=paraOndeVolta();
   el('voltar').hidden = !(pv && !pv.fechar && !pv.ficar);
+  /* antes de entrar, o "‹ Voltar" leva ao ecrã de entrada e chama-se
+     "Início"; o ⇄ (que fazia o mesmo sem dizer o quê) só aparece depois */
+  try{ el('voltar').lastChild.nodeValue = pv && pv.porta ? 'Início' : 'Voltar'; }catch(e){}
+  var tr=document.getElementById('trocar');
+  if(tr) tr.hidden = !S.sessao;
   armarVoltar();
   el('sub-marca').textContent = S.sessao&&S.frota ? ' · '+S.frota.nome : '';
   pintarNav(); pintarTopo();
@@ -5065,6 +5155,7 @@ function paraOndeVolta(){
      e o botão de voltar do telemóvel não o fecha sem querer */
   if(S.ecra==='guardar-rec') return {ficar:true};
   if(!S.sessao){
+    if(S.ecra==='criar' && document.getElementById('trocar')) return {porta:true};
     if(S.ecra==='criar' || S.ecra==='recuperar') return {ir:{ecra:'entrar'}};
     /* do ecrã de entrar volta-se à escolha entre condutor e patrão */
     if(S.ecra==='entrar' && document.getElementById('trocar')) return {porta:true};
@@ -5243,12 +5334,17 @@ document.addEventListener('click', function(e){
     S.aviso='a entrar…'; pintar();
     Nuvem.entrar(em, co).then(function(r){
       if(r.erro||r.papel!=='dono'){
-        S.aviso = r.erro || 'Esta conta é de condutor, não do proprietário.';
+        S.aviso = r.erro || ('Esta conta é de condutor, não do proprietário.'+
+          (document.getElementById('trocar') ? ' Carregue em «Entrar como condutor», em baixo.' : ''));
         pintar(); return; }
       S.sessao=true; S.aviso=null; Nuvem.local('dono-sessao', true); ir('mapa');
     });
   }
   if(f==='ir-criar'){ S.aviso=null; ir('criar'); return; }
+  if(f==='ir-condutor'){
+    try{ localStorage.setItem('fleetcv-quem','condutor'); localStorage.removeItem('fleetcv-ensaio'); }
+    catch(e){}
+    location.reload(); return; }
   if(f==='ir-recuperar'){ S.recEmail=(S.r.email||'').trim(); S.aviso=null;
     ir('recuperar'); return; }
   if(f==='recuperar'){
@@ -5727,7 +5823,10 @@ Nuvem.aoMudar(function(){
     Nuvem.minhaFrota().then(function(c){ S.conta=c||null; S.aPedirConta=false;
       pintarSePuder(); }); }
   if(['entrar','criar','recuperar','guardar-rec'].indexOf(S.ecra)<0) pintarSePuder();
-  else pintarTopo();
+  else {
+    var semB=!!(Nuvem.semBase && Nuvem.semBase());
+    if(semB!==!!S.semBaseVisto){ S.semBaseVisto=semB; pintarSePuder(); }
+    else pintarTopo(); }
 });
 Nuvem.arrancar({
   papel: 'dono',

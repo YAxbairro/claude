@@ -418,7 +418,7 @@
   try{ if(canal) canal.onmessage=function(m){
     avisarTodos(m.data.ev, m.data.linha, false); }; }catch(e){}
 
-  window.supabase = { createClient:function(url, chave, op){
+  var biblioteca = { createClient:function(url, chave, op){
     var ref=String(url||'').replace(/^https?:\/\//,'').split('.')[0];
     /* window.__outroTelemovel: um separador que finge ser outro
        aparelho a falar com a MESMA base — a base aqui vive no
@@ -426,6 +426,14 @@
     var k=(window.__outroTelemovel ? 'tel-'+window.__outroTelemovel+'-' : '') +
           ((op&&op.auth&&op.auth.storageKey) || ('sb-'+ref+'-auth-token'));
     return criarCliente(k); } };
+  /* A biblioteca verdadeira vem da internet (no fleetcv.html) e carrega
+     depois desta, escrevendo por cima. Enquanto a máquina dos testes não
+     a deixava chegar não se notava; a 11/11/2026 passou a chegar, e os
+     testes iam bater à base verdadeira em vez desta. Esta fica: a outra
+     escreve e não muda nada. */
+  try{ Object.defineProperty(window, 'supabase', {configurable:true, enumerable:true,
+    get:function(){ return biblioteca; }, set:function(){} }); }
+  catch(e){ window.supabase=biblioteca; }
 
   /* a semente: uma base que já estava no ar antes das várias frotas,
      com a frota do fundador (o código dele ainda à vista, como nas

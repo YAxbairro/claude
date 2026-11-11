@@ -8,7 +8,7 @@ const ok=(n,c,x)=>console.log((c?' ok  ':'FALHA')+' · '+n+(x?'  → '+x:''));
 const txt=()=>p.textContent('#ecra');
 
 await p.goto('file://'+process.cwd()+'/painel_dono.html'); await p.waitForTimeout(700);
-ok('abre no login do patrão', (await txt()).includes('Painel do proprietário'));
+ok('abre no login do patrão', (await txt()).includes('Entrar como proprietário'));
 await p.fill('#i-email','patrao@exemplo.cv'); await p.fill('#i-cod','1111');
 await p.click('[data-f="entrar"]'); await p.waitForTimeout(300);
 ok('código errado recusado', (await txt()).includes('errados'));

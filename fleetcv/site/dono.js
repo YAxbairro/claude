@@ -77,6 +77,29 @@ function verMatricula(t, ignorar){
    campo. Isto trata dos dois, e marca o campo em falta a vermelho —
    num telemóvel, um erro escrito lá em cima e o campo lá em baixo
    não se veem ao mesmo tempo. */
+/* a base de dados não responde: diz-se logo, antes de a pessoa escrever
+   tudo e carregar no botão (e diz-se que não é a internet dela) */
+function avisoSemBase(){
+  if(!(Nuvem.semBase && Nuvem.semBase())) return '';
+  return '<div class="cartao mau"><p class="p-nota"><b>O servidor não está a responder '+
+    'agora.</b> Não é a sua internet. Tente daqui a uns minutos; se continuar, fale '+
+    'connosco pelo WhatsApp: +238 955 78 82.</p></div>';
+}
+/* O aviso de um formulário fica à vista. No criar conta, num computador,
+   o botão está lá em baixo e o aviso aparecia lá em cima, fora do ecrã:
+   carregava-se em "Criar a minha frota" e parecia que nada acontecia
+   (o Yanick, a 11/11/2026). Agora, cada aviso novo é trazido ao ecrã. */
+var avisoVisto=null;
+function verAviso(){
+  var chave=S.aviso ? S.ecra+'|'+(typeof S.aviso==='string' ? S.aviso : JSON.stringify(S.aviso)) : null;
+  if(chave===avisoVisto) return;
+  avisoVisto=chave;
+  if(!chave || ['entrar','criar','recuperar'].indexOf(S.ecra)<0) return;
+  var cx=document.querySelectorAll('#ecra .cartao.mau, #ecra .cartao.aviso');
+  var ult=cx[cx.length-1]; if(!ult || !ult.scrollIntoView) return;
+  var rc=ult.getBoundingClientRect();
+  if(rc.top<60 || rc.bottom>window.innerHeight-10) ult.scrollIntoView({block:'center'});
+}
 function caixaAviso(){
   if(!S.aviso) return '';
   var t = typeof S.aviso==='string' ? S.aviso : (S.aviso.d||'');
@@ -1104,11 +1127,12 @@ function pintar(){
 
   /* ── entrar ─────────────────────────────────────────── */
   if(S.ecra==='entrar'){
-    h='<div style="height:10px"></div><h1>Entrar</h1>'+
-      '<p class="sub">Painel do proprietário.</p>'+
-      '<label class="campo"><span class="lb">Email</span>'+
+    h='<div style="height:10px"></div><h1>Entrar como proprietário</h1>'+
+      '<p class="sub">O e-mail e o código que escolheu quando criou a conta.</p>'+
+      (S.aviso?'':avisoSemBase())+
+      '<label class="campo"><span class="lb">E-mail</span>'+
       '<input type="text" id="i-email" value="'+esc(S.r.email||'')+
-      '" placeholder="patrao@exemplo.cv"></label>'+
+      '" placeholder="o.seu@email.cv"></label>'+
       '<label class="campo"><span class="lb">Código</span>'+
       '<input type="password" id="i-cod" autocomplete="current-password" value="'+
       esc(S.r.cod||'')+'" placeholder="o seu código"></label>';
@@ -1117,9 +1141,10 @@ function pintar(){
     if(Nuvem.podeCriarConta && Nuvem.podeCriarConta())
       h+='<p style="text-align:center;margin:12px 0 0"><button class="lig" '+
         'data-f="ir-recuperar">Esqueci-me do código</button></p>';
-    /* Com a base de dados ligada, quem ainda não tem conta cria-a aqui.
-       Sem ela (aberto como ficheiro) não há onde guardar contas, e fica
-       o código de experimentar de sempre. */
+    /* No site a sério, quem ainda não tem conta cria-a aqui — mesmo
+       antes de a base responder (antes, nesse segundo, aparecia o código
+       de experimentar a quem vinha criar a sua frota). Aberto como
+       ficheiro não há onde guardar contas, e fica o código de sempre. */
     h+= Nuvem.podeCriarConta && Nuvem.podeCriarConta()
       ? '<div class="cartao nota" style="margin-top:14px"><p class="p-nota">'+
         '<b>Ainda não tem conta?</b> Crie a sua frota em dois minutos. '+
@@ -1128,6 +1153,9 @@ function pintar(){
         'Criar conta grátis</button></div>'
       : '<div class="cartao nota"><p class="p-nota"><b>Para experimentar:</b><br>'+
         'patrao@exemplo.cv · 9999</p></div>';
+    if(document.getElementById('trocar'))
+      h+='<p class="p-nota" style="text-align:center;margin-top:16px">É condutor? '+
+        '<button class="lig" data-f="ir-condutor">Entrar como condutor</button></p>';
     b=false;
   }
 
@@ -1142,7 +1170,7 @@ function pintar(){
                  rentacar:'Ex.: Praia Rent-a-car'}[tipoC];
     h='<div style="height:10px"></div><h1>Criar conta</h1>'+
       '<p class="sub">30 dias grátis, sem cartão. Depois, se servir, '+
-      'fala-se do preço.</p>'+caixaAviso()+
+      'fala-se do preço.</p>'+(S.aviso?'':avisoSemBase())+
       '<div class="campo"><span class="lb">Que frota é?</span><div class="opcoes">'+
       ['taxi','instituicao','rentacar'].map(function(k){ var K=FleetTipos.de(k);
         return '<button class="opcao'+(tipoC===k?' on':'')+'" data-f="tipo-criar" data-tipo="'+k+'">'+
@@ -1170,6 +1198,7 @@ function pintar(){
       '<span>Li e aceito os <a href="/termos" target="_blank" rel="noopener">termos de '+
       'utilização</a> e a <a href="/privacidade" target="_blank" rel="noopener">política de '+
       'privacidade</a>.</span></label>'+
+      caixaAviso()+
       '<button class="bt pri" data-f="criar">Criar a minha frota</button>'+
       '<p style="text-align:center;margin:14px 0 0"><button class="lig" '+
       'data-f="ir-entrar">Já tenho conta — entrar</button></p>';
@@ -2005,9 +2034,15 @@ function pintar(){
     '<span class="lupa-x">× fechar</span></div>';
   el('ecra').innerHTML=h;
   montarMapas();
+  verAviso();
   el('nav').parentNode.hidden = !b;
   var pv=paraOndeVolta();
   el('voltar').hidden = !(pv && !pv.fechar && !pv.ficar);
+  /* antes de entrar, o "‹ Voltar" leva ao ecrã de entrada e chama-se
+     "Início"; o ⇄ (que fazia o mesmo sem dizer o quê) só aparece depois */
+  try{ el('voltar').lastChild.nodeValue = pv && pv.porta ? 'Início' : 'Voltar'; }catch(e){}
+  var tr=document.getElementById('trocar');
+  if(tr) tr.hidden = !S.sessao;
   armarVoltar();
   el('sub-marca').textContent = S.sessao&&S.frota ? ' · '+S.frota.nome : '';
   pintarNav(); pintarTopo();
@@ -2066,6 +2101,7 @@ function paraOndeVolta(){
      e o botão de voltar do telemóvel não o fecha sem querer */
   if(S.ecra==='guardar-rec') return {ficar:true};
   if(!S.sessao){
+    if(S.ecra==='criar' && document.getElementById('trocar')) return {porta:true};
     if(S.ecra==='criar' || S.ecra==='recuperar') return {ir:{ecra:'entrar'}};
     /* do ecrã de entrar volta-se à escolha entre condutor e patrão */
     if(S.ecra==='entrar' && document.getElementById('trocar')) return {porta:true};
@@ -2244,12 +2280,17 @@ document.addEventListener('click', function(e){
     S.aviso='a entrar…'; pintar();
     Nuvem.entrar(em, co).then(function(r){
       if(r.erro||r.papel!=='dono'){
-        S.aviso = r.erro || 'Esta conta é de condutor, não do proprietário.';
+        S.aviso = r.erro || ('Esta conta é de condutor, não do proprietário.'+
+          (document.getElementById('trocar') ? ' Carregue em «Entrar como condutor», em baixo.' : ''));
         pintar(); return; }
       S.sessao=true; S.aviso=null; Nuvem.local('dono-sessao', true); ir('mapa');
     });
   }
   if(f==='ir-criar'){ S.aviso=null; ir('criar'); return; }
+  if(f==='ir-condutor'){
+    try{ localStorage.setItem('fleetcv-quem','condutor'); localStorage.removeItem('fleetcv-ensaio'); }
+    catch(e){}
+    location.reload(); return; }
   if(f==='ir-recuperar'){ S.recEmail=(S.r.email||'').trim(); S.aviso=null;
     ir('recuperar'); return; }
   if(f==='recuperar'){
@@ -2728,7 +2769,10 @@ Nuvem.aoMudar(function(){
     Nuvem.minhaFrota().then(function(c){ S.conta=c||null; S.aPedirConta=false;
       pintarSePuder(); }); }
   if(['entrar','criar','recuperar','guardar-rec'].indexOf(S.ecra)<0) pintarSePuder();
-  else pintarTopo();
+  else {
+    var semB=!!(Nuvem.semBase && Nuvem.semBase());
+    if(semB!==!!S.semBaseVisto){ S.semBaseVisto=semB; pintarSePuder(); }
+    else pintarTopo(); }
 });
 Nuvem.arrancar({
   papel: 'dono',

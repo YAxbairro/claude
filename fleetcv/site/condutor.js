@@ -879,9 +879,10 @@ function pintar(){
 
   if(S.ecra==='entrar'){
     h='<div style="height:10px"></div>'+
-      '<h1>Entrar</h1>'+
-      '<p class="sub">O email e o código de quatro números que o patrão lhe deu.</p>'+
-      '<label class="campo"><span class="lb">Email</span>'+
+      '<h1>Entrar como condutor</h1>'+
+      '<p class="sub">O e-mail e o código de quatro números que o patrão lhe deu.</p>'+
+      (S.aviso?'':avisoSemBase())+
+      '<label class="campo"><span class="lb">E-mail</span>'+
       '<input type="text" id="i-email" value="'+esc(S.r.email||'')+
       '" placeholder="o.seu@email.cv"></label>'+
       '<label class="campo"><span class="lb">Código</span>'+
@@ -890,7 +891,7 @@ function pintar(){
     if(S.aviso) h+='<div class="cartao mau"><p class="p-nota">'+esc(S.aviso)+'</p></div>';
     /* os códigos de exemplo só servem aberto como ficheiro; no site a
        sério não existem, e um condutor a sério ficava baralhado */
-    if(!(Nuvem.temServidor && Nuvem.temServidor()))
+    if(!(Nuvem.temServidor && Nuvem.temServidor()) && !(Nuvem.aSerio && Nuvem.aSerio()))
       h+='<div class="cartao nota"><p class="p-nota"><b>Para experimentar:</b><br>'+
         'antonio@exemplo.cv · 1234<br>jorge@exemplo.cv · 2345<br>'+
         'nuno@exemplo.cv · 3456</p></div>';
@@ -900,6 +901,11 @@ function pintar(){
         '<p class="p-nota" style="margin-top:8px"><a href="/privacidade#condutor" '+
         'style="color:var(--accent)">O que a FleetCV regista, e quando</a> · '+
         '<a href="/ajuda#condutor" style="color:var(--accent)">Ajuda</a></p>';
+    /* o patrão que veio parar aqui passa para o lado dele (na aplicação
+       do Android, que é dos condutores, não se mostra) */
+    if(document.getElementById('trocar') && !nativo())
+      h+='<p style="text-align:center;margin:16px 0 0"><button class="lig" data-f="ir-dono">'+
+        'É o proprietário? Entre por aqui</button></p>';
     b='<button class="bt pri" data-f="entrar">Entrar</button>';
   }
 
@@ -1250,6 +1256,11 @@ function pintar(){
   guardarPasso();
   var pv=paraOndeVolta();
   el('voltar').hidden = !(pv && pv!=='ficar');
+  /* antes de entrar, o "‹ Voltar" leva ao ecrã de entrada e chama-se
+     "Início"; o ⇄ só aparece depois de entrar (e no ensaio) */
+  try{ el('voltar').lastChild.nodeValue = pv==='porta' ? 'Início' : 'Voltar'; }catch(e){}
+  var tr=document.getElementById('trocar');
+  if(tr) tr.hidden = !S.eu && !(Nuvem.ensaio && Nuvem.ensaio());
   armarVoltar();
   pintarTopo();
   if(S.ecra==='volante'){ montarMapaDoVolante(); ajustarMapa(); }
@@ -1373,13 +1384,19 @@ document.addEventListener('click', function(e){
     S.aviso='a entrar…'; pintar();
     Nuvem.entrar(em, co).then(function(r){
       if(r.erro||r.papel!=='condutor'){
-        S.aviso = r.erro || 'Esta conta é do proprietário, não de condutor.';
+        S.aviso = r.erro || ('Esta conta é do proprietário, não de condutor.'+
+          (document.getElementById('trocar') && !nativo()
+            ? ' Carregue em «Entrar como proprietário», em baixo.' : ''));
         pintar(); return; }
       S.eu = FROTA.condutores.filter(function(c){ return c.id===r.id; })[0]
              || {id:r.id, nome:r.nome, email:em};
       S.aviso=null; S.r={}; guardar(); S.ecra='carro'; pintar();
     });
   }
+  if(f==='ir-dono'){
+    try{ localStorage.setItem('fleetcv-quem','dono'); localStorage.removeItem('fleetcv-ensaio'); }
+    catch(e){}
+    location.reload(); return; }
   if(f==='sair'){
     Nuvem.sair();
     S.eu=null; S.r={}; guardar(); S.ecra='entrar'; pintar(); }
@@ -1612,6 +1629,13 @@ function retomar(){
   }
 }
 
+/* a base de dados não responde: diz-se logo, e diz-se que não é a
+   internet do condutor */
+function avisoSemBase(){
+  if(!(Nuvem.semBase && Nuvem.semBase())) return '';
+  return '<div class="cartao mau"><p class="p-nota"><b>O servidor não está a responder '+
+    'agora.</b> Não é a sua internet. Tente daqui a uns minutos; se continuar, avise o patrão.</p></div>';
+}
 Nuvem.aoMudar(function(){
   var d=Nuvem.dados();
   if(d.frota){

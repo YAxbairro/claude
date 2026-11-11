@@ -43,8 +43,11 @@ ok('e leva à escolha entre condutor e patrão',
 await p.goto('about:blank'); await p.goto(U+'#criar'); await p.waitForTimeout(1500);
 ok('no criar conta há "Voltar"', await temVoltar(p));
 await botaoDoTelemovel(p);
-ok('e o botão do telemóvel leva ao ecrã de entrar', /Painel do proprietário/.test(await txt()));
-await p.click('[data-f="ir-criar"]'); await p.waitForTimeout(500);
+/* do criar conta volta-se ao início, que é de onde se vem (e onde
+   também está o entrar) */
+ok('e o botão do telemóvel leva ao ecrã de entrada',
+   await esperar(async()=>/Ainda não tenho conta/i.test(await p.textContent('body'))));
+await p.click('[data-quem="criar"]'); await p.waitForTimeout(800);
 for(const [k,v] of Object.entries({'e-c-nome':'Manuel Tavares','e-c-frota':'Táxis Tavares',
   'e-c-email':'manuel@tavares.cv','e-c-cod':'tavares1','e-c-cod2':'tavares1'})) await p.fill('#'+k,v);
 await p.check('#e-c-aceito');

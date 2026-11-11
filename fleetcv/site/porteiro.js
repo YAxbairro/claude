@@ -1,7 +1,8 @@
 /* ─── o porteiro ──────────────────────────────────────────
-   Decide qual dos dois painéis arranca. A escolha fica guardada,
-   por isso só se pergunta na primeira vez; o botão ⇄ no cabeçalho
-   volta a perguntar.                                              */
+   O ecrã de entrada: quem já tem conta entra (como proprietário ou
+   como condutor), quem não tem cria-a, e quem só quer ver experimenta.
+   A escolha fica guardada; antes de entrar, o "‹ Início" do cabeçalho
+   volta aqui, e depois de entrar é o ⇄.                           */
 (function(){
   "use strict";
 
@@ -32,6 +33,7 @@
     '<path d="M10 17l5-5-5-5M15 12H3"/>');
   var IC_CHAVE=sv('<circle cx="8.5" cy="8.5" r="4.5"/>'+
     '<path d="M11.7 11.7 20 20M17.2 17.2l-2 2M19.6 14.8l-2 2"/>');
+  var IC_MAIS=sv('<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>');
   var CORPOS={
     condutor:"<div class=\"topo\">\n  <button class=\"voltar\" id=\"voltar\" hidden><b aria-hidden=\"true\">\u2039</b>Voltar</button>\n  <div class=\"marca\"><span class=\"pt\"></span>FleetCV<span style=\"font-weight:400;\n    font-size:12px;color:var(--muted)\"> \u00b7 condutor</span></div>\n  <div class=\"dir\" id=\"dir\"></div>\n  <button class=\"trocar\" id=\"trocar\" title=\"Trocar de painel\">\u21c4</button>\n</div>\n<main><div class=\"col\" id=\"ecra\"></div></main>\n<div class=\"rodape\"><div class=\"col\" id=\"accoes\"></div></div>\n<div class=\"camara\" id=\"camara\" hidden>\n  <video id=\"cam-v\" autoplay playsinline muted></video>\n  <div class=\"cam-moldura\" id=\"cam-moldura\"></div>\n  <p class=\"cam-guia\" id=\"cam-guia\"></p>\n  <div class=\"cam-falhou\" id=\"cam-falhou\" hidden>\n    <p>N\u00e3o foi poss\u00edvel abrir a c\u00e2mara aqui dentro.</p>\n    <label class=\"bt pri\">Usar a c\u00e2mara do telem\u00f3vel<input type=\"file\"\n      accept=\"image/*\" capture=\"environment\" id=\"ff\"></label>\n  </div>\n  <div class=\"cam-barra\">\n    <button class=\"cam-x\" id=\"cam-fechar\">Cancelar</button>\n    <button class=\"cam-disparo\" id=\"cam-tirar\" aria-label=\"Tirar a fotografia\"><span></span></button>\n    <button class=\"cam-luz\" id=\"cam-luz\" hidden>Luz</button>\n  </div>\n</div>",
     dono:"<div class=\"topo\">\n  <button class=\"voltar\" id=\"voltar\" hidden><b aria-hidden=\"true\">\u2039</b>Voltar</button>\n  <div class=\"marca\"><span class=\"pt\"></span>FleetCV<span style=\"font-weight:400;\n    font-size:12px;color:var(--muted)\" id=\"sub-marca\"></span></div>\n  <div class=\"dir\" id=\"dir\"></div>\n  <button class=\"trocar\" id=\"trocar\" title=\"Trocar de painel\">\u21c4</button>\n</div>\n<main><div class=\"col\" id=\"ecra\"></div></main>\n<div class=\"nav\"><div class=\"in\" id=\"nav\"></div></div>" };
@@ -47,34 +49,41 @@
     if(quem==='condutor') appCondutor(); else appDono();
   }
 
+  /* A 11/11/2026 o Yanick abriu a aplicação no computador para criar
+     uma conta e perdeu-se: três portas (condutor, proprietário,
+     experimentar), o "criar conta" escondido dentro da do proprietário,
+     e um ⇄ que não dizia nada. Agora está tudo à vista, por grupos:
+     quem já tem conta, e quem ainda não tem. */
+  function porta(atr, cls, ic, t, d){
+    return '<button class="porta'+(cls?' '+cls:'')+'" '+atr+'>'+
+      '<span class="ic">'+ic+'</span>'+
+      '<span><span class="t">'+t+'</span><span class="d">'+d+'</span></span>'+
+      '<span class="seta">›</span></button>'; }
   function perguntar(){
     document.body.className='escolher';
     document.body.innerHTML=
       '<div class="escolha-cx">'+
       '<div class="marca"><span class="pt"></span>FleetCV</div>'+
-      '<p>Controlo de frota para táxis, na Praia.</p>'+
-      '<button class="porta" data-quem="condutor">'+
-        '<span class="ic">'+IC_VOLANTE+'</span>'+
-        '<span><span class="t">Sou condutor</span>'+
-        '<span class="d">Abrir turno, marcar os km, abastecer e fechar o dia.</span>'+
-        '</span><span class="seta">\u203A</span></button>'+
-      '<button class="porta" data-quem="dono">'+
-        '<span class="ic">'+IC_CHAVE+'</span>'+
-        '<span><span class="t">Sou o proprietário</span>'+
-        '<span class="d">Ver os carros ao vivo, os turnos, os alertas e as contas.</span>'+
-        '</span><span class="seta">\u203A</span></button>'+
-      '<button class="porta ensaio" data-demo="1">'+
-        '<span class="ic">'+IC_ENSAIO+'</span>'+
-        '<span><span class="t">Só quero experimentar</span>'+
-        '<span class="d">Uma frota de mentira, só neste telemóvel. '+
-        'Não precisa de conta nem de código.</span>'+
-        '</span><span class="seta">\u203A</span></button>'+
-      '<p class="pe">A escolha fica guardada neste telemóvel. Para trocar, '+
-      'carregue em <b>\u21C4</b> no canto de cima.</p></div>';
+      '<p>Controlo de frota pelo telemóvel do condutor — táxis, '+
+      'instituições e rent-a-car.</p>'+
+      '<div class="grupo">Já tenho conta</div>'+
+      porta('data-quem="dono"', '', IC_CHAVE, 'Entrar como proprietário',
+        'Quem gere a frota: o mapa, os turnos, os alertas e as contas.')+
+      porta('data-quem="condutor"', '', IC_VOLANTE, 'Entrar como condutor',
+        'Com o e-mail e o código que o patrão lhe deu.')+
+      '<div class="grupo">Ainda não tenho conta</div>'+
+      porta('data-quem="criar"', 'criar', IC_MAIS, 'Criar conta grátis',
+        '30 dias grátis, sem cartão. É para o dono da frota.')+
+      porta('data-demo="1"', 'ensaio leve', IC_ENSAIO, 'Experimentar sem conta',
+        'Uma frota de exemplo, só neste aparelho.')+
+      '<p class="pe">É condutor e não tem código? Peça-o ao seu patrão — '+
+      'os condutores não criam conta.</p></div>';
     Array.prototype.forEach.call(document.querySelectorAll('[data-quem]'),
       function(x){ x.onclick=function(){
         var q=x.getAttribute('data-quem');
-        try{ localStorage.removeItem(DEMO); localStorage.setItem(QUEM,q); }catch(e){}
+        try{ localStorage.removeItem(DEMO);
+             if(q==='criar'){ q='dono'; localStorage.setItem('fleetcv-quero-criar','1'); }
+             localStorage.setItem(QUEM,q); }catch(e){}
         arrancar(q); }; });
     /* Quem carrega em experimentar não entra na frota de ninguém: a
        aplicação passa a guardar tudo no próprio telemóvel e nem chega a

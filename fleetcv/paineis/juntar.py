@@ -153,6 +153,19 @@ body.escolher{justify-content:center; align-items:center; overflow:auto; padding
 .porta .seta{margin-left:auto; color:var(--line); font-size:24px; font-weight:300;
   line-height:1}
 .porta:hover .seta{color:var(--accent)}
+.escolha-cx .grupo{margin:12px 3px -2px; font-size:11.5px; font-weight:600;
+  letter-spacing:.09em; text-transform:uppercase; color:var(--muted)}
+.escolha-cx .grupo:first-of-type{margin-top:0}
+.porta.criar{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.porta.criar .ic{background:color-mix(in srgb,var(--accent-ink) 16%,transparent);
+  color:var(--accent-ink)}
+.porta.criar .d{color:color-mix(in srgb,var(--accent-ink) 82%,transparent)}
+.porta.criar .seta,.porta.criar:hover .seta{color:var(--accent-ink)}
+.porta.criar:hover{border-color:var(--ink)}
+.porta.leve{padding:13px 17px; background:transparent; box-shadow:none}
+.porta.leve .ic{width:40px; height:40px; border-radius:12px}
+.porta.leve .ic svg{width:21px; height:21px}
+.porta.leve .t{font-size:15.5px}
 .escolha-cx .pe{margin:12px 2px 0; font-size:12.5px; color:var(--muted);
   line-height:1.55}
 .escolha-cx .pe b{font-weight:600; color:var(--ink)}
@@ -161,13 +174,15 @@ body.escolher{justify-content:center; align-items:center; overflow:auto; padding
   font-size:14px; cursor:pointer; display:grid; place-items:center;
   font-family:var(--sans)}
 .trocar:hover{border-color:var(--accent); color:var(--accent)}
+.trocar[hidden]{display:none}
 '''
 
 PORTEIRO = '''
 /* ─── o porteiro ──────────────────────────────────────────
-   Decide qual dos dois painéis arranca. A escolha fica guardada,
-   por isso só se pergunta na primeira vez; o botão ⇄ no cabeçalho
-   volta a perguntar.                                              */
+   O ecrã de entrada: quem já tem conta entra (como proprietário ou
+   como condutor), quem não tem cria-a, e quem só quer ver experimenta.
+   A escolha fica guardada; antes de entrar, o "‹ Início" do cabeçalho
+   volta aqui, e depois de entrar é o ⇄.                           */
 (function(){
   "use strict";
 
@@ -198,6 +213,7 @@ PORTEIRO = '''
     '<path d="M10 17l5-5-5-5M15 12H3"/>');
   var IC_CHAVE=sv('<circle cx="8.5" cy="8.5" r="4.5"/>'+
     '<path d="M11.7 11.7 20 20M17.2 17.2l-2 2M19.6 14.8l-2 2"/>');
+  var IC_MAIS=sv('<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>');
   var CORPOS={
     condutor:%(corpoC)s,
     dono:%(corpoD)s };
@@ -213,34 +229,41 @@ PORTEIRO = '''
     if(quem==='condutor') appCondutor(); else appDono();
   }
 
+  /* A 11/11/2026 o Yanick abriu a aplicação no computador para criar
+     uma conta e perdeu-se: três portas (condutor, proprietário,
+     experimentar), o "criar conta" escondido dentro da do proprietário,
+     e um ⇄ que não dizia nada. Agora está tudo à vista, por grupos:
+     quem já tem conta, e quem ainda não tem. */
+  function porta(atr, cls, ic, t, d){
+    return '<button class="porta'+(cls?' '+cls:'')+'" '+atr+'>'+
+      '<span class="ic">'+ic+'</span>'+
+      '<span><span class="t">'+t+'</span><span class="d">'+d+'</span></span>'+
+      '<span class="seta">\u203A</span></button>'; }
   function perguntar(){
     document.body.className='escolher';
     document.body.innerHTML=
       '<div class="escolha-cx">'+
       '<div class="marca"><span class="pt"></span>FleetCV</div>'+
-      '<p>Controlo de frota para táxis, na Praia.</p>'+
-      '<button class="porta" data-quem="condutor">'+
-        '<span class="ic">'+IC_VOLANTE+'</span>'+
-        '<span><span class="t">Sou condutor</span>'+
-        '<span class="d">Abrir turno, marcar os km, abastecer e fechar o dia.</span>'+
-        '</span><span class="seta">\\u203A</span></button>'+
-      '<button class="porta" data-quem="dono">'+
-        '<span class="ic">'+IC_CHAVE+'</span>'+
-        '<span><span class="t">Sou o proprietário</span>'+
-        '<span class="d">Ver os carros ao vivo, os turnos, os alertas e as contas.</span>'+
-        '</span><span class="seta">\\u203A</span></button>'+
-      '<button class="porta ensaio" data-demo="1">'+
-        '<span class="ic">'+IC_ENSAIO+'</span>'+
-        '<span><span class="t">Só quero experimentar</span>'+
-        '<span class="d">Uma frota de mentira, só neste telemóvel. '+
-        'Não precisa de conta nem de código.</span>'+
-        '</span><span class="seta">\\u203A</span></button>'+
-      '<p class="pe">A escolha fica guardada neste telemóvel. Para trocar, '+
-      'carregue em <b>\\u21C4</b> no canto de cima.</p></div>';
+      '<p>Controlo de frota pelo telemóvel do condutor — táxis, '+
+      'instituições e rent-a-car.</p>'+
+      '<div class="grupo">Já tenho conta</div>'+
+      porta('data-quem="dono"', '', IC_CHAVE, 'Entrar como proprietário',
+        'Quem gere a frota: o mapa, os turnos, os alertas e as contas.')+
+      porta('data-quem="condutor"', '', IC_VOLANTE, 'Entrar como condutor',
+        'Com o e-mail e o código que o patrão lhe deu.')+
+      '<div class="grupo">Ainda não tenho conta</div>'+
+      porta('data-quem="criar"', 'criar', IC_MAIS, 'Criar conta grátis',
+        '30 dias grátis, sem cartão. É para o dono da frota.')+
+      porta('data-demo="1"', 'ensaio leve', IC_ENSAIO, 'Experimentar sem conta',
+        'Uma frota de exemplo, só neste aparelho.')+
+      '<p class="pe">É condutor e não tem código? Peça-o ao seu patrão — '+
+      'os condutores não criam conta.</p></div>';
     Array.prototype.forEach.call(document.querySelectorAll('[data-quem]'),
       function(x){ x.onclick=function(){
         var q=x.getAttribute('data-quem');
-        try{ localStorage.removeItem(DEMO); localStorage.setItem(QUEM,q); }catch(e){}
+        try{ localStorage.removeItem(DEMO);
+             if(q==='criar'){ q='dono'; localStorage.setItem('fleetcv-quero-criar','1'); }
+             localStorage.setItem(QUEM,q); }catch(e){}
         arrancar(q); }; });
     /* Quem carrega em experimentar não entra na frota de ninguém: a
        aplicação passa a guardar tudo no próprio telemóvel e nem chega a

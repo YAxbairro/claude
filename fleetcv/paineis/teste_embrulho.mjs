@@ -57,7 +57,7 @@ ok('o painel do condutor está desenhado', bt===16.5, bt+'px');
 ok('e o corpo ficou marcado', (await p.getAttribute('body','class'))==='condutor');
 await p.screenshot({path:'e2-condutor.png'});
 
-await p.click('#trocar'); await p.waitForTimeout(700);
+await p.click('#voltar'); await p.waitForTimeout(700);
 await p.click('[data-quem="dono"]'); await p.waitForTimeout(900);
 const bd = await p.evaluate(()=>{ const x=document.querySelector('.bt');
   return x?parseFloat(getComputedStyle(x).fontSize):null; });

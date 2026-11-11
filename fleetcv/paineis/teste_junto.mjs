@@ -15,8 +15,8 @@ const movel=()=>b.newContext({ viewport:{width:390,height:840}, isMobile:true,
 let ctx = await movel(); let p = await nova(ctx);
 p.on('pageerror',e=>err.push(e.message));
 await p.goto(URL); await p.waitForTimeout(500);
-ok('abre a perguntar quem é', (await p.textContent('body')).includes('Sou condutor'));
-ok('as duas portas', (await p.locator('[data-quem]').count())===2);
+ok('abre a perguntar quem é', (await p.textContent('body')).includes('Entrar como condutor'));
+ok('as portas: entrar dos dois lados e criar conta', (await p.locator('[data-quem]').count())===3 && (await p.locator('[data-quem="criar"]').count())===1);
 await p.screenshot({path:'j0-escolha.png'});
 
 /* ── 2 · condutor ───────────────────────────────────────── */
@@ -39,12 +39,12 @@ await p.screenshot({path:'j1-condutor.png'});
 /* ── 3 · lembra-se da escolha ───────────────────────────── */
 await p.reload(); await p.waitForTimeout(700);
 ok('ao voltar já não pergunta outra vez',
-   !(await p.textContent('body')).includes('Sou condutor'));
+   !(await p.textContent('body')).includes('Entrar como condutor'));
 ok('e volta ao turno que estava aberto', await p.isVisible('.volante'));
 
 /* ── 4 · o botão ⇄ volta a perguntar ────────────────────── */
 await p.click('#trocar'); await p.waitForTimeout(700);
-ok('o ⇄ volta ao ecrã de escolha', (await p.textContent('body')).includes('Sou o proprietário'));
+ok('o ⇄ volta ao ecrã de escolha', (await p.textContent('body')).includes('Entrar como proprietário'));
 
 /* ── 5 · proprietário, no mesmo ficheiro ────────────────── */
 await p.click('[data-quem="dono"]'); await p.waitForTimeout(500);

@@ -63,6 +63,19 @@ body.escolher{justify-content:center; align-items:center; overflow:auto; padding
 .porta .seta{margin-left:auto; color:var(--line); font-size:24px; font-weight:300;
   line-height:1}
 .porta:hover .seta{color:var(--accent)}
+.escolha-cx .grupo{margin:12px 3px -2px; font-size:11.5px; font-weight:600;
+  letter-spacing:.09em; text-transform:uppercase; color:var(--muted)}
+.escolha-cx .grupo:first-of-type{margin-top:0}
+.porta.criar{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.porta.criar .ic{background:color-mix(in srgb,var(--accent-ink) 16%,transparent);
+  color:var(--accent-ink)}
+.porta.criar .d{color:color-mix(in srgb,var(--accent-ink) 82%,transparent)}
+.porta.criar .seta,.porta.criar:hover .seta{color:var(--accent-ink)}
+.porta.criar:hover{border-color:var(--ink)}
+.porta.leve{padding:13px 17px; background:transparent; box-shadow:none}
+.porta.leve .ic{width:40px; height:40px; border-radius:12px}
+.porta.leve .ic svg{width:21px; height:21px}
+.porta.leve .t{font-size:15.5px}
 .escolha-cx .pe{margin:12px 2px 0; font-size:12.5px; color:var(--muted);
   line-height:1.55}
 .escolha-cx .pe b{font-weight:600; color:var(--ink)}
@@ -71,6 +84,7 @@ body.escolher{justify-content:center; align-items:center; overflow:auto; padding
   font-size:14px; cursor:pointer; display:grid; place-items:center;
   font-family:var(--sans)}
 .trocar:hover{border-color:var(--accent); color:var(--accent)}
+.trocar[hidden]{display:none}
 /* só no condutor */
 body.condutor *{box-sizing:border-box}
 body.condutor button{font:inherit; color:inherit}

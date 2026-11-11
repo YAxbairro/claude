@@ -45,7 +45,7 @@ const aparelho = async (movel) => {
 /* ── o computador do patrão ─────────────────────────────── */
 const patrao = await aparelho(false);
 await patrao.goto(URL); await patrao.waitForTimeout(900);
-ok('a aplicação vem do servidor', (await patrao.textContent('body')).includes('Sou condutor'));
+ok('a aplicação vem do servidor', (await patrao.textContent('body')).includes('Entrar como condutor'));
 await patrao.click('[data-quem="dono"]'); await patrao.waitForTimeout(500);
 await patrao.fill('#i-email','patrao@exemplo.cv'); await patrao.fill('#i-cod','0000');
 await patrao.click('[data-f="entrar"]'); await patrao.waitForTimeout(1200);

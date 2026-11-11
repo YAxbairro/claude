@@ -31,6 +31,28 @@ Escrito para quem pegar nisto a seguir — inclusive eu, noutra sessão.
   E as páginas de venda das instituições e do rent-a-car. 35 de 35, a 7 de
   Outubro (as páginas abrem-se pelo navegador, como um cliente as abre).
 
+- **A base de dados a dormir (11/11).** O Supabase gratuito pôs o projecto
+  `fleetcv` em pausa por falta de uso (estado `INACTIVE`). Sem a base
+  ninguém entra nem cria conta. Não se consegue acordar daqui: a conta
+  `yaxtechcv` já tem os 2 projectos gratuitos ligados (`lutuima-veiga` e
+  `locais-voto-cv`), e o limite conta em todas as organizações onde ela é
+  dona. **Falta o Yanick escolher**: passar a FleetCV para uma organização
+  Pro só dela (25 USD/mês, nunca adormece) ou para uma organização gratuita
+  de outra conta. Até lá, a aplicação diz a verdade: "O servidor não está a
+  responder — não é a sua internet" (antes dizia "é preciso estar ligado à
+  internet", com a internet ligada), e cada Entrar/Criar volta a tentar
+  ligar antes de desistir.
+
+- **A entrada da aplicação refeita (11/11).** O Yanick, no computador, não
+  achava o caminho antes de entrar. Agora `/app` abre num ecrã só, por
+  grupos: "Já tenho conta" (Entrar como proprietário, Entrar como condutor)
+  e "Ainda não tenho conta" (Criar conta grátis, Experimentar sem conta).
+  Antes de entrar o cabeçalho tem "‹ Início" (o ⇄ só aparece depois); cada
+  ecrã de entrar leva ao do outro lado; o "Criar conta" está sempre à vista
+  no site (antes, no primeiro segundo, aparecia o código de experimentar);
+  e o aviso do criar conta aparece ao pé do botão e é trazido ao ecrã
+  (estava lá em cima, fora da vista: parecia que o botão não fazia nada).
+
 - **O GPS que parava em segundo plano (10/10), aplicação 1.2.0.** Num Samsung
   Galaxy A02 (Android 11, pouca memória), com a bateria já "Não optimizada",
   as posições pararam 2 a 3 minutos depois de o ecrã apagar (13:47–13:49:56,
@@ -381,9 +403,11 @@ ficheiros. Os passos estão em `site/INSTALAR.md`.
 | `paineis/teste_tipos.mjs` | 44 — táxis, instituições e rent-a-car: as contas de cada um e um cliente novo de cada, de ponta a ponta |
 | `paineis/teste_supabase.mjs` | 25 — as regras vistas pela aplicação, a trava, sem rede |
 | `paineis/teste_sessao.mjs` | 8 — a sessão que se perde no telemóvel (o iPhone de 10/10): entra na mesma |
+| `paineis/teste_entrada.mjs` | 28 — o ecrã de entrada (cada caminho e o volta ao início), e a base de dados em baixo: diz a verdade ao pé do botão, e entra quando ela volta |
 | o resto dos `teste_*.mjs` | mapa de Cabo Verde 9, aplicação Android 30, leitor ODO/Trip 11, mapa cortado 4, consumo 12, fora da aplicação 18, leitor 18, primeiro turno 28, dados 13, câmara 31, condutor 35, dono 44, junto 16, clicável 25, formulários 18, fotografias 10, embrulho 9, tempo real 15 + 6, Claude 24, servidor 15, ensaio 9, voltar 35, mapa vivo 26, páginas 25, alojamento 17 |
 
-A 12/10, com a aplicação 1.2.0 no ar, os 31 conjuntos deram 664 de 664
+A 11/11, com a entrada nova, os 32 conjuntos deram 692 de 692
+(`teste_entrada` 28: o ecrã de entrada, e a base em baixo e de volta). A 12/10, com a aplicação 1.2.0 no ar, os 31 conjuntos deram 664 de 664
 (`teste_app_android` 37, `teste_alojamento` 18; o `teste_mapa_cv` falhou 2
 no meio de todos e deu 9 de 9 sozinho), o banco do lado nativo 22 de 22, e
 a prova ao vivo 35 de 35. A 10/10 tinham sido 656 de 656. A 07/10, os 30 conjuntos

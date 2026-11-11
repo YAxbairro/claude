@@ -1034,6 +1034,7 @@ var CAUDA_CHEIA = 30000;   /* a cauda inteira só vai de 30 em 30 s; pelo
                               posição pesava 8 kB em vez de menos de 1. */
 
 var loja=null, quem=null, estado='a-ligar', ritmo=RITMO_VIVO, opGuardado={};
+var pronto=null, aReligar=null;
 var ouvintes=[], subs=[], cacheRasto={};
 var D = { frota:null, turnos:[], vivos:[] };
 
@@ -1724,6 +1725,47 @@ function vaiHaverSupabase(){
   return !noEnsaio() && !!(c && c.supabaseUrl && c.supabaseChave);
 }
 
+/* ─── quando a base de dados não responde ─────────────────
+   A 11/11/2026 o Supabase gratuito pôs a base a dormir, e o patrão
+   que estava a criar a conta, com a internet ligada, leu "Para criar
+   conta é preciso estar ligado à internet". Agora diz-se o que se
+   passa: ou é este aparelho que está sem rede, ou é o servidor. E
+   antes de desistir tenta-se ligar outra vez — se a base voltou, a
+   pessoa entra sem ter de recarregar a página. */
+var SEM_BASE='O servidor da FleetCV não está a responder agora — não é a sua internet. '+
+  'Tente outra vez daqui a uns minutos. Se continuar, fale connosco pelo WhatsApp: +238 955 78 82.';
+var SEM_REDE='Este aparelho está sem internet. Ligue os dados ou o Wi-Fi e tente outra vez.';
+function semLigacao(){
+  try{ if(navigator.onLine===false) return SEM_REDE; }catch(e){}
+  return SEM_BASE;
+}
+function comBase(){ return !!(loja&&(loja.supabase||loja.servidor)); }
+function religar(){
+  if(aReligar) return aReligar;
+  aReligar = ligarSupabase(opGuardado.papel).then(function(sb){
+    if(!sb || comBase()) return;
+    var ls=lojaDoSupabase(sb); loja=ls; enviarRegistos();
+    return ls.comecar().then(function(entrou){
+      estado = !entrou ? 'supabase-por-entrar'
+             : ls.semRede() ? 'supabase-sem-rede' : 'supabase';
+      avisar();
+      if(entrou) return semear(opGuardado).then(escutar).then(retomarFila);
+    });
+  }).catch(function(){}).then(function(){ aReligar=null; });
+  return aReligar;
+}
+/* Antes de entrar ou de criar conta num site com base: espera pela
+   primeira tentativa de ligar (quem carrega em Entrar logo ao abrir não
+   leva um "não responde" por ser rápido demais) e, se falhou, tenta
+   outra vez. Devolve a mensagem a mostrar, ou nada se há base. */
+function precisaDeBase(){
+  if(!vaiHaverSupabase() || comBase()) return Promise.resolve(null);
+  var espera = pronto ? Promise.race([pronto,
+    new Promise(function(ok){ setTimeout(ok, 12000); })]) : Promise.resolve();
+  return espera.then(function(){ return comBase() ? null : religar(); })
+    .then(function(){ return comBase() ? null : semLigacao(); });
+}
+
 function arrancar(op){
   op=op||{}; opGuardado=op;
   D.frota  = local('frota')  || (vaiHaverSupabase() ? frotaVazia() : frotaNova());
@@ -1743,7 +1785,7 @@ function arrancar(op){
   };
   /* A ordem é a da qualidade: Supabase, servidor próprio, base do
      Claude, e por fim só este aparelho. Fica o primeiro que houver. */
-  ligarSupabase(op.papel).then(function(sb){
+  pronto = ligarSupabase(op.papel).then(function(sb){
     if(sb){
       var ls=lojaDoSupabase(sb); loja=ls; enviarRegistos();
       return ls.comecar().then(function(entrou){
@@ -2344,6 +2386,9 @@ return {
      lista da frota, como até aqui. */
   temServidor:function(){ return !!(loja&&(loja.servidor||loja.supabase)); },
   entrar:function(email, codigo){
+    if(vaiHaverSupabase() && !comBase())
+      return precisaDeBase().then(function(falta){
+        return falta ? {erro:falta, semBase:true} : Nuvem.entrar(email, codigo); });
     var e=String(email||'').trim().toLowerCase(), c=String(codigo||'').trim();
     if(loja&&loja.supabase)
       return loja.entrar(e,c).then(function(j){
@@ -2376,8 +2421,15 @@ return {
   },
   /* Criar conta de proprietário. Só há contas com o Supabase: sem ele
      não há onde as guardar, e diz-se isso em vez de fingir. */
-  podeCriarConta:function(){ return !!(loja&&loja.supabase); },
+  podeCriarConta:function(){ return !!(loja&&loja.supabase) || vaiHaverSupabase(); },
+  /* o site tem base de dados (não é o ficheiro de experimentar) */
+  aSerio:function(){ return vaiHaverSupabase(); },
+  /* já se tentou ligar e a base não respondeu */
+  semBase:function(){ return vaiHaverSupabase() && !!loja && !comBase(); },
   criarConta:function(d){
+    if(vaiHaverSupabase() && !comBase())
+      return precisaDeBase().then(function(falta){
+        return falta ? {erro:falta, semBase:true} : Nuvem.criarConta(d); });
     if(!(loja&&loja.supabase))
       return Promise.resolve({erro:'Para criar conta é preciso estar ligado à internet.'});
     return loja.criarConta(d).then(function(j){
@@ -2415,6 +2467,9 @@ return {
      aplicar: supabase/por_aplicar.sql), responde semFuncao — e o ecrã
      manda falar pelo WhatsApp. */
   recuperarAcesso:function(email, rec, novo){
+    if(vaiHaverSupabase() && !comBase())
+      return precisaDeBase().then(function(falta){
+        return falta ? {erro:falta, semBase:true} : Nuvem.recuperarAcesso(email, rec, novo); });
     if(!(loja&&loja.supabase))
       return Promise.resolve({erro:'Isto só se faz com a internet ligada.'});
     var e=String(email||'').trim().toLowerCase();
