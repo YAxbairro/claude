@@ -3,10 +3,10 @@
 # Os grafismos/textos novos vêm de html/proib.html renderizado para hfr/ (ver build4.sh).
 import sys,os
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
-import segs3 as S3
+import segs3 as M
 from segs3 import *
-S3.OUT=S+'/seg4/'; os.makedirs(S3.OUT,exist_ok=True)
-S3.logos=lambda b:None; logos=S3.logos
+M.OUT=S+'/seg4/'; os.makedirs(M.OUT,exist_ok=True)
+M.logos=lambda b:None; logos=M.logos
 def H(n):
     p=f'{S}/hfr/{n:05d}.png'
     return Image.open(p).convert('RGBA') if os.path.exists(p) else None
@@ -29,7 +29,7 @@ def abertura(b,t):
     tag(b,t,1112,496,'LIBERDADE',66,'red',15.52,19.0)
     tag(b,t,1112,566,'RESPONSABILIDADE',39,'navy',16.58,19.0)
     tag(b,t,1112,629,'CONSCIÊNCIA CÍVICA',39,'red',17.84,19.0)
-S3.abertura=abertura
+M.abertura=abertura
 def S1():
     def f(n,t):
         b=EMPTY(); abertura(b,t); addH(b,n)
@@ -77,6 +77,6 @@ def S1112():
         tag(b,t,1112,375,'SEGREDO DO VOTO',66,'red',63.95,1e9)
         return addH(b,n)
     run('S1112',1355,1633,f)
-S2,S3_,S13,F14=S3.S2,S3.S3,S3.S13,S3.F14
+S2,S3_,S13,F14=M.S2,M.S3,M.S13,M.F14
 G={'S1':S1,'S2':S2,'S3':S3_,'S4':S4,'S678':S678,'S10':S10,'S1112':S1112,'S13':S13,'F14':F14}
 if __name__=='__main__': G[sys.argv[1]]()
