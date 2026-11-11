@@ -93,17 +93,15 @@ svg{position:absolute;overflow:visible}
    <path class="d" d="M582,200 L582,455 M662,200 L662,455 M742,200 L742,455" stroke-width="6"/>
    <g class="ps"><circle cx="0" cy="-236" r="36"/><path d="M-74,0 L-74,-118 Q-74,-182 0,-182 Q74,-182 74,-118 L74,0"/></g>
   </g>
-  <g class="ph"><rect x="-17" y="-29" width="34" height="58" rx="7" fill="#fff"/><rect x="-10" y="-21" width="20" height="36" rx="2" fill="#1279C2"/></g>
-  <g class="cm"><rect x="-38" y="-24" width="76" height="52" rx="9" fill="#fff"/><path d="M-20,-24 L-12,-36 L12,-36 L20,-24 Z" fill="#fff"/><circle cx="0" cy="2" r="15" fill="#1279C2"/><circle cx="0" cy="2" r="8" fill="#fff"/></g>
-  <g class="n1"><circle cx="0" cy="0" r="62" fill="none" stroke="#E3262B" stroke-width="16"/><path d="M-44,-44 L44,44" stroke="#E3262B" stroke-width="16" stroke-linecap="round"/></g>
-  <g class="n2"><circle cx="0" cy="0" r="66" fill="none" stroke="#E3262B" stroke-width="16"/><path d="M-47,-47 L47,47" stroke="#E3262B" stroke-width="16" stroke-linecap="round"/></g>
  </svg>
- <div class="blk" style="left:1090px;top:330px" data-w="760" data-e="60.05">
+ <div class="blk" style="left:1090px;top:400px" data-w="760">
   <div class="ln k" data-a="54.25">É também proibido</div>
   <div class="ln r" data-a="55.68">entrar na cabine de voto</div>
-  <div class="ln n" data-a="57.32">com telemóveis</div>
-  <div class="ln k" data-a="58.55">máquinas fotográficas</div>
  </div></div>
+<!-- texto da mochila -->
+<div class="sc" id="moc"><div class="blk" style="left:1080px;top:200px" data-w="780" data-e="60.05">
+  <div class="ln n" data-a="57.32">com telemóveis</div>
+  <div class="ln k" data-a="58.55">máquinas fotográficas</div></div></div>
 <!-- G4 dispositivos -->
 <div class="sc" id="g4"><div class="pan"></div>
  <svg viewBox="0 0 800 400" style="left:60px;top:330px;width:960px;height:480px">
@@ -166,20 +164,14 @@ tl.to('#g3 .car',{rotation:-1.5,svgOrigin:'290 470',duration:.12,yoyo:true,repea
 draw([$('#g3 .no')[0]],48.8,.45,0);draw([$('#g3 .no2')[0]],49.15,.25,0);
 // ---------- texto da rua ----------
 show('rua',50.0,54.6);text($('#rua .blk')[0]);
-// ---------- G5 cabine (54.06-60.20) ----------
-show('g5',54.0,60.45);panel('g5',54.06,54.36);draw($('#g5 .d'),54.3,.8,.06);text($('#g5 .blk')[0]);
-// pessoa caminha até à cabine e pára à frente dela
-tl.set('#g5 .ps',{x:150,y:602,opacity:0},0);tl.to('#g5 .ps',{opacity:1,duration:.3},55.1);
-tl.to('#g5 .ps',{x:360,duration:1.3,ease:'power1.inOut'},55.6);tl.fromTo('#g5 .ps',{y:602},{y:592,duration:.16,yoyo:true,repeat:7,ease:'sine.inOut',immediateRender:false},55.6);
-// telemóvel na mão + proibido; máquina fotográfica + proibido
-tl.set('#g5 .ph',{x:445,y:470,scale:0,opacity:0,svgOrigin:'0 0'},0);tl.to('#g5 .ph',{scale:1.2,opacity:1,duration:.4,ease:'back.out(2.5)'},57.3);
-tl.set('#g5 .n1',{x:445,y:470,opacity:0},0);tl.set('#g5 .n1',{opacity:1},57.6);draw([...$('#g5 .n1')[0].children],57.6,.35,.1);
-tl.set('#g5 .cm',{x:250,y:300,scale:0,opacity:0,svgOrigin:'0 0'},0);tl.to('#g5 .cm',{scale:1.15,opacity:1,duration:.4,ease:'back.out(2.5)'},58.55);
-tl.set('#g5 .n2',{x:250,y:300,opacity:0},0);tl.set('#g5 .n2',{opacity:1},58.9);draw([...$('#g5 .n2')[0].children],58.9,.35,.1);
-// sai suave para os dispositivos
-tl.to('#g5 svg',{opacity:0,duration:.3},59.95);
+// ---------- G5 cabine (54.06-56.48): só "é também proibido entrar na cabine de voto" ----------
+show('g5',54.0,56.95);panel('g5',54.06,54.36,56.48);draw($('#g5 .d'),54.3,.7,.05);text($('#g5 .blk')[0]);
+tl.set('#g5 .ps',{x:120,y:602,opacity:0},0);tl.to('#g5 .ps',{opacity:1,duration:.3},54.9);
+tl.to('#g5 .ps',{x:370,duration:1.1,ease:'power1.inOut'},55.3);tl.fromTo('#g5 .ps',{y:602},{y:592,duration:.14,yoyo:true,repeat:7,ease:'sine.inOut',immediateRender:false},55.3);
+// ---------- texto da mochila ----------
+show('moc',56.4,60.4);text($('#moc .blk')[0]);
 // ---------- G4 60.20-62.16 ----------
-show('g4',60.15,62.6);tl.set('#g4',{clipPath:'inset(0 0 0 0%)'},0);tl.to('#g4',{clipPath:'inset(0 100% 0 0%)',duration:.38,ease:'power3.inOut'},62.16);
+show('g4',59.9,62.6);panel('g4',59.92,60.20,62.16);
 $('#g4 .dv').forEach((g,i)=>{const o=['130 200','400 200','670 200'][i];tl.fromTo(g,{scale:0,opacity:0,svgOrigin:o},{scale:1,opacity:1,svgOrigin:o,duration:.4,ease:'back.out(2)',immediateRender:false},60.15+i*.15)});tl.set('#g4 .dv',{opacity:0},0);
 $('#g4 .nos').forEach((g,i)=>{draw([...g.children],61.15+i*.18,.3,0)});
 // textos dos grafismos
