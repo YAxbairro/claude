@@ -10,19 +10,19 @@ HASHTAGS = "#GEW2026 &nbsp;#GEWCaboVerde &nbsp;#AJEC &nbsp;#NovaGeraçãoNovaAmb
 # Parceiros: logo (ficheiro) ou None -> etiqueta de texto até haver ficheiro oficial
 LOGOS = {
     "CEDEAO": None,
-    "Consulado da Colômbia": None,
+    "Consulado da Colômbia": "t_consulado.png",
     "Min. Cultura da Colômbia": "t_mincultura_col.png",
     "CO-CREA": "t_cocrea.png",
-    "EHTCV": None,
+    "EHTCV": "t_ehtcv.png",
     "Asicotur": "t_asicotur.png",
     "Universidade de Santiago": "t_unisantiago.png",
-    "FIC": None,
+    "FIC": "t_fic.png",
     "CCB": "t_ccb.png",
-    "Fidjuz di Cabral": None,
+    "Fidjuz di Cabral": "t_fidjuz.png",
     "CEUS – Casa do Empreendedor": None,
 }
 
-SCALE = {"t_cocrea.png": .55, "t_mincultura_col.png": 1.3, "t_asicotur.png": .9, "t_unisantiago.png": 1.15, "t_ccb.png": .72}
+SCALE = {"t_cocrea.png": .4, "t_mincultura_col.png": 1.3, "t_asicotur.png": .9, "t_unisantiago.png": 1.15, "t_ccb.png": .72, "t_consulado.png": 1.25, "t_ehtcv.png": 1.25, "t_fic.png": 1.1, "t_fidjuz.png": 1.35}
 import math
 def ring_svg(size=600, op=1):
     cols = ['#2E5FA8','#5B4B9A','#F2A1B8','#3BA7B5','#C3125A','#9ED3E8','#13939C','#DDE3EA','#C8D82B','#E4E80F','#A8C531',
@@ -134,7 +134,7 @@ h1{{font-size:98px;margin-top:22px}}
 </div></body></html>"""
 
 # ---------------------------------------------------------------- Flyers individuais (1080x1350)
-def single(eyebrow, title, subtitle, info, support, partners, accent="var(--orange)"):
+def single(eyebrow, title, subtitle, info, support, partners, accent="var(--orange)", badge=None):
     infos = "".join(f'<div class="i"><small>{k}</small><div>{v}</div></div>' for k, v in info)
     logos = "".join(partner(p, 48) for p in partners)
     return f"""<!doctype html><html lang="pt"><head><meta charset="utf-8"><style>{CSS}
@@ -150,6 +150,10 @@ h1{{font-size:90px;margin-top:24px}}
 .i small{{font-size:14px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--teal)}}
 .i div{{font-size:27px;font-weight:700;line-height:1.3;margin-top:8px}}
 .sup{{margin-top:64px;max-width:860px;font-family:'Playfair Display',serif;font-style:italic;font-size:34px;line-height:1.4;color:#fff;padding-left:28px;border-left:2px solid rgba(255,255,255,.25)}}
+.badge{{margin-top:44px;align-self:flex-start;display:flex;align-items:center;gap:22px;background:#fff;border-radius:10px;padding:14px 26px 14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}}
+.badge img{{height:118px;display:block}}
+.badge small{{display:block;font-size:12px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:#6b7a90}}
+.badge b{{display:block;font-size:22px;font-weight:800;color:var(--navy);margin-top:4px;line-height:1.2}}
 .gewline{{margin-top:auto;margin-bottom:30px;display:flex;justify-content:space-between;align-items:flex-end}}
 .gewline .tg{{font-family:'Playfair Display',serif;font-style:italic;font-size:22px;color:#AFC0D6}}
 .gewline .hash{{font-size:17px;text-align:right;line-height:1.5}}
@@ -163,6 +167,7 @@ h1{{font-size:90px;margin-top:24px}}
  <div class="sub">{subtitle}</div>
  <div class="info">{infos}</div>
  <div class="sup">{support}</div>
+ {badge or ""}
  <div class="gewline"><div class="tg">Uma nova geração,<br>uma nova ambição.</div><div class="hash">#GEW2026 &nbsp;#GEWCaboVerde<br>#AJEC &nbsp;#NovaGeraçãoNovaAmbição</div></div>
 </div>
 <div class="foot"><div class="lbl">Com o apoio de</div><div class="logos">{logos}</div></div>
@@ -178,14 +183,14 @@ PAGES = {
         "Exposição <b>«Ciclo Histórico do Milho»</b> &amp; Degustação: menu de fusão Colômbia–Cabo Verde em torno do Milho",
         [("Data", "16 de Novembro"), ("Local", "Mercado Municipal<br>Praia, Santiago")],
         "Receitas para a Paz — memórias do milho, hospitalidade e ressignificação.",
-        COL), 1080, 1350),
+        COL, badge='<div class="badge"><img src="t_rotamilho.png" alt="A Rota do Milho"><div><small>Projeto Cultural</small><b>A Rota do Milho<br>Receitas para a Paz</b></div></div>'), 1080, 1350),
     "D_Laboratorio_Receitas_para_a_Paz": (single(
         "Laboratório Gastronómico",
         'Laboratório<br><span class="o">«Receitas<br>para a Paz»</span>',
         "Cozinhas <b>Colombiana</b> e <b>Cabo-Verdiana</b> em diálogo",
         [("19 Nov", "14h00 – 17h00"), ("20 Nov", "14h30 – 18h00"), ("Local", "EHTCV, Praia")],
         "Mesas-redondas, oficinas técnicas e rodas de memória em torno do milho, a nossa ponte afro-atlântica.",
-        COL), 1080, 1350),
+        COL, badge='<div class="badge"><img src="t_rotamilho.png" alt="A Rota do Milho"><div><small>Projeto Cultural</small><b>A Rota do Milho<br>Receitas para a Paz</b></div></div>'), 1080, 1350),
     "F_Encerramento_ECOWAS_Business_Forum": (single(
         "Encerramento Oficial GEW 2026",
         'ECOWAS–<br>Cabo Verde<br><span class="o">Business Forum</span>',
