@@ -134,7 +134,7 @@ h1{{font-size:98px;margin-top:22px}}
 </div></body></html>"""
 
 # ---------------------------------------------------------------- Flyers individuais (1080x1350)
-def single(eyebrow, title, subtitle, info, support, partners, accent="var(--orange)", badge=None):
+def single(eyebrow, title, subtitle, info, support, partners, accent="var(--orange)", badge=None, footlbl="Com o apoio de"):
     infos = "".join(f'<div class="i"><small>{k}</small><div>{v}</div></div>' for k, v in info)
     logos = "".join(partner(p, 48) for p in partners)
     return f"""<!doctype html><html lang="pt"><head><meta charset="utf-8"><style>{CSS}
@@ -170,7 +170,7 @@ h1{{font-size:90px;margin-top:24px}}
  {badge or ""}
  <div class="gewline"><div class="tg">Uma nova geração,<br>uma nova ambição.</div><div class="hash">#GEW2026 &nbsp;#GEWCaboVerde<br>#AJEC &nbsp;#NovaGeraçãoNovaAmbição</div></div>
 </div>
-<div class="foot"><div class="lbl">Com o apoio de</div><div class="logos">{logos}</div></div>
+<div class="foot"><div class="lbl">{footlbl}</div><div class="logos">{logos}</div></div>
 </div></body></html>"""
 
 COL = ["Consulado da Colômbia", "Min. Cultura da Colômbia", "CO-CREA", "EHTCV", "Fidjuz di Cabral"]
@@ -183,14 +183,14 @@ PAGES = {
         "Exposição <b>«Ciclo Histórico do Milho»</b> &amp; Degustação: menu de fusão Colômbia–Cabo Verde em torno do Milho",
         [("Data", "16 de Novembro"), ("Local", "Mercado Municipal<br>Praia, Santiago")],
         "Receitas para a Paz — memórias do milho, hospitalidade e ressignificação.",
-        COL, badge='<div class="badge"><img src="t_rotamilho.png" alt="A Rota do Milho"><div><small>Projeto Cultural</small><b>A Rota do Milho<br>Receitas para a Paz</b></div></div>'), 1080, 1350),
+        COL, badge='<div class="badge"><img src="t_rotamilho.png" alt="A Rota do Milho"><div><small>Projeto Cultural</small><b>A Rota do Milho<br>Receitas para a Paz</b></div></div>', footlbl="Promovido por"), 1080, 1350),
     "D_Laboratorio_Receitas_para_a_Paz": (single(
         "Laboratório Gastronómico",
         'Laboratório<br><span class="o">«Receitas<br>para a Paz»</span>',
         "Cozinhas <b>Colombiana</b> e <b>Cabo-Verdiana</b> em diálogo",
         [("19 Nov", "14h00 – 17h00"), ("20 Nov", "14h30 – 18h00"), ("Local", "EHTCV, Praia")],
         "Mesas-redondas, oficinas técnicas e rodas de memória em torno do milho, a nossa ponte afro-atlântica.",
-        COL, badge='<div class="badge"><img src="t_rotamilho.png" alt="A Rota do Milho"><div><small>Projeto Cultural</small><b>A Rota do Milho<br>Receitas para a Paz</b></div></div>'), 1080, 1350),
+        COL, badge='<div class="badge"><img src="t_rotamilho.png" alt="A Rota do Milho"><div><small>Projeto Cultural</small><b>A Rota do Milho<br>Receitas para a Paz</b></div></div>', footlbl="Promovido por"), 1080, 1350),
     "F_Encerramento_ECOWAS_Business_Forum": (single(
         "Encerramento Oficial GEW 2026",
         'ECOWAS–<br>Cabo Verde<br><span class="o">Business Forum</span>',
