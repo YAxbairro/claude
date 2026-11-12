@@ -9,7 +9,7 @@ HASHTAGS = "#GEW2026 &nbsp;#GEWCaboVerde &nbsp;#AJEC &nbsp;#NovaGeraçãoNovaAmb
 
 # Parceiros: logo (ficheiro) ou None -> etiqueta de texto até haver ficheiro oficial
 LOGOS = {
-    "CEDEAO": None,
+    "CEDEAO": "t_cedeao.png",
     "Consulado da Colômbia": "t_consulado.png",
     "Min. Cultura da Colômbia": "t_mincultura_col.png",
     "CO-CREA": "t_cocrea.png",
@@ -22,7 +22,7 @@ LOGOS = {
     "CEUS – Casa do Empreendedor": None,
 }
 
-SCALE = {"t_cocrea.png": .4, "t_mincultura_col.png": 1.3, "t_asicotur.png": .9, "t_unisantiago.png": 1.15, "t_ccb.png": .72, "t_consulado.png": 1.25, "t_ehtcv.png": 1.25, "t_fic.png": 1.1, "t_fidjuz.png": 1.35}
+SCALE = {"t_cocrea.png": .4, "t_mincultura_col.png": 1.3, "t_asicotur.png": .9, "t_unisantiago.png": 1.15, "t_ccb.png": .72, "t_consulado.png": 1.25, "t_ehtcv.png": 1.25, "t_fic.png": 1.1, "t_fidjuz.png": 1.35, "t_cedeao.png": 1.4}
 import math
 def ring_svg(size=600, op=1):
     cols = ['#2E5FA8','#5B4B9A','#F2A1B8','#3BA7B5','#C3125A','#9ED3E8','#13939C','#DDE3EA','#C8D82B','#E4E80F','#A8C531',
@@ -197,7 +197,7 @@ PAGES = {
         "Capacitação em <b>e-commerce</b>, sessões <b>B2B</b> com PME e Representações Diplomáticas da CEDEAO, e <b>Pitch Inverso</b> de Startups.",
         [("Data", "28 de Novembro"), ("Horário", "10h00 – 16h00"), ("Local", "Uni. Santiago<br>Polo Sucupira, Praia")],
         "A grande ponte entre Cabo Verde e a África Ocidental, no coração do maior mercado do país!",
-        ["CEDEAO", "Universidade de Santiago", "CEUS – Casa do Empreendedor"], accent="var(--teal)"), 1080, 1350),
+        ["CEDEAO", "Universidade de Santiago"], accent="var(--teal)"), 1080, 1350),
 }
 
 import json
