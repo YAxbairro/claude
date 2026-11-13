@@ -34,7 +34,7 @@ BACK = f"""<!doctype html><html><head><meta charset="utf-8"><style>{BASE}
 </div></body></html>"""
 
 ABERTURA = front(
-    '<img src="t_rotamilho_up.png" style="height:640px">',
+    '<img src="hd_rotamilho.png" style="height:640px">',
     [("t_consulado.png", 100), ("t_mincultura_col.png", 120), ("t_cocrea.png", 38), ("t_fidjuz.png", 130), ("t_ehtcv.png", 105)])
 
 ENC_CENTER = """
@@ -55,7 +55,7 @@ ENC_CSS = """
 .ev .d{font-weight:700;font-size:40px;letter-spacing:.2em;color:var(--navy);margin-top:36px}
 .strip{justify-content:center;gap:120px}
 """
-ENCERRAMENTO = front(ENC_CENTER, [("t_cedeao.png", 230), ("t_unisantiago.png", 190)], ENC_CSS)
+ENCERRAMENTO = front(ENC_CENTER, [("hd_cedeao.png", 230), ("hd_unisantiago.png", 190)], ENC_CSS)
 
 # ---------- mockup (camisola branca, frente e costas lado a lado)
 SHIRT = "M150 60 L255 20 Q300 70 345 20 L450 60 L560 170 L490 245 L445 205 L445 640 L155 640 L155 205 L110 245 L40 170 Z"
