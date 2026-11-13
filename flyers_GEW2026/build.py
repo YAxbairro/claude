@@ -76,13 +76,14 @@ h1 .o{color:var(--orange)}
 
 # ---------------------------------------------------------------- Cartaz principal (A4)
 AGENDA = [
-    ("16", "Nov", "Praia", "Abertura Oficial &amp; Fusão Gastronómica <span style=\"display:inline;font-size:inherit;font-weight:inherit;color:inherit;margin:0;white-space:nowrap\">Colômbia–Cabo Verde</span>"),
-    ("16–21", "Nov", "Sal", "TUI Futureshaper Santa Maria, Sal <span>Programa de Apoio na Preparação para a Certificação Turística</span>"),
-    ("18–21", "Nov", "São Vicente<br>Santo Antão", "<i>GEW Business &amp; Investment Network</i> <span>Feira Internacional de Cabo Verde (FIC)</span>"),
-    ("19–20", "Nov", "Praia", "Laboratório «Receitas para a Paz»"),
+    ("16", "Nov", "Praia", "Abertura Oficial GEW 2026 <span>Exposição «Ciclo Histórico do Milho» e Degustação (fusão Colômbia–Cabo Verde)</span>"),
+    ("16–21", "Nov", "Sal", "TUI Futureshaper Santa Maria, Sal <span>Programa de Apoio na Preparação para a Certificação Turística (Qualidade e Sustentabilidade)</span>"),
+    ("18–21", "Nov", "São Vicente<br>Santo Antão", "<i>GEW Business &amp; Investment Network</i> <span>XXIXª Edição da Feira Internacional de Cabo Verde (FIC) / GEW Investors Lounge (B2B da CEDEAO e Diáspora)</span>"),
+    ("19", "Nov", "Praia", "Laboratório «Receitas para a Paz» (Parte I) <span>Mesa-redonda e oficinas técnicas colombianas e cabo-verdianas com milho</span>"),
+    ("20", "Nov", "Praia", "Laboratório «Receitas para a Paz» (Parte II) <span>Oficinas de Conservação, Soberania Alimentar e Roda de Memória</span>"),
     ("21", "Nov", "Sal", "Workshop + Mini-exposição de Acesso ao Mercado Turístico <span>Valorização da oferta local</span>"),
     ("26", "Nov", "Praia", "IV Jornada de Cooperação Turística Internacional <span>Gala Cultural: Encontro gastronómico (fusão sabores Cabo Verde e Colômbia)</span>"),
-    ("28", "Nov", "Praia", "Encerramento Oficial <span><i>ECOWAS–Cabo Verde Business Forum</i> (Capacitação e B2B)</span>"),
+    ("28", "Nov", "Praia", "Encerramento Oficial <span><i>ECOWAS–Cabo Verde Business Forum</i> (Capacitação e B2B) e Pitch Inverso Startups</span>"),
 ]
 
 def poster():
@@ -109,7 +110,7 @@ h1{{font-size:98px;margin-top:22px}}
 .isl div{{font-size:26px;font-weight:700;margin-top:6px;white-space:nowrap}}
 .isl em{{font-style:normal;color:var(--orange);margin:0 10px}}
 .agenda{{margin-top:44px;border-top:1px solid rgba(255,255,255,.18)}}
-.row{{display:grid;grid-template-columns:150px 180px 1fr;align-items:center;padding:27px 0;border-bottom:1px solid rgba(255,255,255,.18)}}
+.row{{display:grid;grid-template-columns:128px 168px 1fr;align-items:center;padding:18px 0;border-bottom:1px solid rgba(255,255,255,.18)}}
 .row .d b{{font-size:36px;font-weight:900;line-height:1;color:#fff}}
 .row .d small{{display:block;font-size:14px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--orange);margin-top:4px}}
 .row .loc{{font-size:15px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}}
