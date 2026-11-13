@@ -56,7 +56,7 @@ h1{{font-size:68px;margin-top:44px;line-height:1.06}}
  <div class="eyebrow">Global Entrepreneurship Week</div>
  <h1>{TITLE}<span class="o">Cabo Verde 2026</span></h1>
  <div class="tag">Uma nova geração,<br>uma nova ambição.</div>
- <div class="date"><small>Datas</small><b>16 — 22 NOV<br>2026</b></div>
+ <div class="date"><small>Datas</small><b>16 — 28 NOV<br>2026</b></div>
  <div class="hash">#GEW2026 &nbsp;#GEWCaboVerde<br>#AJEC &nbsp;#NovaGeraçãoNovaAmbição</div>
 </div></div></body></html>"""
 
@@ -80,7 +80,7 @@ h1{{font-size:150px;margin-top:40px}} h1 .o{{display:inline}}
 <div class="body">
  <div class="eyebrow">Global Entrepreneurship Week</div>
  <h1>Semana Global de Empreendedorismo<br><span class="o">Cabo Verde 2026</span></h1>
- <div class="row"><div class="date"><small>Datas</small><b>16 — 22 NOV 2026</b></div><div class="tag">Uma nova geração,<br>uma nova ambição.</div></div>
+ <div class="row"><div class="date"><small>Datas</small><b>16 — 28 NOV 2026</b></div><div class="tag">Uma nova geração,<br>uma nova ambição.</div></div>
  <div class="hash">#GEW2026 &nbsp;#GEWCaboVerde &nbsp;#AJEC &nbsp;#NovaGeraçãoNovaAmbição</div>
 </div></div></body></html>"""
 
