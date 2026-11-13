@@ -76,12 +76,13 @@ h1 .o{color:var(--orange)}
 
 # ---------------------------------------------------------------- Cartaz principal (A4)
 AGENDA = [
-    ("16", "Nov", "Praia", "Abertura Oficial & Fusão Gastronómica Colômbia–Cabo Verde"),
-    ("16–21", "Nov", "Sal", "TUI Futureshaper <span>Certificação Turística</span>"),
-    ("18–21", "Nov", "São Vicente", "<i>GEW Business & Investment Network</i> <span>FIC</span>"),
+    ("16", "Nov", "Praia", "Abertura Oficial &amp; Fusão Gastronómica <span style=\"display:inline;font-size:inherit;font-weight:inherit;color:inherit;margin:0;white-space:nowrap\">Colômbia–Cabo Verde</span>"),
+    ("16–21", "Nov", "Sal", "TUI Futureshaper Santa Maria, Sal <span>Programa de Apoio na Preparação para a Certificação Turística</span>"),
+    ("18–21", "Nov", "São Vicente<br>Santo Antão", "<i>GEW Business &amp; Investment Network</i> <span>Feira Internacional de Cabo Verde (FIC)</span>"),
     ("19–20", "Nov", "Praia", "Laboratório «Receitas para a Paz»"),
-    ("26", "Nov", "Praia", "IV Jornada de Cooperação Turística Internacional"),
-    ("28", "Nov", "Praia", "Encerramento Oficial <span><i>ECOWAS–Cabo Verde Business Forum</i></span>"),
+    ("21", "Nov", "Sal", "Workshop + Mini-exposição de Acesso ao Mercado Turístico <span>Valorização da oferta local</span>"),
+    ("26", "Nov", "Praia", "IV Jornada de Cooperação Turística Internacional <span>Gala Cultural: Encontro gastronómico (fusão sabores Cabo Verde e Colômbia)</span>"),
+    ("28", "Nov", "Praia", "Encerramento Oficial <span><i>ECOWAS–Cabo Verde Business Forum</i> (Capacitação e B2B)</span>"),
 ]
 
 def poster():
@@ -108,13 +109,13 @@ h1{{font-size:98px;margin-top:22px}}
 .isl div{{font-size:26px;font-weight:700;margin-top:6px;white-space:nowrap}}
 .isl em{{font-style:normal;color:var(--orange);margin:0 10px}}
 .agenda{{margin-top:44px;border-top:1px solid rgba(255,255,255,.18)}}
-.row{{display:grid;grid-template-columns:150px 180px 1fr;align-items:center;padding:20px 0;border-bottom:1px solid rgba(255,255,255,.18)}}
+.row{{display:grid;grid-template-columns:150px 180px 1fr;align-items:center;padding:27px 0;border-bottom:1px solid rgba(255,255,255,.18)}}
 .row .d b{{font-size:36px;font-weight:900;line-height:1;color:#fff}}
 .row .d small{{display:block;font-size:14px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--orange);margin-top:4px}}
 .row .loc{{font-size:15px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}}
 .row .t{{font-size:24px;font-weight:600;line-height:1.25}}
 .row .t span{{display:block;font-size:18px;font-weight:500;color:#AFC0D6;margin-top:3px}}
-.hashes{{margin-top:auto;margin-bottom:28px;font-size:21px}}
+.hashes{{margin-top:auto;margin-bottom:56px;font-size:21px}}
 .foot .logos+.logos{{margin-top:16px}}
 </style></head><body><div class="page"><div class="grid"></div>
 <div class="ring a">{ring_svg(600,.92)}</div>
@@ -130,7 +131,6 @@ h1{{font-size:98px;margin-top:22px}}
  <div class="agenda">{rows}</div>
  <div class="hashes hash">{HASHTAGS}</div>
 </div>
-<div class="foot"><div class="lbl">Parceiros</div><div class="logos">{logos1}</div><div class="logos">{logos2}</div></div>
 </div></body></html>"""
 
 # ---------------------------------------------------------------- Flyers individuais (1080x1350)
