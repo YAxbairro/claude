@@ -5,263 +5,279 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Levy Travel Santiago</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Levy Travel — Incoming &amp; Representações. Excursões, caminhadas e transfers na Ilha de Santiago, Cabo Verde, com recolha no seu hotel em Praia.">
-<meta name="theme-color" content="#0a1514">
+<meta name="description" content="Levy Travel — excursões, caminhadas e transfers na Ilha de Santiago, Cabo Verde, com recolha no seu hotel em Praia.">
+<meta name="theme-color" content="#2cb5bf">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
-<div class="grain" aria-hidden="true"></div>
-
-<!-- Abertura -->
-<div class="loader" id="loader" aria-hidden="true">
-  <svg class="loader__islands" id="loaderIslands" viewBox="0 0 1000 900"></svg>
-  <div class="loader__row">
-    <span>Levy Travel</span>
-    <span class="loader__name" id="loaderName">Cabo Verde</span>
-    <span class="loader__count"><b id="loaderCount">000</b></span>
-  </div>
-</div>
-
-<div class="cursor" id="cursor" aria-hidden="true"><i></i><span id="cursorLabel"></span></div>
-
-<!-- Barra -->
-<header class="bar" id="bar">
-  <a class="brand" href="#topo" aria-label="Levy Travel, início">
-    <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="21.5"/><path d="M12.5 26.5c4.5 8 18.5 8 23 0"/><path d="M15.5 17.5c3-4 8-4 11 0"/></svg>
-    <span>Levy Travel</span>
-  </a>
-  <p class="bar__clock" aria-live="off"><span>Praia</span> <b id="clock">--:--</b> <span>UTC−1</span></p>
-  <div class="bar__right">
-    <button class="sound" id="sound" aria-pressed="false" aria-label="Ligar som do mar"><i></i><i></i><i></i><i></i><span>Som</span></button>
-    <a class="pill pill--light" href="#reservar" data-magnetic><span>Reservar</span></a>
-    <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="menu"><span>Menu</span><i></i></button>
+<header class="nav" id="nav">
+  <div class="nav__in">
+    <a class="logo" href="#topo" aria-label="Levy Travel, início">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="21.5"/><path d="M12.5 26.5c4.5 8 18.5 8 23 0"/><path d="M15.5 17.5c3-4 8-4 11 0"/></svg>
+      <span><b>Levy Travel</b><small>Cabo Verde</small></span>
+    </a>
+    <nav class="nav__links" aria-label="Principal">
+      <a href="#excursoes">Excursões</a>
+      <a href="#transfers">Transfers</a>
+      <a href="#cabo-verde">Cabo Verde</a>
+      <a href="#como-funciona">Como funciona</a>
+    </nav>
+    <a class="btn btn--coral btn--sm" href="#reservar">Reservar</a>
+    <button class="burger" id="burger" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu"><i></i><i></i><i></i></button>
   </div>
 </header>
 
 <div class="menu" id="menu" hidden>
-  <div class="menu__media" aria-hidden="true"><img id="menuImg" src="assets/img/tarrafal-praia.jpg" alt=""></div>
-  <nav class="menu__nav" aria-label="Menu">
-    <a href="#ilhas" data-img="interior">O arquipélago</a>
-    <a href="#excursoes" data-img="pico-1">Excursões</a>
-    <a href="#destinos" data-img="cv-vista">Destinos</a>
-    <a href="#transfers" data-img="praia-rua">Transfers</a>
-    <a href="#reservar" data-img="tarrafal-botes">Reservar</a>
+  <nav aria-label="Menu">
+    <a href="#excursoes">Excursões</a>
+    <a href="#transfers">Transfers</a>
+    <a href="#cabo-verde">Cabo Verde</a>
+    <a href="#como-funciona">Como funciona</a>
+    <a href="#reservar">Reservar</a>
   </nav>
-  <p class="menu__foot">Incoming &amp; Representações · Ilha de Santiago, Cabo Verde</p>
 </div>
 
 <main id="topo">
 
-<!-- 1 · CAPA: água viva -->
-<section class="hero" id="hero">
-  <canvas class="hero__gl" id="heroGL" aria-hidden="true"></canvas>
-  <img class="hero__fallback" src="assets/img/hero.jpg" alt="Baía do Tarrafal vista de cima: água turquesa e botes de pesca">
-  <h1 class="hero__title"><span class="sr">Levy Travel —</span> <span class="hero__word">Santiago</span><span class="sr">, Cabo Verde</span></h1>
-  <div class="hero__ui">
-    <p class="hero__lead" data-hero>Excursões, caminhadas e transfers na ilha onde Cabo Verde começou.</p>
-    <p class="hero__hint" data-hero><span class="hero__hint-dot"></span><span id="heroHint">Passe o rato pela água</span></p>
-    <dl class="hero__coords" data-hero>
-      <div><dt>Lat</dt><dd>15°04′N</dd></div>
-      <div><dt>Lon</dt><dd>23°37′O</dd></div>
-      <div><dt>Recolha</dt><dd>Hotel em Praia</dd></div>
-    </dl>
-  </div>
-</section>
-
-<!-- 2 · Manifesto -->
-<section class="intro" id="intro">
-  <div class="wrap">
-    <p class="kicker" data-reveal>Bem-vindo a Cabo Verde com a Levy Travel</p>
-    <p class="intro__text" id="introText">Dez ilhas de origem <span class="inl" style="background-image:url(assets/img/pico-2.jpg)"></span> vulcânica no meio do Atlântico, a 500 km da costa do Senegal. Praias de areia branca, montanhas escarpadas <span class="inl" style="background-image:url(assets/img/vale-2.jpg)"></span> e vales férteis. Um ponto de encontro entre a África e a Europa, com a <em>morabeza</em> de quem sabe receber.</p>
-    <div class="intro__facts">
-      <dl data-reveal><dt>Ilhas</dt><dd>10</dd><p>Nove habitadas, e vários ilhéus.</p></dl>
-      <dl data-reveal><dt>Barlavento</dt><dd>6</dd><p>Santo Antão, São Vicente, Santa Luzia, São Nicolau, Sal e Boa Vista.</p></dl>
-      <dl data-reveal><dt>Sotavento</dt><dd>4</dd><p>Maio, Santiago, Fogo e Brava.</p></dl>
-      <dl data-reveal><dt>Língua</dt><dd class="it">Crioulo</dd><p>E a música: Morna e Funaná.</p></dl>
-    </div>
-  </div>
-</section>
-
-<!-- 3 · O arquipélago em 3D + excursões -->
-<section class="stage" id="ilhas" aria-label="O arquipélago e as excursões">
-  <div class="stage__pin" id="stagePin">
-    <canvas class="stage__gl" id="islandGL" aria-hidden="true"></canvas>
-    <div class="stage__labels" id="labels" aria-hidden="true"></div>
-
-    <div class="stage__chapter" id="chapter">
-      <p class="kicker" id="chapterKicker">O arquipélago</p>
-      <h2 class="stage__title" id="chapterTitle">Dez ilhas a flutuar no Atlântico.</h2>
-      <p class="stage__sub" id="chapterSub">Contornos reais de cada ilha, relevo exagerado para se ler a montanha.</p>
-    </div>
-
-    <nav class="stage__index" id="excursoes" aria-label="Excursões">
-      <p class="stage__index-head"><span>Excursões</span><span>11</span></p>
-      <ol id="tourIndex"></ol>
-    </nav>
-
-    <article class="hud" id="hud" aria-live="polite" hidden>
-      <div class="hud__img"><img id="hudImg" src="" alt=""></div>
-      <div class="hud__body">
-        <p class="hud__tag mono" id="hudTag"></p>
-        <h3 class="hud__title" id="hudTitle"></h3>
-        <p class="hud__lead" id="hudLead"></p>
-        <dl class="hud__meta">
-          <div><dt>Horário</dt><dd id="hudHours"></dd></div>
-          <div><dt>Encontro</dt><dd id="hudMeet"></dd></div>
-          <div><dt>Esforço</dt><dd id="hudLevel"></dd></div>
-        </dl>
-        <div class="hud__foot">
-          <p class="hud__price"><b id="hudPrice"></b><span>€ por pessoa · mín. 2</span></p>
-          <button class="pill pill--ember" id="hudOpen" data-magnetic><span>Ver excursão</span></button>
+  <!-- CAPA: o nome da ilha entre a água e os barcos -->
+  <section class="hero" aria-labelledby="heroTitle">
+    <div class="hero__card" id="heroCard">
+      <div class="hero__layer" data-layer="photo"><img src="assets/img/hero.jpg" alt="Baía do Tarrafal vista de cima, com botes de pesca na água turquesa" fetchpriority="high"></div>
+      <h1 class="hero__word" id="heroTitle"><span class="sr">Levy Travel: excursões na Ilha de Santiago, Cabo Verde</span><span class="hero__letters" id="heroLetters" aria-hidden="true"><span>S</span><span>A</span><span>N</span><span>T</span><span>I</span><span>A</span><span>G</span><span>O</span></span></h1>
+      <div class="hero__layer hero__layer--fg" data-layer="photo" aria-hidden="true"><img src="assets/img/hero-fg.webp" alt=""></div>
+      <svg class="gulls" viewBox="0 0 400 200" aria-hidden="true">
+        <path class="gull gull--1" d="M0 12 C8 2 16 2 22 10 C28 2 36 2 44 12 C36 8 28 9 22 14 C16 9 8 8 0 12Z"/>
+        <path class="gull gull--2" d="M0 9 C6 2 12 2 16 8 C20 2 26 2 32 9 C26 6 20 7 16 10 C12 7 6 6 0 9Z"/>
+      </svg>
+      <div class="hero__shade"></div>
+      <div class="hero__content">
+        <p class="hero__kicker"><span class="dot"></span>Ilha de Santiago · Cabo Verde</p>
+        <p class="hero__lead">Excursões e caminhadas com guia, a partir do seu hotel em Praia.</p>
+        <div class="hero__actions">
+          <a class="btn btn--white" href="#excursoes">Ver as 11 excursões <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
+          <a class="btn btn--glass" href="#transfers">Transfers do aeroporto</a>
         </div>
       </div>
-    </article>
+    </div>
+  </section>
 
-    <div class="stage__progress" aria-hidden="true"><i id="stageBar"></i></div>
-  </div>
-</section>
+  <!-- Vantagens -->
+  <section class="perks" aria-label="Incluído em todas as excursões">
+    <ul class="wrap perks__list">
+      <li class="perk perk--sun"><span class="perk__ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></span><div><b>Recolha no hotel</b><small>Recepção do seu hotel em Praia</small></div></li>
+      <li class="perk perk--coral"><span class="perk__ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></span><div><b>Guia em português</b><small>Em todas as excursões</small></div></li>
+      <li class="perk perk--leaf"><span class="perk__ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h16v10H4z"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/></svg></span><div><b>Entradas incluídas</b><small>Nos pontos históricos</small></div></li>
+      <li class="perk perk--sea"><span class="perk__ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10M7 12h10M7 17h6"/><rect x="3" y="3" width="18" height="18" rx="4"/></svg></span><div><b>A partir de 35 €</b><small>Por pessoa, mínimo 2 pessoas</small></div></li>
+    </ul>
+  </section>
 
-<!-- 4 · Destinos -->
-<section class="dest" id="destinos" aria-label="Destinos">
-  <div class="dest__pin">
-    <canvas class="dest__gl" id="destGL" aria-hidden="true"></canvas>
-    <div class="dest__shade"></div>
-    <div class="dest__fallback" id="destFallback"></div>
-    <div class="dest__ui">
-      <p class="kicker kicker--light">Destinos · Santiago</p>
-      <ul class="dest__list" id="destList"></ul>
-      <h2 class="dest__name" id="destName" aria-live="polite">Tarrafal</h2>
-      <div class="dest__row">
-        <p class="dest__desc" id="destDesc"></p>
-        <p class="dest__coord mono" id="destCoord"></p>
-        <button class="pill pill--light" id="destOpen" data-magnetic><span>Ver excursão</span></button>
+  <!-- EXCURSÕES -->
+  <section class="tours" id="excursoes">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Programa Santiago</p>
+        <h2 class="title">Escolha a sua excursão</h2>
+        <p class="sub">Preços por pessoa, com mínimo de 2 pessoas. Toque numa excursão para ver o programa completo.</p>
       </div>
     </div>
-  </div>
-</section>
+    <div class="filters" id="filters">
+      <div class="wrap filters__in">
+        <div class="chips" role="group" aria-label="Filtrar excursões">
+          <button class="chip is-on" data-cat="all" aria-pressed="true">Todas</button>
+          <button class="chip" data-cat="cultura" aria-pressed="false"><i class="c-coral"></i>Cultura e história</button>
+          <button class="chip" data-cat="caminhada" aria-pressed="false"><i class="c-leaf"></i>Caminhadas</button>
+          <button class="chip" data-cat="mar" aria-pressed="false"><i class="c-sea"></i>Praia e mar</button>
+          <span class="chips__sep" aria-hidden="true"></span>
+          <button class="chip" data-len="Meio dia" aria-pressed="false">Meio dia</button>
+          <button class="chip" data-len="Dia inteiro" aria-pressed="false">Dia inteiro</button>
+        </div>
+        <label class="sort"><span class="sr">Ordenar</span>
+          <select id="sort">
+            <option value="rec">Recomendadas</option>
+            <option value="asc">Preço: mais baixo</option>
+            <option value="desc">Preço: mais alto</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <div class="wrap">
+      <p class="count" id="count" aria-live="polite">11 excursões</p>
+      <ul class="grid" id="grid"></ul>
+      <div class="empty" id="empty" hidden>
+        <p>Nenhuma excursão com estes filtros.</p>
+        <button class="btn btn--ink btn--sm" id="clearFilters">Ver todas</button>
+      </div>
+    </div>
+  </section>
 
-<!-- 5 · Transfers -->
-<section class="tr" id="transfers" data-mode="day">
-  <canvas class="tr__stars" id="stars" aria-hidden="true"></canvas>
-  <div class="wrap tr__grid">
-    <div class="tr__head">
-      <p class="kicker" data-reveal>Preço de transfers</p>
-      <h2 class="h2" data-split>Aterrou na Praia. <em>Nós tratamos do resto.</em></h2>
-      <p class="tr__note" data-reveal>Por pessoa, mínimo de 2 pessoas. A tarifa noturna aplica-se às chegadas e partidas de noite.</p>
-      <div class="tr__controls" data-reveal>
-        <button class="daynight" id="dayNight" aria-pressed="false" aria-label="Mudar para tarifa noturna">
-          <span class="daynight__track"><i class="daynight__orb"></i></span>
-          <span class="daynight__label"><b id="dnLabel">Tarifa diurna</b><small>Tocar para mudar</small></span>
-        </button>
-        <div class="pax">
-          <label for="pax">Pessoas</label>
+  <!-- COMO FUNCIONA -->
+  <section class="steps" id="como-funciona">
+    <div class="wrap">
+      <div class="head head--light">
+        <p class="eyebrow">Como funciona</p>
+        <h2 class="title">Reservar é simples</h2>
+      </div>
+      <ol class="steps__list">
+        <li class="reveal"><span class="steps__n">1</span><h3>Escolha</h3><p>Escolha a excursão ou o transfer, a data e quantas pessoas são.</p></li>
+        <li class="reveal"><span class="steps__n">2</span><h3>Envie o pedido</h3><p>O site prepara o pedido com o preço total, pronto a enviar à Levy Travel.</p></li>
+        <li class="reveal"><span class="steps__n">3</span><h3>Confirmamos</h3><p>A Levy Travel responde a confirmar a reserva.</p></li>
+        <li class="reveal"><span class="steps__n">4</span><h3>Partida às 8h50</h3><p>O guia espera por si na recepção do seu hotel em Praia.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- TRANSFERS -->
+  <section class="transfers" id="transfers">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Aeroporto · Hotel</p>
+        <h2 class="title">Transfers</h2>
+        <p class="sub">Preço por pessoa, mínimo de 2 pessoas. A tarifa noturna aplica-se a chegadas e partidas de noite.</p>
+      </div>
+      <div class="tcontrols">
+        <div class="seg" role="group" aria-label="Tarifa">
+          <button class="seg__b is-on" data-rate="day" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>Diurna</button>
+          <button class="seg__b" data-rate="night" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>Noturna</button>
+        </div>
+        <div class="stepper">
+          <span>Pessoas</span>
           <button type="button" id="paxMinus" aria-label="Menos uma pessoa">−</button>
-          <input id="pax" type="number" min="2" max="20" value="2" inputmode="numeric">
+          <output id="paxOut" aria-live="polite">2</output>
           <button type="button" id="paxPlus" aria-label="Mais uma pessoa">+</button>
         </div>
       </div>
+      <ul class="tcards" id="tcards"></ul>
     </div>
-    <ul class="tr__list" id="trList"></ul>
-  </div>
-</section>
+  </section>
 
-<!-- 6 · Morabeza -->
-<section class="mora" id="mora" aria-label="Morabeza">
-  <div class="mora__pin">
-    <img class="mora__photo" src="assets/img/tarrafal-botes.jpg" alt="Botes de pesca coloridos na areia do Tarrafal" loading="lazy">
-    <div class="mora__mask" id="moraMask"><span id="moraWord">Morabeza</span></div>
-    <div class="mora__def" id="moraDef">
-      <p class="mono">morabeza · s.f. · crioulo cabo-verdiano</p>
-      <p class="mora__def-text">A arte de bem receber.</p>
-    </div>
-  </div>
-</section>
-
-<!-- 7 · Reservar -->
-<section class="book" id="reservar">
-  <div class="wrap">
-    <p class="kicker" data-reveal>Pedido de reserva</p>
-    <form class="sentence" id="bookForm" novalidate>
-      <p>
-        Olá, chamo-me
-        <span class="slot"><label class="sr" for="fName">O seu nome</label><input id="fName" name="name" type="text" autocomplete="name" placeholder="o seu nome" size="10"></span>.
-        Queremos
-        <span class="slot slot--select"><label class="sr" for="fTour">Excursão ou transfer</label><select id="fTour" name="tour"></select></span>
-        no dia
-        <span class="slot"><label class="sr" for="fDate">Data</label><input id="fDate" name="date" type="date"></span>,
-        somos
-        <span class="slot slot--num"><label class="sr" for="fPax">Número de pessoas</label><input id="fPax" name="pax" type="number" min="2" max="40" value="2" inputmode="numeric"></span>
-        pessoas e estamos no hotel
-        <span class="slot"><label class="sr" for="fHotel">Hotel em Praia</label><input id="fHotel" name="hotel" type="text" placeholder="nome do hotel" size="12"></span>.
-      </p>
-      <div class="sentence__foot">
-        <p class="sentence__total"><span class="mono">Total estimado</span><b id="fTotal">—</b></p>
-        <button class="pill pill--ember pill--xl" type="submit" data-magnetic><span>Preparar pedido</span></button>
-      </div>
-      <p class="sentence__error" id="fError" role="alert" hidden></p>
-      <div class="receipt" id="fResult" hidden>
-        <pre id="fSummary" tabindex="0"></pre>
-        <div class="receipt__actions">
-          <button class="pill pill--dark" type="button" id="fCopy"><span>Copiar pedido</span></button>
-          <a class="pill pill--ember" id="fSend" hidden target="_blank" rel="noopener"><span>Enviar</span></a>
+  <!-- CABO VERDE -->
+  <section class="cv" id="cabo-verde">
+    <div class="wrap cv__grid">
+      <div class="cv__text reveal">
+        <p class="eyebrow">Bem-vindo a Cabo Verde</p>
+        <h2 class="title">Dez ilhas no meio do Atlântico</h2>
+        <p>Cabo Verde é um arquipélago de dez ilhas, nove delas habitadas, e vários ilhéus, a cerca de 500 km da costa do Senegal. De origem vulcânica, divide-se em dois grupos.</p>
+        <div class="cv__groups">
+          <div><h3><i class="c-sea"></i>Barlavento · norte</h3><p>Santo Antão, São Vicente, Santa Luzia, São Nicolau, Sal e Boa Vista.</p></div>
+          <div><h3><i class="c-coral"></i>Sotavento · sul</h3><p>Maio, <b>Santiago</b> (com a capital, Praia), Fogo e Brava.</p></div>
         </div>
-        <p class="receipt__note" id="fNote"></p>
+        <p>Um ponto de encontro entre a África e a Europa, que se sente na comida, no crioulo e na música: a Morna e o Funaná levam a <b>morabeza</b>, a arte de bem receber, a todo o mundo.</p>
       </div>
-    </form>
-  </div>
-</section>
+      <figure class="cv__map reveal">
+        <svg id="cvMap" viewBox="0 0 600 560" role="img" aria-label="Mapa das ilhas de Cabo Verde com Santiago em destaque"></svg>
+        <figcaption>Santiago, no grupo de Sotavento</figcaption>
+      </figure>
+    </div>
+  </section>
 
+  <!-- RESERVAR -->
+  <section class="book" id="reservar">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Pedido de reserva</p>
+        <h2 class="title">Reservar</h2>
+        <p class="sub">Preencha o pedido. Mostramos o preço total e preparamos a mensagem para enviar à Levy Travel.</p>
+      </div>
+      <div class="book__grid">
+        <form class="form" id="form" novalidate>
+          <div class="f f--full">
+            <label for="fService">Excursão ou transfer</label>
+            <select id="fService" required></select>
+          </div>
+          <div class="f">
+            <label for="fDate">Data</label>
+            <input id="fDate" type="date" required>
+          </div>
+          <div class="f">
+            <label for="fPax">Pessoas</label>
+            <input id="fPax" type="number" inputmode="numeric" min="2" max="40" value="2" required>
+          </div>
+          <div class="f">
+            <label for="fName">Nome</label>
+            <input id="fName" type="text" autocomplete="name" placeholder="O seu nome" required>
+          </div>
+          <div class="f">
+            <label for="fHotel">Hotel em Praia <span>(opcional)</span></label>
+            <input id="fHotel" type="text" placeholder="Onde o vamos buscar">
+          </div>
+          <div class="f f--full">
+            <label for="fMsg">Mensagem <span>(opcional)</span></label>
+            <textarea id="fMsg" rows="3" placeholder="Pedidos especiais, passeio da tarde, número do voo…"></textarea>
+          </div>
+          <p class="form__err f--full" id="fErr" role="alert" hidden></p>
+          <button class="btn btn--coral btn--lg f--full" type="submit">Preparar pedido</button>
+        </form>
+        <aside class="summary" aria-live="polite">
+          <p class="summary__label">Resumo</p>
+          <p class="summary__service" id="sService">Escolha uma excursão ou transfer</p>
+          <dl>
+            <div><dt>Data</dt><dd id="sDate">—</dd></div>
+            <div><dt>Pessoas</dt><dd id="sPax">2</dd></div>
+            <div><dt>Preço por pessoa</dt><dd id="sEach">—</dd></div>
+          </dl>
+          <p class="summary__total"><span>Total estimado</span><b id="sTotal">—</b></p>
+          <div class="result" id="result" hidden>
+            <pre id="resultText" tabindex="0"></pre>
+            <div class="result__actions">
+              <button class="btn btn--white btn--sm" type="button" id="copy">Copiar pedido</button>
+              <a class="btn btn--coral btn--sm" id="send" hidden target="_blank" rel="noopener">Enviar</a>
+            </div>
+            <p class="result__note" id="resultNote"></p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
 </main>
 
 <footer class="foot">
-  <div class="wrap">
-    <p class="foot__word" id="footWord" aria-label="Levy Travel">Levy Travel</p>
-    <div class="foot__cols">
-      <div><p class="mono">Levy Travel</p><p>Incoming &amp; Representações<br>Praia, Ilha de Santiago<br>Cabo Verde</p></div>
-      <div><p class="mono">Explorar</p><a href="#ilhas">O arquipélago</a><a href="#excursoes">Excursões</a><a href="#transfers">Transfers</a><a href="#reservar">Reservar</a></div>
-      <div><p class="mono">Ilhas</p><p>Santo Antão · São Vicente · Santa Luzia · São Nicolau · Sal · Boa Vista · Maio · <b>Santiago</b> · Fogo · Brava</p></div>
+  <div class="wrap foot__grid">
+    <div class="foot__brand">
+      <p class="foot__logo">Levy Travel</p>
+      <p>Incoming &amp; Representações<br>Praia, Ilha de Santiago, Cabo Verde</p>
     </div>
-    <div class="foot__bottom">
-      <span>© <span id="year">2026</span> Levy Travel</span>
-      <button class="ulink" id="creditsOpen">Créditos das fotografias</button>
-      <a class="ulink" href="#topo">Voltar ao topo</a>
-    </div>
+    <nav class="foot__links" aria-label="Rodapé">
+      <a href="#excursoes">Excursões</a>
+      <a href="#transfers">Transfers</a>
+      <a href="#cabo-verde">Cabo Verde</a>
+      <a href="#reservar">Reservar</a>
+    </nav>
+  </div>
+  <div class="wrap foot__bottom">
+    <span>© <span id="year">2026</span> Levy Travel</span>
+    <button class="foot__credits" id="creditsBtn">Créditos das fotografias</button>
   </div>
 </footer>
 
-<!-- Detalhe -->
-<div class="detail" id="detail" hidden>
-  <div class="detail__panel" role="dialog" aria-modal="true" aria-labelledby="dTitle" tabindex="-1">
-    <button class="detail__close" data-close aria-label="Fechar"><span>Fechar</span><i></i></button>
-    <div class="detail__media"><img id="dImg" src="" alt=""></div>
-    <div class="detail__scroll" id="dBody" data-lenis-prevent></div>
+<!-- Detalhe da excursão -->
+<div class="modal" id="modal" hidden>
+  <div class="modal__bg" data-close></div>
+  <div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="mTitle" tabindex="-1">
+    <button class="modal__x" data-close aria-label="Fechar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="modal__scroll" id="mBody"></div>
+    <div class="modal__bar" id="mBar"></div>
   </div>
 </div>
 
-<div class="detail detail--credits" id="credits" hidden>
-  <div class="detail__panel" role="dialog" aria-modal="true" aria-labelledby="creditsTitle" tabindex="-1">
-    <button class="detail__close" data-close aria-label="Fechar"><span>Fechar</span><i></i></button>
-    <div class="detail__scroll" data-lenis-prevent>
-      <div class="detail__content">
-        <h2 class="detail__title" id="creditsTitle">Créditos</h2>
-        <p>Fotografias do programa da Levy Travel e da Wikimedia Commons, usadas sob licença livre; autor e licença na página de cada uma. Contornos das ilhas: Natural Earth (domínio público).</p>
+<div class="modal" id="credits" hidden>
+  <div class="modal__bg" data-close></div>
+  <div class="modal__box modal__box--sm" role="dialog" aria-modal="true" aria-labelledby="cTitle" tabindex="-1">
+    <button class="modal__x" data-close aria-label="Fechar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="modal__scroll">
+      <div class="m__pad">
+        <h2 class="m__title" id="cTitle">Créditos</h2>
+        <p class="m__p">Fotografias do programa da Levy Travel e da Wikimedia Commons, usadas sob licença livre; autor e licença na página de cada uma. Contornos das ilhas: Natural Earth.</p>
         <ul class="credits" id="creditsList"></ul>
       </div>
     </div>
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="assets/js/data.js"></script>
-<script src="assets/js/gl.js"></script>
-<script src="assets/js/island.js"></script>
 <script src="assets/js/main.js"></script>
 </body>
 </html>
