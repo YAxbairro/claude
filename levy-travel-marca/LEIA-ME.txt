@@ -1,0 +1,76 @@
+LEVY TRAVEL · ENTREGA DA MARCA
+Versão 1 · Novembro 2026
+=====================================================================
+
+Comece pelo manual:  07-manual/levy-travel_manual-de-marca.pdf
+
+PASTAS
+---------------------------------------------------------------------
+01-logo        Logótipo oficial. Texto convertido em contornos (não precisa de fontes).
+               svg/  vetorial, para gráfica, sinalética e web
+               png/  4000 px, fundo transparente, para Office e redes
+               pdf/  vetorial, para gráfica
+               Formatos: horizontal (principal), empilhado, símbolo
+               Cores:    cor, preto, branco, negativo (para fundo Verde Levy)
+
+02-papelaria   PDF prontos para a gráfica, com 3 mm de sangria
+               cartão de visita 85 × 55 mm (frente e verso)
+               papel de carta A4 · envelope DL 220 × 110 mm
+               pasta 230 × 310 mm (frente e verso)
+
+03-impressao   flyer A5 148 × 210 mm (frente e verso) · sangria 3 mm
+               roll-up 850 × 2000 mm, escala 1:1 · sangria 5 mm
+               outdoor 8 × 3 m, ficheiro em escala 1:10 (800 × 300 mm) · sangria 5 mm
+                 → a gráfica amplia 10× (imagem com resolução suficiente para o tamanho final)
+
+04-digital     instagram/  posts 4:5 e stories 9:16 (2160 px de largura)
+               banners/    banner 16:9 e banner 1920 × 720 (a 2×)
+
+05-mockups     viaturas, papelaria e merchandising (para apresentação)
+
+06-fotografia  fotografias da campanha em alta resolução
+
+CORES
+---------------------------------------------------------------------
+Verde Levy  #0E3F1D  RGB 14 63 29     CMYK 78 0 54 75
+Cinza Levy  #5F6E62  RGB 95 110 98    CMYK 14 0 11 57
+Mar         #1E5D7A  RGB 30 93 122    CMYK 75 24 0 52
+Sol         #E8A33A  RGB 232 163 58   CMYK 0 30 75 9
+Basalto     #23272A  RGB 35 39 42     CMYK 17 7 0 84
+Sal         #F5F6F2  RGB 245 246 242  CMYK 0 0 2 4
+
+TIPOGRAFIA (gratuita)
+---------------------------------------------------------------------
+Lexend (títulos e logo)  https://fonts.google.com/specimen/Lexend
+Inter  (texto)           https://fonts.google.com/specimen/Inter
+
+ANTES DE IMPRIMIR · A PREENCHER PELO CLIENTE
+---------------------------------------------------------------------
+Os campos entre [ ] são marcadores e têm de ser substituídos:
+  [telefone]       cartão, papel de carta, pasta, flyer, roll-up
+  [morada]         papel de carta, envelope, pasta
+  [Nome Apelido]   cartão de visita (um por pessoa)
+  [email]          cartão de visita
+O site indicado é levytravel.cv. Confirme que é o domínio correto.
+Os preços de transfer no flyer (Praia 10/20 €, Cidade Velha 20/30 €,
+Tarrafal 40/50 €) e as datas e preços dos posts são exemplos tirados do
+catálogo. Confirme-os antes de publicar.
+
+NOTAS PARA A GRÁFICA
+---------------------------------------------------------------------
+· Os PDF estão em RGB, com sangria, caixa de corte (TrimBox) e BleedBox
+  definidas. A gráfica converte para CMYK no seu perfil. Peça uma prova
+  de cor, sobretudo para o Verde Levy.
+· Roll-up: não há texto nos últimos 150 mm. Confirme com o fornecedor
+  quanto fica escondido na base da estrutura.
+· Outdoor: ficheiro a 1:10. Indique à gráfica "ampliar 1000%".
+
+NOTAS SOBRE AS IMAGENS
+---------------------------------------------------------------------
+· As fotografias e os mockups foram gerados por IA para mostrar o estilo da
+  marca. Para campanhas reais recomenda-se uma sessão fotográfica nos
+  locais das excursões. Os nomes nos barcos (MORABEZA, SODADE) foram
+  pintados de propósito.
+· Mockup da carrinha 3/4: o emblema do fabricante e a matrícula vêm da
+  imagem gerada. Não use esse mockup em publicidade paga sem o substituir
+  por uma foto da viatura real.
