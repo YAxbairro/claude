@@ -1,0 +1,64 @@
+DERME E ARTE · SALÃO E ESTÉTICA · ENTREGA DA MARCA
+Versão 1 · Novembro 2026
+=====================================================================
+
+Comece pelo manual:  07-manual/derme-e-arte_manual-de-marca.pdf
+
+LOGO PROVISÓRIO
+---------------------------------------------------------------------
+O símbolo usado em todas as peças é a versão B (Essencial) da proposta.
+Todas as peças foram geradas a partir de um único ficheiro de símbolo,
+por isso trocar pelo logo final é refazer a exportação, sem redesenhar.
+
+PASTAS
+---------------------------------------------------------------------
+01-logo        Logo com texto em vetor (não precisa de fontes).
+               svg/ png/ (4000 px, transparente) pdf/
+               Formatos: empilhado (principal), horizontal, símbolo
+               Cores:    cor, cacau, branco, negativo (fundo rosé)
+
+02-papelaria   PDF para gráfica, sangria 3 mm, TrimBox definida
+               cartão de visita 85 × 55 mm (frente e verso)
+               cartão de marcação 85 × 55 mm (frente e verso)
+               vale oferta DL 210 × 99 mm (frente e verso)
+               menu de serviços A5 148 × 210 mm (frente e verso)
+
+03-impressao   roll-up 850 × 2000 mm, escala 1:1, sangria 5 mm
+               placa de fachada 1800 × 500 mm, ficheiro a 1:10 (ampliar 1000%)
+
+04-digital     instagram/  6 posts 4:5 e 3 stories 9:16 (2160 px de largura)
+               instagram/destaques/  5 capas de destaques
+               banners/    banner 1920 × 720 (a 2×) para site, Facebook, WhatsApp
+
+05-mockups     fachada, papelaria, perfil no telemóvel, toalhas, bata, saco
+
+06-fotografia  8 fotografias da campanha em alta resolução
+
+CORES
+---------------------------------------------------------------------
+Rosé   #A86B55  RGB 168 107 85   CMYK 0 36 49 34
+Nude   #E9D3C3  RGB 233 211 195  CMYK 0 9 16 9
+Areia  #F7F1EA  RGB 247 241 234  CMYK 0 2 5 3
+Cacau  #3B2620  RGB 59 38 32     CMYK 0 36 46 77
+Ouro   #C9A46A  RGB 201 164 106  CMYK 0 18 47 21
+
+TIPOGRAFIA (gratuita, Google Fonts)
+---------------------------------------------------------------------
+Cormorant Garamond (títulos e logo) · Jost (texto) · Allura (acento)
+
+A CONFIRMAR ANTES DE IMPRIMIR / PUBLICAR
+---------------------------------------------------------------------
+· [Nome Apelido] e o cargo no cartão de visita (um por pessoa).
+· WhatsApp +238 589 30 02 e "Ponta de Água, Praia": tirados da bio do
+  Instagram. Confirme.
+· Lista de serviços do menu e dos posts (corte, coloração, tranças, gel,
+  nail art, limpeza de pele, peeling, depilação...): é uma proposta. Ajuste
+  aos serviços reais. O menu não tem preços: "valores pelo WhatsApp".
+· CMYK aproximado: peça prova de cor à gráfica, sobretudo para o Rosé.
+
+NOTAS SOBRE AS IMAGENS
+---------------------------------------------------------------------
+· As fotografias e os mockups foram gerados por IA (GPT Image 2.6) para
+  mostrar o estilo. Para publicar, prefira fotos reais das clientes e do
+  espaço, com autorização. A fachada do mockup não é o espaço real.
+· O ecrã do telemóvel é uma simulação do perfil, não uma captura real.
