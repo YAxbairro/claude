@@ -1,5 +1,15 @@
 # Videoclipe "São Vicente": plano de produção com IA
 
+> **DECISÃO (19/11):** **só história, sem A-roll.** Ninguém canta para a câmara, não há lip-sync e não se usa o vídeo do testemunho real. A música fica como está.
+> Fluxo: **imagem da cena (2 opções) → aprovação → animação → cena seguinte.** A montagem final é feita no Premiere.
+> Substituições em relação à tabela abaixo:
+> - **05:** o rapaz olha para o espelho e o reflexo desfaz-se em fumo, sem lip-sync.
+> - **13:** o rapaz em silêncio no porto ao pôr do sol, com o Monte Cara atrás. Olha a baía e depois a câmara, sem cantar.
+> - **1:08–1:15:** discussão em casa; a mãe bloqueia a porta e ele sai.
+> - **2:20–2:30:** os "amigos" afastam-se e ele fica sozinho.
+> - **0:19–0:40, 1:31–2:00 e 3:03–3:19:** em vez do testemunho real, cenas narrativas (moldura/infância, mãe à espera e conselheiro feito por IA com os jovens). A voz do testemunho continua na música.
+> - As referências a Avatar/lip-sync e ao vídeo real na secção 2 ficam **sem efeito**.
+
 > Feito a 19/11/2026 a partir da pasta do Drive **Video Contra Droga**.
 > Ferramentas disponíveis: **fal.ai** (acesso total) + **créditos Kling**.
 > Os preços vêm de pesquisa feita hoje. Muitos são de sites de terceiros, por isso confirma na página do modelo antes de gastar.
