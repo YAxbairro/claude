@@ -1,6 +1,7 @@
 # Videoclipe "São Vicente": plano de produção com IA
 
 > **DECISÃO (19/11):** **só história, sem A-roll.** Ninguém canta para a câmara, não há lip-sync e não se usa o vídeo do testemunho real. A música fica como está.
+> **Modelo de imagem a partir de 19/11: GPT Image 2.6 Flare** (`openai/gpt-image-2.6/flare/edit`, fal). Vídeo: Kling V3 Pro (fal), sempre com confirmação.
 > Fluxo: **imagem da cena (2 opções) → aprovação → animação → cena seguinte.** A montagem final é feita no Premiere.
 > Substituições em relação à tabela abaixo:
 > - **05:** o rapaz olha para o espelho e o reflexo desfaz-se em fumo, sem lip-sync.
