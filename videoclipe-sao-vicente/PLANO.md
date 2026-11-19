@@ -27,7 +27,7 @@
    - "traficante na tua porta… finanças": storyboard **2:55**, música **≈2:05**
    - "autoestima": storyboard **2:45**, música **≈2:16 e ≈2:35**
    → **É preciso voltar a cronometrar as cenas** (ver a secção 4, com os tempos reais).
-2. **A intro não é instrumental.** Entre 0:05 e 0:38 ouve-se a **voz real do testemunho** ("comecei a consumir drogas desde os 14, 15 anos… drogas leves… depois mais pesadas… cocaína"). O mesmo acontece entre **2:50 e 3:19** ("tratamento antirretroviral… infetado pelo vírus do VIH").
+2. **A música usa o testemunho real em 3 sítios:** **0:19–0:40** ("comecei a consumir droga desde os 14 anos… droga leve… depois mais pesada… cocaína"), **1:31–2:00** ("15 anos de droga injetável… diagnosticado com VIH… desde 2003") e **3:03–3:34** ("ser infetado pelo vírus do VIH…"). O storyboard trata estes momentos como intro calma ou pausa.
 3. **Os rostos mudam de cena para cena nas imagens do storyboard.** O rapaz da 05 não é o da 13 nem o da 16, a mãe da 06 não é a da 19 e o conselheiro aparece com camisa aos quadrados (17) e com camisa azul (folha de referência). Estas imagens servem para **composição e luz**, não como frames finais.
 4. Faltam referências para: Julha "depois", traficantes (silhuetas), porto + Monte Cara, praça do Mindelo, festa, corredor/porta, muro com graffiti e espelho/casa de banho.
 5. A cena 20 pede "um contacto real de apoio". **Não encontrei online nenhum número verificado** de apoio à toxicodependência em São Vicente. Pedir à Delegacia de Saúde de São Vicente / Hospital Baptista de Sousa ou à CCAD (Comissão de Coordenação do Álcool e outras Drogas).
@@ -120,7 +120,58 @@ Pega em cada imagem do storyboard e regenera-a no Nano Banana Pro Edit com as re
 
 > Tempos da transcrição automática (Whisper). Margem de erro de cerca de 1–2 s. **Confirma ouvindo a música.**
 
-LETRA_TIMING_PLACEHOLDER
+### Estrutura real da música
+| Tempo | Secção | Conteúdo áudio |
+|---|---|---|
+| 0:00–0:05 | Abertura | Grito "El Chapo!" |
+| 0:05–0:19 | Intro falada | Ad-libs / conversa |
+| **0:19–0:40** | **Testemunho 1** | Voz real: "comecei a consumir droga desde os 14 anos… droga leve… depois mais pesada… cocaína" |
+| 0:40–1:31 | **Verso 1** (rap) | alma consumida → perder tudo → mãe a chorar / vizinhos sabem → traficantes a festejar a mota nova → casa / brigar → Julha → polícia, doutor → toda a malta |
+| **1:31–2:00** | **Testemunho 2** (inclui a queda de energia de 1:40–1:50) | "15 anos de droga injetável… diagnosticado com VIH… desde 2003…" |
+| 2:00–2:48 | **Verso 2** | confiança da família queimada → vender a aliança → traficante à porta a cobrar mais que as Finanças → festas → juventude / autoestima → falsos amigos → madrugada → "nunca sabia onde parar" |
+| 2:48–3:03 | Instrumental / queda | — |
+| **3:03–3:19** | **Testemunho 3** | "a maior consequência… ser infetado pelo vírus do VIH" |
+| 3:19–3:26 | Dedicatória | "**Rest in peace, my brother Pinga**… o testemunho serve-nos como reflexão" |
+| 3:26–3:34 | Testemunho 4 | "seja usuário de droga injetável, seja de outras drogas…" |
+| 3:34–3:45 | Fim | — |
+
+⚠️ **Não encontrei na transcrição a frase "São Vicente também merece uma clínica de reabilitação"** (cena 13). O crioulo transcrito à máquina tem falhas. Pergunta ao artista **em que segundo está** essa frase, porque é a mais importante do vídeo.
+⚠️ Há uma **dedicatória a "Pinga"** (3:19). Sugiro um cartão "Em memória de Pinga" ou incluí-la no cartão final. Confirma com o artista.
+
+### As 20 cenas com os tempos novos
+| Tempo | Cena | Ferramenta | Nota |
+|---|---|---|---|
+| 0:00–0:08 | **01** Drone sobre o Mindelo com nevoeiro | Veo/Seedance (fal) | entra com o "El Chapo!" |
+| 0:08–0:14 | **02** Beco, poste a piscar, cão | Kling | o poste pisca na batida |
+| 0:14–0:19 | **03** Rapaz de costas à janela | Kling (push-in) | |
+| 0:19–0:40 | **04** Moldura partida ↔ **testemunho real** (rosto/voz) | Kling + vídeo real | a voz real ouve-se aqui: intercala-o com a moldura |
+| 0:40–0:47 | **05** Espelho / reflexo em fumo | Kling (frame inicial e final) + **lip-sync** | entra o rap |
+| 0:47–0:53 | **06** Mãe a chorar, vizinhos à janela | Kling | P&B |
+| 0:53–1:01 | **08** Traficantes, carro e mota | Kling | caras na sombra, néon |
+| 1:01–1:08 | **07** Quarto a esvaziar | Kling (frame inicial e final) | 1 objeto por batida |
+| 1:08–1:15 | Performance do rapaz (casa / discussão) | Avatar v2 Pro (lip-sync) | |
+| 1:15–1:19 | **10** Julha antes | Kling (travelling) | |
+| 1:19–1:22 | **11** Julha depois | Kling (frame inicial e final a partir da 10) | transição em espelho |
+| 1:22–1:26 | **12** Silhuetas de polícia e bata branca | Kling | câmara lenta |
+| 1:26–1:31 | Toda a malta, montagem rápida | Kling (3 planos curtos) | |
+| 1:31–2:00 | **09** Mãe à porta à espera ↔ **testemunho real** | Kling + vídeo real | silêncio visual durante a queda de 1:40–1:50 |
+| 2:00–2:05 | NOVA: a mãe procura a aliança na caixa de joias vazia | Kling | letra: "vender a aliança" |
+| 2:05–2:09 | **15** Sombra por baixo da porta, batidas | Kling | as batidas seguem o bombo |
+| 2:09–2:20 | **14** Festa → a luz apaga-se | Kling (frame inicial e final) | apaga na palavra "autoestima" |
+| 2:20–2:30 | Performance / falsos amigos | Avatar v2 Pro + Kling | |
+| 2:30–2:39 | Rapaz sozinho de madrugada, respiração/batimento | Kling | |
+| 2:39–2:48 | **13** Protesto no porto com o Monte Cara | Avatar v2 Pro (lip-sync) | ⚠️ ajustar para onde estiver a frase "clínica" |
+| 2:48–3:03 | **16** No chão do beco, a mão estendida | Kling (picado) | queda de energia; a música volta quando agarra a mão |
+| 3:03–3:19 | **17** Conselheiro (homem real?) com os jovens na praça | Kling ou vídeo real | é a voz dele que se ouve |
+| 3:19–3:26 | Dedicatória "Pinga" | cartão / plano parado | |
+| 3:26–3:34 | **18** Jovem caminha para a luz | Kling | contraluz dourado |
+| 3:34–3:40 | **19** Mãe sorri à janela | Kling | |
+| 3:40–3:45 | **20** Cartão final + contacto real | montagem | |
+
+Ficheiros de apoio nesta pasta:
+- `audio/voz_isolada.mp3`: para o lip-sync. Corta o segmento exato de cada plano.
+- `audio/instrumental.mp3`
+- `transcricao_musica.txt` e `transcricao_testemunho.txt`
 
 ---
 
