@@ -61,6 +61,7 @@ async function icon(Comp, color) {
   return 'image/png;base64,' + (await sharp(Buffer.from(s)).resize(256, 256).png().toBuffer()).toString('base64');
 }
 
+
 (async () => {
   const pres = new pptxgen();
   pres.layout = 'LAYOUT_WIDE';
@@ -70,156 +71,208 @@ async function icon(Comp, color) {
   const C = pres.SchemeColor;
 
   const foot = (c) => ({ text: { text: 'CONECTA DIÁSPORA  ·  2027', options: { x: 0.8, y: 7.0, w: 4, h: 0.25, fontSize: 9, bold: true, charSpacing: 4, color: c, margin: 0, fontFace: 'Calibri' } } });
-  const titlePh = (c) => ({ placeholder: { options: { name: 'title', type: 'title', x: 0.8, y: 0.6, w: 10, h: 0.95, fontSize: 48, color: c, fontFace: 'Impact', align: 'left', valign: 'top', margin: 0 }, text: '' } });
+  const titlePh = (c) => ({ placeholder: { options: { name: 'title', type: 'title', x: 0.8, y: 0.85, w: 11.5, h: 0.9, fontSize: 44, color: c, fontFace: 'Impact', align: 'left', valign: 'top', margin: 0 }, text: '' } });
   pres.defineSlideMaster({ title: 'ESCURO', background: { color: C.text2 }, objects: [foot(C.accent5), titlePh(C.background2)] });
   pres.defineSlideMaster({ title: 'CREME', background: { color: C.background2 }, objects: [foot(C.accent4), titlePh(C.text2)] });
   pres.defineSlideMaster({ title: 'IMPACTO', background: { color: C.text2 }, objects: [] });
 
   const T = (s, text, o) => s.addText(text, { isTextBox: true, margin: 0, fontFace: 'Calibri', ...o });
   const H = (s, text, o) => s.addText(text, { isTextBox: true, margin: 0, fontFace: 'Impact', ...o });
-  const label = (s, text, x, y, color) => T(s, text, { x, y, w: 6, h: 0.3, fontSize: 13, bold: true, charSpacing: 5, color });
+  const label = (s, text, x, y, color, w = 6) => T(s, text, { x, y, w, h: 0.3, fontSize: 13, bold: true, charSpacing: 5, color });
+  const src = (s, text, color) => T(s, text, { x: 4.6, y: 6.97, w: 8.0, h: 0.3, fontSize: 9, italic: true, color, align: 'right' });
+  const rect = (s, x, y, w, h, color, name, r = 0.12) => s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x, y, w, h, rectRadius: r, fill: { color }, line: { color }, objectName: name });
 
   // ---------- 1. CAPA ----------
   pres.addSection({ title: 'Abertura' });
   let s = pres.addSlide({ masterName: 'IMPACTO', sectionTitle: 'Abertura' });
   s.background = { data: await png(svg(N,
     band(1850, 1250, 760, 110, B3) + band(1850, 1250, 640, 80, L) + band(1850, 1250, 525, 100, CR) + band(1850, 1250, 400, 90, B2) + disc(1850, 1250, 330, MB, .55) +
-    waves(0, 640, 985, 5, 16, 9, 260, SKY, .28) +
+    waves(0, 640, 1000, 4, 16, 9, 260, SKY, .28) +
     constellation(1180, 70, 185, [[1925, 60, -0.18], [1925, 420, 0.15], [1080, 20, 0.2]]))) };
   label(s, 'BRIEFING DO EVENTO', 0.8, 0.75, C.accent1);
   H(s, 'CONECTA', { x: 0.8, y: 1.2, w: 6.4, h: 1.45, fontSize: 104, color: C.background2 });
   H(s, 'DIÁSPORA', { x: 0.8, y: 2.72, w: 6.4, h: 1.45, fontSize: 104, color: C.accent1 });
   T(s, '2  0  2  7', { x: 0.8, y: 4.25, w: 4, h: 0.5, fontSize: 30, color: C.background1, charSpacing: 6 });
-  T(s, 'Encontro de Jovens Cabo-verdianos', { x: 0.8, y: 4.98, w: 6.5, h: 0.5, fontSize: 28, bold: true, color: C.background1 });
-  T(s, 'Da diáspora a Cabo Verde. Ideias que nos ligam.', { x: 0.8, y: 5.48, w: 6.5, h: 0.45, fontSize: 20, italic: true, color: C.accent6 });
-  T(s, '4 DE JANEIRO DE 2027  ·  CIDADE DA PRAIA', { x: 0.8, y: 6.4, w: 6.5, h: 0.35, fontSize: 15, bold: true, charSpacing: 3, color: C.accent1 });
-  s.addNotes('Conecta Diáspora: encontro de jovens cabo-verdianos residentes e da diáspora. 4 de janeiro de 2027, Cidade da Praia.');
+  T(s, 'Investimento, empreendedorismo e networking entre Cabo Verde e a sua diáspora', { x: 0.8, y: 4.95, w: 6.3, h: 0.85, fontSize: 22, bold: true, color: C.background1, valign: 'top' });
+  T(s, '4 DE JANEIRO DE 2027  ·  CIDADE DA PRAIA', { x: 0.8, y: 6.3, w: 6.5, h: 0.35, fontSize: 15, bold: true, charSpacing: 3, color: C.accent1 });
 
-  // ---------- 2. PORQUÊ ----------
-  pres.addSection({ title: 'A ideia' });
-  s = pres.addSlide({ masterName: 'CREME', sectionTitle: 'A ideia' });
-  s.background = { data: await png(svg(CR,
-    band(1960, 1120, 500, 26, B3) + band(1960, 1120, 430, 44, L) + disc(1960, 1120, 360, N) +
-    waves(1180, 1920, 70, 6, 18, 10, 300, MB, .25) + '')) };
-  s.addText('PORQUÊ AGORA', { placeholder: 'title' });
-  T(s, 'O talento cabo-verdiano está espalhado pelo mundo. Nas festas de fim de ano, muitos estão em casa ao mesmo tempo.', { x: 0.8, y: 1.65, w: 8.6, h: 0.9, fontSize: 20, color: C.text2 });
-  const why = [['01', 'Estão cá', 'As festas juntam no país quem vive em Cabo Verde e quem vive fora. É o momento certo para nos encontrarmos.'],
-    ['02', 'Querem começar', 'Muitos pensam regressar ou investir, mas não sabem por onde começar nem a quem pedir apoio.'],
-    ['03', 'Falta a ligação', 'Quem está cá precisa de rede lá fora. Quem está fora precisa de rede cá dentro.']];
-  why.forEach(([n, h, d], i) => {
-    const x = 0.8 + i * 3.3;
-    H(s, n, { x, y: 2.95, w: 1.5, h: 0.95, fontSize: 60, color: C.accent3 });
-    H(s, h.toUpperCase(), { x, y: 3.95, w: 3.0, h: 0.5, fontSize: 26, color: C.text2 });
-    T(s, d, { x, y: 4.5, w: 2.95, h: 1.4, fontSize: 15, color: C.text1, lineSpacingMultiple: 1.1, valign: 'top' });
-  });
-
-  // ---------- 3. A IDEIA ----------
-  s = pres.addSlide({ masterName: 'IMPACTO', sectionTitle: 'A ideia' });
+  // ---------- 2. DIMENSÃO DA DIÁSPORA ----------
+  pres.addSection({ title: 'Contexto' });
+  s = pres.addSlide({ masterName: 'IMPACTO', sectionTitle: 'Contexto' });
   s.background = { data: await png(svg(N,
-    waves(0, 900, 1000, 4, 16, 8, 240, SKY, .22) +
+    constellation(1250, 260, 175, [[1925, 120, -0.2], [1925, 560, 0.1], [1925, 980, 0.18], [1180, 1085, -0.2], [1120, 40, 0.22]], { arc: 3, dot: 9 }) +
+    waves(1100, 1920, 1010, 3, 16, 8, 240, SKY, .22))) };
+  label(s, 'CONTEXTO', 0.8, 0.75, C.accent1);
+  H(s, 'CABO VERDE É MAIOR DO QUE AS SUAS ILHAS', { x: 0.8, y: 1.1, w: 7.2, h: 1.6, fontSize: 44, color: C.background2, valign: 'top' });
+  H(s, '1,5 MILHÃO', { x: 0.8, y: 2.65, w: 6.6, h: 1.5, fontSize: 100, color: C.accent1 });
+  T(s, 'de cabo-verdianos e descendentes vivem na diáspora, em mais de 40 países', { x: 0.8, y: 4.15, w: 6.2, h: 0.7, fontSize: 19, color: C.background1, valign: 'top' });
+  // comparison bars
+  const bw = 6.2;
+  T(s, 'DIÁSPORA', { x: 0.8, y: 5.05, w: 2, h: 0.28, fontSize: 11, bold: true, charSpacing: 3, color: C.accent1 });
+  rect(s, 0.8, 5.35, bw, 0.32, C.accent1, 'barra-diaspora', 0.05);
+  T(s, '≈ 1 500 000', { x: 0.8, y: 5.35, w: bw - 0.15, h: 0.32, fontSize: 13, bold: true, color: C.text2, align: 'right', valign: 'middle' });
+  T(s, 'RESIDENTES', { x: 0.8, y: 5.82, w: 2, h: 0.28, fontSize: 11, bold: true, charSpacing: 3, color: C.background2 });
+  rect(s, 0.8, 6.12, bw * 511534 / 1500000, 0.32, C.background2, 'barra-residentes', 0.05);
+  T(s, '511 534', { x: 0.8 + bw * 511534 / 1500000 + 0.15, y: 6.12, w: 2, h: 0.32, fontSize: 13, bold: true, color: C.background2, valign: 'middle' });
+  T(s, 'O triplo da população residente.', { x: 3.6, y: 6.12, w: 3.5, h: 0.32, fontSize: 14, italic: true, color: C.accent6, valign: 'middle', align: 'right' });
+  src(s, 'Fontes: Governo de Cabo Verde / Ministério das Comunidades (2023), via Lusa; INE Cabo Verde, estimativa 2024.', C.accent5);
+
+  // ---------- 3. REMESSAS ----------
+  s = pres.addSlide({ masterName: 'CREME', sectionTitle: 'Contexto' });
+  s.background = { data: await png(svg(CR, band(1920, 0, 260, 44, L) + band(1920, 0, 200, 26, B3) + disc(1920, 0, 160, N) + waves(0, 1920, 1000, 3, 16, 8, 320, MB, .2))) };
+  s.addText('A DIÁSPORA JÁ SUSTENTA A ECONOMIA', { placeholder: 'title' });
+  const st = [['30,6', 'mil milhões de escudos (≈ 278 M€) em remessas em 2024 — recorde histórico'], ['11,6%', 'do PIB de Cabo Verde vem das remessas dos emigrantes'], ['≈ 3×', 'o investimento direto estrangeiro, que ficou em 4,0% do PIB']];
+  st.forEach(([n, d], i) => {
+    const x = 0.8 + i * 4.0;
+    H(s, n, { x, y: 1.9, w: 3.7, h: 1.35, fontSize: 84, color: i === 2 ? C.accent3 : C.text2 });
+    T(s, d, { x, y: 3.3, w: 3.45, h: 0.85, fontSize: 16, color: C.text1, valign: 'top' });
+  });
+  label(s, 'DE ONDE VÊM AS REMESSAS', 0.8, 4.65, C.accent4);
+  const orig = [['Portugal', 32, C.text2, C.background1], ['EUA', 29, C.accent3, C.background1], ['França', 19, C.accent5, C.text2], ['Outros', 20, C.accent6, C.text2]];
+  let ox = 0.8; const tw = 11.7;
+  orig.forEach(([n, p, c, tc]) => {
+    const w = tw * p / 100;
+    s.addShape(pres.shapes.RECTANGLE, { x: ox, y: 5.05, w: w - 0.04, h: 0.75, fill: { color: c }, line: { color: c }, objectName: 'origem-' + n });
+    T(s, [{ text: p + '%  ', options: { bold: true, fontSize: 20 } }, { text: n, options: { fontSize: 14 } }], { x: ox + 0.2, y: 5.05, w: w - 0.3, h: 0.75, color: tc, valign: 'middle' });
+    ox += w;
+  });
+  T(s, 'Portugal, EUA e França somam 80% das remessas: é aí que está a diáspora com capacidade de investir.', { x: 0.8, y: 6.0, w: 11.5, h: 0.4, fontSize: 15, bold: true, color: C.text2 });
+  src(s, 'Fonte: Banco de Cabo Verde — Relatório do Estado da Economia 2024; dados de remessas 2024.', C.accent4);
+
+  // ---------- 4. TURISMO ----------
+  s = pres.addSlide({ masterName: 'IMPACTO', sectionTitle: 'Contexto' });
+  s.background = { data: await png(svg(N,
+    disc(1500, 760, 210, L) + band(1500, 760, 265, 14, L, .5) + band(1500, 760, 320, 6, L, .25) +
+    ridge(860, 1920, 1080, [[960, 960], [1080, 870], [1170, 910], [1290, 790], [1400, 860], [1520, 800], [1660, 700], [1780, 820], [1920, 760]], B3) +
+    ridge(860, 1920, 1080, [[1000, 1020], [1140, 950], [1260, 990], [1420, 900], [1560, 960], [1700, 890], [1840, 950], [1920, 925]], B2) +
+    waves(860, 1920, 1030, 3, 14, 6, 200, SKY, .35))) };
+  label(s, 'TURISMO', 0.8, 0.75, C.accent1);
+  H(s, 'O MOTOR DO PAÍS — E A DIÁSPORA TAMBÉM VISITA', { x: 0.8, y: 1.1, w: 11.5, h: 0.9, fontSize: 44, color: C.background2 });
+  H(s, '25%', { x: 0.8, y: 2.25, w: 3.2, h: 1.4, fontSize: 92, color: C.accent1 });
+  T(s, 'do PIB vem do turismo', { x: 0.8, y: 3.65, w: 3.0, h: 0.45, fontSize: 17, color: C.background1 });
+  H(s, '981 MIL', { x: 4.3, y: 2.25, w: 4.0, h: 1.4, fontSize: 92, color: C.background2 });
+  T(s, 'hóspedes em 2024, o máximo de sempre', { x: 4.3, y: 3.65, w: 3.6, h: 0.45, fontSize: 17, color: C.background1 });
+  T(s, [{ text: 'Nas férias de verão e de fim de ano, milhares de emigrantes voltam a casa. ', options: { bold: true, color: C.background1 } },
+        { text: 'Consomem, visitam, avaliam terrenos e negócios. Mas não existe um momento organizado para transformar essa visita em investimento.', options: { color: C.accent6 } }],
+    { x: 0.8, y: 4.6, w: 6.6, h: 1.5, fontSize: 18, valign: 'top', lineSpacingMultiple: 1.1 });
+  src(s, 'Fontes: Banco Mundial; INE Cabo Verde — estatísticas do turismo 2024.', C.accent5);
+
+  // ---------- 5. O PROBLEMA ----------
+  pres.addSection({ title: 'Problema e solução' });
+  s = pres.addSlide({ masterName: 'CREME', sectionTitle: 'Problema e solução' });
+  s.background = { data: await png(svg(CR, `<rect x="0" y="0" width="640" height="1080" fill="${N}"/>` + waves(0, 640, 1000, 3, 16, 8, 240, SKY, .22) + waves(640, 1920, 1000, 3, 16, 8, 320, MB, .2))) };
+  label(s, 'A VONTADE EXISTE', 0.6, 0.85, C.accent1, 3.6);
+  H(s, '15% → 18,2%', { x: 0.6, y: 1.3, w: 3.8, h: 0.8, fontSize: 40, color: C.accent1 });
+  T(s, 'peso da diáspora no PIB em três anos', { x: 0.6, y: 2.15, w: 3.5, h: 0.4, fontSize: 14, color: C.background1 });
+  T(s, [{ text: 'Estatuto do Investidor da Diáspora', options: { bold: true, breakLine: true } }, { text: 'em vigor desde 2020', options: { color: C.accent6, breakLine: true } },
+        { text: ' ', options: { fontSize: 8, breakLine: true } },
+        { text: 'A diáspora quer ir além das remessas:', options: { bold: true, breakLine: true } }, { text: 'competências, formação e investimento', options: { color: C.accent6 } }],
+    { x: 0.6, y: 2.95, w: 3.6, h: 2.2, fontSize: 15, color: C.background1, valign: 'top' });
+  H(s, 'MAS O CAMINHO ESTÁ BLOQUEADO', { x: 5.0, y: 0.85, w: 7.8, h: 0.9, fontSize: 44, color: C.text2 });
+  const bar = [[fa.FaFileCircleExclamation, 'BUROCRACIA', 'Processos lentos, pouco claros e difíceis de acompanhar à distância.'],
+    [fa.FaCircleQuestion, 'INFORMAÇÃO DISPERSA', 'Não se sabe onde começar, que apoios existem nem a quem perguntar.'],
+    [fa.FaLinkSlash, 'ELO DE COMUNICAÇÃO', 'As iniciativas do Estado com as comunidades estiveram interrompidas desde 2016.'],
+    [fa.FaHandshakeSlash, 'FALTA DE CONFIANÇA', 'Sem parceiros conhecidos no terreno, o investimento fica adiado.']];
+  for (let i = 0; i < 4; i++) {
+    const [ic, h, d] = bar[i], col = i % 2, row = Math.floor(i / 2), x = 5.0 + col * 3.95, y = 2.0 + row * 1.85;
+    rect(s, x, y, 3.7, 1.6, C.background1, 'travao');
+    s.addShape(pres.shapes.OVAL, { x: x + 0.22, y: y + 0.22, w: 0.56, h: 0.56, fill: { color: C.text2 }, line: { color: C.text2 }, objectName: 'icone' });
+    s.addImage({ data: await icon(ic, L), x: x + 0.36, y: y + 0.36, w: 0.28, h: 0.28, altText: h });
+    H(s, h, { x: x + 0.95, y: y + 0.25, w: 2.6, h: 0.5, fontSize: 19, color: C.text2, valign: 'middle' });
+    T(s, d, { x: x + 0.25, y: y + 0.88, w: 3.25, h: 0.65, fontSize: 13, color: C.text1, valign: 'top' });
+  }
+  T(s, [{ text: '“Redução da burocracia e criação de condições favoráveis ao investimento.”', options: { italic: true, bold: true, color: C.text2, breakLine: true } },
+        { text: 'Primeiro-ministro de Cabo Verde, Lisboa, 2026', options: { fontSize: 12, color: C.accent4 } }],
+    { x: 5.0, y: 5.8, w: 7.7, h: 0.7, fontSize: 16, valign: 'top' });
+  src(s, 'Fontes: Ministério das Comunidades (2023), via Lusa; Forbes África Lusófona, nov. 2026.', C.accent4);
+
+  // ---------- 6. A SOLUÇÃO ----------
+  s = pres.addSlide({ masterName: 'IMPACTO', sectionTitle: 'Problema e solução' });
+  s.background = { data: await png(svg(N,
+    waves(0, 900, 1010, 3, 16, 8, 240, SKY, .22) +
     band(1920, 1080, 300, 70, CR) + band(1920, 1080, 205, 55, L) + disc(1920, 1080, 150, B3) +
     constellation(1110, 140, 215, [[1925, 200, -0.18], [1925, 700, 0.12], [1150, 30, 0.22]], { arc: 4, dot: 10 }))) };
-  label(s, 'A IDEIA', 0.8, 0.75, C.accent1);
-  H(s, [{ text: 'UM DIA', options: { color: C.background2, breakLine: true } }, { text: 'PARA LIGAR', options: { color: C.accent1, breakLine: true } },
-    { text: 'QUEM SAIU', options: { color: C.background2, breakLine: true } }, { text: 'A QUEM FICOU.', options: { color: C.background2 } }],
-    { x: 0.8, y: 1.2, w: 6.6, h: 4.2, fontSize: 66, lineSpacingMultiple: 0.95, valign: 'top' });
-  T(s, 'Um encontro anual, presencial e gratuito, que junta jovens cabo-verdianos de cá e de fora para partilhar experiências, aprender a começar um negócio e criar ligações que continuam depois do evento.',
-    { x: 0.8, y: 5.55, w: 6.4, h: 1.2, fontSize: 17, color: C.accent6, lineSpacingMultiple: 1.1, valign: 'top' });
+  label(s, 'A RESPOSTA', 0.8, 0.75, C.accent1);
+  H(s, [{ text: 'UM EVENTO PARA', options: { color: C.background2, breakLine: true } }, { text: 'TRANSFORMAR', options: { color: C.background2, breakLine: true } },
+    { text: 'LIGAÇÃO EM', options: { color: C.background2, breakLine: true } }, { text: 'INVESTIMENTO.', options: { color: C.accent1 } }],
+    { x: 0.8, y: 1.2, w: 6.8, h: 4.2, fontSize: 66, lineSpacingMultiple: 0.95, valign: 'top' });
+  T(s, 'Investidores e quadros da diáspora, empreendedores locais e as instituições que decidem, na mesma sala, no momento em que a diáspora está no país.',
+    { x: 0.8, y: 5.5, w: 6.4, h: 1.2, fontSize: 18, color: C.accent6, lineSpacingMultiple: 1.1, valign: 'top' });
 
-  // ---------- 4. PILARES ----------
-  s = pres.addSlide({ masterName: 'CREME', sectionTitle: 'A ideia' });
-  const pcx = [0.8, 4.95, 9.1].map(x => x * 144 + 82);
-  s.background = { data: await png(svg(CR,
-    band(1920, 0, 300, 50, L) + band(1920, 0, 235, 30, B3) + disc(1920, 0, 190, N) +
-    pcx.map(cx => band(cx, 380, 80, 10, L) + disc(cx, 380, 68, N)).join('') +
-    waves(0, 1920, 935, 5, 16, 10, 320, MB, .22))) };
-  s.addText('TRÊS PILARES', { placeholder: 'title' });
-  const pil = [[fa.FaRocket, 'EMPREENDEDORISMO', 'Histórias reais de jovens que regressaram e criaram o seu negócio em Cabo Verde.'],
-    [fa.FaComments, 'PARTILHA', 'Conversa direta com as entidades que apoiam quem quer começar: formalizar, financiar, arrancar.'],
-    [fa.FaPeopleArrows, 'CONEXÕES', 'Contactos entre jovens de cá e de fora, para colaborar muito para além do dia do encontro.']];
-  for (let i = 0; i < 3; i++) {
-    const [ic, h, d] = pil[i], x = [0.8, 4.95, 9.1][i];
-    s.addImage({ data: await icon(ic, L), x: x + 0.33, y: 2.31, w: 0.48, h: 0.48, altText: h });
-    H(s, h, { x, y: 3.45, w: 3.6, h: 0.6, fontSize: 30, color: C.text2 });
-    T(s, d, { x, y: 4.15, w: 3.45, h: 1.4, fontSize: 16, color: C.text1, lineSpacingMultiple: 1.1, valign: 'top' });
+  // ---------- 7. O QUE O EVENTO ENTREGA ----------
+  s = pres.addSlide({ masterName: 'CREME', sectionTitle: 'Problema e solução' });
+  s.background = { data: await png(svg(CR, waves(0, 1920, 1000, 3, 16, 8, 320, MB, .2) + band(1920, 0, 230, 36, L) + disc(1920, 0, 170, N))) };
+  s.addText('O QUE O EVENTO ENTREGA', { placeholder: 'title' });
+  const del = [[fa.FaLandmark, 'INFORMAÇÃO DIRETA', 'As entidades públicas explicam, sem intermediários, como investir, formalizar e aceder a apoios e ao Estatuto do Investidor da Diáspora.'],
+    [fa.FaMicrophoneLines, 'CASOS REAIS', 'Quem regressou ou investiu conta o que funcionou, quanto tempo levou e o que evitaria.'],
+    [fa.FaHandshake, 'NEGÓCIOS E PARCERIAS', 'Encontros entre investidores da diáspora e empreendedores locais com projetos concretos.'],
+    [fa.FaPeopleGroup, 'UM ELO PERMANENTE', 'Uma rede que continua depois do evento e um encontro anual com a diáspora.']];
+  for (let i = 0; i < 4; i++) {
+    const [ic, h, d] = del[i], x = 0.8 + i * 2.97, dark = i % 2 === 0;
+    rect(s, x, 2.0, 2.77, 4.35, dark ? C.text2 : C.background1, 'entrega');
+    H(s, '0' + (i + 1), { x: x + 0.3, y: 2.25, w: 1.2, h: 0.7, fontSize: 40, color: dark ? C.accent1 : C.accent3 });
+    s.addShape(pres.shapes.OVAL, { x: x + 1.85, y: 2.3, w: 0.62, h: 0.62, fill: { color: C.accent1 }, line: { color: C.accent1 }, objectName: 'icone' });
+    s.addImage({ data: await icon(ic, N), x: x + 2.0, y: 2.45, w: 0.32, h: 0.32, altText: h });
+    H(s, h, { x: x + 0.3, y: 3.25, w: 2.3, h: 0.95, fontSize: 24, color: dark ? C.background2 : C.text2, valign: 'top' });
+    T(s, d, { x: x + 0.3, y: 4.3, w: 2.25, h: 1.9, fontSize: 14, color: dark ? C.accent6 : C.text1, valign: 'top', lineSpacingMultiple: 1.05 });
   }
 
-  // ---------- 5. PARA QUEM ----------
-  pres.addSection({ title: 'Público e formato' });
-  s = pres.addSlide({ masterName: 'ESCURO', sectionTitle: 'Público e formato' });
-  const lx = 700, rx = 1180, cy = 610, r = 330;
+  // ---------- 8. PARA QUEM ----------
+  pres.addSection({ title: 'Público e edição' });
+  s = pres.addSlide({ masterName: 'ESCURO', sectionTitle: 'Público e edição' });
+  const lx = 700, rx = 1180, cy = 640, r = 330;
   s.background = { data: await png(svg(N,
     `<defs><clipPath id="cl"><circle cx="${lx}" cy="${cy}" r="${r}"/></clipPath></defs>` +
     disc(lx, cy, r, B2, .9) + disc(rx, cy, r, B3, .55) +
     `<circle cx="${rx}" cy="${cy}" r="${r}" fill="${L}" clip-path="url(#cl)"/>` +
     band(lx, cy, r, 5, CR) + band(rx, cy, r, 5, L) +
-    waves(1550, 1920, 980, 4, 16, 8, 240, SKY, .25) + disc(1700, 600, 58, L))) };
-  s.addText('PARA QUEM', { placeholder: 'title' });
-  H(s, 'JOVENS DA DIÁSPORA', { x: 2.9, y: 3.2, w: 2.9, h: 0.45, fontSize: 21, color: C.background2 });
-  T(s, [{ text: 'Estudantes e jovens profissionais', options: { breakLine: true } }, { text: 'Quem pensa regressar', options: { breakLine: true } }, { text: 'Quem quer investir ou colaborar' }],
-    { x: 2.9, y: 3.7, w: 2.9, h: 1.2, fontSize: 15, color: C.background1, paraSpaceAfter: 4 });
-  H(s, 'JOVENS EM CABO VERDE', { x: 7.3, y: 3.2, w: 2.85, h: 0.45, fontSize: 21, color: C.accent1 });
-  T(s, [{ text: 'Estudantes e jovens profissionais', options: { breakLine: true } }, { text: 'Empreendedores', options: { breakLine: true } }, { text: 'Quem procura parceiros lá fora' }],
-    { x: 7.3, y: 3.7, w: 2.75, h: 1.2, fontSize: 15, color: C.background1, paraSpaceAfter: 4 });
-  H(s, [{ text: 'CONECTA', options: { breakLine: true } }, { text: 'DIÁSPORA' }], { x: 5.9, y: 3.85, w: 1.3, h: 0.85, fontSize: 18, color: C.text2, align: 'center', valign: 'middle' });
-  s.addImage({ data: await icon(fa.FaBuildingColumns, N), x: 11.57, y: 3.92, w: 0.5, h: 0.5, altText: 'instituições' });
-  H(s, 'E AINDA', { x: 10.85, y: 4.65, w: 2.0, h: 0.45, fontSize: 22, color: C.accent1, align: 'center' });
-  T(s, 'Instituições e empreendedores que orientam e inspiram', { x: 10.75, y: 5.1, w: 2.15, h: 0.9, fontSize: 14, color: C.background1, align: 'center' });
+    waves(1550, 1920, 1000, 3, 16, 8, 240, SKY, .25) + disc(1700, 640, 58, L))) };
+  s.addText('QUEM QUEREMOS NA SALA', { placeholder: 'title' });
+  const vy = 3.3;
+  H(s, 'DA DIÁSPORA', { x: 2.9, y: vy, w: 2.9, h: 0.45, fontSize: 24, color: C.background2 });
+  T(s, [{ text: 'Quadros e profissionais', options: { breakLine: true } }, { text: 'Empresários e investidores', options: { breakLine: true } }, { text: 'Quem pondera regressar' }],
+    { x: 2.9, y: vy + 0.55, w: 2.85, h: 1.2, fontSize: 15, color: C.background1, paraSpaceAfter: 4 });
+  H(s, 'DE CABO VERDE', { x: 7.3, y: vy, w: 2.85, h: 0.45, fontSize: 24, color: C.accent1 });
+  T(s, [{ text: 'Empreendedores e startups', options: { breakLine: true } }, { text: 'Empresas à procura de capital', options: { breakLine: true } }, { text: 'e de parceiros lá fora' }],
+    { x: 7.3, y: vy + 0.55, w: 2.75, h: 1.2, fontSize: 15, color: C.background1, paraSpaceAfter: 4 });
+  H(s, [{ text: 'CONECTA', options: { breakLine: true } }, { text: 'DIÁSPORA' }], { x: 5.9, y: 4.03, w: 1.3, h: 0.85, fontSize: 18, color: C.text2, align: 'center', valign: 'middle' });
+  s.addImage({ data: await icon(fa.FaBuildingColumns, N), x: 11.57, y: 4.12, w: 0.5, h: 0.5, altText: 'instituições' });
+  H(s, 'E AINDA', { x: 10.85, y: 4.85, w: 2.0, h: 0.45, fontSize: 22, color: C.accent1, align: 'center' });
+  T(s, 'Instituições públicas, banca e setor privado', { x: 10.75, y: 5.3, w: 2.15, h: 0.8, fontSize: 14, color: C.background1, align: 'center' });
 
-  // ---------- 6. O DIA ----------
-  s = pres.addSlide({ masterName: 'CREME', sectionTitle: 'Público e formato' });
-  const nx = [260, 720, 1180, 1640], ny = 430;
-  let arcsSvg = '';
-  for (let i = 0; i < 3; i++) arcsSvg += `<path d="M${nx[i] + 80},${ny} Q${(nx[i] + nx[i + 1]) / 2},${ny - 120} ${nx[i + 1] - 80},${ny}" fill="none" stroke="${B3}" stroke-width="4" stroke-dasharray="2 12" stroke-linecap="round"/>`;
+  // ---------- 9. PRIMEIRA EDIÇÃO ----------
+  s = pres.addSlide({ masterName: 'CREME', sectionTitle: 'Público e edição' });
   s.background = { data: await png(svg(CR,
-    arcsSvg + nx.map(x => band(x, ny, 74, 9, L) + disc(x, ny, 62, N)).join('') +
-    ridge(940, 1920, 1080, [[1060, 1010], [1170, 950], [1240, 985], [1380, 890], [1470, 950], [1560, 920], [1700, 870], [1800, 940], [1920, 905]], MB, .55) +
-    ridge(1100, 1920, 1080, [[1240, 1020], [1350, 990], [1450, 1030], [1600, 960], [1720, 1010], [1830, 975], [1920, 995]], N))) };
-  s.addText('COMO VAI SER O DIA', { placeholder: 'title' });
-  T(s, 'Um dia, quatro momentos.', { x: 0.8, y: 1.6, w: 8, h: 0.5, fontSize: 20, color: C.text2 });
-  const mom = [['OUVIR', 'Testemunhos de jovens que regressaram e criaram o seu projeto.'], ['PERCEBER', 'As entidades de apoio explicam como formalizar, financiar e arrancar.'],
-    ['CRIAR', 'Grupos de trabalho para discutir ideias, obstáculos e colaborações.'], ['LIGAR', 'Tempo para conhecer pessoas e trocar contactos.']];
-  mom.forEach(([h, d], i) => {
-    const cx = nx[i] / 144;
-    H(s, '0' + (i + 1), { x: cx - 0.5, y: ny / 144 - 0.3, w: 1.0, h: 0.6, fontSize: 30, color: C.accent1, align: 'center', valign: 'middle' });
-    H(s, h, { x: cx - 1.5, y: 3.75, w: 3.0, h: 0.55, fontSize: 30, color: C.text2, align: 'center' });
-    T(s, d, { x: cx - 1.45, y: 4.35, w: 2.9, h: 1.1, fontSize: 15, color: C.text1, align: 'center', valign: 'top' });
-  });
-
-  // ---------- 7. PRIMEIRA EDIÇÃO ----------
-  s = pres.addSlide({ masterName: 'ESCURO', sectionTitle: 'Público e formato' });
-  s.background = { data: await png(svg(N,
-    band(1920, 0, 230, 40, L) + disc(1920, 0, 160, CR) +
-    ridge(0, 1920, 1080, [[0, 1010], [160, 975], [260, 990], [420, 930], [520, 960], [700, 985], [880, 925], [1000, 960], [1180, 990], [1360, 945], [1480, 965], [1640, 920], [1800, 975], [1920, 955]], B2, .9) +
-    ridge(0, 1920, 1080, [[0, 1045], [240, 1020], [420, 1040], [640, 1005], [820, 1035], [1060, 1010], [1300, 1040], [1520, 1000], [1760, 1035], [1920, 1020]], B3, .55) +
-    `<rect x="1325" y="245" width="475" height="560" rx="26" fill="${B2}"/>`)) };
+    ridge(0, 1920, 1080, [[0, 1010], [160, 975], [260, 990], [420, 930], [520, 960], [700, 985], [880, 925], [1000, 960], [1180, 990], [1360, 945], [1480, 965], [1640, 920], [1800, 975], [1920, 955]], MB, .35) +
+    `<rect x="1325" y="270" width="475" height="560" rx="26" fill="${N}"/>` + band(1920, 0, 230, 36, L) + disc(1920, 0, 170, B3))) };
   s.addText('A PRIMEIRA EDIÇÃO', { placeholder: 'title' });
-  H(s, '04', { x: 0.8, y: 1.75, w: 3.6, h: 2.6, fontSize: 190, color: C.accent1 });
-  H(s, 'JANEIRO 2027', { x: 0.8, y: 4.35, w: 3.8, h: 0.7, fontSize: 40, color: C.background2 });
-  T(s, 'Segunda-feira', { x: 0.8, y: 5.05, w: 3.5, h: 0.4, fontSize: 17, color: C.accent6 });
-  const facts = [[fa.FaLocationDot, 'LOCAL', 'Cidade da Praia', 'Proposta: TechPark CV'], [fa.FaCalendarDay, 'FORMATO', 'Um dia, presencial'], [fa.FaUsers, 'LUGARES', '80 participantes'], [fa.FaTicket, 'ENTRADA', 'Gratuita, com inscrição']];
+  H(s, '04', { x: 0.8, y: 1.85, w: 3.6, h: 2.6, fontSize: 190, color: C.accent3 });
+  H(s, 'JANEIRO 2027', { x: 0.8, y: 4.45, w: 3.8, h: 0.7, fontSize: 40, color: C.text2 });
+  T(s, 'A diáspora ainda está no país, de férias.', { x: 0.8, y: 5.15, w: 3.6, h: 0.6, fontSize: 16, color: C.text1, valign: 'top' });
+  const facts = [[fa.FaLocationDot, 'LOCAL', 'Cidade da Praia', 'Proposta: TechPark CV'], [fa.FaCalendarDay, 'FORMATO', 'Um dia: painéis, entidades e networking'], [fa.FaUsers, 'LUGARES', '80 participantes'], [fa.FaTicket, 'ACESSO', 'Por inscrição']];
   for (let i = 0; i < facts.length; i++) {
-    const [ic, l, v, sub] = facts[i], y = 1.85 + i * 1.0;
-    s.addImage({ data: await icon(ic, L), x: 5.0, y: y + 0.05, w: 0.42, h: 0.42, altText: l });
-    T(s, l, { x: 5.65, y, w: 3.4, h: 0.28, fontSize: 12, bold: true, charSpacing: 4, color: C.accent1 });
-    T(s, sub ? [{ text: v, options: { breakLine: true } }, { text: sub, options: { fontSize: 13, color: C.accent6 } }] : v, { x: 5.65, y: y + 0.28, w: 3.4, h: sub ? 0.62 : 0.4, fontSize: 18, color: C.background1, valign: 'top' });
+    const [ic, l, v, sub] = facts[i], y = 2.0 + i * 1.0;
+    s.addImage({ data: await icon(ic, N), x: 5.0, y: y + 0.05, w: 0.42, h: 0.42, altText: l });
+    T(s, l, { x: 5.65, y, w: 3.4, h: 0.28, fontSize: 12, bold: true, charSpacing: 4, color: C.accent4 });
+    T(s, sub ? [{ text: v, options: { breakLine: true } }, { text: sub, options: { fontSize: 13, color: C.accent4 } }] : v, { x: 5.65, y: y + 0.28, w: 3.4, h: sub ? 0.62 : 0.4, fontSize: 18, color: C.text2, valign: 'top' });
   }
-  T(s, 'PARCEIROS', { x: 9.45, y: 1.95, w: 3.0, h: 0.3, fontSize: 12, bold: true, charSpacing: 4, color: C.accent1 });
-  const parc = ['Instituições de apoio ao empreendedorismo', 'Câmara Municipal da Praia', 'Associações da diáspora e consulados', 'Setor privado e empreendedores', 'TechPark CV'];
-  T(s, parc.map((t, i) => ({ text: t, options: { bullet: { indent: 14 }, breakLine: i < parc.length - 1 } })), { x: 9.45, y: 2.4, w: 2.95, h: 3.0, fontSize: 15, color: C.background1, paraSpaceAfter: 9, valign: 'top' });
+  T(s, 'PARCEIROS', { x: 9.45, y: 2.12, w: 3.0, h: 0.3, fontSize: 12, bold: true, charSpacing: 4, color: C.accent1 });
+  const parc = ['Pró Empresa, Pró Garante e Pró Capital', 'Casa do Cidadão', 'Câmara Municipal da Praia', 'Associações da diáspora e consulados', 'Banca e setor privado', 'TechPark CV'];
+  T(s, parc.map((t, i) => ({ text: t, options: { bullet: { indent: 14 }, breakLine: i < parc.length - 1 } })), { x: 9.45, y: 2.55, w: 2.95, h: 3.0, fontSize: 15, color: C.background1, paraSpaceAfter: 8, valign: 'top' });
 
-  // ---------- 8. FECHO ----------
+  // ---------- 10. FECHO ----------
   pres.addSection({ title: 'Fecho' });
   s = pres.addSlide({ masterName: 'IMPACTO', sectionTitle: 'Fecho' });
   s.background = { data: await png(svg(N,
     band(1700, 1180, 640, 95, CR) + band(1700, 1180, 525, 75, L) + band(1700, 1180, 420, 85, B3) + disc(1700, 1180, 340, B2) +
-    constellation(1230, 60, 165, [[1925, 80, -0.18], [1080, 30, 0.2]]) + waves(0, 700, 985, 5, 16, 9, 260, SKY, .25))) };
+    constellation(1230, 60, 165, [[1925, 80, -0.18], [1080, 30, 0.2]]) + waves(0, 700, 1000, 4, 16, 9, 260, SKY, .25))) };
+  label(s, 'SEJA PARCEIRO DA PRIMEIRA EDIÇÃO', 0.8, 0.75, C.accent1, 7);
   H(s, [{ text: 'DA DIÁSPORA', options: { color: C.background2, breakLine: true } }, { text: 'A CABO VERDE.', options: { color: C.background2, breakLine: true } },
     { text: 'IDEIAS QUE', options: { color: C.accent1, breakLine: true } }, { text: 'NOS LIGAM.', options: { color: C.accent1 } }],
-    { x: 0.8, y: 0.85, w: 6.6, h: 4.2, fontSize: 66, lineSpacingMultiple: 0.95, valign: 'top' });
-  label(s, 'ORGANIZAÇÃO', 0.8, 5.35, C.accent1);
-  T(s, 'Yanick Silva  ·  Álvaro  ·  Denílson Monteiro', { x: 0.8, y: 5.7, w: 6.5, h: 0.4, fontSize: 18, bold: true, color: C.background1 });
-  T(s, '[Telefone]  ·  [E-mail]', { x: 0.8, y: 6.15, w: 6.5, h: 0.4, fontSize: 16, color: C.accent6 });
+    { x: 0.8, y: 1.15, w: 6.6, h: 4.0, fontSize: 66, lineSpacingMultiple: 0.95, valign: 'top' });
+  label(s, 'ORGANIZAÇÃO', 0.8, 5.4, C.accent1);
+  T(s, 'Yanick Silva  ·  Álvaro  ·  Denílson Monteiro', { x: 0.8, y: 5.75, w: 6.5, h: 0.4, fontSize: 18, bold: true, color: C.background1 });
+  T(s, '[Telefone]  ·  [E-mail]', { x: 0.8, y: 6.2, w: 6.5, h: 0.4, fontSize: 16, color: C.accent6 });
 
   await pres.writeFile({ fileName: OUT });
   await applyTheme(OUT, THEME);
