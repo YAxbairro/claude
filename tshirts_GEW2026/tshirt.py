@@ -13,7 +13,7 @@ img{display:block}
 """
 
 def front(center_html, strip, extra_css="", gew=True):
-    top = '<img src="t_ajec.png" style="height:120px"><img src="t_gewcircle.png" style="height:230px">' if gew else '<img src="t_ajec.png" style="height:150px">'
+    top = '<img src="t_ajec.png" style="height:120px"><img src="t_gewcircle.png" style="height:230px">' if gew else ''
     logos = "".join(f'<img src="{f}" style="height:{h}px">' for f, h in strip)
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>{BASE}
 .top{{position:absolute;top:40px;left:70px;right:70px;display:flex;justify-content:space-between;align-items:center}}
@@ -36,7 +36,7 @@ BACK = f"""<!doctype html><html><head><meta charset="utf-8"><style>{BASE}
 
 ABERTURA = front(
     '<img src="hd_rotamilho.png" style="height:640px">',
-    [("t_consulado.png", 100), ("t_mincultura_col.png", 120), ("t_cocrea.png", 38), ("t_fidjuz.png", 130), ("t_ehtcv.png", 105)], gew=False)
+    [("t_consulado.png", 100), ("t_mincultura_col.png", 120), ("t_cocrea.png", 38), ("t_fidjuz.png", 130), ("t_ehtcv.png", 105)], ".center{top:200px} .strip{bottom:330px}", gew=False)
 
 ENC_CENTER = """
 <div class="ev">
