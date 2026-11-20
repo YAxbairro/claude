@@ -37,25 +37,12 @@ ABERTURA = front(
     '<img src="hd_rotamilho.png" style="height:640px">',
     [("t_consulado.png", 100), ("t_mincultura_col.png", 120), ("t_cocrea.png", 38), ("t_fidjuz.png", 130), ("t_ehtcv.png", 105)])
 
-ENC_CENTER = """
-<div class="ev">
-  <div class="k">Encerramento Oficial · GEW 2026</div>
-  <div class="t1">ECOWAS–CABO VERDE</div>
-  <div class="t2">BUSINESS FORUM</div>
-  <div class="bar"></div>
-  <div class="d">28 NOV 2026 · PRAIA</div>
-</div>"""
+ENC_CENTER = """<div class="lg"><img src="hd_cedeao.png" style="height:330px"><img src="hd_unisantiago.png" style="height:270px"></div>"""
 ENC_CSS = """
-.center{top:420px}
-.ev{text-align:center}
-.ev .k{font-weight:700;font-size:34px;letter-spacing:.28em;text-transform:uppercase;color:var(--teal)}
-.ev .t1{white-space:nowrap;font-weight:900;font-size:96px;line-height:1;color:var(--navy);margin-top:34px;letter-spacing:-.01em}
-.ev .t2{white-space:nowrap;font-weight:900;font-size:122px;line-height:1;color:var(--orange);margin-top:8px;letter-spacing:-.01em}
-.ev .bar{width:220px;height:10px;margin:44px auto 0;background:linear-gradient(90deg,var(--orange),var(--teal));border-radius:5px}
-.ev .d{font-weight:700;font-size:40px;letter-spacing:.2em;color:var(--navy);margin-top:36px}
-.strip{justify-content:center;gap:120px}
+.center{top:470px}
+.lg{display:flex;align-items:center;justify-content:center;gap:150px}
 """
-ENCERRAMENTO = front(ENC_CENTER, [("hd_cedeao.png", 230), ("hd_unisantiago.png", 190)], ENC_CSS)
+ENCERRAMENTO = front(ENC_CENTER, [], ENC_CSS)
 
 # ---------- mockup (camisola branca, frente e costas lado a lado)
 SHIRT = "M150 60 L255 20 Q300 70 345 20 L450 60 L560 170 L490 245 L445 205 L445 640 L155 640 L155 205 L110 245 L40 170 Z"
