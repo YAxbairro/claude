@@ -1,0 +1,25 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:0;font-family:Manrope}
+.p{height:520px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:22px}
+.l{background:#F4F0EA;color:#1F1E1C}.d{background:#1F1E1C;color:#F4F0EA}.o{background:#5F6B45;color:#F4F0EA}.m{background:#8C6446;color:#F4F0EA}
+.row{display:flex;align-items:center;gap:26px}
+svg{width:74px;height:auto}
+.w{font-family:'Cormorant Garamond';font-weight:400;font-size:92px;letter-spacing:.32em;line-height:1;margin-right:-.32em}
+.s{font-size:13px;letter-spacing:.42em;text-transform:uppercase;font-weight:500;opacity:.8;margin-right:-.42em}
+</style></head><body>
+<script>
+const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 150" fill="none">
+  <!-- 12 casas: 3 por piso x 4 pisos, sobre a base de pedra -->
+  <g stroke="currentColor" stroke-width="3">
+    <rect x="6" y="6" width="108" height="108"/>
+    <line x1="42" y1="6" x2="42" y2="114"/><line x1="78" y1="6" x2="78" y2="114"/>
+    <line x1="6" y1="33" x2="114" y2="33"/><line x1="6" y1="60" x2="114" y2="60"/><line x1="6" y1="87" x2="114" y2="87"/>
+  </g>
+  <rect x="80.5" y="35.5" width="31" height="22" fill="#C8A46A"/>
+  <rect x="0" y="122" width="120" height="22" fill="currentColor"/>
+</svg>
+`;
+for(const c of ['l','d','o','m']){document.body.insertAdjacentHTML('beforeend',`<div class="p ${c}"><div class="row">${svg}<div class="w">BRAVA</div></div><div class="s">Residências · Praia · Cabo Verde</div></div>`)}
+</script></body></html>

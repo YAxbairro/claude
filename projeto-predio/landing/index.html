@@ -1,0 +1,513 @@
+<title>BRAVA Residências</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: editorial de revista de arquitetura. Imagens a toda a largura alternam com bandas de basalto e cal; o símbolo 3x4 é o seletor das 12 casas. Um só visual, por escolha. */
+:root{
+  --basalto:#1F1E1C; --basalto-2:#2A2826; --cal:#F3EFE8; --cal-2:#E8E2D8;
+  --madeira:#8C6446; --oliva:#5F6B45; --luz:#C8A46A; --tinta:#1F1E1C; --tinta-suave:#5A554E;
+  --linha:rgba(31,30,28,.16); --linha-clara:rgba(243,239,232,.2);
+  --display:'Cormorant Garamond',Georgia,'Times New Roman',serif;
+  --texto:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--cal);color:var(--tinta);font-family:var(--texto);font-size:16px;line-height:1.6;margin:0;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+h1,h2,h3{font-family:var(--display);font-weight:300;margin:0;line-height:1;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:clamp(2.6rem,6vw,4.6rem)}
+h2 em,h1 em{font-style:italic;color:var(--luz)}
+p{margin:0}
+a{color:inherit}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.eyebrow{font-size:.74rem;letter-spacing:.34em;text-transform:uppercase;font-weight:500}
+.lead{font-size:1.12rem;font-weight:300;max-width:34em;color:var(--tinta-suave)}
+.dark{background:var(--basalto);color:var(--cal)}
+.dark .lead{color:rgba(243,239,232,.72)}
+.btn{display:inline-flex;align-items:center;gap:.7em;padding:1em 1.7em;font:500 .78rem/1 var(--texto);letter-spacing:.22em;text-transform:uppercase;text-decoration:none;border:1px solid currentColor;background:transparent;color:inherit;cursor:pointer;transition:background .25s,color .25s}
+.btn.solid{background:var(--luz);border-color:var(--luz);color:var(--basalto)}
+.btn:hover{background:var(--cal);color:var(--basalto);border-color:var(--cal)}
+.btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--luz);outline-offset:3px}
+.sym{width:30px;height:auto;flex:none}
+
+/* topo */
+.top{position:absolute;left:0;right:0;top:env(safe-area-inset-top,0px);z-index:5;color:var(--cal)}
+.top .wrap{display:flex;justify-content:space-between;align-items:center;padding-block:22px}
+.logo{display:flex;align-items:center;gap:14px;text-decoration:none}
+.logo span{font-family:var(--display);font-size:1.6rem;letter-spacing:.34em}
+.top nav{display:flex;gap:28px;font-size:.72rem;letter-spacing:.26em;text-transform:uppercase}
+.top nav a{text-decoration:none;opacity:.85}
+.top nav a:hover{opacity:1}
+
+/* hero */
+.hero{position:relative;min-height:min(880px,92svh);color:var(--cal);display:flex;align-items:flex-end;overflow:hidden;background:var(--basalto)}
+.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:60% 55%;animation:respira 18s ease-out both}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,19,18,.55) 0%,rgba(20,19,18,0) 30%,rgba(20,19,18,.1) 45%,rgba(20,19,18,.88) 100%),linear-gradient(90deg,rgba(20,19,18,.55),rgba(20,19,18,0) 60%)}
+.hero .wrap{position:relative;z-index:2;width:100%;padding-block:0 56px;display:grid;grid-template-columns:1.4fr 1fr;gap:40px;align-items:end}
+.hero h1{font-size:clamp(3.4rem,10vw,8.6rem)}
+.hero .side{display:flex;flex-direction:column;gap:22px;align-items:flex-start}
+.hero .side p{font-weight:300;font-size:1.05rem;max-width:26em;opacity:.9}
+.ctas{display:flex;flex-wrap:wrap;gap:12px}
+@keyframes respira{from{transform:scale(1.06)}to{transform:scale(1)}}
+
+/* factos */
+.factos{border-bottom:1px solid var(--linha)}
+.factos .wrap{display:grid;grid-template-columns:repeat(6,1fr)}
+.facto{padding:28px 18px 26px;border-left:1px solid var(--linha);display:flex;flex-direction:column;gap:6px;min-width:0}
+.facto:first-child{border-left:0;padding-left:0}
+.facto b{font-family:var(--display);font-weight:400;font-size:2.3rem;line-height:1;font-variant-numeric:tabular-nums}
+.facto span{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tinta-suave)}
+
+section{padding-block:clamp(72px,10vw,130px)}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:clamp(32px,6vw,90px);align-items:center}
+.split>*{min-width:0}
+.stack{display:flex;flex-direction:column;gap:26px}
+.foto{width:100%;aspect-ratio:4/5;object-fit:cover}
+.legenda{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--tinta-suave);margin-top:12px}
+.dark .legenda{color:rgba(243,239,232,.55)}
+
+/* seletor das 12 casas */
+.seletor{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:clamp(32px,6vw,80px);align-items:start;margin-top:56px}
+.predio{display:flex;flex-direction:column;gap:0}
+.grelha{display:grid;grid-template-columns:44px repeat(3,1fr);border:1.5px solid var(--cal)}
+.grelha .piso{display:flex;align-items:center;justify-content:center;font-size:.7rem;letter-spacing:.14em;color:rgba(243,239,232,.6);border-top:1.5px solid var(--linha-clara)}
+.grelha .piso:nth-child(1){border-top:0}
+.casa{aspect-ratio:1.35;border:0;border-left:1.5px solid var(--cal);border-top:1.5px solid var(--cal);background:transparent;color:var(--cal);font:400 1.5rem/1 var(--display);cursor:pointer;position:relative;transition:background .2s,color .2s}
+.casa.r1{border-top:0}
+.casa small{position:absolute;left:8px;bottom:6px;font:500 .58rem/1 var(--texto);letter-spacing:.14em;text-transform:uppercase;opacity:.6}
+.casa:hover{background:rgba(243,239,232,.08)}
+.casa[aria-pressed="true"]{background:var(--luz);color:var(--basalto)}
+.casa.reservada{color:rgba(243,239,232,.3);background:repeating-linear-gradient(135deg,transparent 0 7px,rgba(243,239,232,.06) 7px 8px)}
+.base{height:42px;background:var(--cal);color:var(--basalto);display:flex;align-items:center;justify-content:center;font-size:.66rem;letter-spacing:.28em;text-transform:uppercase;font-weight:600;margin-top:10px}
+.cave{height:30px;border:1.5px dashed rgba(243,239,232,.4);display:flex;align-items:center;justify-content:center;font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;color:rgba(243,239,232,.6);margin-top:8px}
+.ficha{border-top:1px solid var(--linha-clara);padding-top:28px;display:flex;flex-direction:column;gap:22px}
+.ficha h3{font-size:clamp(2.4rem,5vw,3.6rem)}
+.ficha dl{display:grid;grid-template-columns:auto 1fr;gap:12px 28px;margin:0;font-size:.95rem}
+.ficha dt{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(243,239,232,.55);padding-top:3px}
+.ficha dd{margin:0}
+.estado{display:inline-flex;align-items:center;gap:8px;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase}
+.estado::before{content:"";width:8px;height:8px;border-radius:50%;background:#8FB37A}
+.estado.r::before{background:#B5655A}
+.nota{font-size:.78rem;color:rgba(243,239,232,.5);font-style:italic}
+.escada{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--linha-clara);margin-top:6px}
+.degrau{background:var(--basalto);padding:14px 12px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.degrau b{font-family:var(--display);font-weight:400;font-size:1.3rem}
+.degrau span{font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(243,239,232,.55)}
+.degrau.on{background:var(--basalto-2);box-shadow:inset 0 2px 0 var(--luz)}
+
+.sim{display:flex;flex-direction:column;gap:10px;background:var(--cal);padding:clamp(22px,4vw,40px);border:1px solid var(--linha)}
+.sim label{display:flex;justify-content:space-between;gap:12px;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tinta-suave);margin-top:10px}
+.sim output{font:500 .95rem var(--texto);letter-spacing:0;text-transform:none;color:var(--tinta);font-variant-numeric:tabular-nums}
+.sim input[type=range]{width:100%;accent-color:var(--madeira);border:0;padding:0}
+.resultado{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--linha);margin-top:22px}
+.resultado>div{background:var(--basalto);color:var(--cal);padding:20px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.resultado span{font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(243,239,232,.6)}
+.resultado b{font:400 clamp(1.6rem,3.4vw,2.3rem)/1 var(--display);font-variant-numeric:tabular-nums}
+.resultado i{font-style:normal;font-size:.85rem;color:var(--luz);font-variant-numeric:tabular-nums}
+/* personalidades */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--linha);margin-top:44px;overflow-x:auto}
+.tab{flex:1;min-width:150px;background:none;border:0;padding:18px 4px 16px;text-align:left;cursor:pointer;font:300 2rem/1 var(--display);color:var(--tinta-suave);border-bottom:3px solid transparent;margin-bottom:-1px;display:flex;align-items:baseline;gap:12px}
+.tab i{font:500 .66rem/1 var(--texto);letter-spacing:.2em;text-transform:uppercase;font-style:normal}
+.tab[aria-selected="true"]{color:var(--tinta);border-color:var(--c)}
+.galeria{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:auto auto;gap:10px;margin-top:28px}
+.galeria img{width:100%;height:100%;object-fit:cover;aspect-ratio:4/3}
+.galeria img:first-child{grid-row:span 2;aspect-ratio:auto}
+.galeria img:last-child{grid-column:span 2;aspect-ratio:16/7}
+.pdesc{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:30px;align-items:start}
+.pdesc>*{min-width:0}
+.amostras{display:flex;gap:8px}
+.amostras span{width:46px;height:46px;border:1px solid var(--linha)}
+
+/* banda de imagem */
+.banda{position:relative;min-height:560px;display:flex;align-items:flex-end;color:var(--cal);padding:0;overflow:hidden;background:var(--basalto)}
+.banda img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.banda::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,19,18,.82),rgba(20,19,18,.15) 65%)}
+.banda .wrap{position:relative;z-index:2;width:100%;padding-block:80px}
+.banda h2{font-size:clamp(3rem,8vw,6.2rem)}
+
+/* passos diáspora */
+.passos{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:52px;border-top:1px solid var(--linha)}
+.passo{padding:26px 22px 0 0;display:flex;flex-direction:column;gap:12px;min-width:0}
+.passo b{font-family:var(--display);font-weight:300;font-size:3rem;line-height:1;color:var(--madeira)}
+.passo h3{font-family:var(--texto);font-weight:500;font-size:1rem;letter-spacing:0}
+.passo p{font-size:.92rem;color:var(--tinta-suave)}
+
+/* local */
+.mapa{position:relative}
+.mapa img{width:100%;aspect-ratio:16/9;object-fit:cover;filter:saturate(.7) contrast(1.05)}
+.perto{list-style:none;padding:0;margin:0;display:flex;flex-direction:column}
+.perto li{display:flex;justify-content:space-between;gap:20px;padding:14px 0;border-bottom:1px solid var(--linha);font-size:.95rem}
+.perto li span:last-child{color:var(--tinta-suave);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* VIP */
+form{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+form label{display:flex;flex-direction:column;gap:8px;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(243,239,232,.65);min-width:0}
+form .full{grid-column:1/-1}
+input,select{font:400 1rem var(--texto);color:var(--cal);background:transparent;border:0;border-bottom:1px solid rgba(243,239,232,.4);padding:10px 0;border-radius:0;width:100%}
+select option{color:var(--basalto)}
+.ok[hidden]{display:none}
+.ok{grid-column:1/-1;border:1px solid var(--luz);padding:22px;display:flex;flex-direction:column;gap:12px}
+.ok pre{white-space:pre-wrap;font:400 .9rem/1.5 var(--texto);margin:0;color:rgba(243,239,232,.85)}
+.rodape{padding-block:40px;font-size:.78rem;color:rgba(243,239,232,.55);border-top:1px solid var(--linha-clara)}
+.rodape .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+
+@media (max-width:900px){
+  .top nav{display:none}
+  .hero .wrap,.split,.seletor,.pdesc{grid-template-columns:1fr}
+  .factos .wrap{grid-template-columns:repeat(3,1fr)}
+  .facto:nth-child(4){border-left:0;padding-left:0}
+  .facto{border-top:1px solid var(--linha)}
+  .facto:nth-child(-n+3){border-top:0}
+  .passos{grid-template-columns:1fr 1fr}
+  .galeria{grid-template-columns:1fr 1fr}
+  .galeria img:first-child{grid-row:auto;grid-column:span 2;aspect-ratio:4/3}
+  .split.inv>:first-child{order:2}
+}
+@media (max-width:520px){
+  form{grid-template-columns:1fr}
+  .passos{grid-template-columns:1fr}
+  .factos .wrap{grid-template-columns:1fr 1fr}
+  .facto:nth-child(odd){border-left:0;padding-left:0}
+  .facto:nth-child(4){border-left:1px solid var(--linha);padding-left:18px}
+  .facto:nth-child(3){border-top:1px solid var(--linha)}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="sym" viewBox="0 0 120 150"><g fill="none" stroke="currentColor" stroke-width="5"><rect x="6" y="6" width="108" height="108"/><line x1="42" y1="6" x2="42" y2="114"/><line x1="78" y1="6" x2="78" y2="114"/><line x1="6" y1="33" x2="114" y2="33"/><line x1="6" y1="60" x2="114" y2="60"/><line x1="6" y1="87" x2="114" y2="87"/></g><rect x="81" y="36" width="30" height="21" fill="#C8A46A"/><rect x="0" y="122" width="120" height="22" fill="currentColor"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#inicio" aria-label="BRAVA"><svg class="sym"><use href="#sym"/></svg><span>BRAVA</span></a>
+    <nav aria-label="Secções"><a href="#casas">As 12 casas</a><a href="#interiores">Interiores</a><a href="#local">Localização</a><a href="#vip">Lista VIP</a></nav>
+  </div>
+</header>
+
+<div class="hero" id="inicio">
+  <img src="img/hero.jpg" alt="Edifício BRAVA ao pôr do sol em Praia, com varandas em vidro e revestimento em madeira">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow" style="margin-bottom:22px">Residências · Praia · Cabo Verde</div>
+      <h1>Só doze.<br><em>Uma pode ser sua.</em></h1>
+    </div>
+    <div class="side">
+      <p>Doze apartamentos T3 em quatro pisos, três casas por piso. Lojas no rés-do-chão, garagem com elevador. No Palmarejo, na Rua Ilha Brava, a dois minutos da praia de Quebra Canela.</p>
+      <div class="ctas"><a class="btn solid" href="#vip">Entrar na lista VIP</a><a class="btn" href="#casas">Ver as 12 casas</a></div>
+    </div>
+  </div>
+</div>
+
+<div class="factos">
+  <div class="wrap">
+    <div class="facto"><b>12</b><span>Apartamentos T3</span></div>
+    <div class="facto"><b>4</b><span>Pisos residenciais</span></div>
+    <div class="facto"><b>3</b><span>Casas por piso</span></div>
+    <div class="facto"><b>1</b><span>Elevador da garagem a casa</span></div>
+    <div class="facto"><b>R/C</b><span>Lojas com montra</span></div>
+    <div class="facto"><b>3</b><span>Personalidades de acabamento</span></div>
+  </div>
+</div>
+
+<section>
+  <div class="wrap split">
+    <div class="stack">
+      <div class="eyebrow" style="color:var(--madeira)">O edifício</div>
+      <h2>Pedra em baixo.<br><em style="color:var(--madeira)">Luz</em> em cima.</h2>
+      <p class="lead">Uma base em pedra escura que acolhe o comércio da rua. Por cima, quatro pisos em branco e madeira, com varandas em vidro que deixam entrar a luz de Praia de manhã à noite. Arquitetura limpa, pensada para envelhecer bem.</p>
+    </div>
+    <div>
+      <img class="foto" src="img/manha.jpg" alt="Fachada do BRAVA de manhã, com céu azul e casas coloridas ao lado" loading="lazy" style="aspect-ratio:4/3">
+      <div class="legenda">Imagem ilustrativa · Fachada nascente</div>
+    </div>
+  </div>
+</section>
+
+<section class="dark" id="casas">
+  <div class="wrap">
+    <div class="eyebrow" style="color:var(--luz)">As 12 casas</div>
+    <h2 style="margin-top:20px">Escolha o seu <em>lugar</em> no edifício.</h2>
+    <p class="lead" style="margin-top:22px">Cada quadrado é uma casa. Toque para ver o piso, a posição e o estado. Quando uma casa é reservada, deixa de estar disponível para sempre.</p>
+    <div class="seletor">
+      <div class="predio">
+        <div class="grelha" id="grelha" role="group" aria-label="Apartamentos por piso"></div>
+        <div class="base">Rés-do-chão · Lojas</div>
+        <div class="cave">Cave · Garagem + elevador</div>
+      </div>
+      <div class="ficha" aria-live="polite">
+        <div class="eyebrow" id="f-eyebrow" style="color:var(--luz)">Apartamento</div>
+        <h3 id="f-titulo">T3 · 4.º C</h3>
+        <dl>
+          <dt>Piso</dt><dd id="f-piso"></dd>
+          <dt>Posição</dt><dd id="f-pos"></dd>
+          <dt>Tipologia</dt><dd>T3 · 3 quartos · cozinha aberta com ilha · varanda em vidro</dd>
+          <dt>Área</dt><dd>A confirmar na planta final</dd>
+          <dt>Inclui</dt><dd>Lugar de garagem na cave, com elevador</dd>
+          <dt>Estado</dt><dd><span class="estado" id="f-estado">Disponível</span></dd>
+        </dl>
+        <div>
+          <div class="eyebrow" style="font-size:.66rem;margin-bottom:10px">Preço por fase de venda</div>
+          <div class="escada">
+            <div class="degrau on"><b>Fundador</b><span>4 primeiras casas</span></div>
+            <div class="degrau"><b>Lançamento</b><span>Casas 5 a 8</span></div>
+            <div class="degrau"><b>Final</b><span>Últimas 4</span></div>
+          </div>
+        </div>
+        <div class="ctas"><a class="btn solid" id="f-cta" href="#vip">Quero esta casa</a></div>
+        <p class="nota">Estado das casas apresentado a título de exemplo até ao arranque oficial das vendas.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="simulador" style="background:var(--cal-2)">
+  <div class="wrap split" style="align-items:start">
+    <div class="stack">
+      <div class="eyebrow" style="color:var(--madeira)">Simulador</div>
+      <h2>Quanto fica <em style="color:var(--madeira)">por mês?</em></h2>
+      <p class="lead">Faça as contas antes de falar connosco. Mude o valor, a entrada e o prazo para ver uma prestação indicativa de crédito habitação.</p>
+      <p class="legenda" style="text-transform:none;letter-spacing:0;font-size:.82rem;line-height:1.5">Simulação indicativa, taxa fixa de referência de 9% (crédito habitação em Cabo Verde, novembro de 2026). Não é uma proposta de crédito: a taxa, o montante e o prazo dependem do banco e do seu perfil. Ao valor do imóvel acrescem 1% de ITI e custos de escritura e registo.</p>
+    </div>
+    <div class="sim">
+      <label for="s-preco">Valor da casa <output id="o-preco"></output></label>
+      <input type="range" id="s-preco" min="12000000" max="22000000" step="250000" value="16500000">
+      <label for="s-entrada">Entrada <output id="o-entrada"></output></label>
+      <input type="range" id="s-entrada" min="10" max="50" step="5" value="20">
+      <label for="s-anos">Prazo <output id="o-anos"></output></label>
+      <input type="range" id="s-anos" min="10" max="30" step="5" value="30">
+      <label for="s-taxa">Taxa anual <output id="o-taxa"></output></label>
+      <input type="range" id="s-taxa" min="6" max="12" step="0.25" value="9">
+      <div class="resultado">
+        <div><span>Prestação mensal indicativa</span><b id="r-mes"></b><i id="r-eur"></i></div>
+        <div><span>Entrada a juntar</span><b id="r-ent"></b><i id="r-ent-eur"></i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="interiores">
+  <div class="wrap">
+    <div class="eyebrow" style="color:var(--madeira)">Interiores</div>
+    <h2 style="margin-top:20px">Uma casa. Três <em style="color:var(--madeira)">personalidades.</em></h2>
+    <p class="lead" style="margin-top:22px">A planta é a mesma, mas o ambiente é escolhido por si: escolha o pacote de acabamentos que diz mais sobre a forma como vive.</p>
+    <div class="tabs" role="tablist" aria-label="Personalidades de acabamento">
+      <button class="tab" role="tab" id="t-oliva" aria-selected="true" style="--c:#5F6B45" data-p="oliva">Oliva <i>Natural · sereno</i></button>
+      <button class="tab" role="tab" id="t-grafite" aria-selected="false" style="--c:#1F1E1C" data-p="grafite">Grafite <i>Urbano · elegante</i></button>
+      <button class="tab" role="tab" id="t-terra" aria-selected="false" style="--c:#8C6446" data-p="terra">Terra <i>Quente · acolhedor</i></button>
+    </div>
+    <div class="galeria" id="galeria"></div>
+    <div class="pdesc">
+      <p class="lead" id="p-texto"></p>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="eyebrow" style="font-size:.66rem">Paleta de materiais</div>
+        <div class="amostras" id="p-amostras"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="banda">
+  <img src="img/familia.jpg" alt="Família numa sala do BRAVA ao fim da tarde" loading="lazy" style="object-position:40% 50%">
+  <div class="wrap">
+    <div class="eyebrow" style="color:var(--luz);margin-bottom:20px">Três quartos</div>
+    <h2>Uma vida<br><em>inteira.</em></h2>
+  </div>
+</div>
+
+<section>
+  <div class="wrap split inv">
+    <div>
+      <img class="foto" src="img/varanda.jpg" alt="Casal numa varanda do BRAVA ao pôr do sol sobre Praia" loading="lazy">
+      <div class="legenda">Imagem ilustrativa · Varanda de piso superior</div>
+    </div>
+    <div class="stack">
+      <div class="eyebrow" style="color:var(--madeira)">Para quem está longe</div>
+      <h2>Voltar<br><em style="color:var(--madeira)">tem morada.</em></h2>
+      <p class="lead">Mora em Lisboa, Boston, Roterdão ou Paris? Compre a sua casa em Praia sem perder um voo. Acompanhamos cada etapa, com documentos claros e atualizações da obra.</p>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="passos">
+      <div class="passo"><b>1</b><h3>Visita por videochamada</h3><p>Percorremos consigo o edifício, as plantas e os acabamentos, ao seu horário.</p></div>
+      <div class="passo"><b>2</b><h3>Reserva à distância</h3><p>Escolhe a casa e reserva com um sinal. Contrato-promessa assinado digitalmente ou por procuração.</p></div>
+      <div class="passo"><b>3</b><h3>Obra à vista</h3><p>Fotografias e vídeo da obra todos os meses, diretamente no seu WhatsApp.</p></div>
+      <div class="passo"><b>4</b><h3>Chave na mão</h3><p>Escritura em Praia, com apoio para crédito, registo e mobiliário.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="dark">
+  <div class="wrap split">
+    <div class="stack">
+      <div class="eyebrow" style="color:var(--luz)">Espaços comerciais</div>
+      <h2>O rés-do-chão onde a cidade <em>acontece.</em></h2>
+      <p class="lead">Lojas com montras em vidro do chão ao teto, numa esquina com dois acessos. Para um café, uma clínica, um escritório ou uma loja de marca, com doze famílias como primeiros clientes.</p>
+      <div class="ctas"><a class="btn" href="#vip">Pedir informação das lojas</a></div>
+    </div>
+    <div>
+      <img class="foto" src="img/loja.jpg" alt="Loja do rés-do-chão ocupada por um café" loading="lazy" style="aspect-ratio:4/3">
+      <div class="legenda">Simulação de ocupação · Loja de esquina</div>
+    </div>
+  </div>
+  <div class="wrap split" style="margin-top:80px">
+    <div>
+      <img class="foto" src="img/garagem.jpg" alt="Garagem na cave com elevador" loading="lazy" style="aspect-ratio:16/9">
+    </div>
+    <div class="stack">
+      <div class="eyebrow" style="color:var(--luz)">Garagem</div>
+      <h3 style="font-size:clamp(2rem,4vw,3rem)">Do carro ao sofá, sem sair do edifício.</h3>
+      <p class="lead">Cave com estacionamento e elevador direto a todos os pisos. As compras sobem consigo.</p>
+    </div>
+  </div>
+</section>
+
+<section id="local">
+  <div class="wrap split">
+    <div class="stack">
+      <div class="eyebrow" style="color:var(--madeira)">Localização</div>
+      <h2>No centro do que <em style="color:var(--madeira)">já funciona.</em></h2>
+      <p class="lead">Palmarejo, na Rua Ilha Brava, junto à entrada da Cidadela. O bairro mais procurado da capital, com praia, centro comercial, universidades e saúde ao alcance de uma caminhada.</p>
+      <ul class="perto">
+        <li><span>Policlínica Santiago</span><span>Ao lado</span></li>
+        <li><span>Praia de Quebra Canela</span><span>≈ 2 min</span></li>
+        <li><span>Praia Shopping</span><span>≈ 2 min</span></li>
+        <li><span>Uni-CV e Universidade Jean Piaget</span><span>Palmarejo Grande</span></li>
+        <li><span>Plateau, centro histórico</span><span>≈ 2 km</span></li>
+        <li><span>Aeroporto Nelson Mandela</span><span>≈ 6 km</span></li>
+      </ul>
+      <p class="legenda" style="margin-top:0">Distâncias aproximadas, de carro.</p>
+    </div>
+    <div class="mapa">
+      <img src="img/mapa.jpg" alt="Vista aérea do terreno do BRAVA, junto à Rua da Ilha Brava e à Policlínica Santiago" loading="lazy">
+      <div class="legenda">Vista aérea do terreno · Palmarejo, Praia</div>
+    </div>
+  </div>
+</section>
+
+<section class="dark" id="vip">
+  <div class="wrap split" style="align-items:start">
+    <div class="stack">
+      <div class="eyebrow" style="color:var(--luz)">Lista VIP</div>
+      <h2>Antes de toda a gente.</h2>
+      <p class="lead">Quem está na lista VIP vê as plantas e os preços primeiro, e tem acesso às 4 casas com preço de fundador antes da abertura ao público.</p>
+      <img src="img/chave.jpg" alt="Chave com porta-chaves BRAVA numa porta" loading="lazy" style="width:100%;max-width:360px;aspect-ratio:4/5;object-fit:cover;margin-top:10px">
+    </div>
+    <form id="form" novalidate>
+      <label>Nome<input id="nome" name="nome" autocomplete="name" required></label>
+      <label>WhatsApp<input id="tel" name="tel" type="tel" autocomplete="tel" placeholder="+238 …" required></label>
+      <label>Onde vive<select id="pais" name="pais"><option>Cabo Verde</option><option>Portugal</option><option>Estados Unidos</option><option>França</option><option>Países Baixos</option><option>Luxemburgo</option><option>Outro país</option></select></label>
+      <label>Interesse<select id="interesse" name="interesse"><option>Apartamento T3</option><option>Loja</option><option>T3 + loja</option></select></label>
+      <label class="full">Casa preferida (opcional)<input id="casa" name="casa" placeholder="Ex.: 4.º C"></label>
+      <div class="full"><button class="btn solid" type="submit">Entrar na lista VIP</button></div>
+      <div class="ok" id="ok" hidden>
+        <div class="eyebrow" style="color:var(--luz)">Pedido pronto</div>
+        <p>Envie esta mensagem para o WhatsApp oficial do BRAVA para confirmar o seu lugar na lista:</p>
+        <pre id="msg"></pre>
+        <div class="ctas"><a class="btn solid" id="wa" href="#" target="_blank" rel="noopener">Abrir WhatsApp</a><button class="btn" type="button" id="copiar">Copiar mensagem</button></div>
+        <p class="nota" id="wa-nota"></p>
+      </div>
+    </form>
+  </div>
+</section>
+
+<footer class="dark rodape">
+  <div class="wrap">
+    <div class="logo"><svg class="sym"><use href="#sym"/></svg><span style="font-size:1.2rem">BRAVA</span></div>
+    <p>Imagens ilustrativas, sem valor contratual. Áreas, preços e acabamentos a confirmar em documentação oficial.</p>
+  </div>
+</footer>
+
+<script>
+// Configuração comercial: preencher antes de divulgar
+const WHATSAPP = ""; // ex.: "2389XXXXXX" (apenas dígitos, com indicativo)
+const RESERVADAS = []; // ex.: ["2B","3A"] quando houver reservas reais
+
+const POS = {A:"Frente · nascente", B:"Esquina · dupla frente", C:"Traseira · mais reservada"};
+const grelha = document.getElementById('grelha');
+let atual = "4C";
+for (let piso = 4; piso >= 1; piso--) {
+  const p = document.createElement('div'); p.className = 'piso'; p.textContent = piso + '.º';
+  grelha.appendChild(p);
+  for (const l of ['A','B','C']) {
+    const id = piso + l, b = document.createElement('button');
+    b.className = 'casa' + (piso === 4 ? ' r1' : '') + (RESERVADAS.includes(id) ? ' reservada' : '');
+    b.type = 'button'; b.dataset.id = id; b.setAttribute('aria-pressed', id === atual);
+    b.setAttribute('aria-label', 'Apartamento ' + piso + '.º ' + l);
+    b.innerHTML = l + '<small>' + id + '</small>';
+    b.onclick = () => escolher(id);
+    grelha.appendChild(b);
+  }
+}
+function escolher(id) {
+  atual = id;
+  grelha.querySelectorAll('.casa').forEach(c => c.setAttribute('aria-pressed', c.dataset.id === id));
+  const piso = id[0], l = id[1], res = RESERVADAS.includes(id);
+  document.getElementById('f-titulo').textContent = 'T3 · ' + piso + '.º ' + l;
+  document.getElementById('f-piso').textContent = piso + '.º piso' + (piso === '4' ? ' · último piso, mais vista e mais privacidade' : '');
+  document.getElementById('f-pos').textContent = POS[l] + ' (a confirmar na planta)';
+  const e = document.getElementById('f-estado'); e.textContent = res ? 'Reservada' : 'Disponível'; e.className = 'estado' + (res ? ' r' : '');
+  document.getElementById('casa').value = piso + '.º ' + l;
+}
+escolher(atual);
+
+const P = {
+  oliva: {img:['a1','a2','a3','a4'], cores:['#5F6B45','#E9E3D6','#B9A27F','#2B2A27'],
+    txt:'Linho, verde-oliva e madeira clara. Uma casa calma, que convida a abrandar ao fim do dia. Cortinas de duas camadas filtram o sol forte da tarde.'},
+  grafite: {img:['b1','b2','b3','b4'], cores:['#2B2A28','#D9D6D0','#8D8A84','#B79A78'],
+    txt:'Cinzas profundos, laca branca e bancada escura. Para quem gosta de linhas limpas, de receber em casa e de uma cozinha que é o centro de tudo.'},
+  terra: {img:['c1','c2','c3','c4'], cores:['#8C6446','#EFE9E1','#C9B79F','#3A332D'],
+    txt:'Castanhos quentes, texturas em relevo e luz indireta. Uma casa acolhedora, feita para a família e para as noites longas à mesa.'}
+};
+function mostrar(p) {
+  document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', t.dataset.p === p));
+  const d = P[p];
+  document.getElementById('galeria').innerHTML = d.img.map((i, n) => `<img src="img/${i}.jpg" alt="Interior ${p}, imagem ${n+1}" loading="lazy">`).join('');
+  document.getElementById('p-texto').textContent = d.txt;
+  document.getElementById('p-amostras').innerHTML = d.cores.map(c => `<span style="background:${c}" title="${c}"></span>`).join('');
+}
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => mostrar(t.dataset.p));
+mostrar('oliva');
+
+document.getElementById('form').addEventListener('submit', ev => {
+  ev.preventDefault();
+  const v = id => document.getElementById(id).value.trim();
+  if (!v('nome') || !v('tel')) { document.getElementById(v('nome') ? 'tel' : 'nome').focus(); return; }
+  const msg = `Olá BRAVA! Quero entrar na lista VIP.\nNome: ${v('nome')}\nWhatsApp: ${v('tel')}\nVivo em: ${v('pais')}\nInteresse: ${v('interesse')}` + (v('casa') ? `\nCasa preferida: ${v('casa')}` : '');
+  document.getElementById('msg').textContent = msg;
+  const wa = document.getElementById('wa'), nota = document.getElementById('wa-nota');
+  if (WHATSAPP) { wa.href = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(msg); wa.hidden = false; nota.textContent = 'WhatsApp oficial: +' + WHATSAPP; }
+  else { wa.hidden = true; nota.textContent = 'O número oficial do WhatsApp BRAVA será publicado no arranque da campanha.'; }
+  document.getElementById('ok').hidden = false;
+});
+document.getElementById('copiar').addEventListener('click', ev => {
+  const t = document.getElementById('msg').textContent, b = ev.currentTarget;
+  navigator.clipboard.writeText(t).then(() => b.textContent = 'Copiada', () => {
+    const r = document.createRange(); r.selectNodeContents(document.getElementById('msg'));
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selecionada: copie com Ctrl+C';
+  });
+});
+// Simulador de prestação (sistema francês)
+const EUR = 110.265;
+const fmt = n => Math.round(n).toLocaleString('pt-PT').replace(/\u202f|\u00a0/g,' ');
+function prestacao(capital, taxaAnual, anos) {
+  const r = taxaAnual / 100 / 12, n = anos * 12;
+  return r === 0 ? capital / n : capital * r / (1 - Math.pow(1 + r, -n));
+}
+function simular() {
+  const v = id => parseFloat(document.getElementById(id).value);
+  const preco = v('s-preco'), ent = v('s-entrada'), anos = v('s-anos'), taxa = v('s-taxa');
+  const entrada = preco * ent / 100, mes = prestacao(preco - entrada, taxa, anos);
+  document.getElementById('o-preco').textContent = fmt(preco) + ' CVE';
+  document.getElementById('o-entrada').textContent = ent + '%';
+  document.getElementById('o-anos').textContent = anos + ' anos';
+  document.getElementById('o-taxa').textContent = taxa.toLocaleString('pt-PT') + '%';
+  document.getElementById('r-mes').textContent = fmt(mes) + ' CVE';
+  document.getElementById('r-eur').textContent = '≈ ' + fmt(mes / EUR) + ' € por mês';
+  document.getElementById('r-ent').textContent = fmt(entrada) + ' CVE';
+  document.getElementById('r-ent-eur').textContent = '≈ ' + fmt(entrada / EUR) + ' €';
+}
+['s-preco','s-entrada','s-anos','s-taxa'].forEach(id => document.getElementById(id).addEventListener('input', simular));
+simular();
+</script>
