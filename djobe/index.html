@@ -192,8 +192,9 @@ textarea {
   }
   function tokens(s) {
     const out = [];
-    for (const w of fold(s).split(/[^a-z0-9]+/)) {
+    for (let w of fold(s).split(/[^a-z0-9]+/)) {
       if (w.length < 2 || STOP.has(w)) continue;
+      w = w.replace(/cc/g, "c").replace(/c(?=t)/g, "").replace(/p(?=t)/g, ""); // old spelling: protecção, efectivo, excepto
       if (/^\d+$/.test(w) && w.length > 6) continue;
       out.push(stem(w));
     }
@@ -210,7 +211,9 @@ textarea {
     casa: "habitacao domicilio", ferias: "ferias", gravida: "maternidade", gravidez: "maternidade", filho: "filho descendente",
     bater: "ofensa integridade fisica violencia", violencia: "violencia", mulher: "genero", empresa: "empresa sociedade",
     multa: "coima multa", carta: "titulo conducao", irps: "taxa irps rendimento", desconto: "contribuicao cotizacao desconto",
-    descontos: "contribuicao cotizacao desconto", inps: "previdencia social contribuicao"
+    descontos: "contribuicao cotizacao desconto", inps: "previdencia social contribuicao",
+    seguranca: "seguranca protecao especial", guarda: "protecao especial seguranca", procurador: "magistrado ministerio publico procurador",
+    juiza: "magistrado judicial juiz", segurancas: "protecao especial seguranca"
   };
 
   function build(chunks, docs) {
