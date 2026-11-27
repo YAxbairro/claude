@@ -28,7 +28,7 @@ Legenda: **Djobe** = já está na base do chat (`djobe/data/`).
 |---|---|
 | inps.cv (obrigações, pensões, benefícios, abono, FAQ, legislação) | INPS — no Djobe |
 | mf.gov.cv (guia dos agentes públicos, DNRE, Portal Transparência com API) | impostos, função pública, orçamento |
-| boe.incv.cv | pesquisa de leis: `djobe/build/boe.py` |
+| boe.incv.cv | pesquisa de leis: `djobe/scripts/boe.py` |
 
 ## Imprensa (para factos recentes; indicar sempre a data)
 Expresso das Ilhas, Inforpress, A Nação, Balai, TVA, Voz do Arquipélago, Lusa/RTP/Observador.

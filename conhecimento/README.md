@@ -12,5 +12,5 @@ Tudo o que aprendemos fica aqui, organizado, até termos uma base sólida que re
 ## Regras
 1. Cada pergunta: procurar em todas as fontes possíveis (leis no Boletim Oficial, sites oficiais, imprensa) antes de responder.
 2. Só se guarda como resposta o que tem fonte verificada. O resto fica em "O que falta saber".
-3. Uma lei nova encontrada vai também para o Djobe (`djobe/build/build_kb.py`), com um caso de teste em `djobe/tests/cases.json`.
+3. Uma lei nova encontrada vai também para o Djobe (`djobe/scripts/build_kb.py`), com um caso de teste em `djobe/tests/cases.json`.
 4. Notícias datam rápido: indicar sempre a data em que foram consultadas.
