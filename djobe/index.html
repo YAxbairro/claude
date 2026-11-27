@@ -134,15 +134,14 @@ textarea {
       <div class="example">
         <span class="tag">Exemplo · "Que descontos vão para o INPS?"</span>
         <div class="answer">
-          <p>Depende do teu tipo de trabalho:</p>
-          <p><strong>Trabalhas para uma empresa</strong> (conta de outrem)</p>
+          <p>Depende de como trabalhas, porque cada caso paga uma percentagem diferente. Trabalhas para uma empresa ou por tua conta?</p>
+        </div>
+        <div class="msg user"><div class="bubble">Trabalho para uma empresa</div></div>
+        <div class="answer">
+          <p>Vão <strong>24,5%</strong> do teu salário para o INPS, mas tu só pagas <strong>8,5%</strong>. O resto paga o patrão.<sup><a href="https://inps.cv/obrigacoes/" target="_blank" rel="noopener">1</a></sup></p>
           <ul>
-            <li>Vão 24,5% do teu salário para o INPS, mas tu só pagas 8,5%. O resto paga o patrão.<sup><a href="https://inps.cv/obrigacoes/" target="_blank" rel="noopener">1</a></sup></li>
-            <li>Com 50 contos: tiram-te <strong>4,25 contos</strong> e recebes <strong>45,75 contos</strong>. O patrão paga mais <strong>8 contos</strong>.</li>
-          </ul>
-          <p><strong>Trabalhas por tua conta</strong> (conta própria)</p>
-          <ul>
-            <li>Pagas tudo tu: 19,5%. Com 50 contos, são <strong>9,75 contos</strong> por mês.<sup><a href="https://inps.cv/obrigacoes/" target="_blank" rel="noopener">1</a></sup></li>
+            <li>Com 50 contos: tiram-te <strong>4,25 contos</strong> e recebes <strong>45,75 contos</strong>.</li>
+            <li>O patrão paga mais <strong>8 contos</strong> do bolso dele.</li>
           </ul>
         </div>
         <div class="sources"><span class="label">Fonte</span>
@@ -197,7 +196,12 @@ textarea {
   // Tiny, safe markdown: escape first, then bold, lists, paragraphs, citations.
   function render(text) {
     const cited = [];
-    const clean = text.replace(/\n+\s*(\*\*)?Fontes?:?(\*\*)?[\s\S]*$/i, "").trim();
+    let options = [];
+    let clean = text.replace(/\n+\s*(\*\*)?Fontes?:?(\*\*)?[\s\S]*$/i, "");
+    clean = clean.replace(/^\s*\**OP[ÇC](?:Õ|O)ES\**\s*:?\**(.*)$/gim, (m, rest) => {
+      options = rest.split("|").map(s => s.replace(/\*\*/g, "").trim()).filter(Boolean).slice(0, 4);
+      return "";
+    }).trim();
     // Line by line: runs of "- " lines become a list, other lines a paragraph.
     let html = "", para = [], list = null, listTag = "";
     const flushPara = () => { if (para.length) { html += "<p>" + para.join("<br>") + "</p>"; para = []; } };
@@ -218,7 +222,7 @@ textarea {
       }
     }
     flushPara(); flushList();
-    return { html, cited };
+    return { html, cited, options };
   }
   function inline(line, cited) {
     let s = esc(line);
@@ -259,8 +263,19 @@ textarea {
     return { ans, srcs };
   }
   function fill(view, text, final) {
-    const { html, cited } = render(text);
+    const { html, cited, options } = render(text);
     view.ans.innerHTML = html || '<p class="thinking">A procurar nas fontes oficiais…</p>';
+    if (final && options.length) {
+      const box = document.createElement("div");
+      box.className = "chips opts";
+      for (const o of options) {
+        const btn = document.createElement("button");
+        btn.type = "button"; btn.className = "chip"; btn.textContent = o;
+        btn.addEventListener("click", () => { if (!busy) ask(o); });
+        box.appendChild(btn);
+      }
+      view.ans.after(box);
+    }
     if (final) {
       view.srcs.innerHTML = "";
       if (cited.length) {
@@ -298,9 +313,18 @@ textarea {
       "",
       "COMO FALAR:",
       "- Tom de conversa: explicas como um amigo que percebe do assunto, com calma e sem pressa, mas sem enrolar.",
-      "- Começa logo pela resposta. Se a resposta depende da situação da pessoa, começa por 'Depende...' e explica cada caso em separado.",
-      "- Cada caso tem um título curto em **negrito** com o nome em linguagem do dia a dia e, entre parênteses, o nome oficial. Por baixo, 1 a 3 pontos com '- '.",
+      "",
+      "PERGUNTA ANTES DE RESPONDER:",
+      "- Se a resposta depende da situação da pessoa (tipo de trabalho, salário, idade, anos de descontos...) e ela ainda não disse isso na conversa, NÃO respondas ainda.",
+      "- Em vez disso, diz numa frase de que depende e faz UMA pergunta curta, a mais importante. Sem citações nessa mensagem.",
+      "- Na última linha dessa mensagem escreve exatamente: OPÇÕES: opção 1 | opção 2 | opção 3 (2 a 4 respostas curtas, escritas como a pessoa as diria, por exemplo 'Trabalho para uma empresa'). Se a resposta for um número (salário, idade), não ponhas OPÇÕES.",
+      "- Usa tudo o que a pessoa já disse. No máximo 2 perguntas antes de responder; se faltar algo menos importante, usa um exemplo de 50 contos.",
+      "- Se a pessoa disser que não sabe ou quiser ver todos os casos, explica os casos em separado, de forma breve.",
+      "",
+      "QUANDO RESPONDES:",
+      "- Responde só ao caso da pessoa. Começa logo pela resposta.",
       "- Dá SEMPRE um exemplo com números: os da pessoa, ou 50 contos se ela não disse. Mostra quanto paga, quanto paga o patrão e com quanto fica.",
+      "- Se tiveres de mostrar vários casos, cada um tem um título curto em **negrito** com o nome em linguagem do dia a dia e, entre parênteses, o nome oficial. Por baixo, 1 a 3 pontos com '- '.",
       "- Normalmente até 100 palavras; quando há vários casos, até 170.",
       "- Se um caso que a pessoa pode ter não está nas fontes (por exemplo, quem trabalha para o Estado), diz numa frase que ainda não tens essa informação.",
       "- Trata a pessoa por tu e fala como ela fala. Se escreveu em kriolu, responde em kriolu; se escreveu em português, em português simples de Cabo Verde.",
@@ -309,22 +333,16 @@ textarea {
       "- Só dás um passo prático ('O que fazer') se a pessoa perguntar o que fazer ou tiver um problema.",
       "- Se parecer um problema sério (patrão que não paga, pensão cortada), diz que isto é informação geral e que vale a pena ir ao INPS ou a um advogado.",
       "",
-      "EXEMPLO DO TOM CERTO (pergunta: 'Que descontos vão para o INPS?'):",
-      "Depende do teu tipo de trabalho. Há três casos principais:",
-      "",
-      "**Trabalhas para uma empresa** (conta de outrem)",
-      "- Vão 24,5% do teu salário para o INPS, mas tu só pagas 8,5%. Os outros 16% paga o patrão. [S1]",
-      "- Exemplo com 50 contos: tiram-te **4,25 contos** e recebes **45,75 contos**. O patrão paga mais **8 contos** do bolso dele.",
-      "",
-      "**Trabalhas por tua conta** (conta própria: tens o teu negócio ou és independente)",
-      "- Pagas tudo tu: 19,5%. [S1]",
-      "- Exemplo com 50 contos: pagas **9,75 contos** por mês.",
-      "",
-      "**Trabalho doméstico** (serviço doméstico)",
-      "- Vão 23%: tu pagas 8% e quem te contrata paga 15%. [S1]",
-      "- Exemplo com 50 contos: tiram-te **4 contos** e o patrão paga **7,5 contos**.",
-      "",
-      "Se trabalhas para o Estado, o teu regime pode ser outro e ainda não tenho essa informação aqui.",
+      "EXEMPLO DO TOM CERTO:",
+      "Pessoa: 'Que descontos vão para o INPS?'",
+      "Djobe: Depende de como trabalhas, porque cada caso paga uma percentagem diferente. Trabalhas para uma empresa, por tua conta ou em casa de alguém?",
+      "OPÇÕES: Trabalho para uma empresa | Trabalho por minha conta | Trabalho doméstico | Trabalho para o Estado",
+      "Pessoa: 'Trabalho para uma empresa'",
+      "Djobe: Vão **24,5%** do teu salário para o INPS, mas tu só pagas **8,5%**. Os outros 16% paga o patrão. [S1]",
+      "- Exemplo com 50 contos: tiram-te **4,25 contos** e recebes **45,75 contos**.",
+      "- O patrão paga mais **8 contos** do bolso dele, por cima do teu salário.",
+      "Diz-me quanto ganhas e faço a conta certa para ti.",
+      "(Se a pessoa disser 'Trabalho para o Estado': diz que esse caso ainda não está nas tuas fontes.)",
       "",
       "FORMATO: texto simples. Usa **negrito** nos títulos dos casos e nos números importantes, e pontos com '- '. Não escrevas lista de fontes no fim; a aplicação mostra-a.",
       "",
@@ -357,6 +375,7 @@ textarea {
     if (!sample) { showStatus("O chat só responde quando a página está aberta no Claude. Abre-a lá para testar."); return; }
     intro.hidden = true;
     showStatus("");
+    log.querySelectorAll(".opts").forEach(el => el.remove());
     addUser(text);
     turns.push({ role: "user", content: text });
     const view = addAssistant();
