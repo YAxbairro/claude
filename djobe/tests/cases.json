@@ -1,0 +1,20 @@
+[
+  {"q": "Quanto tempo a polícia me pode ter detido antes de me levar ao juiz?", "doc": ["constituicao", "cpp"], "match": "quarenta e oito horas", "answer": "No máximo 48 horas até ser apresentado ao juiz (Constituição, art. 31.º)."},
+  {"q": "A polícia pode revistar-me ou revistar o meu carro sem ordem do juiz?", "doc": "cpp", "match": "revistas e as buscas", "answer": "Em regra, revistas e buscas são ordenadas pela autoridade judiciária; a polícia só pode fazê-las sem essa ordem nos casos de exceção da lei (CPP, art. 234.º)."},
+  {"q": "Quantos dias de férias tenho por ano?", "doc": "cod_laboral", "match": "22 dias úteis", "answer": "22 dias úteis por ano, para contratos sem prazo ou de pelo menos um ano (Código Laboral, art. 52.º)."},
+  {"q": "Quanto desconto para o INPS se trabalho numa empresa?", "doc": "web_s1", "match": "8,5%", "answer": "8,5% do salário; o patrão paga 16% (INPS, Obrigações)."},
+  {"q": "Tenho uma micro empresa no REMPE, quanto pago de imposto?", "doc": "rempe", "match": "4% sobre o valor bruto", "answer": "Tributo Especial Unificado de 4% sobre as vendas brutas; micro empresas até 1.000 contos de vendas pagam no mínimo 30 contos por ano (Lei 70/VIII/2014, art. 25.º)."},
+  {"q": "Qual é o salário mínimo em Cabo Verde?", "doc": "smn", "match": "17.000", "answer": "17.000 ECV no privado e 19.000 ECV no público; o Governo prevê 25.000 ECV a partir de 2027 (Resolução 4/2026)."},
+  {"q": "Violência doméstica é crime público? Qualquer pessoa pode denunciar?", "doc": "vbg", "match": "natureza pública", "answer": "Sim, o crime de VBG é público e qualquer pessoa pode denunciar (Lei 84/VII/2011, art. 29.º)."},
+  {"q": "Com que idade me posso reformar?", "doc": "web_s3", "match": "65", "answer": "65 anos para homens e 60 para mulheres, com os anos mínimos de descontos (INPS, Pensões)."},
+  {"q": "Qual é a taxa do IVA?", "doc": "iva", "match": "taxa do imposto é de 15", "answer": "15% (Regulamento do IVA, art. 17.º, versão de 2003)."},
+  {"q": "Quantos dias de licença de maternidade tenho?", "doc": "cod_laboral", "match": "licença por maternidade de 60 dias", "answer": "60 dias segundo o Código Laboral de 2007 (art. 271.º); confirmar alterações mais recentes."},
+  {"q": "Quantos pontos tem a carta de condução?", "doc": "estrada_pontos", "match": "doze pontos", "answer": "12 pontos, que podem subir até 15 ou 16 em certas situações (DL 28/2025, art. 21.º)."},
+  {"q": "Fui detido ilegalmente, o que posso fazer?", "doc": "cpp", "match": "habeas corpus", "answer": "Pedir habeas corpus (CPP)."},
+  {"q": "Que direitos tenho quando estou detido na esquadra?", "doc": "cpp", "match": "detida", "answer": "Direitos da pessoa detida (CPP, art. 7.º; Constituição, art. 31.º)."},
+  {"q": "O meu senhorio pode aumentar a renda quando quiser?", "doc": "arrendamento", "match": "renda", "answer": "Regras de atualização de renda na Lei do Arrendamento (Lei 101/VIII/2016)."},
+  {"q": "Fui despedido sem justa causa, tenho direito a indemnização?", "doc": "cod_laboral", "match": "indemniza", "answer": "Sim, o despedimento sem justa causa dá direito a indemnização (Código Laboral)."},
+  {"q": "Quanto IRPS pago sobre o meu salário?", "doc": "irps", "match": "taxa", "answer": "Taxas do IRPS no Código do IRPS (Lei 78/VIII/2014)."},
+  {"q": "Quanto dinheiro vai para a saúde no orçamento de 2026?", "doc": "oe2026", "match": "saúde", "answer": "Ver mapas do Orçamento do Estado 2026 (Lei 69/X/2025)."},
+  {"q": "Que idade mínima para trabalhar?", "doc": "cod_laboral", "match": "menor", "answer": "Regras sobre trabalho de menores no Código Laboral."}
+]
