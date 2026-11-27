@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<title>E agora? — segurança do procurador</title>
+<style>
+/* 1080x1920 vertical explainer. Neutral newsroom look: graphite ground, paper-white type, one amber signal colour. */
+:root {
+  --bg: #111317;
+  --bg-2: #181B21;
+  --ink: #F3F1EC;
+  --muted: #9AA0AA;
+  --line: #2A2E36;
+  --signal: #F2B33D;
+  --gov: #8FB3FF;
+  --mag: #7FD1B9;
+  --display: "Inter Display", "Inter", system-ui, sans-serif;
+  --body: "Inter", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1080px; height: 1920px; background: var(--bg); overflow: hidden; }
+body { font-family: var(--body); color: var(--ink); }
+#stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: radial-gradient(1200px 900px at 50% 30%, var(--bg-2), var(--bg)); }
+#grid { position: absolute; inset: 0; background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 90px 90px; opacity: .35; }
+#bar { position: absolute; top: 64px; left: 80px; right: 80px; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+#bar i { display: block; height: 100%; width: 0; background: var(--signal); }
+#tag { position: absolute; top: 100px; left: 80px; font: 600 28px/1 var(--body); letter-spacing: .18em; color: var(--muted); text-transform: uppercase; }
+#tag b { color: var(--signal); font-weight: 700; }
+.scene { position: absolute; inset: 0; padding: 230px 80px 200px; display: flex; flex-direction: column; justify-content: center; gap: 44px; opacity: 0; }
+.el { opacity: 0; will-change: transform, opacity; }
+.kicker { font: 700 34px/1 var(--body); letter-spacing: .16em; text-transform: uppercase; color: var(--signal); }
+.h1 { font: 800 104px/1.02 var(--display); letter-spacing: -.035em; }
+.h2 { font: 800 84px/1.05 var(--display); letter-spacing: -.03em; }
+.p { font: 500 46px/1.3 var(--body); color: #D9D6CF; }
+.small { font: 500 34px/1.35 var(--body); color: var(--muted); }
+.hl { color: var(--signal); }
+.card { background: rgba(255,255,255,.04); border: 2px solid var(--line); border-radius: 28px; padding: 44px 48px; display: flex; flex-direction: column; gap: 18px; }
+.stat { font: 800 190px/0.9 var(--display); letter-spacing: -.05em; color: var(--signal); font-variant-numeric: tabular-nums; }
+.statlabel { font: 700 44px/1.15 var(--display); }
+.row { display: flex; gap: 28px; align-items: stretch; }
+.row > * { flex: 1; min-width: 0; }
+.name { font: 800 120px/0.95 var(--display); letter-spacing: -.04em; }
+.role { font: 600 40px/1.2 var(--body); color: var(--muted); }
+.quote { font: 700 72px/1.12 var(--display); letter-spacing: -.02em; }
+.quote::before { content: "“"; display: block; font: 800 180px/0.6 var(--display); color: currentColor; opacity: .5; margin-bottom: 10px; }
+.who { display: flex; align-items: center; gap: 20px; font: 600 36px/1.2 var(--body); color: var(--muted); }
+.who i { width: 22px; height: 22px; border-radius: 50%; display: inline-block; flex: none; }
+.side-gov .quote { color: var(--gov); } .side-gov .who i { background: var(--gov); } .side-gov .kicker { color: var(--gov); }
+.side-mag .quote { color: var(--mag); } .side-mag .who i { background: var(--mag); } .side-mag .kicker { color: var(--mag); }
+.tl { display: flex; flex-direction: column; gap: 0; position: relative; padding-left: 70px; }
+.tl::before { content: ""; position: absolute; left: 20px; top: 20px; bottom: 20px; width: 4px; background: var(--line); }
+.tl .step { position: relative; padding: 10px 0 46px; }
+.tl .step::before { content: ""; position: absolute; left: -62px; top: 22px; width: 28px; height: 28px; border-radius: 50%; background: var(--bg); border: 6px solid var(--signal); }
+.tl .when { font: 700 32px/1 var(--body); letter-spacing: .12em; color: var(--signal); text-transform: uppercase; margin-bottom: 14px; }
+.tl .what { font: 600 48px/1.2 var(--display); }
+.law { border-left: 10px solid var(--signal); padding: 10px 0 10px 44px; }
+.law .quote::before { display: none; }
+.big { font: 900 230px/0.92 var(--display); letter-spacing: -.06em; }
+.sources { position: absolute; left: 80px; right: 80px; bottom: 90px; font: 500 28px/1.4 var(--body); color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="grid"></div>
+  <div id="bar"><i></i></div>
+  <div id="tag">Cabo Verde · <b>novembro 2026</b></div>
+
+  <!-- S1 hook -->
+  <section class="scene" data-start="0" data-end="5">
+    <div class="el kicker" data-in="0.2">A pergunta da semana</div>
+    <div class="el h1" data-in="0.5">O procurador que acusou o <span class="hl">Primeiro-Ministro</span></div>
+    <div class="el h1" data-in="1.4">e lidera a <span class="hl">Operação Shark</span></div>
+    <div class="el h2" data-in="2.4" style="color: var(--muted)">ficou sem segurança pessoal?</div>
+  </section>
+
+  <!-- S2 who -->
+  <section class="scene" data-start="5" data-end="11">
+    <div class="el kicker" data-in="0.1">Quem é</div>
+    <div class="el">
+      <div class="name" data-in="0.3">Nilton Moniz</div>
+      <div class="role" style="margin-top:16px">Procurador da República</div>
+    </div>
+    <div class="row">
+      <div class="el card" data-in="1.0">
+        <div class="stat" data-count="26" data-cin="1.1">0</div>
+        <div class="statlabel">crimes</div>
+        <div class="small">Acusação contra Francisco Carvalho, do tempo em que era presidente da Câmara da Praia</div>
+      </div>
+      <div class="el card" data-in="1.6">
+        <div class="stat" data-count="20" data-cin="1.7">0</div>
+        <div class="statlabel">detidos</div>
+        <div class="small">Operação Shark, contra o narcotráfico</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- S3 what changed -->
+  <section class="scene" data-start="11" data-end="17.5">
+    <div class="el kicker" data-in="0.1">O que mudou</div>
+    <div class="el h2" data-in="0.3">Despacho n.º 126/GMAI/2026</div>
+    <div class="el small" data-in="0.6" style="margin-top:-24px">Ministério da Administração Interna</div>
+    <div class="tl">
+      <div class="el step" data-in="1.2"><div class="when">2025</div><div class="what">Proteção pedida pelo Conselho Superior do Ministério Público</div></div>
+      <div class="el step" data-in="2.2"><div class="when">Novembro 2026</div><div class="what">Nova avaliação: risco <span class="hl">“moderado”</span></div></div>
+      <div class="el step" data-in="3.2"><div class="when">Agora</div><div class="what">Segurança pessoal substituída <span class="hl">“gradualmente por outras medidas”</span></div></div>
+    </div>
+  </section>
+
+  <!-- S4 government -->
+  <section class="scene side-gov" data-start="17.5" data-end="23.5">
+    <div class="el kicker" data-in="0.1">O Governo diz</div>
+    <div class="el quote" data-in="0.4">Não foi retirada a segurança do procurador. Foi alterado o modelo.</div>
+    <div class="el who" data-in="1.2"><i></i>Carlos Sena, ministro da Administração Interna</div>
+    <div class="el p" data-in="2.2">Faltam polícias nas ruas. A revisão vai abranger outras entidades com segurança pessoal.</div>
+  </section>
+
+  <!-- S5 magistrates -->
+  <section class="scene side-mag" data-start="23.5" data-end="29.5">
+    <div class="el kicker" data-in="0.1">Os magistrados dizem</div>
+    <div class="el quote" data-in="0.4">Não se pode esperar por uma ameaça corroborada, ou por um atentado, para proteger um magistrado.</div>
+    <div class="el who" data-in="1.4"><i></i>ASSIMP, sindicato dos magistrados do Ministério Público</div>
+    <div class="el p" data-in="2.4">Exigem a reposição imediata e uma nova avaliação, com o Conselho Superior do Ministério Público.</div>
+  </section>
+
+  <!-- S6 law -->
+  <section class="scene" data-start="29.5" data-end="35">
+    <div class="el kicker" data-in="0.1">O que diz a lei</div>
+    <div class="el small" data-in="0.3">Estatuto dos Magistrados do Ministério Público · art. 41.º</div>
+    <div class="el law" data-in="0.8"><div class="quote">Proteção especial da pessoa, família e bens, <span class="hl">sempre que ponderosas razões de segurança o exijam.</span></div></div>
+    <div class="el p" data-in="2.2">A lei não diz quem tem razão. Diz o que conta: <b>o risco.</b></div>
+  </section>
+
+  <!-- S7 ending -->
+  <section class="scene" data-start="35" data-end="41">
+    <div class="el big" data-in="0.2">E agora?</div>
+    <div class="el h2" data-in="1.0" style="color: var(--muted)">O risco baixou ou subiu?</div>
+    <div class="el h2" data-in="1.8">Tu decides.</div>
+    <div class="el sources" data-in="2.4">Fontes: Expresso das Ilhas (26 e 27 nov 2026), Inforpress, A Nação (6 nov 2026), Boletim Oficial (Lei n.º 2/VIII/2011).</div>
+  </section>
+</div>
+
+<script>
+const DURATION = 41;
+const scenes = [...document.querySelectorAll(".scene")].map(s => ({
+  el: s, start: +s.dataset.start, end: +s.dataset.end,
+  items: [...s.querySelectorAll(".el, [data-in]")].map(e => ({ e, tin: +(e.dataset.in || 0) })),
+  counters: [...s.querySelectorAll("[data-count]")].map(e => ({ e, to: +e.dataset.count, tin: +e.dataset.cin }))
+}));
+const bar = document.querySelector("#bar i");
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const easeOut = x => 1 - Math.pow(1 - x, 3);
+const easeInOut = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+
+window.renderAt = function (t) {
+  bar.style.width = (clamp(t / DURATION) * 100) + "%";
+  for (const s of scenes) {
+    const local = t - s.start;
+    const fadeIn = clamp(local / 0.35), fadeOut = clamp((s.end - t) / 0.35);
+    const vis = (t >= s.start && t < s.end) || (s === scenes[scenes.length - 1] && t >= s.start);
+    const sceneOp = vis ? Math.min(fadeIn, s === scenes[scenes.length - 1] ? 1 : fadeOut) : 0;
+    s.el.style.opacity = sceneOp;
+    s.el.style.transform = `translateY(${(1 - easeOut(fadeIn)) * 30 - (1 - fadeOut) * 30}px)`;
+    for (const it of s.items) {
+      const p = easeOut(clamp((local - it.tin) / 0.55));
+      it.e.style.opacity = p;
+      it.e.style.transform = `translateY(${(1 - p) * 48}px)`;
+    }
+    for (const c of s.counters) {
+      const p = easeInOut(clamp((local - c.tin) / 1.1));
+      c.e.textContent = Math.round(c.to * p);
+    }
+  }
+  document.getElementById("grid").style.transform = `translateY(${-(t * 12) % 90}px)`;
+  const big = document.querySelector(".big");
+  if (big) { const l = t - 35.2; big.style.letterSpacing = (l > 0 ? (-0.06 + 0.02 * Math.sin(l * 2.4)) : -0.06) + "em"; }
+};
+window.DURATION = DURATION;
+renderAt(0);
+</script>
+</body>
+</html>

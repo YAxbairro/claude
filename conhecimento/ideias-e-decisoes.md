@@ -25,3 +25,7 @@
 Em cada pergunta: procurar todas as fontes possíveis; quando houver resposta, guardar a fonte, a pergunta, a resposta e o trabalho nesta pasta, de forma organizada.
 
 Regra permanente (27-11-2026): antes de responder, pensar em coisas paralelas que possam mudar a resposta.
+
+## Conteúdo (27-11-2026)
+- Quer ficar neutro e não publicar em nome próprio; o conteúdo pode ser dado a outra pessoa.
+- Formato: vídeos de motion graphics feitos 100% com Claude Code (`videos/`). Gancho em forma de pergunta, os dois lados, a lei e as fontes no fim.
