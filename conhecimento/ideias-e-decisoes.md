@@ -23,3 +23,5 @@
 
 ## Regra permanente (27-11-2026)
 Em cada pergunta: procurar todas as fontes possíveis; quando houver resposta, guardar a fonte, a pergunta, a resposta e o trabalho nesta pasta, de forma organizada.
+
+Regra permanente (27-11-2026): antes de responder, pensar em coisas paralelas que possam mudar a resposta.

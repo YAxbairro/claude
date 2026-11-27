@@ -40,3 +40,18 @@ Depende de uma coisa: se ainda existem "ponderosas razões de segurança". A lei
 3. Expresso das Ilhas, 27-11-2026 — Ministro justifica alteração do modelo… https://expressodasilhas.cv/politica/2026/11/27/ministro-justifica-alteracao-do-modelo-de-seguranca-pessoal-do-procurador-nilton-moniz/105719
 4. Lei n.º 2/VIII/2011, art. 41.º — https://boe.incv.cv/Bulletins/View?id=5775
 5. Lei n.º 89/VII/2011, art. 3.º — https://boe.incv.cv/Bulletins/View?id=5863
+
+## Atualização (27-11-2026): "ele comandou a Shark e acusou o PM, por isso o risco de vida é iminente"
+### Coisas paralelas que mudam a resposta
+1. **A Shark aconteceu há 3 semanas.** Os detidos foram presentes a tribunal a 3 e 4 de novembro de 2026; a proteção foi alterada no fim de novembro. O risco ligado ao narcotráfico tende a ser mais alto logo a seguir às detenções, não mais baixo. (A Nação, 06-11-2026)
+2. **A rede infiltrou a própria polícia.** O mandado assinado por Nilton Moniz descreve "um quadro de infiltração sem precedentes em serviços alfandegários, corporações policiais, estabelecimentos prisionais e até no sector da saúde pública". Isto aumenta o risco e levanta outra dúvida: a avaliação de risco e a proteção dependem da mesma polícia que a investigação diz estar infiltrada. (A Nação, 06-11-2026)
+3. **O próprio Governo comentou a Shark.** O PM e o ministro da Administração Interna fizeram declarações sobre processos "engavetados" através da PJ no governo anterior; o MpD chamou-lhes "insinuações" de interferência política. (A Nação, 06-11-2026)
+4. **Segundo A Nação, entre os detidos está um alto responsável nomeado por despacho do PM cerca de dois meses antes.** Isto não prova nada contra ninguém, mas reforça a necessidade de a decisão ser tomada por alguém que não esteja ligado aos processos.
+5. **A acusação contra o PM é sobretudo um problema de imparcialidade, não de risco físico.** Quem decide sobre a segurança de quem o acusou está numa posição de conflito de interesses aparente.
+6. **A palavra "iminente" não é necessária.** A lei pede "ponderosas razões de segurança", não um perigo iminente. Não há notícia pública de uma ameaça concreta, mas a lei também não a exige.
+
+### Conclusão atualizada
+Com estes factos, as razões de segurança parecem ter aumentado, não diminuído. A posição mais segura do ponto de vista legal seria manter a proteção até uma nova avaliação independente, com o Conselho Superior do Ministério Público, como pede a ASSIMP. Não está provado publicamente que haja risco de vida iminente.
+
+### Fontes novas
+6. A Nação, 06-11-2026 — Operação "Shark": MpD considera graves as insinuações do Governo… https://www.anacao.cv/noticia/2026/11/06/operacao-shark-mpd-considera-graves-as-insinuacoes-do-governo-sobre-interferencia-politica-na-pjs/
