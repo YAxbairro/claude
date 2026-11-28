@@ -1,0 +1,1248 @@
+{
+ "total": 48.38,
+ "lines": [
+  {
+   "id": "l01",
+   "text": "Acusou o Primeiro-Ministro de vinte e seis crimes.",
+   "cap": "Acusou o Primeiro-Ministro de 26 crimes.",
+   "dur": 2.239,
+   "start": 0.12,
+   "end": 2.359,
+   "words": [
+    {
+     "w": "Acusou",
+     "t0": 0.12,
+     "t1": 0.493,
+     "key": false
+    },
+    {
+     "w": "o",
+     "t0": 0.493,
+     "t1": 0.618,
+     "key": false
+    },
+    {
+     "w": "Primeiro-Ministro",
+     "t0": 0.618,
+     "t1": 1.613,
+     "key": true
+    },
+    {
+     "w": "de",
+     "t0": 1.613,
+     "t1": 1.737,
+     "key": false
+    },
+    {
+     "w": "26",
+     "t0": 1.737,
+     "t1": 1.861,
+     "key": true
+    },
+    {
+     "w": "crimes.",
+     "t0": 1.861,
+     "t1": 2.359,
+     "key": true
+    }
+   ]
+  },
+  {
+   "id": "l02",
+   "text": "Comandou a maior operação contra o narcotráfico do ano.",
+   "cap": "Comandou a maior operação contra o narcotráfico do ano.",
+   "dur": 2.458,
+   "start": 2.559,
+   "end": 5.017,
+   "words": [
+    {
+     "w": "Comandou",
+     "t0": 2.559,
+     "t1": 2.952,
+     "key": false
+    },
+    {
+     "w": "a",
+     "t0": 2.952,
+     "t1": 3.051,
+     "key": false
+    },
+    {
+     "w": "maior",
+     "t0": 3.051,
+     "t1": 3.296,
+     "key": false
+    },
+    {
+     "w": "operação",
+     "t0": 3.296,
+     "t1": 3.69,
+     "key": false
+    },
+    {
+     "w": "contra",
+     "t0": 3.69,
+     "t1": 3.985,
+     "key": false
+    },
+    {
+     "w": "o",
+     "t0": 3.985,
+     "t1": 4.083,
+     "key": false
+    },
+    {
+     "w": "narcotráfico",
+     "t0": 4.083,
+     "t1": 4.673,
+     "key": true
+    },
+    {
+     "w": "do",
+     "t0": 4.673,
+     "t1": 4.771,
+     "key": false
+    },
+    {
+     "w": "ano.",
+     "t0": 4.771,
+     "t1": 5.017,
+     "key": false
+    }
+   ]
+  },
+  {
+   "id": "l03",
+   "text": "E agora... ficou sem segurança pessoal?",
+   "cap": "E agora… ficou sem segurança pessoal?",
+   "dur": 1.778,
+   "start": 5.267,
+   "end": 7.045,
+   "words": [
+    {
+     "w": "E",
+     "t0": 5.267,
+     "t1": 5.369,
+     "key": false
+    },
+    {
+     "w": "agora…",
+     "t0": 5.369,
+     "t1": 5.724,
+     "key": false
+    },
+    {
+     "w": "ficou",
+     "t0": 5.724,
+     "t1": 5.978,
+     "key": false
+    },
+    {
+     "w": "sem",
+     "t0": 5.978,
+     "t1": 6.131,
+     "key": false
+    },
+    {
+     "w": "segurança",
+     "t0": 6.131,
+     "t1": 6.588,
+     "key": true
+    },
+    {
+     "w": "pessoal?",
+     "t0": 6.588,
+     "t1": 7.045,
+     "key": true
+    }
+   ]
+  },
+  {
+   "id": "l04",
+   "text": "O nome dele é Nilton Moniz. Procurador da República.",
+   "cap": "O nome dele é Nilton Moniz. Procurador da República.",
+   "dur": 2.861,
+   "start": 7.645,
+   "end": 10.506,
+   "words": [
+    {
+     "w": "O",
+     "t0": 7.645,
+     "t1": 7.764,
+     "key": false
+    },
+    {
+     "w": "nome",
+     "t0": 7.764,
+     "t1": 8.003,
+     "key": false
+    },
+    {
+     "w": "dele",
+     "t0": 8.003,
+     "t1": 8.241,
+     "key": false
+    },
+    {
+     "w": "é",
+     "t0": 8.241,
+     "t1": 8.36,
+     "key": false
+    },
+    {
+     "w": "Nilton",
+     "t0": 8.36,
+     "t1": 8.718,
+     "key": true
+    },
+    {
+     "w": "Moniz.",
+     "t0": 8.718,
+     "t1": 9.135,
+     "key": true
+    },
+    {
+     "w": "Procurador",
+     "t0": 9.135,
+     "t1": 9.731,
+     "key": false
+    },
+    {
+     "w": "da",
+     "t0": 9.731,
+     "t1": 9.85,
+     "key": false
+    },
+    {
+     "w": "República.",
+     "t0": 9.85,
+     "t1": 10.506,
+     "key": false
+    }
+   ]
+  },
+  {
+   "id": "l05",
+   "text": "No início de novembro, a Operação Shark prendeu vinte pessoas.",
+   "cap": "No início de novembro, a Operação Shark prendeu 20 pessoas.",
+   "dur": 3.029,
+   "start": 10.806,
+   "end": 13.835,
+   "words": [
+    {
+     "w": "No",
+     "t0": 10.806,
+     "t1": 10.92,
+     "key": false
+    },
+    {
+     "w": "início",
+     "t0": 10.92,
+     "t1": 11.263,
+     "key": false
+    },
+    {
+     "w": "de",
+     "t0": 11.263,
+     "t1": 11.378,
+     "key": false
+    },
+    {
+     "w": "novembro,",
+     "t0": 11.378,
+     "t1": 11.949,
+     "key": false
+    },
+    {
+     "w": "a",
+     "t0": 11.949,
+     "t1": 12.063,
+     "key": false
+    },
+    {
+     "w": "Operação",
+     "t0": 12.063,
+     "t1": 12.521,
+     "key": false
+    },
+    {
+     "w": "Shark",
+     "t0": 12.521,
+     "t1": 12.806,
+     "key": true
+    },
+    {
+     "w": "prendeu",
+     "t0": 12.806,
+     "t1": 13.206,
+     "key": false
+    },
+    {
+     "w": "20",
+     "t0": 13.206,
+     "t1": 13.321,
+     "key": true
+    },
+    {
+     "w": "pessoas.",
+     "t0": 13.321,
+     "t1": 13.835,
+     "key": false
+    }
+   ]
+  },
+  {
+   "id": "l06",
+   "text": "O mandado fala de infiltração na alfândega, nas prisões, na saúde... e na própria polícia.",
+   "cap": "O mandado fala de infiltração na alfândega, nas prisões, na saúde… e na própria polícia.",
+   "dur": 4.244,
+   "start": 14.085,
+   "end": 18.329,
+   "words": [
+    {
+     "w": "O",
+     "t0": 14.085,
+     "t1": 14.191,
+     "key": false
+    },
+    {
+     "w": "mandado",
+     "t0": 14.191,
+     "t1": 14.562,
+     "key": false
+    },
+    {
+     "w": "fala",
+     "t0": 14.562,
+     "t1": 14.775,
+     "key": false
+    },
+    {
+     "w": "de",
+     "t0": 14.775,
+     "t1": 14.881,
+     "key": false
+    },
+    {
+     "w": "infiltração",
+     "t0": 14.881,
+     "t1": 15.464,
+     "key": true
+    },
+    {
+     "w": "na",
+     "t0": 15.464,
+     "t1": 15.57,
+     "key": false
+    },
+    {
+     "w": "alfândega,",
+     "t0": 15.57,
+     "t1": 16.154,
+     "key": false
+    },
+    {
+     "w": "nas",
+     "t0": 16.154,
+     "t1": 16.313,
+     "key": false
+    },
+    {
+     "w": "prisões,",
+     "t0": 16.313,
+     "t1": 16.791,
+     "key": false
+    },
+    {
+     "w": "na",
+     "t0": 16.791,
+     "t1": 16.897,
+     "key": false
+    },
+    {
+     "w": "saúde…",
+     "t0": 16.897,
+     "t1": 17.268,
+     "key": false
+    },
+    {
+     "w": "e",
+     "t0": 17.268,
+     "t1": 17.374,
+     "key": false
+    },
+    {
+     "w": "na",
+     "t0": 17.374,
+     "t1": 17.48,
+     "key": false
+    },
+    {
+     "w": "própria",
+     "t0": 17.48,
+     "t1": 17.852,
+     "key": true
+    },
+    {
+     "w": "polícia.",
+     "t0": 17.852,
+     "t1": 18.329,
+     "key": true
+    }
+   ]
+  },
+  {
+   "id": "l07",
+   "text": "Três semanas depois, um despacho do Ministério da Administração Interna substitui a segurança pessoal dele por outras medidas.",
+   "cap": "Três semanas depois, um despacho do Ministério da Administração Interna substitui a segurança pessoal dele por outras medidas.",
+   "dur": 5.488,
+   "start": 18.779,
+   "end": 24.267,
+   "words": [
+    {
+     "w": "Três",
+     "t0": 18.779,
+     "t1": 18.975,
+     "key": true
+    },
+    {
+     "w": "semanas",
+     "t0": 18.975,
+     "t1": 19.318,
+     "key": true
+    },
+    {
+     "w": "depois,",
+     "t0": 19.318,
+     "t1": 19.71,
+     "key": false
+    },
+    {
+     "w": "um",
+     "t0": 19.71,
+     "t1": 19.808,
+     "key": false
+    },
+    {
+     "w": "despacho",
+     "t0": 19.808,
+     "t1": 20.2,
+     "key": true
+    },
+    {
+     "w": "do",
+     "t0": 20.2,
+     "t1": 20.298,
+     "key": false
+    },
+    {
+     "w": "Ministério",
+     "t0": 20.298,
+     "t1": 20.788,
+     "key": false
+    },
+    {
+     "w": "da",
+     "t0": 20.788,
+     "t1": 20.886,
+     "key": false
+    },
+    {
+     "w": "Administração",
+     "t0": 20.886,
+     "t1": 21.523,
+     "key": false
+    },
+    {
+     "w": "Interna",
+     "t0": 21.523,
+     "t1": 21.866,
+     "key": false
+    },
+    {
+     "w": "substitui",
+     "t0": 21.866,
+     "t1": 22.307,
+     "key": false
+    },
+    {
+     "w": "a",
+     "t0": 22.307,
+     "t1": 22.405,
+     "key": false
+    },
+    {
+     "w": "segurança",
+     "t0": 22.405,
+     "t1": 22.846,
+     "key": true
+    },
+    {
+     "w": "pessoal",
+     "t0": 22.846,
+     "t1": 23.189,
+     "key": false
+    },
+    {
+     "w": "dele",
+     "t0": 23.189,
+     "t1": 23.385,
+     "key": false
+    },
+    {
+     "w": "por",
+     "t0": 23.385,
+     "t1": 23.532,
+     "key": false
+    },
+    {
+     "w": "outras",
+     "t0": 23.532,
+     "t1": 23.826,
+     "key": true
+    },
+    {
+     "w": "medidas.",
+     "t0": 23.826,
+     "t1": 24.267,
+     "key": true
+    }
+   ]
+  },
+  {
+   "id": "l08",
+   "text": "A nova avaliação de risco? Moderado.",
+   "cap": "A nova avaliação de risco? Moderado.",
+   "dur": 2.246,
+   "start": 24.567,
+   "end": 26.813,
+   "words": [
+    {
+     "w": "A",
+     "t0": 24.567,
+     "t1": 24.699,
+     "key": false
+    },
+    {
+     "w": "nova",
+     "t0": 24.699,
+     "t1": 24.963,
+     "key": false
+    },
+    {
+     "w": "avaliação",
+     "t0": 24.963,
+     "t1": 25.558,
+     "key": false
+    },
+    {
+     "w": "de",
+     "t0": 25.558,
+     "t1": 25.69,
+     "key": false
+    },
+    {
+     "w": "risco?",
+     "t0": 25.69,
+     "t1": 26.152,
+     "key": false
+    },
+    {
+     "w": "Moderado.",
+     "t0": 26.152,
+     "t1": 26.813,
+     "key": true
+    }
+   ]
+  },
+  {
+   "id": "l09",
+   "text": "O Governo garante: não foi retirada. Foi alterado o modelo. Faltam polícias nas ruas.",
+   "cap": "O Governo garante: não foi retirada. Foi alterado o modelo. Faltam polícias nas ruas.",
+   "dur": 4.69,
+   "start": 27.313,
+   "end": 32.003,
+   "words": [
+    {
+     "w": "O",
+     "t0": 27.313,
+     "t1": 27.433,
+     "key": false
+    },
+    {
+     "w": "Governo",
+     "t0": 27.433,
+     "t1": 27.854,
+     "key": false
+    },
+    {
+     "w": "garante:",
+     "t0": 27.854,
+     "t1": 28.395,
+     "key": false
+    },
+    {
+     "w": "não",
+     "t0": 28.395,
+     "t1": 28.576,
+     "key": false
+    },
+    {
+     "w": "foi",
+     "t0": 28.576,
+     "t1": 28.756,
+     "key": false
+    },
+    {
+     "w": "retirada.",
+     "t0": 28.756,
+     "t1": 29.357,
+     "key": false
+    },
+    {
+     "w": "Foi",
+     "t0": 29.357,
+     "t1": 29.538,
+     "key": false
+    },
+    {
+     "w": "alterado",
+     "t0": 29.538,
+     "t1": 30.019,
+     "key": true
+    },
+    {
+     "w": "o",
+     "t0": 30.019,
+     "t1": 30.139,
+     "key": false
+    },
+    {
+     "w": "modelo.",
+     "t0": 30.139,
+     "t1": 30.62,
+     "key": true
+    },
+    {
+     "w": "Faltam",
+     "t0": 30.62,
+     "t1": 30.981,
+     "key": false
+    },
+    {
+     "w": "polícias",
+     "t0": 30.981,
+     "t1": 31.462,
+     "key": false
+    },
+    {
+     "w": "nas",
+     "t0": 31.462,
+     "t1": 31.642,
+     "key": false
+    },
+    {
+     "w": "ruas.",
+     "t0": 31.642,
+     "t1": 32.003,
+     "key": false
+    }
+   ]
+  },
+  {
+   "id": "l10",
+   "text": "Os magistrados respondem: não se pode esperar por um atentado para proteger um procurador.",
+   "cap": "Os magistrados respondem: não se pode esperar por um atentado para proteger um procurador.",
+   "dur": 4.018,
+   "start": 32.353,
+   "end": 36.371,
+   "words": [
+    {
+     "w": "Os",
+     "t0": 32.353,
+     "t1": 32.455,
+     "key": false
+    },
+    {
+     "w": "magistrados",
+     "t0": 32.455,
+     "t1": 33.014,
+     "key": false
+    },
+    {
+     "w": "respondem:",
+     "t0": 33.014,
+     "t1": 33.574,
+     "key": false
+    },
+    {
+     "w": "não",
+     "t0": 33.574,
+     "t1": 33.726,
+     "key": false
+    },
+    {
+     "w": "se",
+     "t0": 33.726,
+     "t1": 33.828,
+     "key": false
+    },
+    {
+     "w": "pode",
+     "t0": 33.828,
+     "t1": 34.031,
+     "key": false
+    },
+    {
+     "w": "esperar",
+     "t0": 34.031,
+     "t1": 34.387,
+     "key": false
+    },
+    {
+     "w": "por",
+     "t0": 34.387,
+     "t1": 34.54,
+     "key": false
+    },
+    {
+     "w": "um",
+     "t0": 34.54,
+     "t1": 34.642,
+     "key": false
+    },
+    {
+     "w": "atentado",
+     "t0": 34.642,
+     "t1": 35.049,
+     "key": true
+    },
+    {
+     "w": "para",
+     "t0": 35.049,
+     "t1": 35.252,
+     "key": false
+    },
+    {
+     "w": "proteger",
+     "t0": 35.252,
+     "t1": 35.659,
+     "key": false
+    },
+    {
+     "w": "um",
+     "t0": 35.659,
+     "t1": 35.761,
+     "key": false
+    },
+    {
+     "w": "procurador.",
+     "t0": 35.761,
+     "t1": 36.371,
+     "key": false
+    }
+   ]
+  },
+  {
+   "id": "l11",
+   "text": "E a lei? Dá-lhe proteção especial, sempre que ponderosas razões de segurança o exijam.",
+   "cap": "E a lei? Dá-lhe proteção especial, sempre que ponderosas razões de segurança o exijam.",
+   "dur": 4.019,
+   "start": 36.821,
+   "end": 40.84,
+   "words": [
+    {
+     "w": "E",
+     "t0": 36.821,
+     "t1": 36.924,
+     "key": false
+    },
+    {
+     "w": "a",
+     "t0": 36.924,
+     "t1": 37.027,
+     "key": false
+    },
+    {
+     "w": "lei?",
+     "t0": 37.027,
+     "t1": 37.285,
+     "key": false
+    },
+    {
+     "w": "Dá-lhe",
+     "t0": 37.285,
+     "t1": 37.542,
+     "key": false
+    },
+    {
+     "w": "proteção",
+     "t0": 37.542,
+     "t1": 37.955,
+     "key": false
+    },
+    {
+     "w": "especial,",
+     "t0": 37.955,
+     "t1": 38.47,
+     "key": false
+    },
+    {
+     "w": "sempre",
+     "t0": 38.47,
+     "t1": 38.779,
+     "key": false
+    },
+    {
+     "w": "que",
+     "t0": 38.779,
+     "t1": 38.934,
+     "key": false
+    },
+    {
+     "w": "ponderosas",
+     "t0": 38.934,
+     "t1": 39.449,
+     "key": true
+    },
+    {
+     "w": "razões",
+     "t0": 39.449,
+     "t1": 39.758,
+     "key": true
+    },
+    {
+     "w": "de",
+     "t0": 39.758,
+     "t1": 39.861,
+     "key": false
+    },
+    {
+     "w": "segurança",
+     "t0": 39.861,
+     "t1": 40.325,
+     "key": true
+    },
+    {
+     "w": "o",
+     "t0": 40.325,
+     "t1": 40.428,
+     "key": false
+    },
+    {
+     "w": "exijam.",
+     "t0": 40.428,
+     "t1": 40.84,
+     "key": false
+    }
+   ]
+  },
+  {
+   "id": "l12",
+   "text": "Então, a pergunta é só uma.",
+   "cap": "Então, a pergunta é só uma.",
+   "dur": 1.818,
+   "start": 41.29,
+   "end": 43.108,
+   "words": [
+    {
+     "w": "Então,",
+     "t0": 41.29,
+     "t1": 41.779,
+     "key": false
+    },
+    {
+     "w": "a",
+     "t0": 41.779,
+     "t1": 41.919,
+     "key": false
+    },
+    {
+     "w": "pergunta",
+     "t0": 41.919,
+     "t1": 42.479,
+     "key": false
+    },
+    {
+     "w": "é",
+     "t0": 42.479,
+     "t1": 42.619,
+     "key": false
+    },
+    {
+     "w": "só",
+     "t0": 42.619,
+     "t1": 42.758,
+     "key": false
+    },
+    {
+     "w": "uma.",
+     "t0": 42.758,
+     "t1": 43.108,
+     "key": true
+    }
+   ]
+  },
+  {
+   "id": "l13",
+   "text": "O risco dele baixou... ou subiu?",
+   "cap": "O risco dele baixou… ou subiu?",
+   "dur": 1.461,
+   "start": 43.408,
+   "end": 44.869,
+   "words": [
+    {
+     "w": "O",
+     "t0": 43.408,
+     "t1": 43.512,
+     "key": false
+    },
+    {
+     "w": "risco",
+     "t0": 43.512,
+     "t1": 43.773,
+     "key": false
+    },
+    {
+     "w": "dele",
+     "t0": 43.773,
+     "t1": 43.982,
+     "key": false
+    },
+    {
+     "w": "baixou…",
+     "t0": 43.982,
+     "t1": 44.399,
+     "key": true
+    },
+    {
+     "w": "ou",
+     "t0": 44.399,
+     "t1": 44.504,
+     "key": false
+    },
+    {
+     "w": "subiu?",
+     "t0": 44.504,
+     "t1": 44.869,
+     "key": true
+    }
+   ]
+  },
+  {
+   "id": "l14",
+   "text": "Diz nos comentários.",
+   "cap": "Diz nos comentários.",
+   "dur": 1.21,
+   "start": 45.569,
+   "end": 46.779,
+   "words": [
+    {
+     "w": "Diz",
+     "t0": 45.569,
+     "t1": 45.76,
+     "key": false
+    },
+    {
+     "w": "nos",
+     "t0": 45.76,
+     "t1": 45.951,
+     "key": false
+    },
+    {
+     "w": "comentários.",
+     "t0": 45.951,
+     "t1": 46.779,
+     "key": true
+    }
+   ]
+  }
+ ],
+ "sfx": [
+  {
+   "s": "boom",
+   "t": 0,
+   "g": 1.0
+  },
+  {
+   "s": "glitch",
+   "t": 0,
+   "g": 0.6
+  },
+  {
+   "s": "pop",
+   "t": 1.737,
+   "g": 0.6
+  },
+  {
+   "s": "whoosh_up",
+   "t": 2.259,
+   "g": 0.7
+  },
+  {
+   "s": "stamp",
+   "t": 4.083,
+   "g": 0.9
+  },
+  {
+   "s": "riser",
+   "t": 4.645,
+   "g": 0.6
+  },
+  {
+   "s": "glitch",
+   "t": 5.267,
+   "g": 0.7
+  },
+  {
+   "s": "boom",
+   "t": 7.095,
+   "g": 1.0
+  },
+  {
+   "s": "whoosh_down",
+   "t": 7.395,
+   "g": 0.7
+  },
+  {
+   "s": "shutter",
+   "t": 8.36,
+   "g": 0.9
+  },
+  {
+   "s": "typewriter",
+   "t": 8.41,
+   "g": 0.6
+  },
+  {
+   "s": "whoosh_up",
+   "t": 10.556,
+   "g": 0.6
+  },
+  {
+   "s": "stamp",
+   "t": 12.521,
+   "g": 0.7
+  },
+  {
+   "s": "tick",
+   "t": 12.806,
+   "g": 0.55
+  },
+  {
+   "s": "tick",
+   "t": 12.881,
+   "g": 0.55
+  },
+  {
+   "s": "tick",
+   "t": 12.956,
+   "g": 0.55
+  },
+  {
+   "s": "tick",
+   "t": 13.031,
+   "g": 0.55
+  },
+  {
+   "s": "tick",
+   "t": 13.106,
+   "g": 0.55
+  },
+  {
+   "s": "tick",
+   "t": 13.181,
+   "g": 0.55
+  },
+  {
+   "s": "tick",
+   "t": 13.256,
+   "g": 0.55
+  },
+  {
+   "s": "tick",
+   "t": 13.331,
+   "g": 0.55
+  },
+  {
+   "s": "tick",
+   "t": 13.406,
+   "g": 0.55
+  },
+  {
+   "s": "tick",
+   "t": 13.481,
+   "g": 0.55
+  },
+  {
+   "s": "tick",
+   "t": 13.556,
+   "g": 0.55
+  },
+  {
+   "s": "tick",
+   "t": 13.631,
+   "g": 0.55
+  },
+  {
+   "s": "tick",
+   "t": 13.706,
+   "g": 0.55
+  },
+  {
+   "s": "tick",
+   "t": 13.781,
+   "g": 0.55
+  },
+  {
+   "s": "whoosh_down",
+   "t": 13.835,
+   "g": 0.6
+  },
+  {
+   "s": "tick",
+   "t": 13.856,
+   "g": 0.55
+  },
+  {
+   "s": "tick",
+   "t": 13.931,
+   "g": 0.55
+  },
+  {
+   "s": "tick",
+   "t": 14.006,
+   "g": 0.55
+  },
+  {
+   "s": "tick",
+   "t": 14.081,
+   "g": 0.55
+  },
+  {
+   "s": "tick",
+   "t": 14.156,
+   "g": 0.55
+  },
+  {
+   "s": "tick",
+   "t": 14.231,
+   "g": 0.55
+  },
+  {
+   "s": "pop",
+   "t": 15.57,
+   "g": 0.5
+  },
+  {
+   "s": "pop",
+   "t": 16.313,
+   "g": 0.5
+  },
+  {
+   "s": "pop",
+   "t": 16.897,
+   "g": 0.5
+  },
+  {
+   "s": "stamp",
+   "t": 17.852,
+   "g": 1.0
+  },
+  {
+   "s": "boom",
+   "t": 17.852,
+   "g": 0.55
+  },
+  {
+   "s": "whoosh_up",
+   "t": 18.529,
+   "g": 0.6
+  },
+  {
+   "s": "pop",
+   "t": 18.779,
+   "g": 0.5
+  },
+  {
+   "s": "stamp",
+   "t": 21.866,
+   "g": 1.0
+  },
+  {
+   "s": "riser",
+   "t": 24.167,
+   "g": 0.45
+  },
+  {
+   "s": "glitch",
+   "t": 26.152,
+   "g": 0.5
+  },
+  {
+   "s": "pop",
+   "t": 26.152,
+   "g": 0.7
+  },
+  {
+   "s": "whoosh_down",
+   "t": 27.063,
+   "g": 0.6
+  },
+  {
+   "s": "pop",
+   "t": 29.538,
+   "g": 0.5
+  },
+  {
+   "s": "whoosh_up",
+   "t": 32.103,
+   "g": 0.6
+  },
+  {
+   "s": "boom",
+   "t": 34.642,
+   "g": 0.5
+  },
+  {
+   "s": "whoosh_down",
+   "t": 36.571,
+   "g": 0.6
+  },
+  {
+   "s": "shutter",
+   "t": 38.934,
+   "g": 0.6
+  },
+  {
+   "s": "riser",
+   "t": 40.908,
+   "g": 0.75
+  },
+  {
+   "s": "glitch",
+   "t": 41.19,
+   "g": 0.6
+  },
+  {
+   "s": "pop",
+   "t": 43.982,
+   "g": 0.6
+  },
+  {
+   "s": "boom",
+   "t": 44.504,
+   "g": 1.0
+  },
+  {
+   "s": "whoosh_up",
+   "t": 45.369,
+   "g": 0.6
+  },
+  {
+   "s": "pop",
+   "t": 45.669,
+   "g": 0.6
+  }
+ ]
+}

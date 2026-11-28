@@ -29,3 +29,5 @@ Regra permanente (27-11-2026): antes de responder, pensar em coisas paralelas qu
 ## Conteúdo (27-11-2026)
 - Quer ficar neutro e não publicar em nome próprio; o conteúdo pode ser dado a outra pessoa.
 - Formato: vídeos de motion graphics feitos 100% com Claude Code (`videos/`). Gancho em forma de pergunta, os dois lados, a lei e as fontes no fim.
+- (28-11-2026) Vídeos têm de prender: gancho nos primeiros 3 segundos (texto + voz + imagem), narração, música, efeitos sonoros, motion e imagens. Nada de "PowerPoint animado".
+- Recursos: créditos Gemini e fal esgotados; Epidemic Sound sem licença de download; ElevenLabs por autorizar. Usado: voz Piper (local), som sintetizado, fotos livres da Wikimedia.
